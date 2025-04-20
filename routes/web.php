@@ -28,6 +28,9 @@ Route::get('/template', function () {
 Route::get('/profile', function () {
     return view('profile');
 });
+Route::get('/device_page', function () {
+    return view('device_page');
+});
 Route::post('/student', [ScheduleController::class, 'generatePDF'])->name('generate.memo.pdf');
 Route::post('/import', [ImportController::class, 'import'])->name('import');
 Route::post('/registration', [StudentController::class, 'store'])->name('register');
