@@ -1,0 +1,678 @@
+body {
+  font-family: 'Montserrat', sans-serif;
+  margin-left: 230px; /* Sidebar width for larger screens */
+  transition: margin-left 0.3s ease; /* Smooth transition for margin change */
+}
+
+/* Mobile Responsive */
+@media (max-width: 991.98px) {
+  body {
+    margin-left: 0; /* Remove the left margin for smaller screens */
+  }
+
+  .content-wrapper {
+    margin-left: 0; /* Adjust content to align with the left edge */
+  }
+
+  /* Make the sidebar take full width */
+  .logo-sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+
+  .content-area {
+    margin-left: 0; /* Remove the left margin */
+  }
+}
+  
+  .accordion-button {
+    color: white;
+    background-color: #343a4000;
+    border: none;
+    text-align: left;
+    width: 100%;
+  }
+  
+  .accordion-button:focus {
+    outline: none;
+  }
+  
+  .accordion-button:hover {
+    background-color: #495057;
+  }
+  
+  .accordion-item {
+    padding: 5px 0;
+  }
+  
+  
+  .navbar { 
+    margin-left: 280px;
+    background-color: transparent !important;
+    height: 80px;
+    margin-top: 20px;
+    margin-right: 20px;
+    border-radius: 16px;
+    padding: 0.5rem;
+    transition: all 0.3s ease-in-out;
+    z-index: 1050;
+    
+}
+
+/* Small screens: Sidebar is hidden/offcanvas, reduce margin */
+@media (max-width: 991.98px) {
+    .navbar {
+        margin-left: 20px;
+    }
+}
+
+/* Default navbar background */
+
+  /* Navbar background color when scrolled */
+  #navbar.scrolled {
+    background-color: #fafdff83; /* Dark background when scrolled */
+  }
+  
+.navbar-brand {
+    font-weight: 500;
+    color: #fff !important;
+    font-size: 28px;
+    transition: 0.3s color;
+}
+
+.navbar .nav-link {
+    font-size: 18px;
+    color: #fff !important;
+    font-weight: 500;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.navbar .nav-link:hover, 
+.navbar .nav-link.active {
+    color: #dddddd !important;
+}
+
+.navbar.scrolled {
+    background-color: #3d3d3d9c !important;
+    box-shadow: 0 4px 6px rgba(83, 83, 83, 0.1);
+}
+
+.login-button {
+    background-color: #63D4D5;
+    color: #000000;
+    font-size: 18px;
+    padding: 8px 20px;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: 0.3s background-color;
+}
+
+.login-button:hover {
+    background-color: #88f0f2;
+}
+
+.navbar-toggler {
+    font-size: 1.25rem;
+    color: rgb(245, 0, 0) !important;  /* Custom color */
+    background: transparent;  /* Ensure button background is clear */
+    border: none;  /* Remove any borders */
+    z-index: 1050;  /* Ensure it stays above other content */
+  }
+  
+  /* Ensure the navbar-toggler icon color is adjusted */
+  .navbar-toggler-icon {
+    filter: invert(1) !important; /* Make sure the icon color is white */
+  }
+
+.navbar-toggler:focus, .btn-close:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.nav-link {
+    color: #666777;
+    font-weight: 500;
+    position: relative;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #000;
+}
+
+@media (min-width: 991px) {
+    .nav-link::before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        height: 2px;
+        background-color: #63D4D5;
+        visibility: hidden;
+        transition: 0.3s ease-in-out;
+    }
+
+    .nav-link:hover::before, .nav-link.active::before {
+        width: 100%;
+        visibility: visible;
+    }
+}
+
+@media (max-width: 991px) {
+    .offcanvas-body .nav-link {
+        color: black !important;
+        position: fixed;
+    }
+
+    .offcanvas-body .nav-link:hover, 
+    .offcanvas-body .nav-link.active {
+        color: #333 !important;
+    }
+
+    .navbar-toggler {
+        color: white !important;
+    }
+}
+
+/* Ensure navbar-toggler is visible on all screen sizes */
+@media (max-width: 991px) {
+    .navbar-toggler {
+        display: block !important; /* Always show the button */
+    }
+}
+
+/* Sidebar on the side (large screen) */
+
+.carousel-item {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+}
+
+.carousel-item img {
+    object-fit: cover;
+    object-position: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* Dark overlay effect */
+.carousel-item::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1;
+}
+
+/* Ensure carousel controls and indicators are above the overlay */
+.carousel-control-prev,
+.carousel-control-next,
+.carousel-indicators {
+    z-index: 2;
+}
+
+/* Carousel container */
+.carousel-container {
+    position: relative;
+    width: 100%;
+}
+
+/* Keeps overlay content on top */
+.overlay-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    background: rgba(0, 0, 0, 0);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 60%;
+    text-align: center;
+    max-height: 70vh;
+}
+
+.overlay-content h1,
+.overlay-content h2 {
+    margin-top: 15px;
+    color: white;
+    font-weight: bold;
+    word-wrap: break-word;
+}
+
+/* Base font sizes (desktop) */
+.overlay-content h1 {
+    font-size: 280%;
+}
+.overlay-content h2 {
+    font-size: 220%;
+}
+
+/* Medium screens */
+@media (max-width: 992px) {
+    .overlay-content {
+        width: 70%;
+    }
+    .overlay-content h1 {
+        font-size: 220%;
+    }
+    .overlay-content h2 {
+        font-size: 180%;
+    }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+    .overlay-content {
+        width: 85%;
+    }
+    .overlay-content h1 {
+        font-size: 180%;
+    }
+    .overlay-content h2 {
+        font-size: 150%;
+    }
+}
+
+/* Small phones */
+@media (max-width: 576px) {
+    .overlay-content {
+        width: 90vw;
+        padding: 10px;
+    }
+    .overlay-content h1 {
+        font-size: 150%;
+    }
+    .overlay-content h2 {
+        font-size: 120%;
+    }
+    .logo-container img {
+        height: 40px;
+        margin: 0 5px 10px 5px;
+    }
+}
+
+/* Narrowest screens (iPhone SE, 430px or less) */
+@media (max-width: 430px) {
+    .overlay-content h1 {
+        font-size: 130%;
+    }
+    .overlay-content h2 {
+        font-size: 110%;
+    }
+}
+
+
+/* Center logo images */
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo-container img {
+    max-width: 200px;
+    height: auto;
+    margin: 0 10px 20px 20px;
+}
+
+.overlay-content h1 {
+    font-size: 280%;
+    font-weight: bold;
+    margin-top: 15px;
+    color: white;
+}
+
+.overlay-content h2 {
+    font-size: 250%;
+    font-weight: bold;
+    margin-top: 15px;
+    color: white;
+}
+
+/* Keep carousel buttons centered */
+.carousel-control-prev, 
+.carousel-control-next {
+    z-index: 3;
+}
+
+footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+#customSidebar {
+  position: fixed;
+  top: 0;
+  right: -380px;
+  width: 380px;
+  height: 100%;
+  background: rgba(17, 17, 17, 0.75);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  z-index: 2000;
+  transition: right 0.4s ease;
+  padding: 60px 20px 20px;
+  overflow-y: auto;
+  box-shadow: -6px 0 20px rgba(0, 0, 0, 0.6);
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+}
+
+#customSidebar.show {
+  right: 0;
+}
+
+#customSidebar .sidebar-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+.btn-close-white {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+.btn-close-white:hover {
+  color: #ff6b6b;
+}
+
+.sidebar-nav,
+.sidebar-orgs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav li,
+.sidebar-orgs li {
+  margin-bottom: 15px;
+}
+
+.sidebar-nav a,
+.sidebar-orgs a {
+  display: flex;
+  align-items: center;
+  padding: 10px 5px;
+  border-radius: 12px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.sidebar-nav a:hover,
+.sidebar-orgs a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(3px);
+}
+
+.sidebar-orgs img {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  margin-right: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Main clickable org link */
+.org-main-link {
+  display: flex;
+  align-items: center;
+  color: #fff;
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 12px;
+  transition: background 0.3s ease;
+  flex-grow: 1;
+}
+
+.org-main-link img {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.org-main-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* The container for link + dropdown */
+.dropdown-toggle-org {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* The dropdown button (chevron) */
+.org-dropdown-toggle {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 10px;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-org-parent.active .org-dropdown-toggle {
+  transform: rotate(180deg);
+}
+
+/* Children hidden by default */
+.dropdown-org-children {
+  display: none;
+  margin-left: 40px;
+  margin-top: 10px;
+}
+
+.dropdown-org-parent.active .dropdown-org-children {
+  display: block;
+}
+
+
+/* Hide main nav on lg+ */
+@media (min-width: 992px) {
+  .sidebar-nav {
+    display: none;
+  }
+}
+
+/* Show nav on sm-md */
+@media (max-width: 991.98px) {
+  .sidebar-nav {
+    display: block;
+  }
+}
+/* Organization title styling */
+.organization-title {
+  font-family: 'Montserrat', sans-serif;
+  color: #fff;
+  font-size: 1.3rem; /* Adjust font size */
+  font-weight: bold;
+  text-align: center;
+  margin: 10px 0;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Section title styling */
+.sidebar-section-title {
+  color: #fff;
+  font-weight: bold;
+  margin: 10px 20px;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+/* Divider line */
+.sidebar-divider {
+  margin: 12px 20px;
+  height: 5px;
+  background: rgb(255, 255, 255);
+}
+
+/* Update for the logo sidebar */
+.logo-sidebar {
+  width: 250px;
+  background: #0a0f36; /* Keep updated background */
+  padding-top: 60px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100%;
+  z-index: 1100;
+  overflow-x: hidden;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  font-family: 'Segoe UI', sans-serif;
+  transition: width 0.3s ease;
+  border-top-right-radius: 20px; /* Rounded top-right corner */
+  border-bottom-right-radius: 20px; /* Rounded bottom-left corner */
+}
+
+/* Section title styling */
+.sidebar-section-title {
+  color: #fff;
+  font-weight: bold;
+  margin: 10px 20px;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Top-level org item */
+.logo-toggle-org {
+  cursor: pointer;
+  padding: 1px 8px;
+  display: flex;
+  align-items: center;
+  color: #e4e4e463;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-radius: 30px;
+  margin: 4px 4px;
+  font-size: 1rem;
+}
+
+.logo-toggle-org:hover {
+  background-color: #171722;
+}
+
+/* Child list visibility */
+.logo-org-children {
+  display: none;
+  padding-left: 50px;
+  margin-top: 5px;
+  list-style: none;
+}
+
+/* When expanded */
+.logo-org-parent.expanded .logo-org-children,
+.logo-org-parent.active .logo-org-children {
+  display: block;
+}
+
+/* Styling for child links */
+.logo-org-children li a {
+  display: flex;
+  align-items: center;
+  color: #cfcfcf;
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 2px 0;
+  transition: background 0.25s;
+}
+
+.logo-org-children li a:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.logo-org-children img {
+  width: 22px;
+  height: 22px;
+  margin-right: 10px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+/* Styling for active state */
+.logo-org-parent.active .logo-toggle-org,
+.logo-org-children li a.active {
+  background: linear-gradient(135deg, hsla(206, 59%, 79%, 1) 0%, rgb(32, 88, 95) 100%);
+  color: white;
+  box-shadow: 0 0 rgba(0, 229, 255, 0.4);
+}
+
+/* Update for the dropdown indicator */
+.org-dropdown-toggle {
+  background: none;
+  border: none;
+  color: #aaa;
+  margin-left: auto;
+  cursor: pointer;
+  font-size: 1rem; /* Reduced size of the indicator */
+  transform: rotate(0deg);
+  transition: transform 0.3s ease, color 0.3s ease;
+  padding: 5px 10px;
+  border-radius: 8px;
+  display: inline-flex; /* Ensures the indicator stays aligned */
+  align-items: center;
+  justify-content: center;
+}
+
+/* When expanded, rotate the dropdown and adjust color */
+.logo-org-parent.expanded .org-dropdown-toggle {
+  transform: rotate(180deg);
+  color: #ffffff; /* Make it stand out more when active */
+}
+
+/* Hover effect for the indicator */
+.org-dropdown-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Subtle background on hover */
+}
+
+
+/* Divider line */
+.sidebar-divider {
+  margin: 15px 20px;
+  border: none;
+  height: 1px;
+  background: rgb(255, 255, 255);
+}
+
+/* Mobile Responsive */
+@media (max-width: 991.98px) {
+  .logo-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 10px 20px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .logo-toggle-org {
+    justify-content: center;
+  }
+
+  .logo-toggle-org span {
+    display: none;
+  }
+}
