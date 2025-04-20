@@ -31,6 +31,15 @@ Route::get('/profile', function () {
 Route::get('/device_page', function () {
     return view('device_page');
 });
+
+Route::get('/manage_orgs_page', function () {
+    return view('manage_orgs_page');
+});
+
+use App\Http\Controllers\OrgListController;
+
+Route::post('/orgs', [OrgListController::class, 'store'])->name('orgs.store');
+
 Route::post('/student', [ScheduleController::class, 'generatePDF'])->name('generate.memo.pdf');
 Route::post('/import', [ImportController::class, 'import'])->name('import');
 Route::post('/registration', [StudentController::class, 'store'])->name('register');

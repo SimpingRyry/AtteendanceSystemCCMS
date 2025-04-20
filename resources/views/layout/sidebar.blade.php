@@ -17,7 +17,8 @@
 
                 <!-- Dashboard Link -->
                 <li>
-                    <a href="{{ url('dash') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('dash') ? 'active-link' : '' }}">
+                <a href="{{ url('dash2') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('dash2') ? 'active-link' : '' }}">
+
                         <img src="{{ asset('images/dashingboard_ico.png') }}" alt="Dashboard" class="sidebar-icon">
                         <span>Dashboard</span>
                     </a>
@@ -35,7 +36,7 @@
 
                 <!-- More Links -->
                 <li>
-                    <a href="{{ url('dash2') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('dash2') ? 'active-link' : '' }}">
+                    <a href="{{ url('profile') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('profile') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/user_prof.png') }}" alt="Profile" class="sidebar-icon">
                         <span>Profile</span>
                     </a>
@@ -77,7 +78,7 @@
                 </li>
 
                 <li>
-                    <a href="#" class="mb-2 nav-link px-3 text-white d-flex align-items-center">
+                <a href="{{ url('device_page') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('device_page') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/record_ico.png') }}" alt="Device" class="sidebar-icon">
                         <span>Device</span>
                     </a>
@@ -91,7 +92,7 @@
                 </li>
 
                 <li>
-                    <a href="#" class="mb-2 nav-link px-3 text-white d-flex align-items-center">
+                <a href="{{ url('manage_orgs_page') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/org_ico.png') }}" alt="Manage Orgs" class="sidebar-icon">
                         <span>Manage Orgs</span>
                     </a>
