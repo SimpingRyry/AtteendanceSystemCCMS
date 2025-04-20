@@ -1,0 +1,88 @@
+:root{
+    --offcanvas-width: 270px;
+    --navbar-height: 70px;
+
+}
+
+.sidebar-nav {
+    width: var(--offcanvas-width) !important;
+}
+
+@media (min-width:992px) {
+    body{
+        overflow: auto !important;
+    }
+    .offcanvas-backdrop::before{
+        display: none !important;
+    }
+    main {
+        margin-left: var(--offcanvas-width);
+        margin-top: 100px;
+
+    }
+    .sidebar-close {
+        visibility: hidden;
+    }
+    .sidebar-nav {
+        transform: none !important;
+        visibility: visible !important;
+
+    }
+    .custom-navbar {
+        left: var(--offcanvas-width);
+        width: calc(100% - var(--offcanvas-width));
+    }
+}
+
+/* Outer box with gradient background */
+.outer-box {
+    border-radius: 15px;
+    background: radial-gradient(circle at top left, #d0f4ff, #a2dff7, #63b3ed);
+    overflow: hidden;
+    position: relative;
+    max-width: 1500px; /* wider than Bootstrap default */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  
+  /* Inner glass effect */
+  .inner-glass {
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px); /* Safari support */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  
+/*                                         EDIT BELOW HERE BOSS                                           */
+body {
+    font-family: 'Poppins', sans-serif;
+}
+.card {
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5) !important;
+    font-family: 'Poppins', sans-serif;
+}
+
+.form-control-plaintext {
+    font-family: 'Poppins', sans-serif;
+}
+
+.col-form-label,
+.card-title,
+.text-muted,
+.fw-bold,
+.fw-semibold {
+    font-family: 'Poppins', sans-serif !important;
+}
+
+input[type="text"]::placeholder {
+    font-size: 14px;
+    color: #aaa;
+}
+
+button.btn-success {
+    white-space: nowrap;
+}

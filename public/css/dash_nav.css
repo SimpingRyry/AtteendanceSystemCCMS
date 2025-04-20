@@ -1,0 +1,35 @@
+/* Navbar shadow */
+.navbar-floaty {
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+    z-index: 1030;
+  }
+  
+  /* Profile image sizing */
+  .profile-img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+  }
+  
+  /* Profile text styling */
+  .profile-name {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  
+  .profile-role {
+    color: yellow;
+    font-size: 0.75rem;
+  }
+  
+  /* Optional: Make the profile button a bit more clickable and spaced */
+  .profile-button {
+    padding: 0.25rem 0.75rem;
+    border-radius: 8px;
+    transition: background 0.3s;
+  }
+  
+  .profile-button:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
