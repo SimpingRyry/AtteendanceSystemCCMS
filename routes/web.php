@@ -34,8 +34,13 @@ Route::get('/accounts', [AccountsController::class, 'show']);
 Route::get('/profile', function () {
     return view('profile');
 });
+
 Route::get('/device_page', function () {
     return view('device_page');
+});
+
+Route::get('/events', function () {
+    return view('events');
 });
 
 Route::get('/manage_orgs_page', [App\Http\Controllers\OrgListController::class, 'index'])->name('orgs.index');
