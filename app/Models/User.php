@@ -26,7 +26,7 @@ class User extends Authenticatable
     // If your primary key is not an auto-incrementing integer
     protected $keyType = 'int'; // or 'string' if it's UUID or similar
 
-    protected $fillable = ['email', 'password','name','image','role'];
+    protected $fillable = ['email', 'password','name','image','role','org'];
 
     protected $hidden = ['password'];
 

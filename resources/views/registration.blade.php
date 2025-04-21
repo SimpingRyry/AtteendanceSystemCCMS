@@ -202,7 +202,7 @@
             </div>
             <div class="col-md-6">
               <label>Course</label>
-              <input type="text" class="form-control" id="modalCourse" id="modalCourse" value="${data.course}" readonly>
+              <input type="text" class="form-control" id="modalCourse" id="modalCourse" name="course" value="${data.course}" readonly>
             </div>
             <div class="col-md-6">
               <label>Year</label>

@@ -1,12 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LoginController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ImportController;
-use App\Http\Controllers\StudentController;
-use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\OrgListController;
 
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\AccountsController;
+use App\Http\Controllers\ScheduleController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,8 +19,6 @@ use App\Http\Controllers\ScheduleController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-
 Route::get('/', [HomeController::class, 'index']);
 
 Route::get('/student', function () {
@@ -28,6 +28,9 @@ Route::get('/student', function () {
 Route::get('/template', function () {
     return view('schedTemplate');
 });
+
+Route::get('/accounts', [AccountsController::class, 'show']);
+
 Route::get('/profile', function () {
     return view('profile');
 });
@@ -39,7 +42,6 @@ Route::get('/manage_orgs_page', function () {
     return view('manage_orgs_page');
 });
 
-use App\Http\Controllers\OrgListController;
 
 Route::post('/orgs', [OrgListController::class, 'store'])->name('orgs.store');
 
@@ -48,6 +50,7 @@ Route::post('/import', [ImportController::class, 'import'])->name('import');
 Route::post('/registration', [StudentController::class, 'store'])->name('register');
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 
-Route::get('/login', [HomeController::class, 'showlogin'])->name('login');
+
 Route::get('/student', [ImportController::class, 'show']);
 Route::get('/registration', [ImportController::class, 'showUnregistered']);
+Route::post('/account-update', [AccountsController::class, 'update'])->name('users.update');

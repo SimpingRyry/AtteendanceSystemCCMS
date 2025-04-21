@@ -14,6 +14,8 @@ class StudentController extends Controller
         $request->validate([
             'sname' => 'required|string|max:255',
             'student_id' => 'required|string|max:255',
+            'course' => 'required|string|max:255',
+
             'email' => 'required|email|max:255',
             'uploaded_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'fingerprint' => 'required|int|max:255',
