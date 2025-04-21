@@ -144,3 +144,8 @@ body {
   .slider.round {
     border-radius: 34px;
   }
+
+  .modal-backdrop.show {
+    backdrop-filter: blur(6px);
+    background-color: rgba(0, 0, 0, 0.4);
+}

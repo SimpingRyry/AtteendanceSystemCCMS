@@ -38,10 +38,10 @@ Route::get('/device_page', function () {
     return view('device_page');
 });
 
-Route::get('/manage_orgs_page', function () {
-    return view('manage_orgs_page');
-});
+Route::get('/manage_orgs_page', [App\Http\Controllers\OrgListController::class, 'index'])->name('orgs.index');
 
+
+Route::resource('orgs', OrgListController::class);
 
 Route::post('/orgs', [OrgListController::class, 'store'])->name('orgs.store');
 
