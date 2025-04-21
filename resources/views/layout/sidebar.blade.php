@@ -17,7 +17,7 @@
 
                 <!-- Dashboard Link -->
                 <li>
-                <a href="{{ url('dash2') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('dash2') ? 'active-link' : '' }}">
+                <a href="{{ url('dashboard_page') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('dashboard_page') ? 'active-link' : '' }}">
 
                         <img src="{{ asset('images/dashingboard_ico.png') }}" alt="Dashboard" class="sidebar-icon">
                         <span>Dashboard</span>

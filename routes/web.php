@@ -24,7 +24,9 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/student', function () {
     return view('student');
 });
-
+Route::get('/dashboard_page', function () {
+    return view('dashboard_page');
+});
 Route::get('/template', function () {
     return view('schedTemplate');
 });
