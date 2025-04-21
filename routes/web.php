@@ -35,6 +35,8 @@ Route::get('/profile', function () {
     return view('profile');
 });
 
+
+
 Route::get('/device_page', function () {
     return view('device_page');
 });
@@ -56,6 +58,5 @@ Route::post('/registration', [StudentController::class, 'store'])->name('registe
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 
 
-Route::get('/student', [ImportController::class, 'show']);
 Route::get('/registration', [ImportController::class, 'showUnregistered']);
 Route::post('/account-update', [AccountsController::class, 'update'])->name('users.update');

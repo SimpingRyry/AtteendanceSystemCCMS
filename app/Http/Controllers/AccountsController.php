@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 
 class AccountsController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     public function show()
     {
         $users = User::select('user_ID', 'name', 'email', 'role', 'org')->get();
