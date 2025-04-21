@@ -50,6 +50,7 @@ Route::get('/device_page', function () {
 Route::get('/events', function () {
     return view('events');
 });
+Route::get('/student', [StudentController::class, 'index'])->middleware('auth');
 
 Route::get('/manage_orgs_page', [App\Http\Controllers\OrgListController::class, 'index'])->name('orgs.index');
 
@@ -66,7 +67,7 @@ Route::post('/student', [ScheduleController::class, 'generatePDF'])->name('gener
 Route::post('/import', [ImportController::class, 'import'])->name('import');
 Route::post('/registration', [StudentController::class, 'store'])->name('register');
 Route::post('/login', [LoginController::class, 'login'])->name('login');
-
+Route::get('/login', [HomeController::class, 'showlogin'])->name('login');
 
 Route::get('/student', [ImportController::class, 'show']);
 Route::get('/registration', [ImportController::class, 'showUnregistered']);
