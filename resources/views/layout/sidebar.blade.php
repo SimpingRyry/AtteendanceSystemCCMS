@@ -50,7 +50,7 @@
                 </li>
 
                 <li>
-                    <a href="#" class="mb-2 nav-link px-3 text-white d-flex align-items-center">
+                <a href="{{ url('advisers') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('advisers') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/adviser_ico.png') }}" alt="Advisers" class="sidebar-icon">
                         <span>Advisers</span>
                     </a>
