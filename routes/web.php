@@ -37,6 +37,12 @@ Route::get('/profile', function () {
 
 
 
+use App\Http\Controllers\AdviserController;
+
+use App\Http\Controllers\LogController;
+
+Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
+
 Route::get('/device_page', function () {
     return view('device_page');
 });
@@ -46,6 +52,10 @@ Route::get('/events', function () {
 });
 
 Route::get('/manage_orgs_page', [App\Http\Controllers\OrgListController::class, 'index'])->name('orgs.index');
+
+
+Route::get('/advisers', [AdviserController::class, 'index'])->name('advisers.index');
+
 
 
 Route::resource('orgs', OrgListController::class);

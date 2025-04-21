@@ -50,7 +50,7 @@
                 </li>
 
                 <li>
-                    <a href="#" class="mb-2 nav-link px-3 text-white d-flex align-items-center">
+                <a href="{{ url('advisers') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('advisers') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/adviser_ico.png') }}" alt="Advisers" class="sidebar-icon">
                         <span>Advisers</span>
                     </a>
@@ -64,7 +64,7 @@
                 </li>
 
                 <li>
-                    <a href="#" class="mb-2 nav-link px-3 text-white d-flex align-items-center">
+                <a href="{{ url('events') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('events') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/event_ico.png') }}" alt="Events" class="sidebar-icon">
                         <span>Events</span>
                     </a>
@@ -99,7 +99,7 @@
                 </li>
 
                 <li>
-                    <a href="#" class="nav-link px-3 text-white d-flex align-items-center">
+                <a href="{{ url('logs') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('logs') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/log_ico.png') }}" alt="Logs" class="sidebar-icon">
                         <span>Logs</span>
                     </a>
