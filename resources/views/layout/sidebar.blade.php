@@ -2,7 +2,7 @@
 <div class="offcanvas offcanvas-start sidebar-nav" style="background-color: #111115;" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
     <!-- Offcanvas Header with Centered Image -->
     <div class="offcanvas-header justify-content-center">
-        <img src="{{ asset('images/org_ccms_logo.png') }}" alt="Profile Image" class="rounded-circle" width="100" height="100">
+        <img src="{{ asset('images/org_ccms_logo.png') }}" alt="Org Image" class="rounded-circle" width="100" height="100">
         <button type="button" class="btn-close position-absolute end-0 me-3 mt-3" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
 
