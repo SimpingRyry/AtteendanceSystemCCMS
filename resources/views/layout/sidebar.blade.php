@@ -64,7 +64,7 @@
                 </li>
 
                 <li>
-                    <a href="#" class="mb-2 nav-link px-3 text-white d-flex align-items-center">
+                <a href="{{ url('events') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('eventd') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/event_ico.png') }}" alt="Events" class="sidebar-icon">
                         <span>Events</span>
                     </a>

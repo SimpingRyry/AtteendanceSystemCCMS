@@ -35,6 +35,10 @@ Route::get('/profile', function () {
     return view('profile');
 });
 
+use App\Http\Controllers\LogController;
+
+Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
+
 Route::get('/device_page', function () {
     return view('device_page');
 });
