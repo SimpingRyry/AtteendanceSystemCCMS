@@ -70,3 +70,4 @@ Route::post('/login', [LoginController::class, 'login'])->name('login');
 
 Route::get('/registration', [ImportController::class, 'showUnregistered']);
 Route::post('/account-update', [AccountsController::class, 'update'])->name('users.update');
+Route::get('/student', [ImportController::class, 'show']);
