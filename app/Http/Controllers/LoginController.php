@@ -34,7 +34,7 @@ class LoginController extends Controller
             'user_img' => $user->image ?? 'default.png',
         ]);
 
-        return redirect()->intended('/student'); // or /dash
+        return redirect()->intended('/dashboard_page'); // or /dash
     }
 
     return back()->with('error', 'Invalid credentials.');
