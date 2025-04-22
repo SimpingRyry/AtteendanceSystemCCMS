@@ -5,7 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\OrgListController;
-
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\ScheduleController;
@@ -57,7 +57,12 @@ Route::get('/manage_orgs_page', [App\Http\Controllers\OrgListController::class, 
 
 Route::get('/advisers', [AdviserController::class, 'index'])->name('advisers.index');
 
+Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
 
+Route::middleware('auth')->get('/profile', [ProfileController::class, 'show'])->name('profile');
+Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
+Route::post('/profile/{id}', [ProfileController::class, 'update'])->name('profile.update');
+Route::post('/profile/{id}/photo', [ProfileController::class, 'uploadPhoto'])->name('profile.uploadPhoto');
 
 Route::resource('orgs', OrgListController::class);
 
