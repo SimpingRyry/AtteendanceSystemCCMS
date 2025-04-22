@@ -10,26 +10,31 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, Notifiable;
 
-    use HasApiTokens, HasFactory, Notifiable;
-
-  
-
-
-    // Set your custom table
     protected $table = 'users';
 
-    // Set your custom primary key
-    protected $primaryKey = 'user_ID';
+    protected $primaryKey = 'id'; // ✅ matches your DB
 
-    // If your primary key is not an auto-incrementing integer
-    protected $keyType = 'int'; // or 'string' if it's UUID or similar
+    public $timestamps = false; // ✅ no timestamps in your schema
 
-    protected $fillable = ['email', 'password','name','image','role','org'];
+    protected $fillable = [
+        'username', 'email', 'password', 'position', 'picture'
+    ];
 
-    protected $hidden = ['password'];
+    protected $hidden = [
+        'password',
+    ];
 
-    public $timestamps = false;
+    // ✅ Accessor to let Laravel treat `username` as `name`
+    public function getNameAttribute()
+    {
+        return $this->attributes['username'];
+    }
 
+    // ✅ Accessor for image field
+    public function getImageAttribute()
+    {
+        return $this->attributes['picture'];
+    }
 }

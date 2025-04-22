@@ -1,3 +1,7 @@
+@php
+    $user = Auth::user();
+@endphp
+
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-floaty custom-navbar fixed-top" style="background-color: #111115;">
   <div class="container-fluid">
@@ -6,7 +10,7 @@
     <button class="navbar-toggler me-2" type="button"
       data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample"
       aria-controls="offcanvasExample">
-      <span class="navbar-toggler-icon" data-bs-target="#offcanvasExample"></span>
+      <span class="navbar-toggler-icon"></span>
     </button>
 
     <!-- Brand -->
@@ -16,10 +20,11 @@
     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
       <li class="nav-item">
         <a class="nav-link d-flex align-items-center gap-2 text-white profile-button" href="#">
-          <img src="{{ asset('images/arden_pik.jpg') }}" alt="Profile" class="rounded-circle profile-img">
+          <img src="{{ asset('images/' . ($user->image ?? 'default.png')) }}" 
+               alt="Profile" class="rounded-circle profile-img" style="width: 40px; height: 40px; object-fit: cover;">
           <div class="d-flex flex-column lh-sm">
-            <span class="profile-name">Profile</span>
-            <small class="profile-role">Admin</small>
+            <span class="profile-name">{{ $user->name ?? 'No Name' }}</span>
+            <small class="profile-role">{{ $user->position ?? 'No Role' }}</small>
           </div>
         </a>
       </li>

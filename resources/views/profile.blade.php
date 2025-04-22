@@ -32,10 +32,44 @@
 
     <!------------------------------------------------------ MAIN_BOX -------------------------------------------------------->
     <main>
-        <div class="container outer-box mt-5 pt-5 pb-4 shadow">
-            {{-- Your content here --}}
+  <div class="container outer-box mt-5 pt-5 pb-4 shadow">
+    <div class="container inner-glass shadow p-4" id="main_box">
+      <div class="row mb-4 g-4 align-items-stretch">
+        <div class="col-md-4 d-flex">
+          <div class="card text-center shadow-sm w-100 h-100 border-0 rounded-4">
+            <div class="card-body d-flex flex-column align-items-center justify-content-center">
+              <div class="mb-3" style="width: 150px; height: 150px;">
+                <img src="{{ asset('images/' . $profile->photo) }}" class="rounded-circle w-100 h-100" style="object-fit: cover;" alt="Profile Picture">
+              </div>
+              <h5 class="card-title mb-1">{{ $profile->name }}</h5>
+              <p class="text-muted">{{ $profile->position }}</p>
+            </div>
+          </div>
         </div>
-    </main>
+
+        <div class="col-md-8">
+          <div class="card shadow-sm h-100 border-0 rounded-4">
+            <div class="card-body">
+              <form>
+                @foreach (['Name' => 'name', 'Program' => 'program', 'Position' => 'position', 'Email' => 'email', 'Mobile No.' => 'mobile', 'Address' => 'address'] as $label => $field)
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label fw-semibold">{{ $label }}:</label>
+                  <div class="col-sm-9">
+                    <input type="text" readonly class="form-control-plaintext border rounded px-3" value="{{ $profile->$field }}">
+                  </div>
+                </div>
+                <hr>
+                @endforeach
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Section Here (JS same as before) -->
+    </div>
+  </div>
+</main>
 
     <!-- Chart Initialization Script -->
     <script>

@@ -3,9 +3,6 @@
     --navbar-height: 70px;
 
 }
-body {
-    font-family: 'Poppins', sans-serif;
-}
 .sidebar-nav {
     width: var(--offcanvas-width) !important;
 }

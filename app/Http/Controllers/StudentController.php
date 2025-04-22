@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Student;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 class StudentController extends Controller
 {
     public function store(Request $request)

@@ -5,7 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\OrgListController;
-
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\ScheduleController;
@@ -24,7 +24,9 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/student', function () {
     return view('student');
 });
-
+Route::get('/dashboard_page', function () {
+    return view('dashboard_page');
+});
 Route::get('/template', function () {
     return view('schedTemplate');
 });
@@ -50,13 +52,19 @@ Route::get('/device_page', function () {
 Route::get('/events', function () {
     return view('events');
 });
+Route::get('/student', [StudentController::class, 'index'])->middleware('auth');
 
 Route::get('/manage_orgs_page', [App\Http\Controllers\OrgListController::class, 'index'])->name('orgs.index');
 
 
 Route::get('/advisers', [AdviserController::class, 'index'])->name('advisers.index');
 
+Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
 
+Route::middleware('auth')->get('/profile', [ProfileController::class, 'show'])->name('profile');
+Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
+Route::post('/profile/{id}', [ProfileController::class, 'update'])->name('profile.update');
+Route::post('/profile/{id}/photo', [ProfileController::class, 'uploadPhoto'])->name('profile.uploadPhoto');
 
 Route::resource('orgs', OrgListController::class);
 
@@ -66,7 +74,7 @@ Route::post('/student', [ScheduleController::class, 'generatePDF'])->name('gener
 Route::post('/import', [ImportController::class, 'import'])->name('import');
 Route::post('/registration', [StudentController::class, 'store'])->name('register');
 Route::post('/login', [LoginController::class, 'login'])->name('login');
-
+Route::get('/login', [HomeController::class, 'showlogin'])->name('login');
 
 Route::get('/registration', [ImportController::class, 'showUnregistered']);
 Route::post('/account-update', [AccountsController::class, 'update'])->name('users.update');
