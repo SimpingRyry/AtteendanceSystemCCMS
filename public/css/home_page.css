@@ -498,38 +498,39 @@ footer {
     display: block;
   }
 }
-/* Organization title styling */
 .organization-title {
   font-family: 'Montserrat', sans-serif;
-  color: #fff;
-  font-size: 1.3rem; /* Adjust font size */
+  color: #ffffff;
+  font-size: 1.3rem;
   font-weight: bold;
   text-align: center;
   margin: 10px 0;
   letter-spacing: 1px;
   text-transform: uppercase;
+  text-shadow: 0 0 8px #b3ecff, 0 0 16px #d0f0ff;
 }
 
-/* Section title styling */
 .sidebar-section-title {
-  color: #fff;
+  color: #ffffff;
   font-weight: bold;
   margin: 10px 20px;
   font-size: 0.9rem;
   letter-spacing: 1px;
   text-transform: uppercase;
+  text-shadow: 0 0 6px #b3ecff, 0 0 12px #e6faff;
 }
-/* Divider line */
+
 .sidebar-divider {
   margin: 12px 20px;
   height: 5px;
-  background: rgb(255, 255, 255);
+  background: linear-gradient(to right, #b3ecff, #ffffff);
+  box-shadow: 0 0 12px rgba(179, 236, 255, 0.5);
+  border-radius: 10px;
 }
 
-/* Update for the logo sidebar */
 .logo-sidebar {
   width: 250px;
-  background: #0a0f36; /* Keep updated background */
+  background: linear-gradient(135deg, #0b1a3c, #3fcaff); /* Dark Blue to Light Blue */
   padding-top: 60px;
   position: fixed;
   left: 0;
@@ -537,43 +538,34 @@ footer {
   height: 100%;
   z-index: 1100;
   overflow-x: hidden;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
   font-family: 'Segoe UI', sans-serif;
   transition: width 0.3s ease;
-  border-top-right-radius: 20px; /* Rounded top-right corner */
-  border-bottom-right-radius: 20px; /* Rounded bottom-left corner */
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
-/* Section title styling */
-.sidebar-section-title {
-  color: #fff;
-  font-weight: bold;
-  margin: 10px 20px;
-  font-size: 0.9rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
 
-/* Top-level org item */
 .logo-toggle-org {
   cursor: pointer;
   padding: 1px 8px;
   display: flex;
   align-items: center;
-  color: #e4e4e463;
+  color: #e4e4e4;
   text-decoration: none;
   transition: all 0.3s ease;
   border-radius: 30px;
   margin: 4px 4px;
   font-size: 1rem;
+  text-shadow: 0 0 6px #b3ecff;
 }
 
 .logo-toggle-org:hover {
-  background-color: #171722;
+  background-color: rgba(230, 250, 255, 0.5);
+  box-shadow: 0 0 12px rgba(179, 236, 255, 0.4);
 }
 
-/* Child list visibility */
 .logo-org-children {
   display: none;
   padding-left: 50px;
@@ -581,27 +573,27 @@ footer {
   list-style: none;
 }
 
-/* When expanded */
 .logo-org-parent.expanded .logo-org-children,
 .logo-org-parent.active .logo-org-children {
   display: block;
 }
 
-/* Styling for child links */
 .logo-org-children li a {
   display: flex;
   align-items: center;
-  color: #cfcfcf;
+  color: #2b2b2b;
   text-decoration: none;
   font-size: 0.9rem;
   padding: 8px 12px;
   border-radius: 8px;
   margin: 2px 0;
-  transition: background 0.25s;
+  transition: background 0.25s, box-shadow 0.25s;
+  text-shadow: 0 0 6px #b3ecff;
 }
 
 .logo-org-children li a:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(230, 250, 255, 0.5);
+  box-shadow: 0 0 10px rgba(179, 236, 255, 0.4);
 }
 
 .logo-org-children img {
@@ -610,54 +602,43 @@ footer {
   margin-right: 10px;
   border-radius: 4px;
   object-fit: cover;
+  box-shadow: 0 0 6px rgba(179, 236, 255, 0.4);
 }
 
-/* Styling for active state */
 .logo-org-parent.active .logo-toggle-org,
 .logo-org-children li a.active {
-  background: linear-gradient(135deg, hsla(206, 59%, 79%, 1) 0%, rgb(32, 88, 95) 100%);
-  color: white;
-  box-shadow: 0 0 rgba(0, 229, 255, 0.4);
+  background: linear-gradient(135deg, #ffffff, #d0f0ff);
+  color: #000000 !important;  /* Force the color to be black when clicked */
+  box-shadow: 0 0 16px rgba(179, 236, 255, 0.6);
 }
 
-/* Update for the dropdown indicator */
 .org-dropdown-toggle {
   background: none;
   border: none;
-  color: #aaa;
+  color: #888;
   margin-left: auto;
   cursor: pointer;
-  font-size: 1rem; /* Reduced size of the indicator */
+  font-size: 1rem;
   transform: rotate(0deg);
   transition: transform 0.3s ease, color 0.3s ease;
   padding: 5px 10px;
   border-radius: 8px;
-  display: inline-flex; /* Ensures the indicator stays aligned */
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-/* When expanded, rotate the dropdown and adjust color */
 .logo-org-parent.expanded .org-dropdown-toggle {
   transform: rotate(180deg);
-  color: #ffffff; /* Make it stand out more when active */
+  color: #333;
+  text-shadow: 0 0 6px #b3ecff;
 }
 
-/* Hover effect for the indicator */
 .org-dropdown-toggle:hover {
-  background-color: rgba(255, 255, 255, 0.1); /* Subtle background on hover */
+  background-color: rgba(230, 250, 255, 0.2);
+  box-shadow: 0 0 8px rgba(179, 236, 255, 0.25);
 }
 
-
-/* Divider line */
-.sidebar-divider {
-  margin: 15px 20px;
-  border: none;
-  height: 1px;
-  background: rgb(255, 255, 255);
-}
-
-/* Mobile Responsive */
 @media (max-width: 991.98px) {
   .logo-sidebar {
     width: 100%;
@@ -666,6 +647,7 @@ footer {
     padding: 10px 20px;
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none;
   }
 
   .logo-toggle-org {
@@ -676,3 +658,4 @@ footer {
     display: none;
   }
 }
+
