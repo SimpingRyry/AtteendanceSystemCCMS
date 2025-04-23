@@ -14,7 +14,7 @@ class AccountsController extends Controller
     }
     public function show()
     {
-        $users = User::select('user_ID', 'name', 'email', 'role', 'org')->get();
+        $users = User::select('id', 'name', 'email', 'role', 'org')->get();
         return view('accounts', compact('users'));
     }
 

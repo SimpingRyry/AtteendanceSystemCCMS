@@ -85,8 +85,8 @@
                 </li>
 
                 <li>
-                    <a href="#" class="mb-2 nav-link px-3 text-white d-flex align-items-center">
-                        <img src="{{ asset('images/add_account.png') }}" alt="Accounts" class="sidebar-icon">
+                <a href="{{ url('accounts') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('accounts') ? 'active-link' : '' }}">
+                        <img src="{{ asset('images/add_account.png') }}" alt="Manage Orgs" class="sidebar-icon">
                         <span>Accounts</span>
                     </a>
                 </li>
