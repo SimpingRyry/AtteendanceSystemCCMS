@@ -52,7 +52,7 @@ Route::get('/device_page', function () {
 Route::get('/events', function () {
     return view('events');
 });
-Route::get('/student', [StudentController::class, 'index'])->middleware('auth');
+Route::get('/student', [StudentController::class, 'index']);
 
 Route::get('/manage_orgs_page', [App\Http\Controllers\OrgListController::class, 'index'])->name('orgs.index');
 
@@ -61,7 +61,7 @@ Route::get('/advisers', [AdviserController::class, 'index'])->name('advisers.ind
 
 Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
 
-Route::middleware('auth')->get('/profile', [ProfileController::class, 'show'])->name('profile');
+Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
 Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
 Route::post('/profile/{id}', [ProfileController::class, 'update'])->name('profile.update');
 Route::post('/profile/{id}/photo', [ProfileController::class, 'uploadPhoto'])->name('profile.uploadPhoto');
