@@ -25,18 +25,18 @@
     <title>CCMS Attendance System</title>
 
     <script>
-    function previewImage(input, previewId) {
-        const preview = document.getElementById(previewId);
-        const file = input.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                preview.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
         }
-    }
-</script>
+    </script>
 </head>
 
 <body style="background: radial-gradient(circle at top left, white, #e0f7ff, #b3e5fc);">
@@ -133,14 +133,43 @@
                             <label for="bg_image" class="form-label">Background Image</label>
                             <input type="file" name="bg_image" class="form-control" accept="image/*" required>
                         </div>
+                        <hr>
+                    <h5 class="mt-4">Org Admin Account</h5>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="org_admin_org" class="form-label">Organization</label>
+                        <input type="text" id="org_admin_org" name="org_admin_org" class="form-control" readonly>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary">Upload</button>
                     </div>
+                    </div>
+
                 </form>
             </div>
         </div>
     </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const orgInput = document.querySelector('[name="org_name"]');
+        const adminOrgInput = document.querySelector('#org_admin_org');
+
+        orgInput.addEventListener('input', () => {
+            adminOrgInput.value = orgInput.value;
+        });
+    });
+</script>
     @foreach ($org_list as $org)
     {{-- Modal: Edit Organization --}}
     <div class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" id="editOrgModal{{ $org->id }}" tabindex="-1" aria-hidden="true">
