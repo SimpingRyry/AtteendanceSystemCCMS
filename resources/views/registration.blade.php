@@ -201,11 +201,11 @@
             </div>
             <div class="col-md-6">
               <label>Gender</label>
-              <input type="text" class="form-control"  id="modalGender" value="${data.gender}" readonly>
+              <input type="text" class="form-control" id="modalGender" value="${data.gender}" readonly>
             </div>
             <div class="col-md-6">
               <label>Course</label>
-              <input type="text" class="form-control" id="modalCourse" id="modalCourse" name="course" value="${data.course}" readonly>
+              <input type="text" class="form-control" id="modalCourse" name="course" value="${data.course}" readonly>
             </div>
             <div class="col-md-6">
               <label>Year</label>
@@ -234,7 +234,7 @@
             </div>
             <div class="col-12">
               <label>Address</label>
-              <input type="text" class="form-control" id="modalAddress"value="${data.address}" readonly>
+              <input type="text" class="form-control" id="modalAddress" value="${data.address}" readonly>
             </div>
             <div class="col-12">
               <label>Email</label>
@@ -242,26 +242,53 @@
             </div>
           </div>
 
-          <!-- Profile Picture -->
-          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Profile Picture</h4>
-          <div class="row g-3 mb-4">
-            <div class="col-12">
-              <label>Upload Image</label>
-              <input type="file" name="uploaded_picture" accept="image/*" class="form-control mb-2" id="uploadImage">
-            </div>
-            <div class="col-12">
-              <label>Capture Image (Open Camera)</label><br>
-              <video id="cameraStream" width="100%" height="300" autoplay playsinline style="border: 1px solid #ccc; border-radius: 8px;"></video>
-              <div class="d-flex gap-2 mt-2">
-                <button type="button" class="btn btn-primary" onclick="startCamera()">Open Camera</button>
-                <button type="button" class="btn btn-success" onclick="capturePhoto()">Capture Photo</button>
-              </div>
-              <canvas id="capturedCanvas" style="display:none;"></canvas>
-              <img id="capturedImage" src="" alt="Captured Image" class="img-fluid mt-2" style="display:none; max-height: 300px;">
-              <input type="hidden" name="captured_image" id="capturedImageInput">
-            </div>
+          <!-- Role/Position -->
+          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Role / Position</h4>
+          <div class="mb-4">
+            <label for="roleSelect">Select Role</label>
+            <select name="role" id="roleSelect" class="form-select" required>
+              @if(auth()->user()->org == 'ITS')
+                <option value="">-- Select Role --</option>
+                <option value="IT Support">IT Support</option>
+                <option value="Network Admin">Network Admin</option>
+                <option value="System Analyst">System Analyst</option>
+              @elseif(auth()->user()->org == 'PRAXIS')
+                <option value="">-- Select Role --</option>
+                <option value="Research Assistant">Research Assistant</option>
+                <option value="Project Coordinator">Project Coordinator</option>
+                <option value="Field Agent">Field Agent</option>
+              @elseif(auth()->user()->org == 'SG')
+                <option value="">-- Select Role --</option>
+                <option value="Security Guard">Security Guard</option>
+                <option value="Supervisor">Supervisor</option>
+                <option value="Admin Officer">Admin Officer</option>
+              @else
+                <option value="">No roles available for this organization</option>
+              @endif
+            </select>
           </div>
 
+          <!-- Profile Picture -->
+          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Profile Picture</h4>
+          <div class="mb-4">
+            <div class="d-flex gap-2 mb-3">
+              <button type="button" class="btn btn-outline-primary" onclick="showUpload()">Upload Image</button>
+              <button type="button" class="btn btn-outline-secondary" onclick="showCamera()">Capture Image</button>
+            </div>
+
+            <!-- Upload Input -->
+            <input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
+
+            <!-- Camera Stream -->
+            <div id="cameraContainer" style="display: none; text-align: center;">
+              <video id="cameraStream" width="100%" height="300" autoplay playsinline style="border-radius: 8px; border: 1px solid #ccc;"></video>
+              <button type="button" class="btn btn-success mt-2" onclick="capturePhoto()">Take Picture</button>
+            </div>
+
+            <!-- Captured Image Preview -->
+            <img id="capturedImage" class="img-fluid mt-3" style="display: none; max-height: 300px;" />
+            <input type="hidden" name="captured_image" id="capturedImageInput">
+          </div>
         </form>
       </div>
 
@@ -272,6 +299,7 @@
     </div>
   </div>
 </div>
+
 
 </div>
 </main>
@@ -287,7 +315,67 @@
     
 </body>
 
+<script>
+  function showUpload() {
+    document.getElementById('uploadInput').style.display = 'block';
+    document.getElementById('cameraContainer').style.display = 'none';
+    document.getElementById('capturedImage').style.display = 'none';
+    stopCamera();
+  }
 
+  function showCamera() {
+    document.getElementById('uploadInput').style.display = 'none';
+    document.getElementById('cameraContainer').style.display = 'block';
+    document.getElementById('capturedImage').style.display = 'none';
+    startCamera();
+  }
+
+  function previewUploadImage(event) {
+    const reader = new FileReader();
+    reader.onload = function () {
+      const img = document.getElementById('capturedImage');
+      img.src = reader.result;
+      img.style.display = 'block';
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  }
+
+  function startCamera() {
+    const video = document.getElementById('cameraStream');
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        alert("Camera access denied: " + err);
+      });
+  }
+
+  function stopCamera() {
+    const video = document.getElementById('cameraStream');
+    const stream = video.srcObject;
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    video.srcObject = null;
+  }
+
+  function capturePhoto() {
+    const canvas = document.getElementById('canvas');
+    const video = document.getElementById('cameraStream');
+    const image = document.getElementById('capturedImage');
+    const input = document.getElementById('capturedImageInput');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+
+    const imageData = canvas.toDataURL('image/png');
+    image.src = imageData;
+    image.style.display = 'block';
+    input.value = imageData;
+  }
+</script>
 
 <script>
 function fillModalData(button) {
@@ -385,109 +473,8 @@ function openRegisterForm(button) {
     renderRegisterForm(data);
 }
 
-function openRegisterFormFromStorage() {
-    const data = JSON.parse(localStorage.getItem('studentData'));
-    if (data) {
-        renderRegisterForm(data);
-    }
-}
 
-function renderRegisterForm(data) {
-    const container = document.getElementById('mainContainer');
-    container.innerHTML = `
-        <div class="mb-3">
-            <h2 class="fw-bold" style="color: #5CE1E6;">Register Student</h2>
-            <small style="color: #989797;">Manage /</small>
-            <small style="color: #444444;">Student Registration</small>
-        </div>
 
-        <div class="card shadow-sm p-4">
-            <form id="registerStudentForm" action="{{ route('register') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                
-                <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Student Details</h4>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label>Student ID</label>
-                        <input type="text" name="student_id" class="form-control" value="${data.id_number}" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Name</label>
-                        <input type="text" name="sname" class="form-control" value="${data.name}" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Gender</label>
-                        <input type="text" class="form-control" value="${data.gender}" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Course</label>
-                        <input type="text" class="form-control" value="${data.course}" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Year</label>
-                        <input type="text" class="form-control" value="${data.year}" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Section</label>
-                        <input type="text" class="form-control" value="${data.section}" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Birth Date</label>
-                        <input type="text" class="form-control" value="${data.birth_date}" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label>Fingerprint ID</label>
-                        <input type="text" name="fingerprint" class="form-control" id="fingerprintId" placeholder="Fingerprint ID">
-                    </div>
-                </div>
-
-                <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Contact Details</h4>
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label>Contact Number</label>
-                        <input type="text" class="form-control" value="${data.contact_no}" readonly>
-                    </div>
-                    <div class="col-12">
-                        <label>Address</label>
-                        <input type="text" class="form-control" value="${data.address}" readonly>
-                    </div>
-                    <div class="col-12">
-                        <label>Email</label>
-                        <input type="email" name="email" class="form-control" placeholder="Enter Email" required>
-                    </div>
-                </div>
-
-                <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Profile Picture</h4>
-                <div class="row g-3 mb-4">
-                    <div class="col-12">
-                        <label>Upload Image</label>
-                        <input type="file" name="uploaded_picture" accept="image/*" class="form-control mb-2" id="uploadImage">
-                    </div>
-                    <div class="col-12">
-                        <label>Capture Image (Open Camera)</label><br>
-                        <video id="cameraStream" width="100%" height="300" autoplay playsinline style="border: 1px solid #ccc; border-radius: 8px;"></video>
-                        <div class="d-flex gap-2 mt-2">
-                            <button type="button" class="btn btn-primary" onclick="startCamera()">Open Camera</button>
-                            <button type="button" class="btn btn-success" onclick="capturePhoto()">Capture Photo</button>
-                        </div>
-                        <canvas id="capturedCanvas" style="display:none;"></canvas>
-                        <img id="capturedImage" src="" alt="Captured Image" class="img-fluid mt-2" style="display:none; max-height: 300px;">
-                        <input type="hidden" name="captured_image" id="capturedImageInput">
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-end mt-4" style="gap: 8px;">
-                    <button type="button" class="btn btn-secondary" onclick="cancelRegistration()">Cancel</button>
-                    <button type="submit" class="btn btn-success">Submit Registration</button>
-                </div>
-
-            </form>
-        </div>
-    `;
-
-    const form = document.getElementById('registerStudentForm');
-    form.addEventListener('submit', handleFormSubmit);
-}
 
 let videoStream;
 

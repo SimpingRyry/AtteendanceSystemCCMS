@@ -16,6 +16,8 @@
 
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
 
 
   <!-- Custom CSS -->
@@ -75,31 +77,49 @@
             @endforeach
           </div>
 
-          <!-- Upload Left + Search Right -->
           <div class="row mb-4 mt-4 align-items-center justify-content-between">
-            <!-- CSV Upload Left -->
-            <div class="col-md-6 d-flex">
-              <form id="csvForm" action="{{ route('import') }}" method="post" enctype="multipart/form-data"
-                class="d-flex align-items-center flex-wrap" style="gap: 8px; max-width: 400px;" onsubmit="return validateCSV();">
-                @csrf
-                <div class="form-text text-muted me-2">
-                  Upload a .csv file
-                </div>
-                <div class="input-group input-group-sm">
-                  <input type="file" class="form-control" name="importFile" accept=".csv" required>
-                  <button class="btn btn-sm btn-primary" type="submit">Upload</button>
-                </div>
-              </form>
-            </div>
+  <!-- Import Button Left -->
+  <div class="col-md-6 d-flex">
+    <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadCSVModal" >
+      <i class="bi bi-plus-lg me-2"></i> Import CSV
+    </button>
+  </div>
 
-            <!-- Search Right -->
-            <div class="col-md-6 d-flex justify-content-md-end mt-6 mt-md-0">
-              <div class="d-flex" style="gap: 8px; max-width: 350px; margin-top: 15px;">
-                <input type="text" class="form-control" placeholder="Enter search...">
-                <button class="btn btn-success">Search</button>
-              </div>
-            </div>
+  <!-- Search Right -->
+  <div class="col-md-6 d-flex justify-content-md-end mt-6 mt-md-0">
+    <div class="d-flex" style="gap: 8px; max-width: 350px; margin-top: 15px;">
+      <input type="text" class="form-control" placeholder="Enter search...">
+      <button class="btn btn-success">Search</button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal fade" id="uploadCSVModal" tabindex="-1" aria-labelledby="uploadCSVModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="csvForm" action="{{ route('import') }}" method="post" enctype="multipart/form-data" onsubmit="return validateCSV();">
+        @csrf
+        <div class="modal-header">
+          <h5 class="modal-title" id="uploadCSVModalLabel">Upload CSV File</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-text text-muted mb-2">
+            Upload a .csv file
           </div>
+          <div class="input-group input-group-sm">
+            <input type="file" class="form-control" name="importFile" accept=".csv" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-primary" type="submit">Upload</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>     
 
           <!-- Student List -->
           <div class="card shadow-sm p-4 mt-2">

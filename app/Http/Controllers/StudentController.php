@@ -20,13 +20,13 @@ class StudentController extends Controller
             'uploaded_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'fingerprint' => 'required|int|max:255',
 
-            'captured_picture' => 'nullable|string', // 
+            'captured_image' => 'nullable|string', // 
         ]);
 
-        if (!$request->uploaded_picture && !$request->captured_picture) {
+        if (!$request->uploaded_picture && !$request->captured_image) {
             return back()->withErrors(['image' => 'Please upload or capture a picture.']);
         }
-        if ($request->uploaded_picture && $request->captured_picture) {
+        if ($request->uploaded_picture && $request->captured_image) {
             return back()->withErrors(['image' => 'Only one image should be provided.']);
         }
 
@@ -40,8 +40,8 @@ class StudentController extends Controller
         }
 
         // Save captured picture (Base64 to BLOB)
-        if ($request->captured_picture) {
-            $image = $request->captured_picture;
+        if ($request->captured_image) {
+            $image = $request->captured_image;
             $image = str_replace('data:image/png;base64,', '', $image);
             $image = str_replace(' ', '+', $image);
             $imageData = base64_decode($image);
