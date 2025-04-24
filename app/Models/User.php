@@ -19,7 +19,7 @@ class User extends Authenticatable
     public $timestamps = false; // ✅ no timestamps in your schema
 
     protected $fillable = [
-        'username', 'email', 'password', 'position', 'picture'
+        'name', 'email', 'password', 'role', 'picture','org'
     ];
 
     protected $hidden = [
@@ -29,7 +29,7 @@ class User extends Authenticatable
     // ✅ Accessor to let Laravel treat `username` as `name`
     public function getNameAttribute()
     {
-        return $this->attributes['username'];
+        return $this->attributes['name'];
     }
 
     // ✅ Accessor for image field
