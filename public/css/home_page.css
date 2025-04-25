@@ -1,6 +1,5 @@
 body {
   font-family: 'Montserrat', sans-serif;
-  margin-left: 230px; /* Sidebar width for larger screens */
   transition: margin-left 0.3s ease; /* Smooth transition for margin change */
 }
 
@@ -20,6 +19,7 @@ body {
     width: 100%;
     height: auto;
   }
+  
 
   .content-area {
     margin-left: 0; /* Remove the left margin */
@@ -48,15 +48,16 @@ body {
   
   
   .navbar { 
-    margin-left: 280px;
-    background-color: transparent !important;
+    margin-left: 70px;
+    background: linear-gradient(to bottom, rgba(14, 14, 14, 0.089), rgba(70, 70, 70, 0.116)) !important;
     height: 80px;
     margin-top: 20px;
     margin-right: 20px;
     border-radius: 16px;
-    padding: 0.5rem;
+    padding: 0.75rem 1.5rem;
     transition: all 0.3s ease-in-out;
     z-index: 1050;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     
 }
 
@@ -71,7 +72,7 @@ body {
 
   /* Navbar background color when scrolled */
   #navbar.scrolled {
-    background-color: #fafdff83; /* Dark background when scrolled */
+    background-color: #fafdff93; /* Dark background when scrolled */
   }
   
 .navbar-brand {
@@ -211,12 +212,6 @@ body {
     z-index: 1;
 }
 
-/* Ensure carousel controls and indicators are above the overlay */
-.carousel-control-prev,
-.carousel-control-next,
-.carousel-indicators {
-    z-index: 2;
-}
 
 /* Carousel container */
 .carousel-container {
@@ -250,10 +245,10 @@ body {
 
 /* Base font sizes (desktop) */
 .overlay-content h1 {
-    font-size: 280%;
+    font-size: 200%;
 }
 .overlay-content h2 {
-    font-size: 220%;
+    font-size: 150%;
 }
 
 /* Medium screens */
@@ -262,10 +257,10 @@ body {
         width: 70%;
     }
     .overlay-content h1 {
-        font-size: 220%;
+        font-size: 160%;
     }
     .overlay-content h2 {
-        font-size: 180%;
+        font-size: 130%;
     }
 }
 
@@ -338,17 +333,118 @@ body {
     color: white;
 }
 
-/* Keep carousel buttons centered */
-.carousel-control-prev, 
-.carousel-control-next {
+/* Ensure carousel controls and indicators are above the overlay */
+.carousel-control-prev,
+.carousel-control-next,
+.carousel-indicators {
     z-index: 3;
 }
+/* Blurred background (stretch across whole carousel) */
+.carousel-bg-blur {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(15px);
+  z-index: 0;
+}
 
+.carousel-foreground-image {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.foreground-img {
+  width: 70%;
+  max-height: 80vh;
+  max-width: 160vh;
+  object-fit: contain;
+  border-radius: 5px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.4);
+}
+
+/* Default position for larger screens */
+.carousel-control-prev,
+.carousel-control-next {
+    top: -30%;  /* Adjust the default position */
+}
+
+/* Medium screens (e.g., tablets) */
+@media (max-width: 992px) {
+    .carousel-control-prev,
+    .carousel-control-next {
+        top: -20%;  /* Move controls slightly down on smaller screens */
+    }
+}
+
+/* Small screens (e.g., mobile phones) */
+@media (max-width: 768px) {
+    .carousel-control-prev,
+    .carousel-control-next {
+        top: -50%;  /* Adjust top position for mobile screens */
+    }
+}
+
+/* Extra small screens (e.g., very small mobile phones) */
+@media (max-width: 576px) {
+    .carousel-control-prev,
+    .carousel-control-next {
+        top: -50%;  /* Keep controls closer to the center */
+    }
+}
+.carousel-indicators {
+    top: 86%;  /* Adjust this value as needed to move the indicators higher */
+}
+.carousel-control-prev {
+  left: 5%; /* Closer to the left side */
+}
+
+.carousel-control-next {
+  right: 5%; /* Closer to the right side */
+}
+
+/* Ensure overlay content is visible above the blurred background */
+.overlay-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
 footer {
     position: relative;
     bottom: 0;
     width: 100%;
 }
+.sidebar-toggle-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 3000;
+  background-color: #3fcaff;
+  color: #0b1a3c;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 14px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(63, 202, 255, 0.5);
+  transition: background 0.3s ease;
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: #0b1a3c;
+  color: #ffffff;
+}
+
 #customSidebar {
   position: fixed;
   top: 0;
@@ -504,7 +600,7 @@ footer {
   font-size: 1.3rem;
   font-weight: bold;
   text-align: center;
-  margin: 10px 0;
+  margin: 30px 10px 10px 10px;
   letter-spacing: 1px;
   text-transform: uppercase;
   text-shadow: 0 0 8px #b3ecff, 0 0 16px #d0f0ff;
@@ -530,7 +626,7 @@ footer {
 
 .logo-sidebar {
   width: 250px;
-  background: linear-gradient(135deg, #0b1a3c, #3fcaff); /* Dark Blue to Light Blue */
+  background: linear-gradient(135deg, #0b1a3c, #3fcaff);
   padding-top: 60px;
   position: fixed;
   left: 0;
@@ -541,9 +637,17 @@ footer {
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
   font-family: 'Segoe UI', sans-serif;
-  transition: width 0.3s ease;
+  transition: transform 0.4s ease;
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
+  transform: translateX(-100%); /* hide by default */
+}
+
+.logo-sidebar.show {
+  transform: translateX(0); /* slide in */
+}
+.logo-sidebar.hide-logo-sidebar {
+  left: -280px; /* Hide from left */
 }
 
 
@@ -659,3 +763,27 @@ footer {
   }
 }
 
+#sidebarToggleBtn {
+  background-color: #49546886; /* same as sidebar/nav */
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 12px;
+  cursor: pointer;
+  font-size: 20px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
+#sidebarToggleBtn:hover {
+  background-color: #1c2f57; /* slightly lighter/darker for hover */
+}
+@media (max-width: 991.98px) {
+  #sidebarToggleBtn {
+    display: none;
+  }
+}
