@@ -3,7 +3,7 @@
 @endphp
 
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-floaty custom-navbar fixed-top" style="background-color: #111115;">
+<nav class="navbar navbar-expand-lg navbar-floaty custom-navbar fixed-top" style="background-color:#bae8e8;">
   <div class="container-fluid">
 
     <!-- Offcanvas toggle -->
@@ -14,12 +14,12 @@
     </button>
 
     <!-- Brand -->
-    <a class="navbar-brand text-white" href="#">TiCKTAX</a>
+    <a class="navbar-brand text-black" href="#">TiCKTAX</a>
 
     <!-- Profile Button -->
     <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
       <li class="nav-item">
-        <a class="nav-link d-flex align-items-center gap-2 text-white profile-button" href="#">
+        <a class="nav-link d-flex align-items-center gap-2 text-black profile-button" href="#">
           <img src="{{ asset('images/' . ($user->image ?? 'default.png')) }}" 
                alt="Profile" class="rounded-circle profile-img" style="width: 40px; height: 40px; object-fit: cover;">
           <div class="d-flex flex-column lh-sm">

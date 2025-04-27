@@ -39,7 +39,7 @@
     </script>
 </head>
 
-<body style="background: radial-gradient(circle at top left, white, #e0f7ff, #b3e5fc);">
+<body style="background-color:#fffffe">
 
     {{-- Navigation --}}
     @include('layout.navbar')
@@ -137,7 +137,8 @@
                     <h5 class="mt-4">Org Admin Account</h5>
                     <div class="mb-3">
                         <label for="username" class="form-label">Full Name</label>
-                        <input type="text" name="username" class="form-control" required>
+                        <input type="text" name="name" class="form-control" required>
+
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
