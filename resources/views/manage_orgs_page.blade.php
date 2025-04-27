@@ -136,7 +136,7 @@
                         <hr>
                     <h5 class="mt-4">Org Admin Account</h5>
                     <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
+                        <label for="username" class="form-label">Full Name</label>
                         <input type="text" name="username" class="form-control" required>
                     </div>
                     <div class="mb-3">

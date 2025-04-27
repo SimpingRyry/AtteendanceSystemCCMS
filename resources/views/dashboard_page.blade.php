@@ -45,6 +45,7 @@
           <div class="p-4 glassy-header rounded-4 shadow">
             <h4 class="mb-4">Overview</h4>
             <div class="row g-3">
+
               <!-- Total Students -->
               <div class="col-md-6 col-xl-3">
                 <div class="card glassy-card p-3 shadow-sm border-0">
@@ -108,13 +109,15 @@
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Second Row: Absentees Chart and Payments Table -->
+      <!-- Second Row: Absentees Chart and Registration Chart -->
       <div class="row g-4 px-2 mt-2">
+
         <!-- Absentees Report -->
         <div class="col-lg-6 col-xl-6">
           <div class="p-4 glassy-header rounded-4 shadow h-100">
@@ -123,7 +126,18 @@
           </div>
         </div>
 
-        <!-- Payments Table -->
+        <!-- BSIT and BSIS Registration Status Chart -->
+        <div class="col-lg-6 col-xl-6">
+          <div class="p-4 glassy-header rounded-4 shadow h-100">
+            <h4 class="mb-4"><i class="fas fa-chart-pie me-2"></i>BSIT & BSIS Registration Status</h4>
+            <canvas id="registrationChart" style="height: 280px;"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Third Row: Payments Table -->
+      <div class="row g-4 px-2 mt-2">
         <div class="col-lg-6 col-xl-6">
           <div class="p-4 glassy-header rounded-4 shadow h-100">
             <h4 class="mb-4"><i class="fas fa-money-check-alt me-2"></i>Payments</h4>
@@ -161,11 +175,9 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Third Row: Upcoming Events -->
-      <div class="row g-4 px-2 mt-2">
-        <div class="col-12">
+        <!-- Upcoming Events -->
+        <div class="col-lg-6 col-xl-6">
           <div class="p-4 glassy-header rounded-4 shadow h-100">
             <h4 class="mb-4"><i class="fas fa-calendar-alt me-2"></i>Upcoming Events</h4>
             <ul class="list-group list-group-flush">
@@ -184,6 +196,7 @@
             </ul>
           </div>
         </div>
+
       </div>
 
     </div>
@@ -194,6 +207,8 @@
     <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+
+  
   const ctx = document.getElementById('absenteesChart').getContext('2d');
   new Chart(ctx, {
     type: 'bar',
@@ -221,6 +236,42 @@
     }
   });
 </script>
+<script>
+   const ctz = document.getElementById('registrationChart').getContext('2d');
+  const registrationChart = new Chart(ctz, {
+    type: 'bar', // you can change to 'pie' or 'doughnut' if you want
+    data: {
+      labels: ['BSIT Registered', 'BSIT Unregistered', 'BSIS Registered', 'BSIS Unregistered'],
+      datasets: [{
+        label: 'Number of Students',
+        data: [400, 50, 467, 107], // <--- You can adjust numbers based on your real data
+        backgroundColor: [
+          'rgba(75, 192, 192, 0.7)',
+          'rgba(255, 99, 132, 0.7)',
+          'rgba(153, 102, 255, 0.7)',
+          'rgba(255, 159, 64, 0.7)'
+        ],
+        borderColor: [
+          'rgba(75, 192, 192, 1)',
+          'rgba(255, 99, 132, 1)',
+          'rgba(153, 102, 255, 1)',
+          'rgba(255, 159, 64, 1)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+
 
 
 
