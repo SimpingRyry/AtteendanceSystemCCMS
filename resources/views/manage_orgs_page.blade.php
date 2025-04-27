@@ -39,7 +39,7 @@
     </script>
 </head>
 
-<body style="background-color:#fffffe">
+<body style="background-color: #fffffe;">
 
     {{-- Navigation --}}
     @include('layout.navbar')

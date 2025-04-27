@@ -15,8 +15,9 @@
 
 
   <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&display=swap" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
 
 
 
@@ -28,7 +29,7 @@
   <title>CCMS Attendance System</title>
 </head>
 
-<body>
+<body style="background-color: #fffffe;">
 
   @include('layout.navbar')
   @include('layout.sidebar')
@@ -39,7 +40,7 @@
       <div class="container-fluid">
         <!-- Heading -->
         <div class="mb-3">
-          <h2 class="fw-bold" style="color: #5CE1E6;">Students</h2>
+          <h2 class="fw-bold" style="color: #232946;">Students</h2>
           <small style="color: #989797;">Manage /</small>
           <small style="color: #444444;">Student</small>
         </div>
@@ -123,7 +124,7 @@
 
           <!-- Student List -->
           <div class="card shadow-sm p-4 mt-2">
-            <h5 class="mb-3 fw-bold" style="color: #5CE1E6;">Student List</h5>
+            <h5 class="mb-3 fw-bold" style="color: #232946;">Student List</h5>
 
             <!-- Displaying students list -->
             @if($students->isEmpty())

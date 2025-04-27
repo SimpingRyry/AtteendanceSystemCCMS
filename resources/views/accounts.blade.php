@@ -34,7 +34,7 @@
     <div class="container-fluid" id="mainContainer">
         <!-- Heading -->
         <div class="mb-3">
-            <h2 class="fw-bold" style="color: #5CE1E6;">Accounts</h2>
+            <h2 class="fw-bold" style="color: #232946;">Accounts</h2>
             <small style="color: #989797;">Manage /</small>
             <small style="color: #444444;">Accounts</small>
         </div>
@@ -69,8 +69,7 @@
             </div>
 
             <!-- Student List -->
-            <div class="card shadow-sm p-4 mt-2">
-                <h5 class="mb-3 fw-bold" style="color: #5CE1E6;">User List</h5>
+                <h5 class="mb-3 fw-bold" style="color: #232946;">User List</h5>
 
                 @if($users->isEmpty())
                     <p>No users found.</p>
@@ -133,8 +132,6 @@
                         </ul>
                     </nav>
                 </div>
-
-            </div>
 
         </div>
 

@@ -23,7 +23,7 @@
     <title>CCMS Attendance System</title>
 </head>
 
-<body style="background: radial-gradient(circle at top left, white, #e0f7ff, #b3e5fc);">
+<body style="background-color: #fffffe;">
 
     {{-- Navigation --}}
     @include('layout.navbar')

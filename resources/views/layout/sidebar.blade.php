@@ -127,7 +127,7 @@
                 </li>
 
                 <li>
-                    <a href="#" class="nav-link px-3 d-flex align-items-center" style="color:crimson;">
+                    <a href="#" class="nav-link px-3 d-flex text-white align-items-center">
                         <img src="{{ asset('images/logout_ico.png') }}" alt="Log-out" class="sidebar-icon">
                         <span>Log-out</span>
                     </a>

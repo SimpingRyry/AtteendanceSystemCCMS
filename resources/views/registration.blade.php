@@ -26,7 +26,7 @@
     <title>CCMS Attendance System</title>
 </head>
 
-<body>
+<body style="background-color: #fffffe;">
 
     @include('layout.navbar')
     @include('layout.sidebar')
