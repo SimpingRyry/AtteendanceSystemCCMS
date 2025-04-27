@@ -33,7 +33,7 @@
     @include('layout.sidebar')
 
     <main>
-        <div class="container outer-box mt-5 pt-5 pb-4 shadow">
+        <div class="container outer-box mt-5 pt-5 pb-4">
             <div class="container inner-glass shadow p-4" id="main_box">
                 <h4 class="mb-4 text-center glow-text">Advisers</h4>
                 <div class="table-responsive">
