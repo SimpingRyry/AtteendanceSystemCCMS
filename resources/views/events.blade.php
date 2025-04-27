@@ -68,29 +68,31 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form>
+                <form id="eventForm" method="POST" action="{{ route('events.store') }}">
+                    @csrf <!-- CSRF Token for Laravel -->
+                    
                     <!-- Event Name -->
                     <div class="mb-3">
                         <label for="eventName" class="form-label">Event Name</label>
-                        <input type="text" class="form-control" id="eventName" required>
+                        <input type="text" class="form-control" id="eventName" name="name" required>
                     </div>
 
                     <!-- Venue -->
                     <div class="mb-3">
                         <label for="venue" class="form-label">Venue</label>
-                        <input type="text" class="form-control" id="venue" required>
+                        <input type="text" class="form-control" id="venue" name="venue" required>
                     </div>
 
                     <!-- Date Picker -->
                     <div class="mb-3">
                         <label for="eventDate" class="form-label">Event Date</label>
-                        <input type="date" class="form-control" id="eventDate" required>
+                        <input type="date" class="form-control" id="eventDate" name="event_date" required>
                     </div>
 
                     <!-- Timeouts Dropdown -->
                     <div class="mb-3">
                         <label for="timeouts" class="form-label">Number of Timeouts</label>
-                        <select class="form-select" id="timeouts" onchange="updateTimepickers()" required>
+                        <select class="form-select" id="timeouts" name="timeouts" onchange="updateTimepickers()" required>
                             <option value="2">2</option>
                             <option value="4">4</option>
                         </select>
@@ -100,11 +102,11 @@
                     <div id="timepickers2" style="display: none;">
                         <div class="mb-3">
                             <label for="timeout1" class="form-label">Morning</label>
-                            <input type="time" class="form-control" id="timeout1" value="08:00">
+                            <input type="time" class="form-control" id="timeout1" name="times[0]" value="08:00">
                         </div>
                         <div class="mb-3">
                             <label for="timeout2" class="form-label">Afternoon</label>
-                            <input type="time" class="form-control" id="timeout2" value="17:00">
+                            <input type="time" class="form-control" id="timeout2" name="times[1]" value="17:00">
                         </div>
                     </div>
 
@@ -112,25 +114,25 @@
                     <div id="timepickers4" style="display: none;">
                         <label class="form-label">Morning</label>
                         <div class="mb-3">
-                            <input type="time" class="form-control" id="timeout1" value="08:00">
+                            <input type="time" class="form-control" id="timeout1" name="times[0]" value="08:00">
                         </div>
                         <div class="mb-3">
-                            <input type="time" class="form-control" id="timeout2" value="12:00">
+                            <input type="time" class="form-control" id="timeout2" name="times[1]" value="12:00">
                         </div>
 
                         <label class="form-label">Afternoon</label>
                         <div class="mb-3">
-                            <input type="time" class="form-control" id="timeout3" value="13:00">
+                            <input type="time" class="form-control" id="timeout3" name="times[2]" value="13:00">
                         </div>
                         <div class="mb-3">
-                            <input type="time" class="form-control" id="timeout4" value="17:00">
+                            <input type="time" class="form-control" id="timeout4" name="times[3]" value="17:00">
                         </div>
                     </div>
 
                     <!-- Involved Course -->
                     <div class="mb-3">
                         <label for="course" class="form-label">Involved Course</label>
-                        <select class="form-select" id="course" onchange="appendCourseTag()">
+                        <select class="form-select" id="course" name="course" onchange="appendCourseTag()">
                             <option value="BSIS">BSIS</option>
                             <option value="BSIT">BSIT</option>
                         </select>
@@ -172,14 +174,13 @@
         });
 
         document.getElementById('eventDate').setAttribute('min', new Date().toISOString().split('T')[0]);
-
     </script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
 
-        <script>
+    <script>
     function updateTimepickers() {
         var timeouts = document.getElementById('timeouts').value;
         if (timeouts == '2') {
@@ -227,6 +228,49 @@
         background-color: #8A2BE2; /* Violet */
     }
 </style>
-</body>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: {
+            url: "{{ route('events.fetch') }}",  // Your route to fetch events
+            method: 'GET',
+            failure: function() {
+                alert('there was an error while fetching events!');
+            },
+            eventRender: function(info) {
+                // Customizing the event color based on course
+                if (info.event.extendedProps.course === 'BSIS') {
+                    info.el.style.backgroundColor = '#8A2BE2'; // Violet for BSIS
+                    info.el.style.borderColor = '#8A2BE2';
+                } else {
+                    info.el.style.backgroundColor = '#007bff'; // Blue for others
+                    info.el.style.borderColor = '#007bff';
+                }
+            }
+        },
+        eventTimeFormat: { 
+            hour: '2-digit',
+            minute: '2-digit',
+            meridiem: false
+        },
+        headerToolbar: {
+            left: 'prev,next today', 
+            center: 'title', 
+            right: 'dayGridMonth,timeGridWeek'
+        },
+        editable: true, // Allow events to be editable
+        droppable: true, // Enable dragging and dropping events
+        eventDisplay: 'block', // Ensures events are shown properly (like Google Calendar)
+    });
+
+    calendar.render();
+});
+</script>
+
+
+</body>
 </html>

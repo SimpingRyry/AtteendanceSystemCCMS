@@ -1,14 +1,19 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LogController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\EventsController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\AdviserController;
 use App\Http\Controllers\OrgListController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
+
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\ScheduleController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -36,12 +41,15 @@ Route::get('/accounts', [AccountsController::class, 'show']);
 Route::get('/profile', function () {
     return view('profile');
 });
+Route::post('/events', [EventsController::class, 'store'])->name('events.store');
+
+// Route to fetch all events from the database (GET request)
+Route::get('/events', [EventsController::class, 'index']);
 
 
+Route::get('/api/events', [EventsController::class, 'fetchEvents'])->name('events.fetch');
 
-use App\Http\Controllers\AdviserController;
 
-use App\Http\Controllers\LogController;
 
 Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
 
@@ -49,9 +57,7 @@ Route::get('/device_page', function () {
     return view('device_page');
 });
 
-Route::get('/events', function () {
-    return view('events');
-});
+
 Route::get('/student', [StudentController::class, 'index']);
 
 Route::get('/manage_orgs_page', [App\Http\Controllers\OrgListController::class, 'index'])->name('orgs.index');
