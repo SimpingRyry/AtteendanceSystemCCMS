@@ -25,12 +25,12 @@
 }
 
 .core-section {
-  color: #272343; /* CORE text in strong blue */
+  color: #eebbc3; /* CORE text in strong blue */
   font-weight: 600;
 }
 
 .divider {
-  border-color: #272343; /* Adjusted divider to match sidebar text */
+  border-color: #fffffe; /* Adjusted divider to match sidebar text */
   opacity: 1;
 }
 

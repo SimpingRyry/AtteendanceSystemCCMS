@@ -3,7 +3,7 @@
 @endphp
 
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-floaty custom-navbar fixed-top" style="background-color:#bae8e8;">
+<nav class="navbar navbar-expand-lg navbar-floaty custom-navbar fixed-top" style="background-color:#232946;">
   <div class="container-fluid">
 
     <!-- Offcanvas toggle -->

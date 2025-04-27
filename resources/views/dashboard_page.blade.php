@@ -26,7 +26,7 @@
 
 </head>
 
-<body style="background: radial-gradient(circle at top left, white, #e0f7ff, #b3e5fc);">
+<body style="background-color: #fffffe;">
 
     {{-- Navigation --}}
     @include('layout.navbar')
@@ -35,7 +35,7 @@
     @include('layout.sidebar')
 
     <main>
-  <div class="container outer-box mt-5 pt-5 pb-4 shadow">
+  <div class="container outer-box mt-5 pt-5 pb-4">
     <div class="container inner-glass shadow p-4" id="main_box">
       <h4 class="mb-4 text-center glow-text">D A S H B O A R D</h4>
 
