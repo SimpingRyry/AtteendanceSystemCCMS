@@ -35,7 +35,12 @@
     <main>
         <div class="container outer-box mt-5 pt-5 pb-4">
             <div class="container inner-glass shadow p-4" id="main_box">
-                <h4 class="mb-4 text-center glow-text">Advisers</h4>
+                <!-- Heading -->
+        <div class="mb-3">
+          <h2 class="fw-bold" style="color: #232946;">Advisers</h2>
+          <small style="color: #989797;">Manage /</small>
+          <small style="color: #444444;">Adviser</small>
+        </div>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped align-middle">
                         <thead class="table-primary text-center">

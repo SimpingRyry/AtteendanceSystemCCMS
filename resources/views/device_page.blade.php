@@ -34,7 +34,12 @@
     <main>
     <div class="container outer-box mt-5 pt-5 pb-4">
         <div class="container inner-glass shadow p-4" id="main_box">
-            <h4 class="mb-4 text-center glow-text">DEVICE STATUS</h4>
+            <!-- Heading -->
+        <div class="mb-3">
+          <h2 class="fw-bold" style="color: #232946;">Device Status</h2>
+          <small style="color: #989797;">Manage /</small>
+          <small style="color: #444444;">Device</small>
+        </div>
 
             <!-- Add Device Button -->
             <div class="d-flex justify-content-end mb-4">

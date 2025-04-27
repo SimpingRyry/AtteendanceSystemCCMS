@@ -35,10 +35,11 @@
 <div class="container outer-box mt-5 pt-5 pb-4 shadow">
     <div class="container-fluid" id="mainContainer">
         <!-- Heading -->
+        <!-- Heading -->
         <div class="mb-3">
-            <h2 class="fw-bold" style="color: #5CE1E6;">Students</h2>
-            <small style="color: #989797;">Manage /</small>
-            <small style="color: #444444;">Student</small>
+          <h2 class="fw-bold" style="color: #232946;">Register</h2>
+          <small style="color: #989797;">Manage /</small>
+          <small style="color: #444444;">Registration</small>
         </div>
 
         <!-- Main Card -->

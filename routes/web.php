@@ -35,6 +35,9 @@ Route::get('/dashboard_page', function () {
 Route::get('/template', function () {
     return view('schedTemplate');
 });
+Route::get('/payment_page', function () {
+    return view('payment_page');
+});
 
 Route::get('/accounts', [AccountsController::class, 'show']);
 

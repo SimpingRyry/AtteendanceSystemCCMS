@@ -64,7 +64,12 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addEventModalLabel">Add Event</h5>
+                <!-- Heading -->
+        <div class="mb-3">
+          <h2 class="fw-bold" style="color: #232946;">Events</h2>
+          <small style="color: #989797;">Manage /</small>
+          <small style="color: #444444;">Events</small>
+        </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">

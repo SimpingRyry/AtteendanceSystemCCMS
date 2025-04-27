@@ -48,8 +48,14 @@
     @include('layout.sidebar')
 
     <main>
-        <div class="container outer-box mt-5 pt-5 pb-4 shadow">
+        <div class="container outer-box mt-5 pt-5 pb-4">
             <div class="container inner-glass shadow p-4" id="main_box">
+                <!-- Heading -->
+        <div class="mb-3">
+          <h2 class="fw-bold" style="color: #232946;">Manage Orgs</h2>
+          <small style="color: #989797;">Manage /</small>
+          <small style="color: #444444;">Orgs</small>
+        </div>
                 {{-- Add Organization Button --}}
                 <div class="text-end mb-3">
                     <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addOrgModal">
