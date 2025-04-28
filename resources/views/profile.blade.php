@@ -66,7 +66,39 @@
         </div>
       </div>
 
-      <!-- Chart Section Here (JS same as before) -->
+                <!-- Row 2: Stats and Charts -->
+                <div class="row g-4">
+                    <!-- Box 1: Total Tax & Absences -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm h-100 border-0 rounded-4">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">Total Tax</h6>
+                                <p class="fs-5 mb-4">₱0</p>
+                                <canvas id="absenceChart" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Box 2: Attendance Breakdown -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm h-100 border-0 rounded-4">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">Attendance Breakdown</h6>
+                                <canvas id="barChart" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Box 3: General Attendance Pie -->
+                    <div class="col-md-4">
+                        <div class="card shadow-sm h-100 border-0 rounded-4">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">General Attendance</h6>
+                                <canvas id="pieChart" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
     </div>
   </div>
 </main>
@@ -80,7 +112,7 @@
                 labels: ['Jan', 'Feb', 'Mar', 'Apr'],
                 datasets: [{
                     label: 'Absents',
-                    data: [1, 2, 1, 0],
+                    data: [0, 0, 0, 0],
                     borderColor: '#f87171',
                     backgroundColor: 'rgba(248,113,113,0.2)',
                     fill: true
@@ -95,7 +127,7 @@
                 labels: ['Events Attended', 'Late Attendance', 'Did not attend'],
                 datasets: [{
                     label: 'Count',
-                    data: [8, 2, 1],
+                    data: [0, 0, 0],
                     backgroundColor: ['#4ade80', '#facc15', '#f87171']
                 }]
             },
@@ -110,7 +142,7 @@
             data: {
                 labels: ['Attended', 'Absent', 'Late'],
                 datasets: [{
-                    data: [75, 15, 10],
+                    data: [0, 0, 0],
                     backgroundColor: ['#60a5fa', '#f87171', '#facc15']
                 }]
             }

@@ -88,51 +88,47 @@
 
     </nav>
 
+    <!-- Carousel -->
     <div id="home" class="carousel-container position-relative">
-  <div id="mainCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+      <div id="mainCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
 
-    <!-- Indicators -->
-    <div class="carousel-indicators">
-      @foreach ($carouselSlides as $index => $slide)
-      <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="{{ $index }}" class="{{ $index === 0 ? 'active' : '' }}"></button>
-      @endforeach
-    </div>
-
-    <!-- Slides -->
-    <div class="carousel-inner">
-      @foreach ($carouselSlides as $index => $slide)
-      <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-        <!-- Blurry Background Image -->
-        <div class="carousel-bg-blur" style="background-image: url('{{ asset("images/" . $slide["image"]) }}');"></div>
-
-        <!-- Foreground Smaller Image -->
-        <div class="carousel-foreground-image d-flex justify-content-center align-items-center">
-          <img src="{{ asset('images/' . $slide['image']) }}" class="foreground-img" alt="Slide {{ $index + 1 }}">
+        <!-- Indicators -->
+        <div class="carousel-indicators">
+          @foreach ($carouselSlides as $index => $slide)
+          <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="{{ $index }}" class="{{ $index === 0 ? 'active' : '' }}"></button>
+          @endforeach
         </div>
 
-        <!-- Overlay -->
-        <div class="overlay-content text-center text-white position-absolute top-50 start-50 translate-middle">
-          <div class="logo-container mb-3">
-            @foreach ($slide['logos'] as $logo)
-            <img src="{{ asset('images/' . $logo) }}" alt="Logo" height="60" class="me-2">
-            @endforeach
+        <!-- Slides -->
+        <div class="carousel-inner">
+          @foreach ($carouselSlides as $index => $slide)
+          <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+            <img src="{{ asset('images/' . $slide['image']) }}" class="d-block w-100" alt="Slide {{ $index + 1 }}">
+
+            <!-- Overlay -->
+            <div class="overlay-content text-center text-white position-absolute top-50 start-50 translate-middle">
+              <div class="logo-container mb-3">
+                @foreach ($slide['logos'] as $logo)
+                <img src="{{ asset('images/' . $logo) }}" alt="Logo" height="60" class="me-2">
+                @endforeach
+              </div>
+              <h1 class="fw-bold">{{ $slide['title'] }}</h1>
+              <h2 class="fw-semibold">{{ $slide['subtitle'] }}</h2>
+            </div>
           </div>
-          <h1 class="fw-bold">{{ $slide['title'] }}</h1>
-          <h2 class="fw-semibold">{{ $slide['subtitle'] }}</h2>
+          @endforeach
         </div>
       </div>
-      @endforeach
     </div>
-  </div>
-</div>
 
-<!-- Controls -->
-<button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
-  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-</button>
-<button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
-  <span class="carousel-control-next-icon" aria-hidden="true"></span>
-</button>
+
+    <!-- Controls -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    </button>
     </div>
     </div>
     <!-- Card Grid -->

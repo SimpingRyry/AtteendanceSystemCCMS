@@ -26,7 +26,7 @@
                 <!-- Dashboard Link -->
                 <li>
                     <a href="{{ url('dashboard_page') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('dashboard_page') ? 'active-link' : '' }}">
-                        <img src="{{ asset('images/dashingboard_ico.png') }}" alt="Dashboard" class="sidebar-icon">
+                        <img src="{{ asset('images/dashh_ico.png') }}" alt="Dashboard" class="sidebar-icon">
                         <span>Dashboard</span>
                     </a>
                 </li>
@@ -58,7 +58,7 @@
 
                 <li>
                     <a href="{{ url('advisers') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('advisers') ? 'active-link' : '' }}">
-                        <img src="{{ asset('images/adviser_ico.png') }}" alt="Advisers" class="sidebar-icon">
+                        <img src="{{ asset('images/instruct_ico.png') }}" alt="Advisers" class="sidebar-icon">
                         <span>Advisers</span>
                     </a>
                 </li>
@@ -74,6 +74,13 @@
                     <a href="{{ url('events') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('events') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/event_ico.png') }}" alt="Events" class="sidebar-icon">
                         <span>Events</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ url('payment_page') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('payment_page') ? 'active-link' : '' }}">
+                        <img src="{{ asset('images/payment_ico.png') }}" alt="Payment" class="sidebar-icon">
+                        <span>Payment</span>
                     </a>
                 </li>
 
@@ -115,7 +122,7 @@
                 @if (Auth::user()->role !== 'officer')
                     <li>
                         <a href="{{ url('logs') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('logs') ? 'active-link' : '' }}">
-                            <img src="{{ asset('images/log_ico.png') }}" alt="Logs" class="sidebar-icon">
+                            <img src="{{ asset('images/loggs_ico.png') }}" alt="Logs" class="sidebar-icon">
                             <span>Logs</span>
                         </a>
                     </li>

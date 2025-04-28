@@ -35,7 +35,12 @@
     <main>
         <div class="container outer-box mt-5 pt-5 pb-4">
             <div class="container inner-glass shadow p-4" id="main_box">
-                <h4 class="mb-4 text-center glow-text">D A S H B O A R D</h4>
+                <!-- Heading -->
+        <div class="mb-3">
+          <h2 class="fw-bold" style="color: #232946;">Dashboard</h2>
+          <small style="color: #989797;">Home /</small>
+          <small style="color: #444444;">Dash</small>
+        </div>
 
                 <!-- Overview Cards -->
                 <div class="row g-4 mb-4">
