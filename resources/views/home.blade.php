@@ -103,7 +103,7 @@
       @foreach ($carouselSlides as $index => $slide)
       <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
         <!-- Blurry Background Image -->
-        <div class="carousel-bg-blur" style="background-image: url('{{ asset('images/' . $slide['image']) }}');"></div>
+        <div class="carousel-bg-blur" style="background-image: url('{{ asset("images/" . $slide["image"]) }}');"></div>
 
         <!-- Foreground Smaller Image -->
         <div class="carousel-foreground-image d-flex justify-content-center align-items-center">
@@ -156,7 +156,7 @@
   <section id="about" class="position-relative">
     <!-- Gradient Background -->
     <div class="w-100" style="height: 20vh;">
-      <img src="{{ asset('images/about_nav.png') }}" alt="Full Image" style="width: 100%; height: 100%; object-fit: cover;">
+    <img src="{{ asset('images/about_nav.png') }}" alt="Full Image" style="width: 100%; height: 100%; object-fit: cover;">
     </div>
 
     <!-- About Content -->

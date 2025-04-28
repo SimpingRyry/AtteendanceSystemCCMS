@@ -47,39 +47,59 @@ class EventsController extends Controller
         return redirect()->back()->with('success', 'Event successfully!');
     }
     public function fetchEvents()
-    {
-        $events = Event::all();
-    
-        $calendarEvents = [];
-    
-        foreach ($events as $event) {
-            $times = json_decode($event->times, true); // Decode the JSON times array
-    
-            if ($event->timeouts == 2) {
-                // Half day
-                $calendarEvents[] = [
-                    'title' => $event->name,
-                    'start' => $event->event_date . 'T' . $times[0], // 08:00
-                    'end' => $event->event_date . 'T' . $times[1],   // 12:00
-                ];
-            } elseif ($event->timeouts == 4) {
-                // Morning session
-                $calendarEvents[] = [
-                    'title' => $event->name . ' (Morning)',
-                    'start' => $event->event_date . 'T' . $times[0], // 08:00
-                    'end' => $event->event_date . 'T' . $times[1],   // 12:00
-                ];
-                // Afternoon session
-                $calendarEvents[] = [
-                    'title' => $event->name . ' (Afternoon)',
-                    'start' => $event->event_date . 'T' . $times[2], // 13:00
-                    'end' => $event->event_date . 'T' . $times[3],   // 17:00
-                ];
-            }
+{
+    $events = Event::all();
+
+    $calendarEvents = [];
+
+    foreach ($events as $event) {
+        $times = json_decode($event->times, true); // Decode the JSON times array
+
+        if ($event->timeouts == 2) {
+            // Half day
+            $calendarEvents[] = [
+                'title' => $event->name,
+                'start' => $event->event_date . 'T' . $times[0], // 08:00
+                'end' => $event->event_date . 'T' . $times[1],   // 12:00
+                'extendedProps' => [
+                    'course' => $event->course,
+                    'venue' => $event->venue,
+                    'timeout' => $event->timeouts, // Add timeout
+                    'times' => $times, // Add times
+                ],
+                'color' => $event->course === 'BSIS' ? 'violet' : 'blue',
+            ];
+        } elseif ($event->timeouts == 4) {
+            // Morning session
+            $calendarEvents[] = [
+                'title' => $event->name . ' (Morning)',
+                'start' => $event->event_date . 'T' . $times[0], // 08:00
+                'end' => $event->event_date . 'T' . $times[1],   // 12:00
+                'extendedProps' => [
+                    'course' => $event->course,
+                    'venue' => $event->venue,
+                    'timeout' => $event->timeouts, // Add timeout
+                    'times' => $times, // Add times
+                ],
+                'color' => $event->course === 'BSIS' ? 'violet' : 'blue',
+            ];
+            // Afternoon session
+            $calendarEvents[] = [
+                'title' => $event->name . ' (Afternoon)',
+                'start' => $event->event_date . 'T' . $times[2], // 13:00
+                'end' => $event->event_date . 'T' . $times[3],   // 17:00
+                'extendedProps' => [
+                    'course' => $event->course,
+                    'venue' => $event->venue,
+                    'timeout' => $event->timeouts, // Add timeout
+                    'times' => $times, // Add times
+                ],
+                'color' => $event->course === 'BSIS' ? 'violet' : 'blue',
+            ];
         }
-    
-        return response()->json(data: $calendarEvents);
     }
 
+    return response()->json($calendarEvents);
+}
     
 }
