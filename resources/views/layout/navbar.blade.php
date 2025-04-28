@@ -24,7 +24,7 @@
                alt="Profile" class="rounded-circle profile-img" style="width: 40px; height: 40px; object-fit: cover;">
           <div class="d-flex flex-column lh-sm">
             <span class="profile-name">{{ $user->name ?? 'No Name' }}</span>
-            <small class="profile-role">{{ $user->position ?? 'No Role' }}</small>
+            <small class="profile-role">{{ $user->role ?? 'No Role' }}</small>
           </div>
         </a>
       </li>

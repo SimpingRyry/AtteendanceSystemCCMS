@@ -1,6 +1,7 @@
 body {
   font-family: 'Montserrat', sans-serif;
   transition: margin-left 0.3s ease; /* Smooth transition for margin change */
+  background-color: #fffffe;
 }
 
 /* Mobile Responsive */
@@ -185,238 +186,173 @@ body {
     }
 }
 
-/* Sidebar on the side (large screen) */
-
 .carousel-item {
-    position: relative;
-    width: 100%;
-    height: 100vh;
+  position: relative;
+  width: 100%;
+  height: 70vh; /* Default height for desktops */
 }
 
+@media (max-width: 768px) {
+  .carousel-item {
+    height: 50vh; /* Smaller height for tablets */
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-item {
+    height: 40vh; /* Even smaller for mobile phones */
+  }
+}
 .carousel-item img {
-    object-fit: cover;
-    object-position: center;
-    width: 100%;
-    height: 100%;
+  object-fit: cover;
+  object-position: center;
+  width: 100%;
+  height: 100%;
 }
 
 /* Dark overlay effect */
 .carousel-item::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    z-index: 1;
-}
-
-
-/* Carousel container */
-.carousel-container {
-    position: relative;
-    width: 100%;
-}
-
-/* Keeps overlay content on top */
-.overlay-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 2;
-    background: rgba(0, 0, 0, 0);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 60%;
-    text-align: center;
-    max-height: 70vh;
-}
-
-.overlay-content h1,
-.overlay-content h2 {
-    margin-top: 15px;
-    color: white;
-    font-weight: bold;
-    word-wrap: break-word;
-}
-
-/* Base font sizes (desktop) */
-.overlay-content h1 {
-    font-size: 200%;
-}
-.overlay-content h2 {
-    font-size: 150%;
-}
-
-/* Medium screens */
-@media (max-width: 992px) {
-    .overlay-content {
-        width: 70%;
-    }
-    .overlay-content h1 {
-        font-size: 160%;
-    }
-    .overlay-content h2 {
-        font-size: 130%;
-    }
-}
-
-/* Tablets */
-@media (max-width: 768px) {
-    .overlay-content {
-        width: 85%;
-    }
-    .overlay-content h1 {
-        font-size: 180%;
-    }
-    .overlay-content h2 {
-        font-size: 150%;
-    }
-}
-
-/* Small phones */
-@media (max-width: 576px) {
-    .overlay-content {
-        width: 90vw;
-        padding: 10px;
-    }
-    .overlay-content h1 {
-        font-size: 150%;
-    }
-    .overlay-content h2 {
-        font-size: 120%;
-    }
-    .logo-container img {
-        height: 40px;
-        margin: 0 5px 10px 5px;
-    }
-}
-
-/* Narrowest screens (iPhone SE, 430px or less) */
-@media (max-width: 430px) {
-    .overlay-content h1 {
-        font-size: 130%;
-    }
-    .overlay-content h2 {
-        font-size: 110%;
-    }
-}
-
-
-/* Center logo images */
-.logo-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.logo-container img {
-    max-width: 200px;
-    height: auto;
-    margin: 0 10px 20px 20px;
-}
-
-.overlay-content h1 {
-    font-size: 280%;
-    font-weight: bold;
-    margin-top: 15px;
-    color: white;
-}
-
-.overlay-content h2 {
-    font-size: 250%;
-    font-weight: bold;
-    margin-top: 15px;
-    color: white;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1;
 }
 
 /* Ensure carousel controls and indicators are above the overlay */
 .carousel-control-prev,
 .carousel-control-next,
 .carousel-indicators {
-    z-index: 3;
-}
-/* Blurred background (stretch across whole carousel) */
-.carousel-bg-blur {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  filter: blur(15px);
-  z-index: 0;
+  z-index: 2;
 }
 
-.carousel-foreground-image {
+/* Carousel container */
+.carousel-container {
   position: relative;
-  z-index: 1;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 100%;
 }
 
-.foreground-img {
-  width: 70%;
-  max-height: 80vh;
-  max-width: 160vh;
-  object-fit: contain;
-  border-radius: 5px;
-  box-shadow: 0 0 30px rgba(0,0,0,0.4);
-}
-
-/* Default position for larger screens */
-.carousel-control-prev,
-.carousel-control-next {
-    top: -30%;  /* Adjust the default position */
-}
-
-/* Medium screens (e.g., tablets) */
-@media (max-width: 992px) {
-    .carousel-control-prev,
-    .carousel-control-next {
-        top: -20%;  /* Move controls slightly down on smaller screens */
-    }
-}
-
-/* Small screens (e.g., mobile phones) */
-@media (max-width: 768px) {
-    .carousel-control-prev,
-    .carousel-control-next {
-        top: -50%;  /* Adjust top position for mobile screens */
-    }
-}
-
-/* Extra small screens (e.g., very small mobile phones) */
-@media (max-width: 576px) {
-    .carousel-control-prev,
-    .carousel-control-next {
-        top: -50%;  /* Keep controls closer to the center */
-    }
-}
-.carousel-indicators {
-    top: 86%;  /* Adjust this value as needed to move the indicators higher */
-}
-.carousel-control-prev {
-  left: 5%; /* Closer to the left side */
-}
-
-.carousel-control-next {
-  right: 5%; /* Closer to the right side */
-}
-
-/* Ensure overlay content is visible above the blurred background */
+/* Keeps overlay content on top */
 .overlay-content {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 2;
+  background: rgba(0, 0, 0, 0);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 60%;
+  text-align: center;
+  max-height: 70vh;
+}
+
+.overlay-content h1,
+.overlay-content h2 {
+  margin-top: 15px;
+  color: white;
+  font-weight: bold;
+  word-wrap: break-word;
+}
+
+/* Base font sizes (desktop) */
+.overlay-content h1 {
+  font-size: 280%;
+}
+.overlay-content h2 {
+  font-size: 220%;
+}
+
+/* Medium screens */
+@media (max-width: 992px) {
+  .overlay-content {
+      width: 70%;
+  }
+  .overlay-content h1 {
+      font-size: 220%;
+  }
+  .overlay-content h2 {
+      font-size: 180%;
+  }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+  .overlay-content {
+      width: 85%;
+  }
+  .overlay-content h1 {
+      font-size: 180%;
+  }
+  .overlay-content h2 {
+      font-size: 150%;
+  }
+}
+
+/* Small phones */
+@media (max-width: 576px) {
+  .overlay-content {
+      width: 90vw;
+      padding: 10px;
+  }
+  .overlay-content h1 {
+      font-size: 150%;
+  }
+  .overlay-content h2 {
+      font-size: 120%;
+  }
+  .logo-container img {
+      height: 40px;
+      margin: 0 5px 10px 5px;
+  }
+}
+
+/* Narrowest screens (iPhone SE, 430px or less) */
+@media (max-width: 430px) {
+  .overlay-content h1 {
+      font-size: 130%;
+  }
+  .overlay-content h2 {
+      font-size: 110%;
+  }
+}
+
+
+/* Center logo images */
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-container img {
+  max-width: 200px;
+  height: auto;
+  margin: 0 10px 20px 20px;
+}
+
+.overlay-content h1 {
+  font-size: 280%;
+  font-weight: bold;
+  margin-top: 15px;
+  color: white;
+}
+
+.overlay-content h2 {
+  font-size: 250%;
+  font-weight: bold;
+  margin-top: 15px;
+  color: white;
+}
+
+/* Keep carousel buttons centered */
+.carousel-control-prev, 
+.carousel-control-next {
+  z-index: 3;
 }
 footer {
     position: relative;
