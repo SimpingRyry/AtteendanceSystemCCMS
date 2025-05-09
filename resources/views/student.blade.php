@@ -47,38 +47,46 @@
 
         <!-- Main Card -->
         <div class="card shadow-sm p-4">
-          <div class="row g-3">
-            @foreach (['Course', 'Block', 'Year Level', 'Status'] as $label)
-            <div class="col-md">
-              <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                  <h6 class="card-title">{{ $label }}</h6>
-                  @if ($label == 'Course')
-                  <input type="text" class="form-control" placeholder="Enter Course">
-                  @else
-                  <select class="form-select">
-                    <option selected disabled>Select {{ $label }}</option>
-                    @if ($label == 'Block')
-                    @foreach (['A', 'B', 'C', 'D'] as $option)
-                    <option>{{ $option }}</option>
-                    @endforeach
-                    @elseif ($label == 'Year Level')
-                    @foreach (range(1, 4) as $year)
-                    <option>{{ $year }}</option>
-                    @endforeach
-                    @else
-                    <option>Enrolled</option>
-                    <option>Unenrolled</option>
-                    @endif
-                  </select>
-                  @endif
-                </div>
-              </div>
-            </div>
+  <div class="row g-3">
+    @foreach (['Organization', 'Block', 'Year Level', 'Status'] as $label)
+    <div class="col-md">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h6 class="card-title">{{ $label }}</h6>
+          @if ($label == 'Organization')
+          <select class="form-select">
+            <option selected disabled>Select Organization</option>
+            <option>ITS</option>
+            <option>Praxis</option>
+          </select>
+          @else
+          @if ($label == 'Course')
+          <input type="text" class="form-control" placeholder="Enter Course">
+          @else
+          <select class="form-select">
+            <option selected disabled>Select {{ $label }}</option>
+            @if ($label == 'Block')
+            @foreach (['A', 'B', 'C', 'D'] as $option)
+            <option>{{ $option }}</option>
             @endforeach
-          </div>
+            @elseif ($label == 'Year Level')
+            @foreach (range(1, 4) as $year)
+            <option>{{ $year }}</option>
+            @endforeach
+            @else
+            <option>Enrolled</option>
+            <option>Unenrolled</option>
+            @endif
+          </select>
+          @endif
+          @endif
+        </div>
+      </div>
+    </div>
+    @endforeach
+  </div>
 
-          <div class="row mb-4 mt-4 align-items-center justify-content-between">
+  <div class="row mb-4 mt-4 align-items-center justify-content-between">
   <!-- Import Button Left -->
   <div class="col-md-6 d-flex">
     <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadCSVModal" >

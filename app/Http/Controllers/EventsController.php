@@ -14,37 +14,54 @@ class EventsController extends Controller
     }
     public function store(Request $request)
     {
-        // Validate and save the event
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'venue' => 'required|string',
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'venue' => 'nullable|string',
             'event_date' => 'required|date',
-            'timeouts' => 'required|integer|in:2,4', // Ensure timeouts is either 2 or 4
-            'course' => 'required|string',
-            'times' => 'required|array',
-            'times.*' => 'required|date_format:H:i', // Ensure that the times follow HH:mm format
+            'timeouts' => 'required|in:2,4',
+            'course' => 'nullable|string',
+            'repeat_dates' => 'nullable|string' // should be comma-separated dates
         ]);
-
-        // Save event to the database
-        $event = new Event();
-        $event->name = $validated['name'];
-        $event->venue = $validated['venue'];
-        $event->event_date = $validated['event_date'];
-        $event->timeouts = $validated['timeouts'];
-        $event->course = $validated['course'];
-
-        // Check number of timeouts and store the corresponding time slots
-        if ($validated['timeouts'] == 2) {
-            // Ensure only 2 timeouts are provided
-            $event->times = json_encode(array_slice($validated['times'], 0, 2));
-        } elseif ($validated['timeouts'] == 4) {
-            // Ensure 4 timeouts are provided
-            $event->times = json_encode(array_slice($validated['times'], 0, 4));
+    
+        // Determine times based on the selected option
+        $times = [];
+    
+        if ($request->timeouts == 2) {
+            $times = [$request->half_start, $request->half_end];
+        } elseif ($request->timeouts == 4) {
+            $times = [
+                $request->morning_start,
+                $request->morning_end,
+                $request->afternoon_start,
+                $request->afternoon_end
+            ];
         }
-
-        $event->save();
-
-        return redirect()->back()->with('success', 'Event successfully!');
+    
+        // Initial event (main date)
+        $dates = [$request->event_date];
+    
+        // Add repeated dates if available
+        if (!empty($request->repeat_dates)) {
+            $extraDates = explode(',', $request->repeat_dates);
+            $extraDates = array_map('trim', $extraDates);
+            $dates = array_merge($dates, $extraDates);
+        }
+    
+        // Create an event for each date
+        foreach ($dates as $date) {
+            Event::create([
+                'name' => $request->name,
+                'description' => $request->description,
+                'venue' => $request->venue,
+                'event_date' => $date,
+                'timeouts' => $request->timeouts,
+                'times' => json_encode($times),
+                'course' => $request->course,
+            ]);
+        }
+    
+        return redirect()->back()->with('success', 'Events created successfully!');
     }
     public function fetchEvents()
 {

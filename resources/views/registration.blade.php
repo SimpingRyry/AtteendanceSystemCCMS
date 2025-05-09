@@ -177,7 +177,12 @@
       </div>
     </div>
 
-    <div class="modal fade" id="registerStudentModal" tabindex="-1" aria-labelledby="registerStudentModalLabel" aria-hidden="true">
+
+
+</div>
+
+
+<div class="modal fade" id="registerStudentModal" tabindex="-1" aria-labelledby="registerStudentModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-scrollable modal-lg">
     <div class="modal-content">
       <div class="modal-header">
@@ -300,10 +305,8 @@
     </div>
   </div>
 </div>
-
-
-</div>
 </main>
+
 
 
 
@@ -312,7 +315,38 @@
     integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
     </script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+  // Function to update Fingerprint ID inside the modal
+  function updateFingerprintID() {
+    // Fetch the latest fingerprint ID from the server
+    axios.get("/api/register") // Fetch latest ID
+      .then(response => {
+        if (response.data && response.data.id) {
+          const id = response.data.id;
+
+          // Check if the modal is open before updating the input field
+          const modal = document.getElementById("registerStudentModal"); // Modal ID
+          if (modal && modal.classList.contains("show")) { // Check if the modal is visible
+            document.getElementById("fingerprintId").value = id; // Update the Fingerprint ID input field
+          }
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching ID:", error);
+      });
+  }
+
+  // Set an interval to fetch the ID every 5 seconds (adjust as needed)
+  setInterval(updateFingerprintID, 5000);
+
+  // Optional: Ensure that when the modal opens, we fetch the ID right away
+  $('#registerStudentModal').on('shown.bs.modal', function () {
+    updateFingerprintID(); // Fetch and update Fingerprint ID immediately after the modal opens
+  });
+</script>
+
     
 </body>
 

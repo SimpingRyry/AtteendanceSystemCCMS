@@ -14,6 +14,8 @@
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 
     <!-- Kalendaryo -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
@@ -36,123 +38,162 @@
 
     {{-- Sidebar --}}
     @include('layout.sidebar')
-
     <main>
     <div class="container outer-box mt-5 pt-5 pb-4">
         <div class="container inner-glass shadow p-4" id="main_box">
-            <h4 class="mb-4 text-center glow-text">EVENTS</h4>
-
-            <!-- Add Event Button -->
-            <div class="row mb-4">
-                <div class="col-12 text-right d-flex justify-content-end mb-3">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEventModal">Add Event</button>
-                </div>
-            </div>
-
-            <!-- FullCalendar Display -->
             <div class="row">
-                <div class="col-12 mb-4">
+                <!-- Sidebar for Filters and Event List -->
+                <div class="col-md-4 col-lg-3">
+                    <div class="d-flex flex-column">
+                        <!-- Add Event Button (Left aligned with "+" icon) -->
+                        <div class="mb-3 text-left">
+                            <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                                <span class="me-2">+</span> Add Event
+                            </button>
+                        </div>
+
+                        <!-- Month Filter -->
+                        <div class="mb-3">
+                            <label for="monthFilter" class="form-label">Filter by Month</label>
+                            <select class="form-select" id="monthFilter">
+                                <option value="all">All Months</option>
+                                <option value="January">January</option>
+                                <option value="February">February</option>
+                                <!-- Add other months here -->
+                            </select>
+                        </div>
+
+                        <!-- Search Bar -->
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="eventSearch" placeholder="Search events...">
+                        </div>
+
+                        <!-- Upcoming Events List -->
+                        <div class="mb-3">
+                            <h6>Upcoming Events</h6>
+                            <ul id="upcomingEventsList" class="list-unstyled">
+                                <!-- List upcoming events dynamically -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Calendar Section -->
+                <div class="col-md-8 col-lg-9">
                     <div class="card-body">
+                        <h4 class="text-center glow-text mb-4">EVENTS</h4>
+                        <!-- FullCalendar Display -->
                         <div id="calendar"></div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </main>
-
 <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl"> <!-- Wider modal -->
         <div class="modal-content">
             <div class="modal-header">
-                <!-- Heading -->
-        <div class="mb-3">
-          <h2 class="fw-bold" style="color: #232946;">Events</h2>
-          <small style="color: #989797;">Manage /</small>
-          <small style="color: #444444;">Events</small>
-        </div>
+                <h2 class="fw-bold text-primary">Create Event</h2>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
             <div class="modal-body">
                 <form id="eventForm" method="POST" action="{{ route('events.store') }}">
-                    @csrf <!-- CSRF Token for Laravel -->
-                    
-                    <!-- Event Name -->
-                    <div class="mb-3">
-                        <label for="eventName" class="form-label">Event Name</label>
-                        <input type="text" class="form-control" id="eventName" name="name" required>
-                    </div>
+                    @csrf
 
-                    <!-- Venue -->
-                    <div class="mb-3">
-                        <label for="venue" class="form-label">Venue</label>
-                        <input type="text" class="form-control" id="venue" name="venue" required>
-                    </div>
-
-                    <!-- Date Picker -->
-                    <div class="mb-3">
-                        <label for="eventDate" class="form-label">Event Date</label>
-                        <input type="date" class="form-control" id="eventDate" name="event_date" required>
-                    </div>
-
-                    <!-- Timeouts Dropdown -->
-                    <div class="mb-3">
-                        <label for="timeouts" class="form-label">Number of Timeouts</label>
-                        <select class="form-select" id="timeouts" name="timeouts" onchange="updateTimepickers()" required>
-                            <option value="2">2</option>
-                            <option value="4">4</option>
-                        </select>
-                    </div>
-
-                    <!-- Time Pickers for 2 timeouts -->
-                    <div id="timepickers2" style="display: none;">
-                        <div class="mb-3">
-                            <label for="timeout1" class="form-label">Morning</label>
-                            <input type="time" class="form-control" id="timeout1" name="times[0]" value="08:00">
+                    <div class="row">
+                        <div class="mb-3 col-md-6">
+                            <label for="eventName" class="form-label">Event Title</label>
+                            <input type="text" class="form-control" id="eventName" name="name" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="timeout2" class="form-label">Afternoon</label>
-                            <input type="time" class="form-control" id="timeout2" name="times[1]" value="17:00">
+                        <div class="mb-3 col-md-6">
+                            <label for="venue" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="venue" name="venue">
                         </div>
                     </div>
 
-                    <!-- Time Pickers for 4 timeouts -->
-                    <div id="timepickers4" style="display: none;">
-                        <label class="form-label">Morning</label>
-                        <div class="mb-3">
-                            <input type="time" class="form-control" id="timeout1" name="times[0]" value="08:00">
-                        </div>
-                        <div class="mb-3">
-                            <input type="time" class="form-control" id="timeout2" name="times[1]" value="12:00">
-                        </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
 
-                        <label class="form-label">Afternoon</label>
-                        <div class="mb-3">
-                            <input type="time" class="form-control" id="timeout3" name="times[2]" value="13:00">
+                    <div class="row">
+                        <div class="mb-3 col-md-6">
+                            <label for="eventDate" class="form-label">Event Date</label>
+                            <input type="date" class="form-control" id="eventDate" name="event_date" required>
                         </div>
-                        <div class="mb-3">
-                            <input type="time" class="form-control" id="timeout4" name="times[3]" value="17:00">
+                        <div class="mb-3 col-md-6">
+                            <label for="dayType" class="form-label">Day Type</label>
+                            <select class="form-select" id="dayType" name="timeouts" required>
+                                <option value="">Select Day Type</option>
+                                <option value="2">Half Day</option>
+                                <option value="4">Whole Day</option>
+                            </select>
                         </div>
                     </div>
 
-                    <!-- Involved Course -->
-                    <div class="mb-3">
-                        <label for="course" class="form-label">Involved Course</label>
-                        <select class="form-select" id="course" name="course" onchange="appendCourseTag()">
-                            <option value="BSIS">BSIS</option>
-                            <option value="BSIT">BSIT</option>
-                        </select>
+                    <!-- Time Pickers -->
+                    <div id="timePickers" class="mb-3 d-none">
+                        <div id="halfDayTimes" class="d-none row">
+                            <label class="form-label">Half Day</label>
+                            <div class="col-md-6 mb-2">
+                                <input type="time" class="form-control" name="half_start" placeholder="Start Time">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="time" class="form-control" name="half_end" placeholder="End Time">
+                            </div>
+                        </div>
+
+                        <div id="wholeDayTimes" class="d-none">
+                            <label class="form-label">Morning</label>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <input type="time" class="form-control" name="morning_start" placeholder="Morning Start">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <input type="time" class="form-control" name="morning_end" placeholder="Morning End">
+                                </div>
+                            </div>
+                            <label class="form-label mt-3">Afternoon</label>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <input type="time" class="form-control" name="afternoon_start" placeholder="Afternoon Start">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <input type="time" class="form-control" name="afternoon_end" placeholder="Afternoon End">
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Involved Course (Tags) -->
                     <div class="mb-3">
-                        <label class="form-label">Selected Courses</label>
+                        <label for="repeatDates" class="form-label">Repeat On</label>
+                        <input type="text" id="repeatDates" class="form-control" placeholder="Select one or more dates">
+                        <input type="hidden" id="repeatDatesHidden" name="repeat_dates">
+                    </div>
+
+                    <div class="row">
+                        <div class="mb-3 col-md-6">
+                            <label for="course" class="form-label">Tag Course</label>
+                            <select class="form-select" id="course" name="course" onchange="appendCourseTag()">
+                                <option value="BSIS">BSIS</option>
+                                <option value="BSIT">BSIT</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label for="guests" class="form-label">Add Guests (Optional)</label>
+                            <input type="text" class="form-control" id="guests" name="guests" placeholder="Separate emails by commas">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Tagged Courses</label>
                         <div id="courseTags" class="d-flex flex-wrap"></div>
                     </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <div class="modal-footer mt-3">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save Event</button>
                     </div>
                 </form>
@@ -187,6 +228,37 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    flatpickr("#repeatDates", {
+        mode: "multiple",
+        dateFormat: "Y-m-d",
+        onChange: function(selectedDates, dateStr, instance) {
+            document.getElementById('repeatDatesHidden').value = dateStr;
+        }
+    });
+</script>
+
+<script>
+    document.getElementById('dayType').addEventListener('change', function () {
+        const type = this.value;
+        const timePickers = document.getElementById('timePickers');
+        const half = document.getElementById('halfDayTimes');
+        const whole = document.getElementById('wholeDayTimes');
+
+        timePickers.classList.remove('d-none');
+        half.classList.add('d-none');
+        whole.classList.add('d-none');
+
+        if (type === '2') {
+            half.classList.remove('d-none');
+        } else if (type === '4') {
+            whole.classList.remove('d-none');
+        } else {
+            timePickers.classList.add('d-none');
+        }
+    });
+</script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
