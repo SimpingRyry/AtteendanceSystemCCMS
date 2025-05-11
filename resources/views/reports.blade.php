@@ -1,51 +1,134 @@
+<!-- resources/views/reports.blade.php -->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCMS Attendance System</title>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-
-    <!-- Font Awesome -->
+    <!-- External Resources -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
 
-    <!-- Custom CSS -->
+    <!-- Local Styles -->
     <link rel="stylesheet" href="{{ asset('css/reports.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_side.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
-
-    <title>CCMS Attendance System</title>
 </head>
-
 <body style="background-color: #fffffe;">
-
-    {{-- Navigation --}}
     @include('layout.navbar')
-
-    {{-- Sidebar --}}
     @include('layout.sidebar')
 
     <main>
-    <div class="container outer-box mt-5 pt-5 pb-4">
-        <div class="container inner-glass shadow p-4" id="main_box">
-        <div class="mb-3">
-          <h2 class="fw-bold" style="color: #232946;">Reports</h2>
-          <small style="color: #989797;">Home /</small>
-          <small style="color: #444444;">Dash</small>
-        </div>
-        </div>
-    </div>
-</main>
+        <div class="container outer-box mt-5 pt-5 pb-4">
+            <div class="container inner-glass shadow p-4" id="main_box">
+                <div class="mb-4">
+                    <h2 class="fw-bold" style="color: #232946;">Reports</h2>
+                    <small style="color: #989797;">Manage /</small>
+                    <small style="color: #444444;">Reports</small>
+                </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+                {{-- Financial Report Section --}}
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white fw-semibold">
+                        Generate Financial Report
+                    </div>
+                    <div class="card-body">
+                        <form action="#" method="GET">
+                            <div class="mb-3">
+                                <label class="form-label">Report Type</label>
+                                <select class="form-select" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="all">All Fines Data</option>
+                                    <option value="by_org">By Organization (from student_list)</option>
+                                </select>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Organization</label>
+                                    <select class="form-select">
+                                        <option value="">All</option>
+                                        <option value="ITS">ITS</option>
+                                        <option value="PRAXIS">PRAXIS</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Program</label>
+                                    <select class="form-select">
+                                        <option value="">All</option>
+                                        <option value="IT">Information Technology</option>
+                                        <option value="IS">Information Systems</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 text-end">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fa-solid fa-file-export"></i> Generate Report
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {{-- Student Roster Section --}}
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white fw-semibold">
+                        Generate Student Roster
+                    </div>
+                    <div class="card-body">
+                        <form action="#" method="GET">
+                            <div class="mb-3">
+                                <label class="form-label">Roster Type</label>
+                                <select class="form-select" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="all">All Students</option>
+                                    <option value="filtered">By Organization and Program</option>
+                                </select>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Organization</label>
+                                    <select class="form-select">
+                                        <option value="">All</option>
+                                        <option value="ITS">ITS</option>
+                                        <option value="PRAXIS">PRAXIS</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Program</label>
+                                    <select class="form-select">
+                                        <option value="">All</option>
+                                        <option value="IT">Information Technology</option>
+                                        <option value="IS">Information Systems</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Block</label>
+                                    <select class="form-select">
+                                        <option value="">All</option>
+                                        <option value="Block A">Block A</option>
+                                        <option value="Block B">Block B</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-users-viewfinder"></i> Generate Roster
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
