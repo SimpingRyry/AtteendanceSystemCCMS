@@ -60,6 +60,10 @@ Route::get('/device_page', function () {
     return view('device_page');
 });
 
+Route::get('/reports', function () {
+    return view('reports');
+});
+
 
 Route::get('/student', [StudentController::class, 'index']);
 
