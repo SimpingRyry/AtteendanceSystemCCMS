@@ -74,8 +74,8 @@
             <option>{{ $year }}</option>
             @endforeach
             @else
-            <option>Enrolled</option>
-            <option>Unenrolled</option>
+            <option>Registered</option>
+            <option>Unregistered</option>
             @endif
           </select>
           @endif
@@ -159,17 +159,24 @@
               <tbody>
                 @foreach($students as $student)
                 <tr>
-                  <td>{{ $student->no }}</td>
-                  <td>{{ $student->id_number }}</td>
-                  <td>{{ $student->name }}</td>
-                  <td>{{ $student->gender }}</td>
-                  <td>{{ $student->course }}</td>
-                  <td>{{ $student->year }}</td>
-                  <td>{{ $student->units }}</td>
-                  <td>{{ $student->section }}</td>
-                  <td>{{ $student->contact_no }}</td>
-                  <td>{{ $student->birth_date }}</td>
-                  <td>{{ $student->address }}</td>
+    <td>{{ $student->no }}</td>
+    <td>{{ $student->id_number }}</td>
+    <td>{{ $student->name }}</td>
+    <td>{{ $student->gender }}</td>
+    <td>{{ $student->course }}</td>
+    <td>{{ $student->year }}</td>
+    <td>{{ $student->units }}</td>
+    <td>{{ $student->section }}</td>
+    <td>{{ $student->contact_no }}</td>
+    <td>{{ $student->birth_date }}</td>
+    <td>{{ $student->address }}</td>
+    <td>
+      @if($student->status === 'Unregistered')
+        <!-- Button to trigger modal -->
+        <button type="button" class="btn btn-primary register-btn" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
+        @else
+        <span class="badge bg-success">Registered</span>
+      @endif
 
                   <!-- Add other columns as needed -->
                 </tr>
@@ -302,6 +309,131 @@
       </div>
 
 
+      <div class="modal fade" id="registerStudentModal" tabindex="-1" aria-labelledby="registerStudentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="registerStudentModalLabel" style="color: #5CE1E6;">Student Registration</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="registerStudentForm" action="{{ route('register') }}" method="POST" enctype="multipart/form-data">
+          @csrf
+
+          <!-- Student Details -->
+          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Student Details</h4>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label>Student ID</label>
+              <input type="text" name="student_id" id="modalStudentId" class="form-control" value="${data.id_number}" readonly>
+            </div>
+            <div class="col-md-6">
+              <label>Name</label>
+              <input type="text" name="sname" id="modalStudentName" class="form-control" value="${data.name}" readonly>
+            </div>
+            <div class="col-md-6">
+              <label>Gender</label>
+              <input type="text" class="form-control" id="modalGender" value="${data.gender}" readonly>
+            </div>
+            <div class="col-md-6">
+              <label>Course</label>
+              <input type="text" class="form-control" id="modalCourse" name="course" value="${data.course}" readonly>
+            </div>
+            <div class="col-md-6">
+              <label>Year</label>
+              <input type="text" class="form-control" id="modalYear" value="${data.year}" readonly>
+            </div>
+            <div class="col-md-6">
+              <label>Section</label>
+              <input type="text" class="form-control" id="modalSection" value="${data.section}" readonly>
+            </div>
+            <div class="col-md-6">
+              <label>Birth Date</label>
+              <input type="text" class="form-control" id="modalBirthDate" value="${data.birth_date}" readonly>
+            </div>
+            <div class="col-md-6">
+              <label>Fingerprint ID</label>
+              <input type="text" name="fingerprint" class="form-control" id="fingerprintId" placeholder="Fingerprint ID">
+            </div>
+          </div>
+
+          <!-- Contact Details -->
+          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Contact Details</h4>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label>Contact Number</label>
+              <input type="text" class="form-control" id="modalContactNumber" value="${data.contact_no}" readonly>
+            </div>
+            <div class="col-12">
+              <label>Address</label>
+              <input type="text" class="form-control" id="modalAddress" value="${data.address}" readonly>
+            </div>
+            <div class="col-12">
+              <label>Email</label>
+              <input type="email" name="email" class="form-control" placeholder="Enter Email" required>
+            </div>
+          </div>
+
+          <!-- Role/Position -->
+          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Role / Position</h4>
+          <div class="mb-4">
+            <label for="roleSelect">Select Role</label>
+            <select name="role" id="roleSelect" class="form-select" required>
+              @if(auth()->user()->org == 'ITS')
+                <option value="">-- Select Role --</option>
+                <option value="IT Support">IT Support</option>
+                <option value="Network Admin">Network Admin</option>
+                <option value="System Analyst">System Analyst</option>
+              @elseif(auth()->user()->org == 'PRAXIS')
+                <option value="">-- Select Role --</option>
+                <option value="Research Assistant">Research Assistant</option>
+                <option value="Project Coordinator">Project Coordinator</option>
+                <option value="Field Agent">Field Agent</option>
+              @elseif(auth()->user()->org == 'SG')
+                <option value="">-- Select Role --</option>
+                <option value="Security Guard">Security Guard</option>
+                <option value="Supervisor">Supervisor</option>
+                <option value="Admin Officer">Admin Officer</option>
+              @else
+                <option value="">No roles available for this organization</option>
+              @endif
+            </select>
+          </div>
+
+          <!-- Profile Picture -->
+          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Profile Picture</h4>
+          <div class="mb-4">
+            <div class="d-flex gap-2 mb-3">
+              <button type="button" class="btn btn-outline-primary" onclick="showUpload()">Upload Image</button>
+              <button type="button" class="btn btn-outline-secondary" onclick="showCamera()">Capture Image</button>
+            </div>
+
+            <!-- Upload Input -->
+            <input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
+
+            <!-- Camera Stream -->
+            <div id="cameraContainer" style="display: none; text-align: center;">
+              <video id="cameraStream" width="100%" height="300" autoplay playsinline style="border-radius: 8px; border: 1px solid #ccc;"></video>
+              <button type="button" class="btn btn-success mt-2" onclick="capturePhoto()">Take Picture</button>
+            </div>
+
+            <!-- Captured Image Preview -->
+            <img id="capturedImage" class="img-fluid mt-3" style="display: none; max-height: 300px;" />
+            <input type="hidden" name="captured_image" id="capturedImageInput">
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" form="registerStudentForm" class="btn btn-success">Submit Registration</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
     </div>
   </main>
 
@@ -359,5 +491,92 @@
     return true;
   }
 </script>
+
+<script>
+  function showUpload() {
+    document.getElementById('uploadInput').style.display = 'block';
+    document.getElementById('cameraContainer').style.display = 'none';
+    document.getElementById('capturedImage').style.display = 'none';
+    stopCamera();
+  }
+
+  function showCamera() {
+    document.getElementById('uploadInput').style.display = 'none';
+    document.getElementById('cameraContainer').style.display = 'block';
+    document.getElementById('capturedImage').style.display = 'none';
+    startCamera();
+  }
+
+  function previewUploadImage(event) {
+    const reader = new FileReader();
+    reader.onload = function () {
+      const img = document.getElementById('capturedImage');
+      img.src = reader.result;
+      img.style.display = 'block';
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  }
+
+  function startCamera() {
+    const video = document.getElementById('cameraStream');
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        alert("Camera access denied: " + err);
+      });
+  }
+
+  function stopCamera() {
+    const video = document.getElementById('cameraStream');
+    const stream = video.srcObject;
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    video.srcObject = null;
+  }
+
+  function capturePhoto() {
+    const canvas = document.getElementById('canvas');
+    const video = document.getElementById('cameraStream');
+    const image = document.getElementById('capturedImage');
+    const input = document.getElementById('capturedImageInput');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+
+    const imageData = canvas.toDataURL('image/png');
+    image.src = imageData;
+    image.style.display = 'block';
+    input.value = imageData;
+  }
+</script>
+
+<script>
+function fillModalData(button) {
+    // Find the row (`<tr>`) that contains the clicked button
+    var row = button.closest('tr');
+
+    // Get all cells (`<td>`) in that row
+    var cells = row.getElementsByTagName('td');
+
+    // Now fill the modal inputs
+    document.getElementById('modalStudentId').value = cells[1].innerText.trim();
+    document.getElementById('modalStudentName').value = cells[2].innerText.trim();
+    document.getElementById('modalGender').value = cells[3].innerText.trim();
+    document.getElementById('modalCourse').value = cells[4].innerText.trim();
+    document.getElementById('modalYear').value = cells[5].innerText.trim();
+    document.getElementById('modalSection').value = cells[6].innerText.trim();
+    document.getElementById('modalContactNumber').value = cells[7].innerText.trim();
+    document.getElementById('modalBirthDate').value = cells[8].innerText.trim();
+    document.getElementById('modalAddress').value = cells[9].innerText.trim();
+}
+</script>
+
+
+
+
 
 </html>

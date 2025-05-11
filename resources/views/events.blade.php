@@ -15,6 +15,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
 
 
     <!-- Kalendaryo -->
@@ -324,16 +325,47 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'GET',
             failure: function() {
                 alert('there was an error while fetching events!');
-            },
-            eventRender: function(info) {
-                if (info.event.extendedProps.course === 'BSIS') {
-                    info.el.style.backgroundColor = '#8A2BE2'; // Violet
-                    info.el.style.borderColor = '#8A2BE2';
-                } else {
-                    info.el.style.backgroundColor = '#007bff'; // Blue
-                    info.el.style.borderColor = '#007bff';
-                }
             }
+        },
+        eventDidMount: function(info) {
+            // Color coding by course
+            if (info.event.extendedProps.course === 'BSIS') {
+                info.el.style.backgroundColor = '#8A2BE2';
+                info.el.style.borderColor = '#8A2BE2';
+            } else {
+                info.el.style.backgroundColor = '#007bff';
+                info.el.style.borderColor = '#007bff';
+            }
+
+            // Create the icon cloud
+            const iconContainer = document.createElement('div');
+            iconContainer.className = 'event-icons';
+            iconContainer.innerHTML = `
+                <i class="fas fa-edit" title="Edit"></i>
+                <i class="fas fa-eye" title="View"></i>
+                <i class="fas fa-trash" title="Delete"></i>
+            `;
+
+            info.el.appendChild(iconContainer);
+
+            // Show/hide logic
+            let hideTimeout;
+
+            function showIcons() {
+                clearTimeout(hideTimeout);
+                iconContainer.style.display = 'block';
+            }
+
+            function hideIcons() {
+                hideTimeout = setTimeout(() => {
+                    iconContainer.style.display = 'none';
+                }, 200);
+            }
+
+            info.el.addEventListener('mouseenter', showIcons);
+            info.el.addEventListener('mouseleave', hideIcons);
+            iconContainer.addEventListener('mouseenter', showIcons);
+            iconContainer.addEventListener('mouseleave', hideIcons);
         },
         eventTimeFormat: { 
             hour: '2-digit',
@@ -353,39 +385,31 @@ document.addEventListener('DOMContentLoaded', function() {
         eventClick: function(info) {
             info.jsEvent.preventDefault();
 
-            // Access event details
-            document.getElementById('modalEventName').innerText = info.event.title;  // Event name
-            document.getElementById('modalEventVenue').innerText = info.event.extendedProps.venue;  // Venue
-            document.getElementById('modalEventDate').innerText = info.event.start.toLocaleDateString();  // Event date
-            document.getElementById('modalEventTimeouts').innerText = info.event.extendedProps.timeout;  // Timeout
-            document.getElementById('modalEventTimes').innerText = info.event.extendedProps.times.join(' - ');  // Event times
-            document.getElementById('modalEventCourse').innerText = info.event.extendedProps.course;  // Course
+            document.getElementById('modalEventName').innerText = info.event.title;
+            document.getElementById('modalEventVenue').innerText = info.event.extendedProps.venue;
+            document.getElementById('modalEventDate').innerText = info.event.start.toLocaleDateString();
+            document.getElementById('modalEventTimeouts').innerText = info.event.extendedProps.timeout;
+            document.getElementById('modalEventTimes').innerText = info.event.extendedProps.times.join(' - ');
+            document.getElementById('modalEventCourse').innerText = info.event.extendedProps.course;
 
-            // Enable/Disable the button based on the event date
             var currentDate = new Date();
-            var eventDate = info.event.start; // Event start date
+            var eventDate = new Date(info.event.start);
+
             var generateAttendanceBtn = document.getElementById('generateAttendanceBtn');
             var attendanceNote = document.getElementById('attendanceNote');
 
-            // Log the current date and event date for debugging
-            console.log("Current Date: ", currentDate);
-            console.log("Event Date: ", eventDate);
+            currentDate.setHours(0, 0, 0, 0);
+            eventDate.setHours(0, 0, 0, 0);
 
-            // Set time of both dates to midnight for comparison (ignores time)
-            eventDate.setHours(0, 0, 0, 0); // Set time to midnight for comparison
-            currentDate.setHours(0, 0, 0, 0); // Set time to midnight for comparison
-
-            // Enable the button if the event date is today or in the future
             if (eventDate >= currentDate) {
-                generateAttendanceBtn.disabled = false;   // Enable button
-                attendanceNote.style.display = 'none';     // Hide note
+                generateAttendanceBtn.disabled = false;
+                attendanceNote.style.display = 'none';
             } else {
-                generateAttendanceBtn.disabled = true;    // Disable button
-                attendanceNote.style.display = 'block';   // Show note
-                attendanceNote.innerText = `Available on ${eventDate.toLocaleDateString()}`;  // Show availability note
+                generateAttendanceBtn.disabled = true;
+                attendanceNote.style.display = 'block';
+                attendanceNote.innerText = `Available on ${eventDate.toLocaleDateString()}`;
             }
 
-            // Show the modal
             var eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
             eventModal.show();
         },
@@ -395,6 +419,40 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <style>
+
+.fc-event {
+    position: relative;
+}
+
+.event-icons {
+    position: absolute;
+    top: -45px;
+    right: 0;
+    display: none;
+    background-color: rgba(0, 0, 0, 0.75);
+    padding: 6px 10px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    white-space: nowrap;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.event-icons i {
+    color: white;
+    margin: 0 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: transform 0.2s;
+}
+
+.event-icons i:hover {
+    transform: scale(1.2);
+}
+
+.fc-event:hover .event-icons {
+    display: block;
+}
     /* General Calendar Card Look */
     #calendar {
         background: white;
