@@ -32,6 +32,10 @@ Route::get('/student', function () {
 Route::get('/dashboard_page', function () {
     return view('dashboard_page');
 });
+
+Route::get('/student_dashboard', function () {
+    return view('student_dashboard');
+});
 Route::get('/template', function () {
     return view('schedTemplate');
 });
