@@ -38,6 +38,9 @@ Route::get('/template', function () {
 Route::get('/payment_page', function () {
     return view('payment_page');
 });
+Route::get('/payment', function () {
+    return view('payment_page2');
+});
 
 Route::get('/accounts', [AccountsController::class, 'show']);
 

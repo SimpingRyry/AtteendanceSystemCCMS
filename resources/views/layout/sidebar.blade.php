@@ -78,7 +78,7 @@
                 </li>
 
                 <li>
-                    <a href="{{ url('payment_page') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('payment_page') ? 'active-link' : '' }}">
+                    <a href="{{ url('payment') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('payment') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/payment_ico.png') }}" alt="Payment" class="sidebar-icon">
                         <span>Payment</span>
                     </a>
