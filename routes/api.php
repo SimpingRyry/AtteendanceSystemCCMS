@@ -1,8 +1,10 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,4 +35,39 @@ Route::get('/register', function () {
     } else {
         return response()->json(['error' => 'ID not found'], 404);
     }
+});
+
+Route::post('/fingerprint-upload', function (Request $request) {
+    Log::info('Fingerprint upload called');
+    Log::info('Request Data:', $request->all());
+    Log::info('Uploaded Files:', $request->allFiles());
+
+    $request->validate([
+        'user_id' => 'required|integer',
+        'image' => 'required|image|mimes:jpg,jpeg,png|max:2048'
+    ]);
+
+    $id = $request->input('user_id');
+    $image = $request->file('image');
+
+    $filename = 'fingerprints/user_' . $id . '_' . time() . '.' . $image->getClientOriginalExtension();
+    Log::info('Saved fingerprint image as: ' . $filename);
+
+    $path = $image->storeAs('public/fingerprints', basename($filename));
+    $url = Storage::url($path);
+
+    // Store the fingerprint image path temporarily in cache
+    Cache::put('latest_fingerprint_image', $url, now()->addMinutes(5));
+
+    // Log what was stored in cache
+    Log::info('Cached fingerprint image URL:', ['url' => Cache::get('latest_fingerprint_image')]);
+
+    return response()->json(['message' => 'Fingerprint received', 'url' => $url]);
+});
+Route::get('/fingerprint/latest', function () {
+    Log::info('Cached fingerprint image URL2:', ['url' => Cache::get('latest_fingerprint_image')]);
+
+    return response()->json([
+        'url' => Cache::get('latest_fingerprint_image')
+    ]);
 });

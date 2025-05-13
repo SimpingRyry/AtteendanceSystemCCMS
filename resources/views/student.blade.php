@@ -18,6 +18,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
 
@@ -353,9 +354,14 @@
               <input type="text" class="form-control" id="modalBirthDate" value="${data.birth_date}" readonly>
             </div>
             <div class="col-md-6">
-              <label>Fingerprint ID</label>
-              <input type="text" name="fingerprint" class="form-control" id="fingerprintId" placeholder="Fingerprint ID">
-            </div>
+  <label>Fingerprint Scan</label>
+  <div style="border: 1px solid #ccc; border-radius: 8px; width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; background-color: #f9f9f9;">
+    <!-- Fingerprint Image Preview -->
+    <img id="fingerprintImage" src="" alt="Fingerprint will appear here" style="max-height: 100%; max-width: 100%; display: none;">
+  </div>
+  <!-- Hidden input to hold fingerprint data (if needed) -->
+  <input type="hidden" name="fingerprint_data" id="fingerprintData">
+</div>
           </div>
 
           <!-- Contact Details -->
@@ -434,6 +440,7 @@
 </div>
 
 
+
     </div>
   </main>
 
@@ -444,12 +451,58 @@
     integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 
 </body>
 
+<script>
+  let fingerprintPolling = null;
 
+  function updateFingerprintImage() {
+    console.log('updateFingerprintImage function is called');
+    axios.get('/api/fingerprint/latest')
+      .then(response => {
+        if (response.data && response.data.url) {
+          const url = response.data.url;
+           console.log(url);
+          const modal = document.getElementById("registerStudentModal");
 
+          if (modal && modal.classList.contains("show")) {
+            const imgEl = document.getElementById("fingerprintImage");
+            imgEl.src = url; // Add timestamp to prevent caching
+            imgEl.style.display = 'block';
+
+            // Optionally store the URL or related data in a hidden field
+            document.getElementById('fingerprintData').value = url;
+          }
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching fingerprint image:", error);
+      });
+  }
+
+  function startFingerprintPolling() {
+    updateFingerprintImage(); // Run once immediately
+    fingerprintPolling = setInterval(updateFingerprintImage, 2000); // Continue every 2 seconds
+  }
+
+  function stopFingerprintPolling() {
+    clearInterval(fingerprintPolling);
+    fingerprintPolling = null;
+  }
+
+  // jQuery version to match the Bootstrap modal event usage in the first script
+  $('#registerStudentModal').on('shown.bs.modal', function () {
+    console.log('Modal is shown');
+    startFingerprintPolling();
+  });
+
+  $('#registerStudentModal').on('hidden.bs.modal', function () {
+    stopFingerprintPolling();
+  });
+</script>
 
 
 <script>
@@ -568,10 +621,10 @@ function fillModalData(button) {
     document.getElementById('modalGender').value = cells[3].innerText.trim();
     document.getElementById('modalCourse').value = cells[4].innerText.trim();
     document.getElementById('modalYear').value = cells[5].innerText.trim();
-    document.getElementById('modalSection').value = cells[6].innerText.trim();
-    document.getElementById('modalContactNumber').value = cells[7].innerText.trim();
-    document.getElementById('modalBirthDate').value = cells[8].innerText.trim();
-    document.getElementById('modalAddress').value = cells[9].innerText.trim();
+    document.getElementById('modalSection').value = cells[7].innerText.trim();
+    document.getElementById('modalContactNumber').value = cells[8].innerText.trim();
+    document.getElementById('modalBirthDate').value = cells[9].innerText.trim();
+    document.getElementById('modalAddress').value = cells[10].innerText.trim();
 }
 </script>
 
