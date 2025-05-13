@@ -98,6 +98,13 @@
                         <span>Device</span>
                     </a>
                 </li>
+                <li>
+    <a href="{{ url('config') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('config') ? 'active-link' : '' }}">
+        <img src="{{ asset('images/config.png') }}" alt="Configure" class="sidebar-icon">
+        <span>Configure</span>
+    </a>
+</li>
+
 
              
 

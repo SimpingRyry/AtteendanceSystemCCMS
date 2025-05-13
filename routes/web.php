@@ -10,7 +10,7 @@ use App\Http\Controllers\AdviserController;
 use App\Http\Controllers\OrgListController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
-
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\ScheduleController;
 
@@ -63,8 +63,9 @@ Route::get('/device_page', function () {
 Route::get('/reports', function () {
     return view('reports');
 });
-
-
+Route::get('/config', [SettingsController::class, 'index'])->name('settings.index');
+Route::post('/config/fines', [SettingsController::class, 'updateFines'])->name('settings.updateFines');
+Route::post('/config/academic', [SettingsController::class, 'updateAcademic'])->name('settings.updateAcademicYear');
 Route::get('/student', [StudentController::class, 'index']);
 
 Route::get('/manage_orgs_page', [App\Http\Controllers\OrgListController::class, 'index'])->name('orgs.index');
