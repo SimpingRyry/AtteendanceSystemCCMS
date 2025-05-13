@@ -170,12 +170,17 @@
                     <hr class="divider">
                 </li>
 
-                <li>
-                    <a href="#" class="nav-link px-3 d-flex text-white align-items-center">
-                        <img src="{{ asset('images/logout_ico.png') }}" alt="Log-out" class="sidebar-icon">
-                        <span>Log-out</span>
-                    </a>
-                </li>
+                <<li>
+    <a href="#" class="nav-link px-3 d-flex text-white align-items-center"
+       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        <img src="{{ asset('images/logout_ico.png') }}" alt="Log-out" class="sidebar-icon">
+        <span>Log-out</span>
+    </a>
+
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+        @csrf
+    </form>
+</li>
 
             </ul>
         </nav>
