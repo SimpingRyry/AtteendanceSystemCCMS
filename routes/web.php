@@ -13,6 +13,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
