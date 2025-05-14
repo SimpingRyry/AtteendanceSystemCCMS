@@ -2,10 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class FinanceData extends Model
 {
-    use HasFactory;
+    protected $table = 'finance_data';
+
+    public $timestamps = false;
+
+    protected $fillable = [
+        'student_id',
+        'org',
+        'program',
+        'amount',
+    ];
 }
