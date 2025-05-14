@@ -18,6 +18,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
   
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
 
@@ -36,191 +37,180 @@
 
   <!------------------------------------------------------ MAIN_BOX -------------------------------------------------------->
   <main>
-    <div class="container outer-box mt-5 pt-5 pb-4 shadow">
-      <div class="container-fluid">
-        <!-- Heading -->
-        <div class="mb-3">
-          <h2 class="fw-bold" style="color: #232946;">Students</h2>
-          <small style="color: #989797;">Manage /</small>
-          <small style="color: #444444;">Student</small>
-        </div>
-
-        <!-- Main Card -->
-        <div class="card shadow-sm p-4">
-  <div class="row g-3">
-    @foreach (['Organization', 'Block', 'Year Level', 'Status'] as $label)
-    <div class="col-md">
-      <div class="card h-100 shadow-sm">
-        <div class="card-body">
-          <h6 class="card-title">{{ $label }}</h6>
-          @if ($label == 'Organization')
-          <select class="form-select">
-            <option selected disabled>Select Organization</option>
-            <option>ITS</option>
-            <option>Praxis</option>
-          </select>
-          @else
-          @if ($label == 'Course')
-          <input type="text" class="form-control" placeholder="Enter Course">
-          @else
-          <select class="form-select">
-            <option selected disabled>Select {{ $label }}</option>
-            @if ($label == 'Block')
-            @foreach (['A', 'B', 'C', 'D'] as $option)
-            <option>{{ $option }}</option>
-            @endforeach
-            @elseif ($label == 'Year Level')
-            @foreach (range(1, 4) as $year)
-            <option>{{ $year }}</option>
-            @endforeach
-            @else
-            <option>Registered</option>
-            <option>Unregistered</option>
-            @endif
-          </select>
-          @endif
-          @endif
-        </div>
+  <div class="container outer-box mt-5 pt-5 pb-4 shadow">
+    <div class="container-fluid">
+      <!-- Heading -->
+      <div class="mb-3">
+        <h2 class="fw-bold" style="color: #232946;">Students</h2>
+        <small style="color: #989797;">Manage /</small>
+        <small style="color: #444444;">Student</small>
       </div>
-    </div>
-    @endforeach
-  </div>
 
-  <div class="row mb-4 mt-4 align-items-center justify-content-between">
-  <!-- Import Button Left -->
-  <div class="col-md-6 d-flex">
-    <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadCSVModal" >
-      <i class="bi bi-plus-lg me-2"></i> Import CSV
-    </button>
-  </div>
+      <!-- Button Area (Upper Right) -->
+      <div class="d-flex justify-content-end mb-3 gap-2">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadCSVModal">
+          <i class="bi bi-upload me-2"></i> Import CSV
+        </button>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#generateScheduleModal">
+          <i class="bi bi-calendar-check me-2"></i> Generate Schedule
+        </button>
+      </div>
 
-  <!-- Search Right -->
-  <div class="col-md-6 d-flex justify-content-md-end mt-6 mt-md-0">
-    <div class="d-flex" style="gap: 8px; max-width: 350px; margin-top: 15px;">
-      <input type="text" class="form-control" placeholder="Enter search...">
-      <button class="btn btn-success">Search</button>
-    </div>
-  </div>
-</div>
-
-<!-- Upload Modal -->
-<div class="modal fade" id="uploadCSVModal" tabindex="-1" aria-labelledby="uploadCSVModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="csvForm" action="{{ route('import') }}" method="post" enctype="multipart/form-data" onsubmit="return validateCSV();">
-        @csrf
-        <div class="modal-header">
-          <h5 class="modal-title" id="uploadCSVModalLabel">Upload CSV File</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="form-text text-muted mb-2">
-            Upload a .csv file
-          </div>
-          <div class="input-group input-group-sm">
-            <input type="file" class="form-control" name="importFile" accept=".csv" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button class="btn btn-primary" type="submit">Upload</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>     
-
-          <!-- Student List -->
-          <div class="card shadow-sm p-4 mt-2">
-            <h5 class="mb-3 fw-bold" style="color: #232946;">Student List</h5>
-
-            <!-- Displaying students list -->
-            @if($students->isEmpty())
-            <p>No students found.</p>
-            @else
-            <table class="table table-bordered">
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>Student ID</th>
-                  <th>Name</th>
-                  <th>Gender</th>
-                  <th>Course</th>
-                  <th>Year</th>
-                  <th>Units</th>
-                  <th>Section</th>
-                  <th>Contact Number</th>
-                  <th>Birth Date</th>
-                  <th>Address</th>
-
-                  <!-- Add other columns as needed -->
-                </tr>
-              </thead>
-              <tbody>
-                @foreach($students as $student)
-                <tr>
-    <td>{{ $student->no }}</td>
-    <td>{{ $student->id_number }}</td>
-    <td>{{ $student->name }}</td>
-    <td>{{ $student->gender }}</td>
-    <td>{{ $student->course }}</td>
-    <td>{{ $student->year }}</td>
-    <td>{{ $student->units }}</td>
-    <td>{{ $student->section }}</td>
-    <td>{{ $student->contact_no }}</td>
-    <td>{{ $student->birth_date }}</td>
-    <td>{{ $student->address }}</td>
-    <td>
-      @if($student->status === 'Unregistered')
-        <!-- Button to trigger modal -->
-        <button type="button" class="btn btn-primary register-btn" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
-        @else
-        <span class="badge bg-success">Registered</span>
-      @endif
-
-                  <!-- Add other columns as needed -->
-                </tr>
-                @endforeach
-              </tbody>
-            </table>
-            @endif
-
-            <!-- Pagination -->
-            <div class="d-flex justify-content-end mt-3">
-              <nav>
-                <ul class="pagination">
-                  <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Previous">
-                      <span aria-hidden="true">&laquo;</span>
-                    </a>
-                  </li>
-                  <li class="page-item"><a class="page-link" href="#">1</a></li>
-                  <li class="page-item"><a class="page-link" href="#">2</a></li>
-                  <li class="page-item"><a class="page-link" href="#">3</a></li>
-                  <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
-                      <span aria-hidden="true">&raquo;</span>
-                    </a>
-                  </li>
-                </ul>
-              </nav>
+      <!-- Main Card -->
+      <div class="card shadow-sm p-4">
+        <div class="row g-3">
+          @foreach (['Organization', 'Block', 'Year Level', 'Status'] as $label)
+          <div class="col-md">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h6 class="card-title">{{ $label }}</h6>
+                @if ($label == 'Organization')
+                <select class="form-select">
+                  <option selected disabled>Select Organization</option>
+                  <option>ITS</option>
+                  <option>Praxis</option>
+                </select>
+                @else
+                @if ($label == 'Course')
+                <input type="text" class="form-control" placeholder="Enter Course">
+                @else
+                <select class="form-select">
+                  <option selected disabled>Select {{ $label }}</option>
+                  @if ($label == 'Block')
+                  @foreach (['A', 'B', 'C', 'D'] as $option)
+                  <option>{{ $option }}</option>
+                  @endforeach
+                  @elseif ($label == 'Year Level')
+                  @foreach (range(1, 4) as $year)
+                  <option>{{ $year }}</option>
+                  @endforeach
+                  @else
+                  <option>Registered</option>
+                  <option>Unregistered</option>
+                  @endif
+                </select>
+                @endif
+                @endif
+              </div>
             </div>
-
-            <!-- Generate Schedule Button -->
-
           </div>
-          <div class="text-center mt-4">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generateScheduleModal">
-              Generate Schedule
-            </button>
+          @endforeach
+        </div>
+
+        <div class="row mb-4 mt-4 align-items-center justify-content-between">
+          <!-- Search Right -->
+          <div class="col-md-6 d-flex justify-content-md-end mt-6 mt-md-0 ms-auto">
+            <div class="d-flex" style="gap: 8px; max-width: 350px; margin-top: 15px;">
+              <input type="text" class="form-control" placeholder="Enter search...">
+              <button class="btn btn-success">Search</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload Modal -->
+        <div class="modal fade" id="uploadCSVModal" tabindex="-1" aria-labelledby="uploadCSVModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <form id="csvForm" action="{{ route('import') }}" method="post" enctype="multipart/form-data" onsubmit="return validateCSV();">
+                @csrf
+                <div class="modal-header">
+                  <h5 class="modal-title" id="uploadCSVModalLabel">Upload CSV File</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="form-text text-muted mb-2">
+                    Upload a .csv file
+                  </div>
+                  <div class="input-group input-group-sm">
+                    <input type="file" class="form-control" name="importFile" accept=".csv" required>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button class="btn btn-primary" type="submit">Upload</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Student List -->
+        <div class="card shadow-sm p-4 mt-2">
+          <h5 class="mb-3 fw-bold" style="color: #232946;">Student List</h5>
+
+          @if($students->isEmpty())
+          <p>No students found.</p>
+          @else
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Course</th>
+                <th>Year</th>
+                <th>Units</th>
+                <th>Section</th>
+                <th>Contact Number</th>
+                <th>Birth Date</th>
+                <th>Address</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($students as $student)
+              <tr>
+                <td>{{ $student->no }}</td>
+                <td>{{ $student->id_number }}</td>
+                <td>{{ $student->name }}</td>
+                <td>{{ $student->gender }}</td>
+                <td>{{ $student->course }}</td>
+                <td>{{ $student->year }}</td>
+                <td>{{ $student->units }}</td>
+                <td>{{ $student->section }}</td>
+                <td>{{ $student->contact_no }}</td>
+                <td>{{ $student->birth_date }}</td>
+                <td>{{ $student->address }}</td>
+                <td>
+                  @if($student->status === 'Unregistered')
+                  <button type="button" class="btn btn-primary register-btn" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
+                  @else
+                  <span class="badge bg-success">Registered</span>
+                  @endif
+                </td>
+              </tr>
+              @endforeach
+            </tbody>
+          </table>
+          @endif
+
+          <!-- Pagination -->
+          <div class="d-flex justify-content-end mt-3">
+            <nav>
+              <ul class="pagination">
+                <li class="page-item">
+                  <a class="page-link" href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                  <a class="page-link" href="#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
       </div>
 
+      <!-- Generate Schedule Modal -->
       <div class="modal fade" id="generateScheduleModal" tabindex="-1" aria-labelledby="generateScheduleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
-
             <div class="modal-header">
               <h5 class="modal-title" id="generateScheduleModalLabel">Generate Schedule</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -279,7 +269,6 @@
                   <input type="time" class="form-control" name="endTime" id="endTime" required>
                 </div>
 
-                <!-- Stretch Submit Button -->
                 <div class="d-grid">
                   <button type="submit" class="btn btn-success">Generate Schedule</button>
                 </div>
@@ -289,154 +278,9 @@
           </div>
         </div>
       </div>
-
-
-      <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content text-center p-4">
-            <div class="modal-body">
-              <div class="mb-3">
-                <!-- Check Animation -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="green" class="bi bi-check-circle-fill animate__animated animate__bounceIn" viewBox="0 0 16 16">
-                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.07 0l4-4a.75.75 0 1 0-1.06-1.06L7.5 9.44 5.53 7.47a.75.75 0 0 0-1.06 1.06l2.5 2.5z" />
-                </svg>
-              </div>
-              <h5 class="modal-title mb-2" id="successModalLabel">Schedule Generated Successfully!</h5>
-              <button type="button" class="btn btn-success mt-3" data-bs-dismiss="modal">OK</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      <div class="modal fade" id="registerStudentModal" tabindex="-1" aria-labelledby="registerStudentModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="registerStudentModalLabel" style="color: #5CE1E6;">Student Registration</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body">
-        <form id="registerStudentForm" action="{{ route('register') }}" method="POST" enctype="multipart/form-data">
-          @csrf
-
-          <!-- Student Details -->
-          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Student Details</h4>
-          <div class="row g-3 mb-4">
-            <div class="col-md-6">
-              <label>Student ID</label>
-              <input type="text" name="student_id" id="modalStudentId" class="form-control" value="${data.id_number}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label>Name</label>
-              <input type="text" name="sname" id="modalStudentName" class="form-control" value="${data.name}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label>Gender</label>
-              <input type="text" class="form-control" id="modalGender" value="${data.gender}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label>Course</label>
-              <input type="text" class="form-control" id="modalCourse" name="course" value="${data.course}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label>Year</label>
-              <input type="text" class="form-control" id="modalYear" value="${data.year}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label>Section</label>
-              <input type="text" class="form-control" id="modalSection" value="${data.section}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label>Birth Date</label>
-              <input type="text" class="form-control" id="modalBirthDate" value="${data.birth_date}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label>Fingerprint ID</label>
-              <input type="text" name="fingerprint" class="form-control" id="fingerprintId" placeholder="Fingerprint ID">
-            </div>
-          </div>
-
-          <!-- Contact Details -->
-          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Contact Details</h4>
-          <div class="row g-3 mb-4">
-            <div class="col-md-6">
-              <label>Contact Number</label>
-              <input type="text" class="form-control" id="modalContactNumber" value="${data.contact_no}" readonly>
-            </div>
-            <div class="col-12">
-              <label>Address</label>
-              <input type="text" class="form-control" id="modalAddress" value="${data.address}" readonly>
-            </div>
-            <div class="col-12">
-              <label>Email</label>
-              <input type="email" name="email" class="form-control" placeholder="Enter Email" required>
-            </div>
-          </div>
-
-          <!-- Role/Position -->
-          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Role / Position</h4>
-          <div class="mb-4">
-            <label for="roleSelect">Select Role</label>
-            <select name="role" id="roleSelect" class="form-select" required>
-              @if(auth()->user()->org == 'ITS')
-                <option value="">-- Select Role --</option>
-                <option value="IT Support">IT Support</option>
-                <option value="Network Admin">Network Admin</option>
-                <option value="System Analyst">System Analyst</option>
-              @elseif(auth()->user()->org == 'PRAXIS')
-                <option value="">-- Select Role --</option>
-                <option value="Research Assistant">Research Assistant</option>
-                <option value="Project Coordinator">Project Coordinator</option>
-                <option value="Field Agent">Field Agent</option>
-              @elseif(auth()->user()->org == 'SG')
-                <option value="">-- Select Role --</option>
-                <option value="Security Guard">Security Guard</option>
-                <option value="Supervisor">Supervisor</option>
-                <option value="Admin Officer">Admin Officer</option>
-              @else
-                <option value="">No roles available for this organization</option>
-              @endif
-            </select>
-          </div>
-
-          <!-- Profile Picture -->
-          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Profile Picture</h4>
-          <div class="mb-4">
-            <div class="d-flex gap-2 mb-3">
-              <button type="button" class="btn btn-outline-primary" onclick="showUpload()">Upload Image</button>
-              <button type="button" class="btn btn-outline-secondary" onclick="showCamera()">Capture Image</button>
-            </div>
-
-            <!-- Upload Input -->
-            <input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
-
-            <!-- Camera Stream -->
-            <div id="cameraContainer" style="display: none; text-align: center;">
-              <video id="cameraStream" width="100%" height="300" autoplay playsinline style="border-radius: 8px; border: 1px solid #ccc;"></video>
-              <button type="button" class="btn btn-success mt-2" onclick="capturePhoto()">Take Picture</button>
-            </div>
-
-            <!-- Captured Image Preview -->
-            <img id="capturedImage" class="img-fluid mt-3" style="display: none; max-height: 300px;" />
-            <input type="hidden" name="captured_image" id="capturedImageInput">
-          </div>
-        </form>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" form="registerStudentForm" class="btn btn-success">Submit Registration</button>
-      </div>
     </div>
   </div>
-</div>
-
-
-    </div>
-  </main>
-
+</main>
 
 
   <!-- Bootstrap JS -->
@@ -444,12 +288,58 @@
     integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 
 </body>
 
+<script>
+  let fingerprintPolling = null;
 
+  function updateFingerprintImage() {
+    console.log('updateFingerprintImage function is called');
+    axios.get('/api/fingerprint/latest')
+      .then(response => {
+        if (response.data && response.data.url) {
+          const url = response.data.url;
+           console.log(url);
+          const modal = document.getElementById("registerStudentModal");
 
+          if (modal && modal.classList.contains("show")) {
+            const imgEl = document.getElementById("fingerprintImage");
+            imgEl.src = url; // Add timestamp to prevent caching
+            imgEl.style.display = 'block';
+
+            // Optionally store the URL or related data in a hidden field
+            document.getElementById('fingerprintData').value = url;
+          }
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching fingerprint image:", error);
+      });
+  }
+
+  function startFingerprintPolling() {
+    updateFingerprintImage(); // Run once immediately
+    fingerprintPolling = setInterval(updateFingerprintImage, 2000); // Continue every 2 seconds
+  }
+
+  function stopFingerprintPolling() {
+    clearInterval(fingerprintPolling);
+    fingerprintPolling = null;
+  }
+
+  // jQuery version to match the Bootstrap modal event usage in the first script
+  $('#registerStudentModal').on('shown.bs.modal', function () {
+    console.log('Modal is shown');
+    startFingerprintPolling();
+  });
+
+  $('#registerStudentModal').on('hidden.bs.modal', function () {
+    stopFingerprintPolling();
+  });
+</script>
 
 
 <script>
@@ -568,10 +458,10 @@ function fillModalData(button) {
     document.getElementById('modalGender').value = cells[3].innerText.trim();
     document.getElementById('modalCourse').value = cells[4].innerText.trim();
     document.getElementById('modalYear').value = cells[5].innerText.trim();
-    document.getElementById('modalSection').value = cells[6].innerText.trim();
-    document.getElementById('modalContactNumber').value = cells[7].innerText.trim();
-    document.getElementById('modalBirthDate').value = cells[8].innerText.trim();
-    document.getElementById('modalAddress').value = cells[9].innerText.trim();
+    document.getElementById('modalSection').value = cells[7].innerText.trim();
+    document.getElementById('modalContactNumber').value = cells[8].innerText.trim();
+    document.getElementById('modalBirthDate').value = cells[9].innerText.trim();
+    document.getElementById('modalAddress').value = cells[10].innerText.trim();
 }
 </script>
 

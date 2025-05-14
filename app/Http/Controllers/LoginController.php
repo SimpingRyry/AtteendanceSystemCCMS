@@ -14,8 +14,7 @@ class LoginController extends Controller
     // }
 
     
-
-    public function login(Request $request)
+ public function login(Request $request)
 {
     $request->validate([
         'email' => 'required|email',
@@ -30,11 +29,18 @@ class LoginController extends Controller
         // Optional: session vars
         session([
             'user_name' => $user->name,
-            'user_role' => $user->position,
+            'user_role' => $user->role,
             'user_img' => $user->image ?? 'default.png',
         ]);
 
-        return redirect()->intended('/dashboard_page'); // or /dash
+        // Check role and redirect accordingly
+        if ($user->role === 'member') {
+            return redirect()->intended('/student_dashboard');
+        } elseif ($user->role === 'super admin') {
+            return redirect()->intended(default: '/super_dashboard');
+        } else {
+            return redirect()->intended('/dashboard_page');
+        }
     }
 
     return back()->with('error', 'Invalid credentials.');
