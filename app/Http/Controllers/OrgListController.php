@@ -16,45 +16,45 @@ class OrgListController extends Controller
         return view('manage_orgs_page', compact('org_list')); // pass it to view
     }
     public function store(Request $request)
-{
-    // Validate the incoming request
-    $request->validate([
-        'org_name'   => 'required|string|max:255',
-        'description'=> 'required|string',
-        'org_logo'   => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        'bg_image'   => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        'name'       => 'required|string|max:255',
-        'email'      => 'required|string|email|max:255|unique:users,email',
-        'password'   => 'required|string|min:6',
-    ]);
-
-    // Handle organization logo upload
-    $orgLogoName = time() . '_logo.' . $request->org_logo->extension();
-    $request->org_logo->move(public_path('images'), $orgLogoName);
-
-    // Handle background image upload
-    $bgImageName = time() . '_bg.' . $request->bg_image->extension();
-    $request->bg_image->move(public_path('images'), $bgImageName);
-
-    // Create organization
-    $organization = OrgList::create([
-        'org_name'    => $request->org_name,
-        'description' => $request->description,
-        'org_logo'    => $orgLogoName,
-        'bg_image'    => $bgImageName,
-    ]);
-
-    // Create admin user for organization
-    $admin = User::create([
-        'name'     => $request->name,
-        'email'    => $request->email,
-        'password' => Hash::make($request->password),
-        'org'      => $organization->org_name, // Save org name in 'org' column of users table
-        'role'     => 'admin', // Optional: if you have a 'role' column
-    ]);
-
-    return redirect()->back()->with('success', 'Organization and Admin created successfully.');
-}
+    {
+        // Validate the incoming request
+        $request->validate([
+            'org_name'   => 'required|string|max:255',
+            'description'=> 'required|string',
+            'org_logo'   => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'bg_image'   => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'name'       => 'required|string|max:255',
+            'email'      => 'required|string|email|max:255|unique:users,email',
+            'password'   => 'required|string|min:6',
+        ]);
+    
+        // Handle organization logo upload
+        $orgLogoName = time() . '_logo.' . $request->org_logo->extension();
+        $request->org_logo->move(public_path('images'), $orgLogoName);
+    
+        // Handle background image upload
+        $bgImageName = time() . '_bg.' . $request->bg_image->extension();
+        $request->bg_image->move(public_path('images'), $bgImageName);
+    
+        // Create organization using new + save()
+        $organization = new OrgList();
+        $organization->org_name = $request->org_name;
+        $organization->description = $request->description;
+        $organization->org_logo = $orgLogoName;
+        $organization->bg_image = $bgImageName;
+        $organization->save();
+    
+        // Create admin user for organization using new + save()
+        $user = new User();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password); // Always hash passwords!
+        $user->org = $organization->org_name; // Save org name to 'org' column
+        $user->role = 'admin';
+        $user->save();
+    
+        return redirect()->back()->with('success', 'Organization and Admin created successfully.');
+    }
 
     // ✅ Update an existing organization
     public function update(Request $request, $id)
