@@ -72,7 +72,7 @@
                         <!-- Upcoming Events List -->
                         <div class="mb-3">
                             <h6>Upcoming Events</h6>
-                            <ul id="upcomingEventsList" class="list-unstyled">
+                            <ul id="upcomingEventsList" class="list-group list-group-flush">
                                 <!-- List upcoming events dynamically -->
                             </ul>
                         </div>
@@ -232,7 +232,8 @@
 <div class="modal fade" id="editEventModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="editEventForm">
+      <form id="editEventForm" method="POST" action="{{ route('events.update') }}">
+        @csrf
         <div class="modal-header">
           <h5 class="modal-title">Edit Event</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -252,8 +253,11 @@
             <input type="date" id="editEventDate" name="date" class="form-control">
           </div>
           <div class="mb-3">
-            <label class="form-label">Timeout</label>
-            <input type="text" id="editEventTimeout" name="timeout" class="form-control">
+            <label class="form-label">Day Type</label>
+            <select id="editEventDayType" name="dayType" class="form-select">
+              <option value="Half Day">Half Day</option>
+              <option value="Whole Day">Whole Day</option>
+            </select>
           </div>
           <div class="mb-3">
             <label class="form-label">Course</label>
@@ -262,7 +266,6 @@
           <div class="mb-3">
             <label class="form-label">Times</label>
             <div id="editEventTimesContainer"></div>
-            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addEditTimeInput()">Add Time</button>
           </div>
         </div>
         <div class="modal-footer">
@@ -283,6 +286,8 @@
         }
     });
 </script>
+
+
 
 <script>
     document.getElementById('dayType').addEventListener('change', function () {
@@ -426,26 +431,52 @@ document.addEventListener('DOMContentLoaded', function () {
             // Edit icon click
             const editIcon = iconContainer.querySelector('.fa-edit');
             editIcon.addEventListener('click', function (e) {
-                e.stopPropagation(); // Prevent calendar click
+    e.stopPropagation(); // Prevent calendar click
 
-                // Populate modal fields
-                document.getElementById('editEventId').value = event.id;
-                document.getElementById('editEventTitle').value = event.title;
-                document.getElementById('editEventVenue').value = event.extendedProps.venue || '';
-                document.getElementById('editEventDate').value = event.start.toISOString().slice(0, 10);
-                document.getElementById('editEventCourse').value = event.extendedProps.course || '';
-                document.getElementById('editEventTimeout').value = event.extendedProps.timeout || '';
+    // Populate basic fields
+    document.getElementById('editEventId').value = event.extendedProps.id;
+    document.getElementById('editEventTitle').value = event.title;
+    document.getElementById('editEventVenue').value = event.extendedProps.venue || '';
+    document.getElementById('editEventDate').value = event.start.toISOString().slice(0, 10);
+    document.getElementById('editEventCourse').value = event.extendedProps.course || '';
 
-                // Clear old time inputs
-                document.getElementById('editEventTimesContainer').innerHTML = '';
+    // Handle day type
+    const timeout = event.extendedProps.timeout;
+    const dayType = (timeout == 2) ? 'Half Day' : 'Whole Day';
+    document.getElementById('editEventDayType').value = dayType;
 
-                // Add time inputs
-                const times = event.extendedProps.times || [];
-                times.forEach(time => addEditTimeInput(time));
+    // Clear and populate time fields
+    const container = document.getElementById('editEventTimesContainer');
+    container.innerHTML = '';
 
-                // Show modal
-                new bootstrap.Modal(document.getElementById('editEventModal')).show();
-            });
+    const times = event.extendedProps.times || [];
+
+    if (times.length === 2) {
+        container.innerHTML = `
+            <label>Time In</label>
+            <input type="time" name="edit_times[]" class="form-control mb-2" value="${times[0]}">
+            <label>Time Out</label>
+            <input type="time" name="edit_times[]" class="form-control mb-2" value="${times[1]}">
+        `;
+    } else if (times.length === 4) {
+        container.innerHTML = `
+            <label>Morning Time In</label>
+            <input type="time" name="edit_times[]" class="form-control mb-2" value="${times[0]}">
+            <label>Morning Time Out</label>
+            <input type="time" name="edit_times[]" class="form-control mb-2" value="${times[1]}">
+            <label>Afternoon Time In</label>
+            <input type="time" name="edit_times[]" class="form-control mb-2" value="${times[2]}">
+            <label>Afternoon Time Out</label>
+            <input type="time" name="edit_times[]" class="form-control mb-2" value="${times[3]}">
+        `;
+    } else {
+        // fallback
+        times.forEach(time => addEditTimeInput(time));
+    }
+
+    // Show modal
+    new bootstrap.Modal(document.getElementById('editEventModal')).show();
+});
 
             // (Optional) View icon
             const viewIcon = iconContainer.querySelector('.fa-eye');
@@ -509,7 +540,51 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     calendar.render();
+    fetch("{{ route('events.fetch') }}")
+    .then(response => response.json())
+    .then(events => {
+        const list = document.getElementById('upcomingEventsList');
+        list.innerHTML = ''; // Clear current content
+
+        const today = new Date();
+        const upcoming = events.filter(event => {
+            const eventDate = new Date(event.start);
+            return eventDate >= today;
+        }).sort((a, b) => new Date(a.start) - new Date(b.start));
+
+        upcoming.forEach(event => {
+            const date = new Date(event.start);
+            const formattedDate = date.toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            // Determine badge color
+            let badgeClass = 'bg-primary';
+            if (event.extendedProps.course === 'BSIT') {
+                badgeClass = 'bg-info text-dark';
+            } else if (event.extendedProps.course === 'BSIS') {
+                badgeClass = 'bg-purple text-white';
+            }
+
+            // Create list item
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center rounded-3 mb-2 shadow-sm';
+
+            li.innerHTML = `
+                ${event.title}
+                <span class="badge ${badgeClass} rounded-pill">${formattedDate}</span>
+            `;
+
+            list.appendChild(li);
+        });
+    })
+    .catch(error => {
+        console.error("Error fetching upcoming events:", error);
+    });
 });
+
 
 // Add time input field to edit modal
 function addEditTimeInput(value = '') {

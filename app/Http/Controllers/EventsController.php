@@ -64,59 +64,94 @@ class EventsController extends Controller
         return redirect()->back()->with('success', 'Events created successfully!');
     }
     public function fetchEvents()
-{
-    $events = Event::all();
-
-    $calendarEvents = [];
-
-    foreach ($events as $event) {
-        $times = json_decode($event->times, true); // Decode the JSON times array
-
-        if ($event->timeouts == 2) {
-            // Half day
-            $calendarEvents[] = [
-                'title' => $event->name,
-                'start' => $event->event_date . 'T' . $times[0], // 08:00
-                'end' => $event->event_date . 'T' . $times[1],   // 12:00
-                'extendedProps' => [
-                    'course' => $event->course,
-                    'venue' => $event->venue,
-                    'timeout' => $event->timeouts, // Add timeout
-                    'times' => $times, // Add times
-                ],
-                'color' => $event->course === 'BSIS' ? 'violet' : 'blue',
-            ];
-        } elseif ($event->timeouts == 4) {
-            // Morning session
-            $calendarEvents[] = [
-                'title' => $event->name . ' (Morning)',
-                'start' => $event->event_date . 'T' . $times[0], // 08:00
-                'end' => $event->event_date . 'T' . $times[1],   // 12:00
-                'extendedProps' => [
-                    'course' => $event->course,
-                    'venue' => $event->venue,
-                    'timeout' => $event->timeouts, // Add timeout
-                    'times' => $times, // Add times
-                ],
-                'color' => $event->course === 'BSIS' ? 'violet' : 'blue',
-            ];
-            // Afternoon session
-            $calendarEvents[] = [
-                'title' => $event->name . ' (Afternoon)',
-                'start' => $event->event_date . 'T' . $times[2], // 13:00
-                'end' => $event->event_date . 'T' . $times[3],   // 17:00
-                'extendedProps' => [
-                    'course' => $event->course,
-                    'venue' => $event->venue,
-                    'timeout' => $event->timeouts, // Add timeout
-                    'times' => $times, // Add times
-                ],
-                'color' => $event->course === 'BSIS' ? 'violet' : 'blue',
-            ];
+    {
+        $events = Event::all();
+    
+        $calendarEvents = [];
+    
+        foreach ($events as $event) {
+            $times = json_decode($event->times, true); // Decode the JSON times array
+    
+            if ($event->timeouts == 2) {
+                // Half day
+                $calendarEvents[] = [
+                    'title' => $event->name,
+                    'start' => $event->event_date . 'T' . $times[0],
+                    'end' => $event->event_date . 'T' . $times[1],
+                    'extendedProps' => [
+                        'id' => $event->id, // Include event ID
+                        'course' => $event->course,
+                        'venue' => $event->venue,
+                        'timeout' => $event->timeouts,
+                        'times' => $times,
+                    ],
+                    'color' => $event->course === 'BSIS' ? 'violet' : 'blue',
+                ];
+            } elseif ($event->timeouts == 4) {
+                // Morning session
+                $calendarEvents[] = [
+                    'title' => $event->name . ' (Morning)',
+                    'start' => $event->event_date . 'T' . $times[0],
+                    'end' => $event->event_date . 'T' . $times[1],
+                    'extendedProps' => [
+                        'id' => $event->id, // Include event ID
+                        'course' => $event->course,
+                        'venue' => $event->venue,
+                        'timeout' => $event->timeouts,
+                        'times' => $times,
+                    ],
+                    'color' => $event->course === 'BSIS' ? 'violet' : 'blue',
+                ];
+                // Afternoon session
+                $calendarEvents[] = [
+                    'title' => $event->name . ' (Afternoon)',
+                    'start' => $event->event_date . 'T' . $times[2],
+                    'end' => $event->event_date . 'T' . $times[3],
+                    'extendedProps' => [
+                        'id' => $event->id, // Include event ID
+                        'course' => $event->course,
+                        'venue' => $event->venue,
+                        'timeout' => $event->timeouts,
+                        'times' => $times,
+                    ],
+                    'color' => $event->course === 'BSIS' ? 'violet' : 'blue',
+                ];
+            }
         }
+    
+        return response()->json($calendarEvents);
     }
+    
 
-    return response()->json($calendarEvents);
+public function update(Request $request)
+{
+    // dd($request->all());
+    $request->validate([
+        'event_id' => 'required|integer|exists:events,id',
+        'title' => 'required|string|max:255',
+        'venue' => 'nullable|string',
+        'date' => 'required|date',
+        'course' => 'nullable|string',
+        'dayType' => 'required|in:Half Day,Whole Day',
+        'edit_times' => 'required|array|min:2|max:4'
+    ]);
+
+    $event = Event::findOrFail($request->event_id);
+
+    $event->name = $request->title;
+    $event->venue = $request->venue;
+    $event->event_date = $request->date;
+    $event->course = $request->course;
+
+    // Convert dayType to timeouts
+    $event->timeouts = $request->dayType === 'Half Day' ? 2 : 4;
+
+    // Store times as JSON
+    $event->times = json_encode($request->edit_times);
+
+    $event->save();
+
+    return redirect()->back()->with('success', 'Events created successfully!');
 }
     
 }
