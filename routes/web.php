@@ -59,6 +59,8 @@ Route::get('/profile', function () {
     return view('profile');
 });
 Route::post('/events', [EventsController::class, 'store'])->name('events.store');
+Route::post('/events/update', [EventsController::class, 'update'])->name('events.update');
+
 
 // Route to fetch all events from the database (GET request)
 Route::get('/events', [EventsController::class, 'index']);
