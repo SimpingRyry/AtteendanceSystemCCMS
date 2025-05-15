@@ -40,7 +40,7 @@
     {{-- Sidebar --}}
     @include('layout.sidebar')
     <main>
-    <div class="container outer-box mt-5 pt-5 pb-4">
+    <div class="container outer-box mt-5 pt-5 pb-4 col-md-20">
         <div class="container inner-glass shadow p-4" id="main_box">
             <div class="row">
                 <!-- Sidebar for Filters and Event List -->
@@ -80,9 +80,9 @@
                 </div>
 
                 <!-- Main Calendar Section -->
-                <div class="col-md-8 col-lg-9">
+                <div class="col-md-5 col-lg-9">
                     <div class="card-body">
-                        <h4 class="text-center glow-text mb-4">EVENTS</h4>
+                        
                         <!-- FullCalendar Display -->
                         <div id="calendar"></div>
                     </div>
@@ -229,6 +229,50 @@
     </div>
 </div>
 
+<div class="modal fade" id="editEventModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="editEventForm">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Event</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="editEventId" name="event_id">
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" id="editEventTitle" name="title" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Venue</label>
+            <input type="text" id="editEventVenue" name="venue" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" id="editEventDate" name="date" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Timeout</label>
+            <input type="text" id="editEventTimeout" name="timeout" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Course</label>
+            <input type="text" id="editEventCourse" name="course" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Times</label>
+            <div id="editEventTimesContainer"></div>
+            <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addEditTimeInput()">Add Time</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
     flatpickr("#repeatDates", {
@@ -315,21 +359,23 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     var calendarEl = document.getElementById('calendar');
 
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         events: {
-            url: "{{ route('events.fetch') }}",  
+            url: "{{ route('events.fetch') }}",
             method: 'GET',
-            failure: function() {
-                alert('there was an error while fetching events!');
+            failure: function () {
+                alert('There was an error while fetching events!');
             }
         },
-        eventDidMount: function(info) {
-            // Color coding by course
-            if (info.event.extendedProps.course === 'BSIS') {
+        eventDidMount: function (info) {
+            const event = info.event;
+
+            // Color coding
+            if (event.extendedProps.course === 'BSIS') {
                 info.el.style.backgroundColor = '#8A2BE2';
                 info.el.style.borderColor = '#8A2BE2';
             } else {
@@ -337,13 +383,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 info.el.style.borderColor = '#007bff';
             }
 
-            // Create the icon cloud
+            // Create icon container (cloud)
             const iconContainer = document.createElement('div');
             iconContainer.className = 'event-icons';
+            iconContainer.style.position = 'absolute';
+            iconContainer.style.top = '0';
+            iconContainer.style.right = '0';
+            iconContainer.style.background = '#fff';
+            iconContainer.style.border = '1px solid #ccc';
+            iconContainer.style.borderRadius = '8px';
+            iconContainer.style.padding = '5px';
+            iconContainer.style.display = 'none';
+            iconContainer.style.zIndex = '1000';
+
             iconContainer.innerHTML = `
-                <i class="fas fa-edit" title="Edit"></i>
-                <i class="fas fa-eye" title="View"></i>
-                <i class="fas fa-trash" title="Delete"></i>
+                <i class="fas fa-edit me-2 text-primary" title="Edit" style="cursor:pointer;"></i>
+                <i class="fas fa-eye me-2 text-success" title="View" style="cursor:pointer;"></i>
+                <i class="fas fa-trash text-danger" title="Delete" style="cursor:pointer;"></i>
             `;
 
             info.el.appendChild(iconContainer);
@@ -366,23 +422,48 @@ document.addEventListener('DOMContentLoaded', function() {
             info.el.addEventListener('mouseleave', hideIcons);
             iconContainer.addEventListener('mouseenter', showIcons);
             iconContainer.addEventListener('mouseleave', hideIcons);
-        },
-        eventTimeFormat: { 
-            hour: '2-digit',
-            minute: '2-digit',
-            meridiem: false
-        },
-        headerToolbar: {
-            left: 'prev,next today', 
-            center: 'title', 
-            right: 'dayGridMonth,timeGridWeek'
-        },
-        editable: true,
-        droppable: true,
-        eventDisplay: 'block',
 
-        // Event click handler
-        eventClick: function(info) {
+            // Edit icon click
+            const editIcon = iconContainer.querySelector('.fa-edit');
+            editIcon.addEventListener('click', function (e) {
+                e.stopPropagation(); // Prevent calendar click
+
+                // Populate modal fields
+                document.getElementById('editEventId').value = event.id;
+                document.getElementById('editEventTitle').value = event.title;
+                document.getElementById('editEventVenue').value = event.extendedProps.venue || '';
+                document.getElementById('editEventDate').value = event.start.toISOString().slice(0, 10);
+                document.getElementById('editEventCourse').value = event.extendedProps.course || '';
+                document.getElementById('editEventTimeout').value = event.extendedProps.timeout || '';
+
+                // Clear old time inputs
+                document.getElementById('editEventTimesContainer').innerHTML = '';
+
+                // Add time inputs
+                const times = event.extendedProps.times || [];
+                times.forEach(time => addEditTimeInput(time));
+
+                // Show modal
+                new bootstrap.Modal(document.getElementById('editEventModal')).show();
+            });
+
+            // (Optional) View icon
+            const viewIcon = iconContainer.querySelector('.fa-eye');
+            viewIcon.addEventListener('click', function (e) {
+                e.stopPropagation();
+                // You can trigger the same logic used in eventClick here if needed
+            });
+
+            // (Optional) Delete icon
+            const deleteIcon = iconContainer.querySelector('.fa-trash');
+            deleteIcon.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (confirm('Are you sure you want to delete this event?')) {
+                    // Add delete logic here
+                }
+            });
+        },
+        eventClick: function (info) {
             info.jsEvent.preventDefault();
 
             document.getElementById('modalEventName').innerText = info.event.title;
@@ -392,31 +473,57 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modalEventTimes').innerText = info.event.extendedProps.times.join(' - ');
             document.getElementById('modalEventCourse').innerText = info.event.extendedProps.course;
 
-            var currentDate = new Date();
-            var eventDate = new Date(info.event.start);
-
-            var generateAttendanceBtn = document.getElementById('generateAttendanceBtn');
-            var attendanceNote = document.getElementById('attendanceNote');
+            const currentDate = new Date();
+            const eventDate = new Date(info.event.start);
 
             currentDate.setHours(0, 0, 0, 0);
             eventDate.setHours(0, 0, 0, 0);
 
+            const generateBtn = document.getElementById('generateAttendanceBtn');
+            const attendanceNote = document.getElementById('attendanceNote');
+
             if (eventDate >= currentDate) {
-                generateAttendanceBtn.disabled = false;
+                generateBtn.disabled = false;
                 attendanceNote.style.display = 'none';
             } else {
-                generateAttendanceBtn.disabled = true;
+                generateBtn.disabled = true;
                 attendanceNote.style.display = 'block';
                 attendanceNote.innerText = `Available on ${eventDate.toLocaleDateString()}`;
             }
 
-            var eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
-            eventModal.show();
+            new bootstrap.Modal(document.getElementById('eventModal')).show();
         },
+        eventTimeFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            meridiem: false
+        },
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek'
+        },
+        editable: true,
+        droppable: true,
+        eventDisplay: 'block'
     });
 
     calendar.render();
 });
+
+// Add time input field to edit modal
+function addEditTimeInput(value = '') {
+    const container = document.getElementById('editEventTimesContainer');
+    const inputGroup = document.createElement('div');
+    inputGroup.className = 'input-group mb-2';
+
+    inputGroup.innerHTML = `
+        <input type="time" name="edit_times[]" class="form-control" value="${value}">
+        <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">Remove</button>
+    `;
+
+    container.appendChild(inputGroup);
+}
 </script>
 <style>
 

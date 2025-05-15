@@ -116,7 +116,7 @@
                 <li>
                     <a href="{{ url('reports') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('reports') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/record_ico.png') }}" alt="Records" class="sidebar-icon">
-                        <span>Records</span>
+                        <span>Reports</span>
                     </a>
                 </li>
 
