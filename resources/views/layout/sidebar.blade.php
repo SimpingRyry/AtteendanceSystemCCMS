@@ -2,17 +2,25 @@
 <div class="offcanvas offcanvas-start sidebar-nav" style="background-color:#232946;" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
 
     <!-- Offcanvas Header with Centered Image -->
-    <div class="offcanvas-header justify-content-center">
-        @if (Auth::user()->org === 'ITS')
-            <img src="{{ asset('images/ITS_LOGO.png') }}" alt="ITS Logo" class="rounded-circle" width="100" height="100">
-        @elseif (Auth::user()->org === 'PRAXIS')
-            <img src="{{ asset('images/praxis_logo.png') }}" alt="PRAXIS Logo" class="rounded-circle" width="100" height="100">
-        @else
-            <img src="{{ asset('images/org_ccms_logo.png') }}" alt="Org Image" class="rounded-circle" width="100" height="100">
-        @endif
 
-        <button type="button" class="btn-close position-absolute end-0 me-3 mt-3" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
+    @php
+    $org = Auth::user()->organization;
+    @endphp
+<div class="text-center pt-4 pb-3">
+    @if ($org && $org->org_logo)
+        <img src="{{ asset('images/' . $org->org_logo) }}" alt="{{ $org->org_name }} Logo"
+             class="rounded-circle mb-3 border border-secondary" width="100" height="100" style="object-fit: cover;">
+    @else
+        <img src="{{ asset('images/default_logo.png') }}" alt="Default Org Logo"
+             class="rounded-circle mb-3 border border-secondary" width="100" height="100" style="object-fit: cover;">
+    @endif
+
+    @if ($org)
+        <h5 class="mt-1 fw-semibold text-light" style="letter-spacing: 1px; text-shadow: 0 0 3px rgba(0,0,0,0.5);">
+            {{ $org->org_name }}
+        </h5>
+    @endif
+</div>
 
     <hr class="divider">
 
@@ -152,7 +160,8 @@
                     <li>
                         <a href="{{ url('manage_orgs_page') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}">
                             <img src="{{ asset('images/org_ico.png') }}" alt="Manage Orgs" class="sidebar-icon">
-                            <span>Manage Orgs</span>
+                            <span>Organization
+                            </span>
                         </a>
                     </li>
 

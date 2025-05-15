@@ -37,4 +37,9 @@ class User extends Authenticatable
     {
         return $this->attributes['picture'];
     }
+
+    public function organization()
+{
+    return $this->belongsTo(OrgList::class, 'org', 'org_name');
+}
 }
