@@ -67,7 +67,7 @@
                             </div>
 
                             {{-- Optional hidden export field if generating PDF --}}
-                             <input type="hidden" name="export" value="pdf">
+                            <input type="hidden" name="export" value="pdf">
 
                             <div class="mt-4 text-end">
                                 <button type="submit" class="btn btn-success">
@@ -85,10 +85,10 @@
                         Generate Student Roster
                     </div>
                     <div class="card-body">
-                        <form action="#" method="GET">
+                        <form action="{{ route('report.studentRoster') }}" method="GET">
                             <div class="mb-3">
                                 <label class="form-label">Roster Type</label>
-                                <select class="form-select" required>
+                                <select class="form-select" name="roster_type" required>
                                     <option value="">-- Select --</option>
                                     <option value="all">All Students</option>
                                     <option value="filtered">By Organization and Program</option>
@@ -98,7 +98,7 @@
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label class="form-label">Organization</label>
-                                    <select class="form-select">
+                                    <select class="form-select" name="organization">
                                         <option value="">All</option>
                                         <option value="ITS">ITS</option>
                                         <option value="PRAXIS">PRAXIS</option>
@@ -106,7 +106,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Program</label>
-                                    <select class="form-select">
+                                    <select class="form-select" name="program">
                                         <option value="">All</option>
                                         <option value="IT">Information Technology</option>
                                         <option value="IS">Information Systems</option>
@@ -114,7 +114,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Block</label>
-                                    <select class="form-select">
+                                    <select class="form-select" name="section">
                                         <option value="">All</option>
                                         <option value="Block A">Block A</option>
                                         <option value="Block B">Block B</option>
@@ -128,6 +128,7 @@
                                 </button>
                             </div>
                         </form>
+
                     </div>
                 </div>
 
