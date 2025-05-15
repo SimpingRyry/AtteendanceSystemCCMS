@@ -40,52 +40,40 @@
     {{-- Sidebar --}}
     @include('layout.sidebar')
     <main>
-    <div class="container outer-box mt-5 pt-5 pb-4 col-md-20">
-        <div class="container inner-glass shadow p-4" id="main_box">
-            <div class="row">
-                <!-- Sidebar for Filters and Event List -->
-                <div class="col-md-4 col-lg-3">
-                    <div class="d-flex flex-column">
-                        <!-- Add Event Button (Left aligned with "+" icon) -->
-                        <div class="mb-3 text-left">
-                            <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addEventModal">
-                                <span class="me-2">+</span> Add Event
-                            </button>
-                        </div>
+    <div class="container-fluid mt-5 px-4">
+        <div class="row g-4">
+            <!-- Sidebar -->
+            <div class="col-md-4 col-lg-3 mt-3"> <!-- Add margin-top -->
+                <div class="d-flex flex-column gap-3">
+                    <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                        <span class="me-2">+</span> Add Event
+                    </button>
 
-                        <!-- Month Filter -->
-                        <div class="mb-3">
-                            <label for="monthFilter" class="form-label">Filter by Month</label>
-                            <select class="form-select" id="monthFilter">
-                                <option value="all">All Months</option>
-                                <option value="January">January</option>
-                                <option value="February">February</option>
-                                <!-- Add other months here -->
-                            </select>
-                        </div>
+                    <div>
+                        <label for="monthFilter" class="form-label small">Filter by Month</label>
+                        <select class="form-select" id="monthFilter">
+                            <option value="all">All Months</option>
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <!-- Add more months -->
+                        </select>
+                    </div>
 
-                        <!-- Search Bar -->
-                        <div class="mb-3">
-                            <input type="text" class="form-control" id="eventSearch" placeholder="Search events...">
-                        </div>
+                    <input type="text" class="form-control" id="eventSearch" placeholder="Search events...">
 
-                        <!-- Upcoming Events List -->
-                        <div class="mb-3">
-                            <h6>Upcoming Events</h6>
-                            <ul id="upcomingEventsList" class="list-group list-group-flush">
-                                <!-- List upcoming events dynamically -->
-                            </ul>
-                        </div>
+                    <div class="border rounded-3 p-3 bg-white">
+                        <h6 class="text-center fw-semibold mb-2">Upcoming Events</h6>
+                        <ul id="upcomingEventsList" class="list-group list-group-flush small">
+                            <!-- Dynamically filled -->
+                        </ul>
                     </div>
                 </div>
+            </div>
 
-                <!-- Main Calendar Section -->
-                <div class="col-md-5 col-lg-9">
-                    <div class="card-body">
-                        
-                        <!-- FullCalendar Display -->
-                        <div id="calendar"></div>
-                    </div>
+            <!-- Calendar -->
+            <div class="col-md-8 col-lg-9 mt-3"> <!-- Add margin-top -->
+                <div class="bg-white border rounded-3 p-3" id="calendarWrapper">
+                    <div id="calendar"></div>
                 </div>
             </div>
         </div>
@@ -601,102 +589,132 @@ function addEditTimeInput(value = '') {
 }
 </script>
 <style>
-
+/* Event styling with smaller fonts and subtle enhancements */
 .fc-event {
     position: relative;
+    background-color: #1976d2;
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: none;
+    box-shadow: none;
+    transition: background-color 0.2s ease;
 }
 
+.fc-event:hover {
+    background-color: #115293;
+}
+
+/* Icon Hover Panel */
 .event-icons {
     position: absolute;
-    top: -45px;
+    top: -40px;
     right: 0;
     display: none;
     background-color: rgba(0, 0, 0, 0.75);
-    padding: 6px 10px;
-    border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    padding: 5px 8px;
+    border-radius: 8px;
     z-index: 9999;
     white-space: nowrap;
-    transition: opacity 0.2s ease-in-out;
 }
 
 .event-icons i {
     color: white;
-    margin: 0 6px;
+    font-size: 12px;
+    margin: 0 4px;
     cursor: pointer;
-    font-size: 14px;
-    transition: transform 0.2s;
+    transition: transform 0.2s ease;
 }
 
 .event-icons i:hover {
     transform: scale(1.2);
+    color: #ffeb3b;
 }
 
 .fc-event:hover .event-icons {
     display: block;
 }
-    /* General Calendar Card Look */
-    #calendar {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        padding: 1rem;
-        font-family: 'Poppins', 'Roboto', sans-serif;
-    }
 
-    /* Calendar Toolbar */
-    .fc-toolbar-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #333;
-    }
+/* Calendar Container */
+#calendarWrapper {
+    background: white;
+    border: 1px solid #e0e0e0;
+    box-shadow: none;
+}
 
-    .fc-button {
-        background-color: #1976d2; /* MUI blue */
-        border: none;
-        border-radius: 6px;
-        padding: 6px 12px;
-        font-size: 0.9rem;
-        transition: background-color 0.3s ease;
-    }
+/* Calendar Appearance */
+#calendar {
+    font-family: 'Poppins', 'Roboto', sans-serif;
+}
 
-    .fc-button-primary:not(:disabled).fc-button-active,
-    .fc-button-primary:not(:disabled):hover {
-        background-color: #115293;
-    }
+.fc-toolbar-title {
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: #333;
+}
 
-    .fc-button-primary {
-        background-color: #1976d2;
-    }
+.fc-button {
+    background-color: #1976d2;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    color: white;
+    transition: background-color 0.3s ease;
+}
 
-    /* Today highlight */
-    .fc-day-today {
-        background: #e3f2fd !important;
-    }
+.fc-button-primary:not(:disabled).fc-button-active,
+.fc-button-primary:not(:disabled):hover {
+    background-color: #115293;
+}
 
-    /* Day grid cells */
-    .fc-daygrid-day {
-        border: 1px solid #f0f0f0;
-    }
+/* Today Cell */
+.fc-day-today {
+    background-color: #f1f8ff !important;
+}
 
-    /* Events */
-    .fc-event {
-        background-color: #1976d2;
-        border: none;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        padding: 2px 4px;
-    }
+/* Flat cell borders */
+.fc-daygrid-day {
+    border: 1px solid #f1f1f1;
+}
 
-    /* Event hover */
-    .fc-event:hover {
-        background-color: #115293;
-    }
+/* Hide calendar grid border */
+.fc-scrollgrid {
+    border: none !important;
+}
 
-    /* Hide border around the calendar */
-    .fc-scrollgrid {
-        border: none !important;
-    }
+main {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+    background-color: #f9f9f9;
+}
+
+/* Ensure sidebar contents are spaced from the top */
+.col-md-4 .d-flex.flex-column {
+    padding-top: 1rem;
+}
+
+/* Add top margin to calendar wrapper */
+#calendarWrapper {
+    margin-top: 0.5rem;
+    padding: 1.1rem;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+}
+
+/* Optionally add box spacing to main row */
+.row.g-4 {
+    margin-top: 1rem;
+}
+
+/* Optional: unify sidebar cards and button spacing */
+#monthFilter,
+#eventSearch,
+#addEventModal {
+    margin-top: 0.5rem;
+}
 </style>
 
 </body>

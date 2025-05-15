@@ -117,7 +117,7 @@
                 <td>BSIT</td>
                 <td>A</td>
                 <td>Science Club</td>
-                <td>₱150.00</td>
+                <td>₱0.00</td>
                 <td>
                   <button class="btn btn-success btn-sm"><i class="fas fa-money-bill-wave"></i> Pay</button>
                   <button class="btn btn-primary btn-sm view-btn" data-bs-toggle="modal" data-bs-target="#soaModal">
@@ -131,7 +131,7 @@
                 <td>BSCS</td>
                 <td>B</td>
                 <td>Math Society</td>
-                <td>₱200.00</td>
+                <td>₱5000.00</td>
                 <td>
                   <button class="btn btn-success btn-sm"><i class="fas fa-money-bill-wave"></i> Pay</button>
                   <button class="btn btn-primary btn-sm view-btn"data-bs-toggle="modal" data-bs-target="#soaModal">
@@ -169,9 +169,11 @@
             <thead class="table-light">
               <tr>
                 <th>Date</th>
-                <th>Description</th>
-                <th>Amount Paid</th>
-                <th>Remaining Balance</th>
+                <th>Transaction</th>
+                <th>Debit</th>
+                <th>Credit</th>
+                <th>Balance</th>
+                <th>Processed By</th>
               </tr>
             </thead>
             <tbody id="modalTableBody">
@@ -179,69 +181,170 @@
             </tbody>
           </table>
         </div>
-      </div>
-      <div class="modal-footer">
-        <span class="fw-bold">Total Remaining Balance: <span id="modalTotalBalance"></span></span>
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button class="btn btn-success">Proceed to Pay</button>
+
+        <div class="mt-3 fw-bold">
+          Total Remaining Balance: <span id="modalTotalBalance"></span>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const viewButtons = document.querySelectorAll(".view-btn");
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const viewButtons = document.querySelectorAll(".view-btn");
+  const payButtons = document.querySelectorAll(".btn-success");
+  const modalBody = document.getElementById("modalTableBody");
+  const totalBalanceDisplay = document.getElementById("modalTotalBalance");
 
-    viewButtons.forEach(button => {
-      button.addEventListener("click", function () {
-        const row = button.closest("tr");
-        const studentID = row.children[0].textContent;
-        const studentName = row.children[1].textContent;
-        const course = row.children[2].textContent;
-        const section = row.children[3].textContent;
+  const studentData = {
+    "2023-001": {
+      name: "Jane Doe",
+      course: "BSIT",
+      section: "A",
+      transactions: {
+        "1st Semester SY 2024-2025 (Jan 2025)": [
+          { date: "1/1/2025", transaction: "Assessment", debit: 6515, credit: 0, balance: 6515, processedBy: "Admin" },
+          { date: "1/1/2025", transaction: "Discount", debit: 0, credit: 6515, balance: 0, processedBy: "Admin" }
+        ]
+      }
+    },
+    "2023-002": {
+      name: "John Smith",
+      course: "BSCS",
+      section: "B",
+      transactions: {
+        "1st Semester SY 2024-2025 (Jan 2025)": [
+          { date: "1/5/2025", transaction: "Assessment", debit: 8000, credit: 0, balance: 8000, processedBy: "Registrar" },
+          { date: "1/20/2025", transaction: "Payment", debit: 0, credit: 3000, balance: 5000, processedBy: "Cashier" }
+        ]
+      }
+    }
+  };
 
-        // Set modal content
-        document.getElementById("modalStudentName").textContent = studentName;
-        document.getElementById("modalStudentID").textContent = studentID;
-        document.getElementById("modalCourseSection").textContent = `${course} - ${section}`;
+  function formatCurrency(value) {
+    return "₱" + value.toFixed(2);
+  }
 
-        // Replace with actual data or fetch from database
-        let tableBody = document.getElementById("modalTableBody");
-        tableBody.innerHTML = ""; // Clear previous
+  function getLatestBalance(transactions) {
+    if (transactions.length === 0) return 0;
+    return transactions[transactions.length - 1].balance;
+  }
 
-        let exampleData = [];
+  function renderModal(studentID) {
+    const student = studentData[studentID];
+    if (!student) return;
 
-        if (studentID === "2023-001") {
-          exampleData = [
-            { date: "2025-01-10", desc: "Science Club Fee", paid: "₱100.00", balance: "₱50.00" }
-          ];
-          document.getElementById("modalTotalBalance").textContent = "₱50.00";
-        } else if (studentID === "2023-002") {
-          exampleData = [
-            { date: "2025-01-20", desc: "Math Contest Fee", paid: "₱150.00", balance: "₱50.00" }
-          ];
-          document.getElementById("modalTotalBalance").textContent = "₱50.00";
-        }
+    document.getElementById("modalStudentName").textContent = student.name;
+    document.getElementById("modalStudentID").textContent = studentID;
+    document.getElementById("modalCourseSection").textContent = `${student.course} - ${student.section}`;
 
-        // Add rows to table
-        exampleData.forEach(item => {
-          let rowHTML = `
-            <tr>
-              <td>${item.date}</td>
-              <td>${item.desc}</td>
-              <td>${item.paid}</td>
-              <td>${item.balance}</td>
-            </tr>
-          `;
-          tableBody.insertAdjacentHTML('beforeend', rowHTML);
-        });
+    modalBody.innerHTML = "";
+    let lastBalance = 0;
+
+    for (const [semester, transactions] of Object.entries(student.transactions)) {
+      const semesterRow = document.createElement("tr");
+      semesterRow.classList.add("table-secondary", "fw-bold");
+      semesterRow.innerHTML = `<td colspan="6">${semester}</td>`;
+      modalBody.appendChild(semesterRow);
+
+      transactions.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.date}</td>
+          <td>${item.transaction}</td>
+          <td>${item.debit ? formatCurrency(item.debit) : ""}</td>
+          <td>${item.credit ? formatCurrency(item.credit) : ""}</td>
+          <td>${formatCurrency(item.balance)}</td>
+          <td>${item.processedBy || ""}</td>
+        `;
+        modalBody.appendChild(tr);
       });
+
+      lastBalance = transactions[transactions.length - 1].balance;
+    }
+
+    totalBalanceDisplay.textContent = formatCurrency(lastBalance);
+  }
+
+  function updateFinesInTable(studentID) {
+    const student = studentData[studentID];
+    const semester = Object.keys(student.transactions)[0];
+    const transactions = student.transactions[semester];
+    const latestBalance = getLatestBalance(transactions);
+
+    const rows = document.querySelectorAll("table tbody tr");
+    rows.forEach(row => {
+      if (row.children[0].textContent.trim() === studentID) {
+        row.children[5].textContent = formatCurrency(latestBalance);
+      }
+    });
+  }
+
+  viewButtons.forEach(button => {
+    button.addEventListener("click", function () {
+      const row = button.closest("tr");
+      const studentID = row.children[0].textContent.trim();
+      renderModal(studentID);
     });
   });
+
+  payButtons.forEach(button => {
+    button.addEventListener("click", function () {
+      const row = button.closest("tr");
+      const studentID = row.children[0].textContent.trim();
+      const student = studentData[studentID];
+      const semester = Object.keys(student.transactions)[0];
+      const txns = student.transactions[semester];
+
+      const lastBalance = getLatestBalance(txns);
+      if (lastBalance <= 0) {
+        alert("No outstanding balance.");
+        return;
+      }
+
+      let input = prompt(`Enter payment amount (max: ₱${lastBalance.toFixed(2)}):`);
+      if (!input) return;
+
+      const amount = parseFloat(input);
+      if (isNaN(amount) || amount <= 0 || amount > lastBalance) {
+        alert("Invalid amount entered.");
+        return;
+      }
+
+      const processor = prompt("Enter name of person processing this payment:");
+      if (!processor || processor.trim() === "") {
+        alert("Payment must be processed by someone.");
+        return;
+      }
+
+      const newBalance = lastBalance - amount;
+      const today = new Date().toLocaleDateString("en-PH");
+
+      txns.push({
+        date: today,
+        transaction: "Payment",
+        debit: 0,
+        credit: amount,
+        balance: newBalance,
+        processedBy: processor
+      });
+
+      updateFinesInTable(studentID);
+
+      const modalEl = document.getElementById("soaModal");
+      const isModalVisible = modalEl.classList.contains("show");
+      if (isModalVisible) {
+        renderModal(studentID);
+      }
+
+      alert(`Payment of ₱${amount.toFixed(2)} applied to ${student.name} by ${processor}`);
+    });
+  });
+});
 </script>
 </body>
 
