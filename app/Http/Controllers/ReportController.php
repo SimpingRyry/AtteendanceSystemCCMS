@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\FinanceData;
+use App\Models\Student;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 
@@ -34,5 +35,29 @@ class ReportController extends Controller
         // Otherwise, show normal view
         return view('report.financial_results', compact('financeReports'));
     }
-}
 
+    public function generateStudentRoster(Request $request)
+{
+    $query = Student::query();
+
+    // Filter if Roster Type is filtered
+    if ($request->roster_type === 'filtered') {
+        if ($request->filled('organization')) {
+            $query->where('f_id', $request->organization); // assuming `f_id` maps to organization
+        }
+        if ($request->filled('program')) {
+            $query->where('course', $request->program); // 'course' is your program column
+        }
+        if ($request->filled('section')) {
+            $query->where('section', $request->section);
+        }
+    }
+
+    $students = $query->orderBy('name')->get();
+
+    // Generate PDF
+    $pdf = PDF::loadView('report.student_roster_pdf', compact('students'));
+
+    return $pdf->download('student_roster.pdf');
+}
+}

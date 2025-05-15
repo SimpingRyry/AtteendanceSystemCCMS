@@ -100,6 +100,11 @@ Route::resource('orgs', OrgListController::class);
 
 Route::get('/report/financial', [ReportController::class, 'generateFinancialReport'])->name('report.financial');
 
+Route::get('/report/student-list', [ReportController::class, 'generateStudentListReport'])->name('report.student_list');
+Route::get('/report/student-roster', [ReportController::class, 'generateStudentRoster'])->name('report.studentRoster');
+
+
+
 
 Route::post('/orgs', [OrgListController::class, 'store'])->name('orgs.store');
 

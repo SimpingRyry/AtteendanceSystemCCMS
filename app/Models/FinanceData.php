@@ -15,5 +15,6 @@ class FinanceData extends Model
         'org',
         'program',
         'amount',
+        'date_issued'
     ];
 }
