@@ -14,6 +14,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,6 +95,9 @@ Route::post('/profile/{id}', [ProfileController::class, 'update'])->name('profil
 Route::post('/profile/{id}/photo', [ProfileController::class, 'uploadPhoto'])->name('profile.uploadPhoto');
 
 Route::resource('orgs', OrgListController::class);
+
+Route::get('/report/financial', [ReportController::class, 'generateFinancialReport'])->name('report.financial');
+
 
 Route::post('/orgs', [OrgListController::class, 'store'])->name('orgs.store');
 

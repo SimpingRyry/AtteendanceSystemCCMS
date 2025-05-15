@@ -30,48 +30,52 @@
                 </div>
 
                 {{-- Financial Report Section --}}
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white fw-semibold">
-                        Generate Financial Report
-                    </div>
-                    <div class="card-body">
-                        <form action="#" method="GET">
-                            <div class="mb-3">
-                                <label class="form-label">Report Type</label>
-                                <select class="form-select" required>
-                                    <option value="">-- Select --</option>
-                                    <option value="all">All Fines Data</option>
-                                    <option value="by_org">By Organization (from student_list)</option>
-                                </select>
-                            </div>
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white fw-semibold">
+        Generate Financial Report
+    </div>
+    <div class="card-body">
+        <form action="{{ route('report.financial') }}" method="GET">
+            <div class="mb-3">
+                <label class="form-label">Report Type</label>
+                <select name="report_type" class="form-select" required>
+                    <option value="">-- Select --</option>
+                    <option value="all">All Fines Data</option>
+                    <option value="by_org">By Organization (from student_list)</option>
+                </select>
+            </div>
 
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Organization</label>
-                                    <select class="form-select">
-                                        <option value="">All</option>
-                                        <option value="ITS">ITS</option>
-                                        <option value="PRAXIS">PRAXIS</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Program</label>
-                                    <select class="form-select">
-                                        <option value="">All</option>
-                                        <option value="IT">Information Technology</option>
-                                        <option value="IS">Information Systems</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="mt-4 text-end">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fa-solid fa-file-export"></i> Generate Report
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Organization</label>
+                    <select name="organization" class="form-select">
+                        <option value="">All</option>
+                        <option value="ITS">ITS</option>
+                        <option value="PRAXIS">PRAXIS</option>
+                    </select>
                 </div>
+                <div class="col-md-6">
+                    <label class="form-label">Program</label>
+                    <select name="program" class="form-select">
+                        <option value="">All</option>
+                        <option value="IT">Information Technology</option>
+                        <option value="IS">Information Systems</option>
+                    </select>
+                </div>
+            </div>
+
+            {{-- Optional hidden export field if generating PDF --}}
+            {{-- <input type="hidden" name="export" value="pdf"> --}}
+
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-file-export"></i> Generate Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 
                 {{-- Student Roster Section --}}
                 <div class="card mb-4">
