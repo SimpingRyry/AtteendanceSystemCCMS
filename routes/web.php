@@ -39,6 +39,10 @@ Route::get('/student_dashboard', function () {
     return view('student_dashboard');
 });
 
+Route::get('/evaluation', function () {
+    return view('evaluation');
+});
+
 
 Route::get('/super_dashboard', function () {
     return view('super_dashboard');
@@ -103,6 +107,10 @@ Route::get('/report/financial', [ReportController::class, 'generateFinancialRepo
 Route::get('/report/student-list', [ReportController::class, 'generateStudentListReport'])->name('report.student_list');
 Route::get('/report/student-roster', [ReportController::class, 'generateStudentRoster'])->name('report.studentRoster');
 
+use App\Http\Controllers\EvaluationController;
+
+Route::get('/evaluation/create', [EvaluationController::class, 'create'])->name('evaluation.create');
+Route::post('/evaluation/store', [EvaluationController::class, 'store'])->name('evaluation.store');
 
 
 

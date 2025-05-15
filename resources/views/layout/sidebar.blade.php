@@ -136,6 +136,13 @@
                     </li>
 
                     <li>
+                        <a href="{{ url('evaluation') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('evaluation') ? 'active-link' : '' }}">
+                            <img src="{{ asset('images/config.png') }}" alt="eval" class="sidebar-icon">
+                            <span>Evaluation</span>
+                        </a>
+                    </li>
+
+                    <li>
                         <a href="{{ url('accounts') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('accounts') ? 'active-link' : '' }}">
                             <img src="{{ asset('images/add_account.png') }}" alt="Accounts" class="sidebar-icon">
                             <span>Accounts</span>
