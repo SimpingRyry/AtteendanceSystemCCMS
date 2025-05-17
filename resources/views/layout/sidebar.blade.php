@@ -131,7 +131,7 @@
                 @if (Auth::user()->role !== 'officer')
                     <li>
                         <a href="{{ url('device_page') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('device_page') ? 'active-link' : '' }}">
-                            <img src="{{ asset('images/record_ico.png') }}" alt="Device" class="sidebar-icon">
+                            <img src="{{ asset('images/device_ico.png') }}" alt="Device" class="sidebar-icon">
                             <span>Device</span>
                         </a>
                     </li>
