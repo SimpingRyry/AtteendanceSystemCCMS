@@ -138,14 +138,14 @@
 
                     <li>
                         <a href="{{ url('config') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('config') ? 'active-link' : '' }}">
-                            <img src="{{ asset('images/config.png') }}" alt="Configure" class="sidebar-icon">
+                            <img src="{{ asset('images/config_ico.png') }}" alt="Configure" class="sidebar-icon">
                             <span>Configure</span>
                         </a>
                     </li>
 
                     <li>
                         <a href="{{ url('evaluation') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('evaluation') ? 'active-link' : '' }}">
-                            <img src="{{ asset('images/config.png') }}" alt="eval" class="sidebar-icon">
+                            <img src="{{ asset('images/evaluation_ico.png') }}" alt="eval" class="sidebar-icon">
                             <span>Evaluation</span>
                         </a>
                     </li>
