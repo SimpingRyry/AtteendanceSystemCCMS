@@ -122,6 +122,16 @@
                         <small class="form-text text-muted">Set the fine for officers who arrive late.</small>
                     </div>
                 </div>
+                <div class="row mb-4">
+    <div class="col-md-6">
+        <label class="form-label fw-semibold">Grace Period (Minutes)</label>
+        <div class="input-group">
+            <input type="number" name="grace_period_minutes" class="form-control" value="{{ (int) ($fines->grace_period_minutes ?? 0) }}" min="0" step="1">
+            <span class="input-group-text">minutes</span>
+        </div>
+        <small class="form-text text-muted">Set how many minutes after the call time a student can time in before being marked late.</small>
+    </div>
+</div>
                 <div class="text-end mt-4">
                     <button type="submit" class="btn btn-primary px-4">Save Fines</button>
                 </div>
