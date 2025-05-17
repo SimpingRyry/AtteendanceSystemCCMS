@@ -27,91 +27,74 @@
     @include('layout.navbar')
     @include('layout.sidebar')
 
-<main class="container mt-5 pt-4 d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-        <div class="w-75">
+    <main class="d-flex justify-content-center align-items-start py-5" style="min-height: 100vh; background-color: #f8f9fa;">
+    <div class="container" style="max-width: 960px; width: 100%;">
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
-                <div class="container outer-box mt-3 pt-1 pb-4">
-            <div class="container inner-glass shadow p-4" id="main_box">
-<div class="card shadow mb-5 border-0 rounded-2 p-4">
-    <h4 class="fw-bold mb-3">Fine Configuration History</h4>
-
-    <!-- Search bar -->
-    <div class="mb-3">
-        <input type="text" class="form-control" id="fineSearch" placeholder="Search fine history...">
-    </div>
-
-    <div class="table-responsive">
-        <table class="table table-hover align-middle" id="fineHistoryTable">
-            <thead class="table-light">
-                <tr>
-                    <th scope="col">Type</th>
-                    <th>Amount (₱)</th>
-                    <th scope="col">Changed By</th>
-                    <th scope="col">Date Changed</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($history as $index => $record)
-                    <tr class="{{ $index >= 12 ? 'extra-row d-none' : '' }}">
-                        <td>{{ $record->type }}</td>
-                        <td>₱{{ number_format($record->amount, 0) }}</td>
-                        <td>{{ $record->updated_by ? \App\Models\User::find($record->updated_by)->name : 'System' }}</td>
-                        <td>{{ \Carbon\Carbon::parse($record->changed_at)->format('M d, Y h:i A') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="text-center text-muted">No fine history found.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <!-- See More / See Less Button -->
-    @if(count($history) > 12)
-        <div class="text-center mt-3">
-            <button id="toggleBtn" class="btn btn-outline-primary">See More</button>
+        <div class="mb-4">
+            <h2 class="fw-bold" style="color: #232946;">Configure</h2>
+            <small style="color: #989797;">Manage /</small>
+            <small style="color: #444444;">Configure</small>
         </div>
-    @endif
-</div>
 
-<!-- JavaScript -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const toggleBtn = document.getElementById('toggleBtn');
-        let expanded = false;
+        <div class="card shadow border-0 rounded-3 p-4 mb-4">
+            <h4 class="fw-bold mb-3">Fine Configuration History</h4>
 
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', function () {
-                const rows = document.querySelectorAll('.extra-row');
-                rows.forEach(row => row.classList.toggle('d-none'));
+            <!-- Search bar -->
+            <div class="mb-3">
+                <input type="text" class="form-control" id="fineSearch" placeholder="Search fine history...">
+            </div>
 
-                expanded = !expanded;
-                toggleBtn.textContent = expanded ? 'See Less' : 'See More';
-            });
-        }
-    });
-</script>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="fineHistoryTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">Type</th>
+                            <th>Amount (₱)</th>
+                            <th scope="col">Changed By</th>
+                            <th scope="col">Date Changed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($history as $index => $record)
+                            <tr class="{{ $index >= 12 ? 'extra-row d-none' : '' }}">
+                                <td>{{ $record->type }}</td>
+                                <td>₱{{ number_format($record->amount, 0) }}</td>
+                                <td>{{ $record->updated_by ? \App\Models\User::find($record->updated_by)->name : 'System' }}</td>
+                                <td>{{ \Carbon\Carbon::parse($record->changed_at)->format('M d, Y h:i A') }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No fine history found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
 
+            @if(count($history) > 12)
+                <div class="text-center mt-3">
+                    <button id="toggleBtn" class="btn btn-outline-primary">See More</button>
+                </div>
+            @endif
+        </div>
 
         <!-- Fine Configuration -->
-        <div class="card shadow mb-5 border-0 rounded-2 p-4">
+        <div class="card shadow border-0 rounded-3 p-4 mb-4">
             <h4 class="fw-bold mb-4">Fine Configuration</h4>
             <form action="{{ route('settings.updateFines') }}" method="POST">
                 @csrf
-                <div class="row mb-3">
-                    <!-- Absentee Fine (Member) -->
-<div class="col-md-6">
-    <label class="form-label fw-semibold">Absentee Fine (Member)</label>
-    <div class="input-group">
-        <span class="input-group-text">₱</span>
-        <input type="number" name="absent_member" class="form-control" value="{{ (int) ($fines->absent_member ?? 0) }}" min="0" step="1">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Absentee Fine (Member)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" name="absent_member" class="form-control" value="{{ (int) ($fines->absent_member ?? 0) }}" min="0" step="1">
+                        </div>
+                        <small class="form-text text-muted">Set the fine for members who are absent.</small>
+                    </div>
 
-    </div>
-<small class="form-text text-muted">Set the fine for members who are absent.</small>
-</div>                                                                                                                                                              
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Absentee Fine (Officer)</label>
                         <div class="input-group">
@@ -120,8 +103,7 @@
                         </div>
                         <small class="form-text text-muted">Set the fine for officers who are absent.</small>
                     </div>
-                </div>
-                <div class="row mb-4">
+
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Late Fine (Member)</label>
                         <div class="input-group">
@@ -130,6 +112,7 @@
                         </div>
                         <small class="form-text text-muted">Set the fine for members who arrive late.</small>
                     </div>
+
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Late Fine (Officer)</label>
                         <div class="input-group">
@@ -139,36 +122,46 @@
                         <small class="form-text text-muted">Set the fine for officers who arrive late.</small>
                     </div>
                 </div>
-                <div class="text-end">
+                <div class="text-end mt-4">
                     <button type="submit" class="btn btn-primary px-4">Save Fines</button>
                 </div>
             </form>
         </div>
 
-<!-- Academic Year and Term Configuration -->
-<div class="card shadow border-0 rounded-2 p-4">
-    <h4 class="fw-bold mb-4">Academic Year & Term Settings</h4>
-    <form action="{{ route('settings.updateAcademicYear') }}" method="POST">
-        @csrf
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Academic Year & Term</label>
-            <input
-                type="text"
-                name="academic_term"
-                class="form-control"
-                placeholder="e.g., 24-1 First Sem A.Y. 2024-2025"
-                value="{{ $academic_term ?? '' }}"
-            >
-            <small class="form-text text-muted">Example: 24-1 First Sem A.Y. 2024-2025</small>
+        <!-- Academic Year and Term Settings -->
+        <div class="card shadow border-0 rounded-3 p-4">
+            <h4 class="fw-bold mb-4">Academic Year & Term Settings</h4>
+            <form action="{{ route('settings.updateAcademicYear') }}" method="POST">
+                @csrf
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Academic Year & Term</label>
+                    <input type="text" name="academic_term" class="form-control" placeholder="e.g., 24-1 First Sem A.Y. 2024-2025" value="{{ $academic_term ?? '' }}">
+                    <small class="form-text text-muted">Example: 24-1 First Sem A.Y. 2024-2025</small>
+                </div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success px-4">Save Academic Settings</button>
+                </div>
+            </form>
         </div>
-        <div class="text-end">
-            <button type="submit" class="btn btn-success px-4">Save Academic Settings</button>
-        </div>
-    </form>
-</div>
-</div>
-</div>
-    </main>
+    </div>
+
+    <!-- JS toggle functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleBtn = document.getElementById('toggleBtn');
+            let expanded = false;
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function () {
+                    const rows = document.querySelectorAll('.extra-row');
+                    rows.forEach(row => row.classList.toggle('d-none'));
+                    toggleBtn.textContent = expanded ? 'See More' : 'See Less';
+                    expanded = !expanded;
+                });
+            }
+        });
+    </script>
+</main>
 </body>
 <script>
 document.getElementById("fineSearch").addEventListener("keyup", function() {
