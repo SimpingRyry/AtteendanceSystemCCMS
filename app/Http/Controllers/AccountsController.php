@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AccountsController extends Controller
 {
@@ -18,6 +19,25 @@ class AccountsController extends Controller
         return view('accounts', compact('users'));
     }
 
+    public function showAdmins()
+{
+    $users = User::select('id', 'name', 'email', 'role', 'org')
+                      ->where('role', 'like', '%admin%')
+                      ->get();
+
+    return view('accounts', compact('users'));
+}
+public function showOfficers()
+{
+    $currentOrg = Auth::user()->org;
+
+    $users = User::select('id', 'name', 'email', 'role', 'org')
+                ->where('role', 'like', '%officer%')
+                ->where('org', $currentOrg)
+                ->get();
+
+    return view('officers', compact('users'));
+}
     public function update(Request $request)
 {
     // Validate the input first

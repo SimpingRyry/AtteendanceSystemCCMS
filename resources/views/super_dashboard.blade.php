@@ -58,16 +58,16 @@
                 </div>
                 <div class="col-md-3">
                     <div class="card text-center shadow-sm p-3 rounded-4">
-                        <h6 class="text-muted">Active Users</h6>
+                        <h6 class="text-muted">Users</h6>
                         <h2>2,415</h2>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card text-center shadow-sm p-3 rounded-4">
-                        <h6 class="text-muted">Total Fines</h6>
-                        <h2>₱25,730</h2>
-                    </div>
-                </div>
+    <div class="card text-center shadow-sm p-3 rounded-4">
+        <h6 class="text-muted">Total Students</h6>
+        <h2>1,234</h2>
+    </div>
+</div>
             </div>
 
             <!-- Charts Row -->
@@ -82,12 +82,13 @@
 
                 <!-- User Registration Trends -->
                 <div class="col-lg-6">
-                    <div class="card shadow-sm p-3 rounded-4">
-                        <h6 class="mb-3 text-center">User Registration Trends</h6>
-                        <canvas id="registrationChart" style="height: 300px;"></canvas>
-                    </div>
-                </div>
-            </div>
+  <div class="card shadow-sm p-3 rounded-4">
+    <h6 class="mb-3 text-center">Student Distribution by Program</h6>
+    <div class="chart-container" style="max-width: 350px; margin: auto;">
+      <canvas id="studentProgramPieChart" width="300" height="290"></canvas>
+    </div>
+  </div>
+</div>     </div>
 
             <!-- Table & Events Row -->
             <div class="row g-4">
@@ -156,6 +157,30 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+        const ctx = document.getElementById('studentProgramPieChart').getContext('2d');
+new Chart(ctx, {
+    type: 'pie',
+    data: {
+        labels: ['BSIT', 'BSIS'],
+        datasets: [{
+            data: [750, 484],  // Example data counts for BSIT and BSIS
+            backgroundColor: ['#3498db', '#9b59b6'],  // Blue and Purple
+            hoverOffset: 30
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    boxWidth: 20,
+                    padding: 15
+                }
+            }
+        }
+    }
+});
         const absenteeCtx = document.getElementById('absenteesChart').getContext('2d');
         new Chart(absenteeCtx, {
             type: 'bar',

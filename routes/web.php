@@ -57,7 +57,10 @@ Route::get('/payment', function () {
     return view('payment_page2');
 });
 
-Route::get('/accounts', [AccountsController::class, 'show']);
+Route::get('/accounts', [AccountsController::class, 'showAdmins']);
+
+Route::get('/officers', [AccountsController::class, 'showOfficers']);
+
 
 Route::get('/profile', function () {
     return view('profile');
@@ -79,7 +82,9 @@ Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
 Route::get('/device_page', function () {
     return view('device_page');
 });
-
+Route::get('/student_payment', function () {
+    return view('student_payment');
+});
 Route::get('/reports', function () {
     return view('reports');
 });
@@ -108,6 +113,7 @@ Route::get('/report/student-list', [ReportController::class, 'generateStudentLis
 Route::get('/report/student-roster', [ReportController::class, 'generateStudentRoster'])->name('report.studentRoster');
 
 use App\Http\Controllers\EvaluationController;
+use Illuminate\Console\Scheduling\Schedule;
 
 Route::get('/evaluation/create', [EvaluationController::class, 'create'])->name('evaluation.create');
 Route::post('/evaluation/store', [EvaluationController::class, 'store'])->name('evaluation.store');
@@ -118,7 +124,7 @@ Route::post('/orgs', [OrgListController::class, 'store'])->name('orgs.store');
 
 Route::post('/student', [ScheduleController::class, 'generatePDF'])->name('generate.memo.pdf');
 Route::post('/import', [ImportController::class, 'import'])->name('import');
-Route::post('/registration', [StudentController::class, 'store'])->name('register');
+Route::post('/student', [StudentController::class, 'store'])->name('register');
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::get('/login', [HomeController::class, 'showlogin'])->name('login');
 
@@ -131,3 +137,6 @@ Route::post('/logout', function () {
     request()->session()->regenerateToken();
     return redirect('/login');
 })->name('logout');
+
+Route::post('/generate-biometrics-schedule', [ScheduleController::class, 'generateBiometricsSchedule']);
+

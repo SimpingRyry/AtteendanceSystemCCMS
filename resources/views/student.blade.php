@@ -36,282 +36,161 @@
   @include('layout.sidebar')
 
   <!------------------------------------------------------ MAIN_BOX -------------------------------------------------------->
-  <main>
-    <div class="container outer-box mt-5 pt-5 pb-4 shadow">
-      <div class="container-fluid">
-        <!-- Heading -->
-        <div class="mb-3">
-          <h2 class="fw-bold" style="color: #232946;">Students</h2>
-          <small style="color: #989797;">Manage /</small>
-          <small style="color: #444444;">Student</small>
-        </div>
+  <main class="pt-5">
+  <div class="container bg-white rounded-4 p-4 shadow-sm">
 
-        <!-- Main Card -->
-        <div class="card shadow-sm p-4">
-  <div class="row g-3">
-    @foreach (['Organization', 'Block', 'Year Level', 'Status'] as $label)
-    <div class="col-md">
-      <div class="card h-100 shadow-sm">
-        <div class="card-body">
-          <h6 class="card-title">{{ $label }}</h6>
+    <!-- Heading -->
+    <div class="mb-4">
+      <h2 class="fw-bold text-dark">Students</h2>
+      <small class="text-muted">Manage / </small>
+      <small class="text-body-secondary">Student</small>
+    </div>
+
+    <!-- Button Row -->
+    <div class="d-flex justify-content-end gap-2 mb-4">
+      <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#uploadCSVModal">
+        <i class="bi bi-upload me-1"></i> Import CSV
+      </button>
+      <button class="btn btn-outline-success rounded-pill" data-bs-toggle="modal" data-bs-target="#scheduleModal">
+        <i class="bi bi-calendar-check me-1"></i> Generate Schedule
+      </button>
+    </div>
+
+    <!-- Filter Cards -->
+    <div class="row g-3 mb-4">
+      @foreach (['Organization', 'Block', 'Year Level', 'Status'] as $label)
+      <div class="col-md">
+        <div class="border rounded-3 p-3 bg-light">
+          <label class="form-label small text-muted">{{ $label }}</label>
           @if ($label == 'Organization')
-          <select class="form-select">
+          <select class="form-select form-select-sm">
             <option selected disabled>Select Organization</option>
             <option>ITS</option>
             <option>Praxis</option>
           </select>
           @else
-          @if ($label == 'Course')
-          <input type="text" class="form-control" placeholder="Enter Course">
-          @else
-          <select class="form-select">
+          <select class="form-select form-select-sm">
             <option selected disabled>Select {{ $label }}</option>
             @if ($label == 'Block')
-            @foreach (['A', 'B', 'C', 'D'] as $option)
-            <option>{{ $option }}</option>
-            @endforeach
+              @foreach (['A', 'B', 'C', 'D'] as $option)
+              <option>{{ $option }}</option>
+              @endforeach
             @elseif ($label == 'Year Level')
-            @foreach (range(1, 4) as $year)
-            <option>{{ $year }}</option>
-            @endforeach
+              @foreach (range(1, 4) as $year)
+              <option>{{ $year }}</option>
+              @endforeach
             @else
-            <option>Registered</option>
-            <option>Unregistered</option>
+              <option>Registered</option>
+              <option>Unregistered</option>
             @endif
           </select>
           @endif
-          @endif
         </div>
       </div>
+      @endforeach
     </div>
-    @endforeach
-  </div>
 
-  <div class="row mb-4 mt-4 align-items-center justify-content-between">
-  <!-- Import Button Left -->
-  <div class="col-md-6 d-flex">
-    <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#uploadCSVModal" >
-      <i class="bi bi-plus-lg me-2"></i> Import CSV
-    </button>
-  </div>
+    <!-- Search -->
+    <div class="d-flex justify-content-end mb-4">
+      <div class="input-group" style="max-width: 350px;">
+        <input type="text" class="form-control form-control-sm rounded-start" placeholder="Search...">
+        <button class="btn btn-success btn-sm rounded-end">Search</button>
+      </div>
+    </div>
 
-  <!-- Search Right -->
-  <div class="col-md-6 d-flex justify-content-md-end mt-6 mt-md-0">
-    <div class="d-flex" style="gap: 8px; max-width: 350px; margin-top: 15px;">
-      <input type="text" class="form-control" placeholder="Enter search...">
-      <button class="btn btn-success">Search</button>
+    <!-- Student List -->
+    <div class="bg-white border rounded-4 p-4 shadow-sm">
+      <h5 class="fw-bold text-dark mb-3">Student List</h5>
+      @if($students->isEmpty())
+      <p class="text-muted">No students found.</p>
+      @else
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>No</th>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Gender</th>
+              <th>Course</th>
+              <th>Year</th>
+              <th>Units</th>
+              <th>Section</th>
+              <th>Contact</th>
+              <th>Birth Date</th>
+              <th>Address</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($students as $student)
+            <tr>
+              <td>{{ $student->no }}</td>
+              <td>{{ $student->id_number }}</td>
+              <td>{{ $student->name }}</td>
+              <td>{{ $student->gender }}</td>
+              <td>{{ $student->course }}</td>
+              <td>{{ $student->year }}</td>
+              <td>{{ $student->units }}</td>
+              <td>{{ $student->section }}</td>
+              <td>{{ $student->contact_no }}</td>
+              <td>{{ $student->birth_date }}</td>
+              <td>{{ $student->address }}</td>
+              <td>
+                @if($student->status === 'Unregistered')
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
+                @else
+                <span class="badge bg-success">Registered</span>
+                @endif
+              </td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+      @endif
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-end mt-3">
+        <nav>
+          <ul class="pagination pagination-sm">
+            <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+            <li class="page-item"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+          </ul>
+        </nav>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Upload Modal -->
-<div class="modal fade" id="uploadCSVModal" tabindex="-1" aria-labelledby="uploadCSVModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="csvForm" action="{{ route('import') }}" method="post" enctype="multipart/form-data" onsubmit="return validateCSV();">
+  <!-- Upload Modal -->
+  <div class="modal fade" id="uploadCSVModal" tabindex="-1" aria-labelledby="uploadCSVModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form class="modal-content" id="csvForm" action="{{ route('import') }}" method="post" enctype="multipart/form-data" onsubmit="return validateCSV();">
         @csrf
         <div class="modal-header">
-          <h5 class="modal-title" id="uploadCSVModalLabel">Upload CSV File</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title">Upload CSV File</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <div class="form-text text-muted mb-2">
-            Upload a .csv file
-          </div>
-          <div class="input-group input-group-sm">
-            <input type="file" class="form-control" name="importFile" accept=".csv" required>
-          </div>
+          <small class="text-muted d-block mb-2">Only .csv files are supported</small>
+          <input type="file" class="form-control form-control-sm" name="importFile" accept=".csv" required>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button class="btn btn-primary" type="submit">Upload</button>
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Upload</button>
         </div>
       </form>
     </div>
   </div>
-</div>     
 
-          <!-- Student List -->
-          <div class="card shadow-sm p-4 mt-2">
-            <h5 class="mb-3 fw-bold" style="color: #232946;">Student List</h5>
-
-            <!-- Displaying students list -->
-            @if($students->isEmpty())
-            <p>No students found.</p>
-            @else
-            <table class="table table-bordered">
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>Student ID</th>
-                  <th>Name</th>
-                  <th>Gender</th>
-                  <th>Course</th>
-                  <th>Year</th>
-                  <th>Units</th>
-                  <th>Section</th>
-                  <th>Contact Number</th>
-                  <th>Birth Date</th>
-                  <th>Address</th>
-
-                  <!-- Add other columns as needed -->
-                </tr>
-              </thead>
-              <tbody>
-                @foreach($students as $student)
-                <tr>
-    <td>{{ $student->no }}</td>
-    <td>{{ $student->id_number }}</td>
-    <td>{{ $student->name }}</td>
-    <td>{{ $student->gender }}</td>
-    <td>{{ $student->course }}</td>
-    <td>{{ $student->year }}</td>
-    <td>{{ $student->units }}</td>
-    <td>{{ $student->section }}</td>
-    <td>{{ $student->contact_no }}</td>
-    <td>{{ $student->birth_date }}</td>
-    <td>{{ $student->address }}</td>
-    <td>
-      @if($student->status === 'Unregistered')
-        <!-- Button to trigger modal -->
-        <button type="button" class="btn btn-primary register-btn" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
-        @else
-        <span class="badge bg-success">Registered</span>
-      @endif
-
-                  <!-- Add other columns as needed -->
-                </tr>
-                @endforeach
-              </tbody>
-            </table>
-            @endif
-
-            <!-- Pagination -->
-            <div class="d-flex justify-content-end mt-3">
-              <nav>
-                <ul class="pagination">
-                  <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Previous">
-                      <span aria-hidden="true">&laquo;</span>
-                    </a>
-                  </li>
-                  <li class="page-item"><a class="page-link" href="#">1</a></li>
-                  <li class="page-item"><a class="page-link" href="#">2</a></li>
-                  <li class="page-item"><a class="page-link" href="#">3</a></li>
-                  <li class="page-item">
-                    <a class="page-link" href="#" aria-label="Next">
-                      <span aria-hidden="true">&raquo;</span>
-                    </a>
-                  </li>
-                </ul>
-              </nav>
-            </div>
-
-            <!-- Generate Schedule Button -->
-
-          </div>
-          <div class="text-center mt-4">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generateScheduleModal">
-              Generate Schedule
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal fade" id="generateScheduleModal" tabindex="-1" aria-labelledby="generateScheduleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-
-            <div class="modal-header">
-              <h5 class="modal-title" id="generateScheduleModalLabel">Generate Schedule</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body">
-              <form id="generateScheduleForm" method="POST" action="{{ route('generate.memo.pdf') }}">
-                @csrf
-                <div class="mb-3">
-                  <label for="course" class="form-label">Course</label>
-                  <select class="form-select" name="course" id="course" required>
-                    <option selected disabled>Select Course</option>
-                    <option>BSIT</option>
-                    <option>BSIS</option>
-                  </select>
-                </div>
-
-                <div class="mb-3">
-                  <label for="block" class="form-label">Block</label>
-                  <select class="form-select" name="block" id="block" required>
-                    <option selected disabled>Select Block</option>
-                    <option>A</option>
-                    <option>B</option>
-                    <option>C</option>
-                  </select>
-                </div>
-
-                <div class="mb-3">
-                  <label for="year" class="form-label">Year</label>
-                  <select class="form-select" name="year" id="year" required>
-                    <option selected disabled>Select Year</option>
-                    <option>1</option>
-                    <option>2</option>
-                    <option>3</option>
-                    <option>4</option>
-                  </select>
-                </div>
-
-                <div class="mb-3">
-                  <label for="venue" class="form-label">Venue</label>
-                  <input type="text" class="form-control" name="venue" id="venue" placeholder="Enter venue" required>
-                </div>
-
-                <div class="mb-3">
-                  <label for="date" class="form-label">Date</label>
-                  <input type="date" class="form-control" name="date" id="date" required>
-                </div>
-
-                <div class="mb-3">
-                  <label for="startTime" class="form-label">Start Time</label>
-                  <input type="time" class="form-control" name="startTime" id="startTime" required>
-                </div>
-
-                <div class="mb-3">
-                  <label for="endTime" class="form-label">End Time</label>
-                  <input type="time" class="form-control" name="endTime" id="endTime" required>
-                </div>
-
-                <!-- Stretch Submit Button -->
-                <div class="d-grid">
-                  <button type="submit" class="btn btn-success">Generate Schedule</button>
-                </div>
-              </form>
-            </div>
-
-          </div>
-        </div>
-      </div>
+</main>
 
 
-      <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content text-center p-4">
-            <div class="modal-body">
-              <div class="mb-3">
-                <!-- Check Animation -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="green" class="bi bi-check-circle-fill animate__animated animate__bounceIn" viewBox="0 0 16 16">
-                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.07 0l4-4a.75.75 0 1 0-1.06-1.06L7.5 9.44 5.53 7.47a.75.75 0 0 0-1.06 1.06l2.5 2.5z" />
-                </svg>
-              </div>
-              <h5 class="modal-title mb-2" id="successModalLabel">Schedule Generated Successfully!</h5>
-              <button type="button" class="btn btn-success mt-3" data-bs-dismiss="modal">OK</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-      <div class="modal fade" id="registerStudentModal" tabindex="-1" aria-labelledby="registerStudentModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+<div class="modal fade" id="registerStudentModal" tabindex="-1" aria-labelledby="registerStudentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable" style="max-width: 70%;">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title fw-bold" id="registerStudentModalLabel" style="color: #5CE1E6;">Student Registration</h5>
@@ -354,14 +233,12 @@
               <input type="text" class="form-control" id="modalBirthDate" value="${data.birth_date}" readonly>
             </div>
             <div class="col-md-6">
-  <label>Fingerprint Scan</label>
-  <div style="border: 1px solid #ccc; border-radius: 8px; width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; background-color: #f9f9f9;">
-    <!-- Fingerprint Image Preview -->
-    <img id="fingerprintImage" src="" alt="Fingerprint will appear here" style="max-height: 100%; max-width: 100%; display: none;">
-  </div>
-  <!-- Hidden input to hold fingerprint data (if needed) -->
-  <input type="hidden" name="fingerprint_data" id="fingerprintData">
-</div>
+              <label>Fingerprint Scan</label>
+              <div style="border: 1px solid #ccc; border-radius: 8px; width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; background-color: #f9f9f9;">
+                <img id="fingerprintImage" src="" alt="Fingerprint will appear here" style="max-height: 100%; max-width: 100%; display: none;">
+              </div>
+              <input type="hidden" name="fingerprint_data" id="fingerprintData">
+            </div>
           </div>
 
           <!-- Contact Details -->
@@ -402,10 +279,26 @@
                 <option value="Supervisor">Supervisor</option>
                 <option value="Admin Officer">Admin Officer</option>
               @else
-                <option value="">No roles available for this organization</option>
+                <option value="">-- Select Role --</option>
+                <option value="member">Member</option>
+                <option value="officer">Officer</option>
+
               @endif
             </select>
           </div>
+
+          <!-- Organization Dropdown for Super Admin -->
+          @if(auth()->user()->role == 'super admin')
+            <div class="mb-4">
+              <label for="organizationSelect">Select Organization</label>
+              <select name="organization" id="organizationSelect" class="form-select" required>
+                <option value="">-- Select Organization --</option>
+                @foreach ($org_list as $org)
+        <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
+    @endforeach
+              </select>
+            </div>
+          @endif
 
           <!-- Profile Picture -->
           <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Profile Picture</h4>
@@ -415,16 +308,13 @@
               <button type="button" class="btn btn-outline-secondary" onclick="showCamera()">Capture Image</button>
             </div>
 
-            <!-- Upload Input -->
             <input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
 
-            <!-- Camera Stream -->
             <div id="cameraContainer" style="display: none; text-align: center;">
               <video id="cameraStream" width="100%" height="300" autoplay playsinline style="border-radius: 8px; border: 1px solid #ccc;"></video>
               <button type="button" class="btn btn-success mt-2" onclick="capturePhoto()">Take Picture</button>
             </div>
 
-            <!-- Captured Image Preview -->
             <img id="capturedImage" class="img-fluid mt-3" style="display: none; max-height: 300px;" />
             <input type="hidden" name="captured_image" id="capturedImageInput">
           </div>
@@ -440,9 +330,32 @@
 </div>
 
 
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ url('/generate-biometrics-schedule') }}">
+        @csrf
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="scheduleModalLabel">Set Schedule Date</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-    </div>
-  </main>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="scheduleDate" class="form-label">Schedule Date</label>
+                    <input type="date" class="form-control" id="scheduleDate" name="date" required>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Generate PDF</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </form>
+  </div>
+</div>
+
 
 
 
@@ -629,7 +542,27 @@ function fillModalData(button) {
 </script>
 
 
+<style>
+  body {
+  background-color: #f9fafb;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
 
+h2, h5 {
+  color: #1e293b;
+}
+
+.btn {
+  transition: all 0.2s ease;
+}
+.btn:hover {
+  opacity: 0.9;
+}
+
+input::placeholder {
+  color: #cbd5e1;
+}
+</style>
 
 
 </html>

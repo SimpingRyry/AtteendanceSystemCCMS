@@ -166,8 +166,12 @@
                         <div class="mb-3 col-md-6">
                             <label for="course" class="form-label">Tag Course</label>
                             <select class="form-select" id="course" name="course" onchange="appendCourseTag()">
+                            <option value="">-- Select Course --</option>
+
                                 <option value="BSIS">BSIS</option>
                                 <option value="BSIT">BSIT</option>
+                                <option value="All">All</option>
+
                             </select>
                         </div>
                         <div class="mb-3 col-md-6">
@@ -301,8 +305,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
-
-    <script>
+        <script>
     function updateTimepickers() {
         var timeouts = document.getElementById('timeouts').value;
         if (timeouts == '2') {
@@ -315,35 +318,65 @@
     }
 
     function appendCourseTag() {
-        var course = document.getElementById('course').value;
-        var courseTags = document.getElementById('courseTags');
+        var course = document.getElementById('course').value.trim();
+        if (!course) return;
 
-        // Check if the course tag already exists
+        var courseTags = document.getElementById('courseTags');
         var existingTags = document.querySelectorAll('#courseTags .badge');
-        for (var i = 0; i < existingTags.length; i++) {
-            if (existingTags[i].textContent === course) {
-                alert("This course is already added.");
+
+        // If 'All' is already selected, do not allow other courses
+        for (let tag of existingTags) {
+            if (tag.firstChild.textContent === 'All') {
+                alert("You cannot add other courses when 'All' is selected.");
                 return;
             }
         }
 
-        // Create a new tag element
-        var tag = document.createElement('span');
-        tag.classList.add('badge', 'me-2', 'mt-2');
+        // If selecting 'All', clear previous tags
+        if (course === 'All') {
+            courseTags.innerHTML = '';
+        } else {
+            // Prevent adding 'All' if other courses are already added
+            for (let tag of existingTags) {
+                if (tag.firstChild.textContent === course) {
+                    alert("This course is already added.");
+                    return;
+                }
+            }
+        }
 
-        // Apply violet color for BSIS
-        if (course === "BSIS") {
+        // Create the tag
+        var tag = document.createElement('span');
+        tag.classList.add('badge', 'me-2', 'mt-2', 'd-inline-flex', 'align-items-center');
+
+        // Style based on course
+        if (course === 'BSIS') {
             tag.classList.add('bg-violet');
+        } else if (course === 'All') {
+            tag.classList.add('bg-secondary');
         } else {
             tag.classList.add('bg-info');
         }
 
-        tag.textContent = course;
+        // Add text
+        tag.appendChild(document.createTextNode(course));
 
-        // Append the tag to the tags container
+        // Add close button
+        var closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.classList.add('btn-close', 'btn-close-white', 'ms-2', 'btn-sm');
+        closeBtn.setAttribute('aria-label', 'Remove');
+        closeBtn.onclick = function () {
+            tag.remove();
+        };
+
+        tag.appendChild(closeBtn);
+
         courseTags.appendChild(tag);
     }
 </script>
+
+
 <style>
     /* Violet color for BSIS tag */
     .bg-violet {
@@ -369,12 +402,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Color coding
             if (event.extendedProps.course === 'BSIS') {
-                info.el.style.backgroundColor = '#8A2BE2';
-                info.el.style.borderColor = '#8A2BE2';
-            } else {
-                info.el.style.backgroundColor = '#007bff';
-                info.el.style.borderColor = '#007bff';
-            }
+    info.el.style.backgroundColor = '#8A2BE2'; // violet
+    info.el.style.borderColor = '#8A2BE2';
+} else if (event.extendedProps.course === 'All') {
+    info.el.style.backgroundColor = '#28a745'; // green
+    info.el.style.borderColor = '#28a745';
+} else {
+    info.el.style.backgroundColor = '#007bff'; // blue
+    info.el.style.borderColor = '#007bff';
+}
 
             // Create icon container (cloud)
             const iconContainer = document.createElement('div');
@@ -550,11 +586,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Determine badge color
             let badgeClass = 'bg-primary';
-            if (event.extendedProps.course === 'BSIT') {
-                badgeClass = 'bg-info text-dark';
-            } else if (event.extendedProps.course === 'BSIS') {
-                badgeClass = 'bg-purple text-white';
-            }
+
+if (event.extendedProps.course === 'BSIT') {
+    badgeClass = 'bg-info text-dark';
+} else if (event.extendedProps.course === 'BSIS') {
+    badgeClass = 'bg-purple text-white';
+} else if (event.extendedProps.course === 'All') {
+    badgeClass = 'bg-success text-white';
+}
 
             // Create list item
             const li = document.createElement('li');
@@ -589,6 +628,10 @@ function addEditTimeInput(value = '') {
 }
 </script>
 <style>
+    .bg-purple {
+    background-color: #8A2BE2 !important;
+   
+}
 /* Event styling with smaller fonts and subtle enhancements */
 .fc-event {
     position: relative;

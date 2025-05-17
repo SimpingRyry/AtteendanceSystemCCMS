@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\OrgList;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
@@ -87,7 +88,9 @@ class ImportController extends Controller
     public function show()
     {
         $students = Student::all();  // Get all students from the database
-        return view('student',compact('students'));  // Pass the students to the view
+        $org_list = OrgList::where('org_name', '!=', 'CCMS Student Government')->get(); 
+    
+        return view('student',compact('students','org_list'));  // Pass the students to the view
     }
 
     public function showUnregistered()

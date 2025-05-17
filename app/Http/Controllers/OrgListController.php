@@ -15,6 +15,12 @@ class OrgListController extends Controller
         $org_list = \App\Models\OrgList::all(); // fetch all orgs
         return view('manage_orgs_page', compact('org_list')); // pass it to view
     }
+
+    public function showOrg()
+{
+    $org_list = OrgList::all();
+    return view('student', compact('org_list'));
+}
     public function store(Request $request)
     {
         // Validate the incoming request

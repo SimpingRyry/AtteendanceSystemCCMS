@@ -51,7 +51,7 @@
                 </li>
 
                 <li>
-                    <a href="{{ url('payment') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('payment') ? 'active-link' : '' }}">
+                    <a href="{{ url('student_payment') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('student_payment') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/payment_ico.png') }}" alt="Payment" class="sidebar-icon">
                         <span>Fines / Statement of Accounts</span>
                     </a>
@@ -151,11 +151,18 @@
                     </li>
 
                     <li>
-                        <a href="{{ url('accounts') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('accounts') ? 'active-link' : '' }}">
-                            <img src="{{ asset('images/add_account.png') }}" alt="Accounts" class="sidebar-icon">
-                            <span>Accounts</span>
-                        </a>
-                    </li>
+    @if (Auth::user()->role === 'super admin')
+        <a href="{{ url('accounts') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('accounts') ? 'active-link' : '' }}">
+            <img src="{{ asset('images/add_account.png') }}" alt="Accounts" class="sidebar-icon">
+            <span>Accounts</span>
+        </a>
+    @elseif (Auth::user()->role === 'admin')
+        <a href="{{ url('officers') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('officers') ? 'active-link' : '' }}">
+            <img src="{{ asset('images/add_account.png') }}" alt="Officers" class="sidebar-icon">
+            <span>Officers</span>
+        </a>
+    @endif
+</li>
 
                     <li>
                         <a href="{{ url('manage_orgs_page') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}">

@@ -106,7 +106,7 @@
                 <th>Course</th>
                 <th>Section</th>
                 <th>Organization</th>
-                <th>Fines</th>
+                <th>Balance</th>
                 <th>Actions</th>
               </tr>
             </thead>

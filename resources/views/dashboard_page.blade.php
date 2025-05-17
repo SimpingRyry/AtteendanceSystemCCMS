@@ -82,11 +82,13 @@
 
                     <!-- Registration Status -->
                     <div class="col-lg-6">
-                        <div class="card shadow-sm p-3 rounded-4">
-                            <h6 class="mb-3 text-center">BSIT & BSIS Registration Status</h6>
-                            <canvas id="registrationChart" style="height: 300px;"></canvas>
-                        </div>
-                    </div>
+    <div class="card shadow-sm p-3 rounded-4">
+        <h6 class="mb-3 text-center">Registration Status</h6>
+        <div style="height: 300px; width: 220px; margin: auto;">
+            <canvas id="registrationChart"></canvas>
+        </div>
+    </div>
+</div>
                 </div>
 
                 <!-- Table & Events Row -->
@@ -185,51 +187,27 @@
             }
         });
 
-        const registrationCtx = document.getElementById('registrationChart').getContext('2d');
-        new Chart(registrationCtx, {
-            type: 'line', // Changed to line chart
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'], // Example months for trend
-                datasets: [{
-                    label: 'BSIT Registered',
-                    data: [200, 300, 350, 400, 450],
-                    borderColor: '#42a5f5', // Blue
-                    fill: false,
-                    tension: 0.4
-                }, {
-                    label: 'BSIT Unregistered',
-                    data: [50, 60, 75, 50, 45],
-                    borderColor: '#ef5350', // Red
-                    fill: false,
-                    tension: 0.4
-                }, {
-                    label: 'BSIS Registered',
-                    data: [300, 330, 350, 400, 450],
-                    borderColor: '#66bb6a', // Green
-                    fill: false,
-                    tension: 0.4
-                }, {
-                    label: 'BSIS Unregistered',
-                    data: [100, 120, 100, 80, 75],
-                    borderColor: '#ffca28', // Yellow
-                    fill: false,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+        const ctx = document.getElementById('registrationChart').getContext('2d');
+    const registrationChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Registered', 'Unregistered'],
+            datasets: [{
+                data: [120, 30],
+                backgroundColor: ['#4CAF50', '#F44336'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
                 }
             }
-        });
+        }
+    });
     </script>
 
     <!-- Bootstrap JS -->
