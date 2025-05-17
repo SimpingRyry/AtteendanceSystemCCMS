@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -50,17 +52,26 @@ Route::post('/fingerprint-upload', function (Request $request) {
     $id = $request->input('user_id');
     $image = $request->file('image');
 
-    $filename = 'fingerprints/user_' . $id . '_' . time() . '.' . $image->getClientOriginalExtension();
-    Log::info('Saved fingerprint image as: ' . $filename);
+    // Create a filename
+    $filename = 'user_' . $id . '_' . time() . '.' . $image->getClientOriginalExtension();
+    $relativePath = 'fingerprints/' . $filename;
+    $publicPath = public_path('fingerprints');
 
-    $path = $image->storeAs('public/fingerprints', basename($filename));
-    $url = Storage::url($path);
+    // Ensure the directory exists
+    if (!File::exists($publicPath)) {
+        File::makeDirectory($publicPath, 0755, true);
+    }
 
-    // Store the fingerprint image path temporarily in cache
+    // Move file to public/fingerprints
+    $image->move($publicPath, $filename);
+
+    // Create URL to the file
+    $url = url('fingerprints/' . $filename);
+
+    // Store temporarily in cache
     Cache::put('latest_fingerprint_image', $url, now()->addMinutes(5));
 
-    // Log what was stored in cache
-    Log::info('Cached fingerprint image URL:', ['url' => Cache::get('latest_fingerprint_image')]);
+    Log::info('Cached fingerprint image URL:', ['url' => $url]);
 
     return response()->json(['message' => 'Fingerprint received', 'url' => $url]);
 });
