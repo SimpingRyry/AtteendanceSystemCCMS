@@ -86,6 +86,7 @@ Route::get('/reports', function () {
 Route::get('/config', [SettingsController::class, 'index'])->name('settings.index');
 Route::post('/config/fines', [SettingsController::class, 'updateFines'])->name('settings.updateFines');
 Route::post('/config/academic', [SettingsController::class, 'updateAcademic'])->name('settings.updateAcademicYear');
+
 Route::get('/student', [StudentController::class, 'index']);
 
 Route::get('/manage_orgs_page', [App\Http\Controllers\OrgListController::class, 'index'])->name('orgs.index');

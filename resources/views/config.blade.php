@@ -32,6 +32,69 @@
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+                <div class="container outer-box mt-3 pt-1 pb-4">
+            <div class="container inner-glass shadow p-4" id="main_box">
+<div class="card shadow mb-5 border-0 rounded-2 p-4">
+    <h4 class="fw-bold mb-3">Fine Configuration History</h4>
+
+    <!-- Search bar -->
+    <div class="mb-3">
+        <input type="text" class="form-control" id="fineSearch" placeholder="Search fine history...">
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle" id="fineHistoryTable">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">Type</th>
+                    <th>Amount (₱)</th>
+                    <th scope="col">Changed By</th>
+                    <th scope="col">Date Changed</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($history as $index => $record)
+                    <tr class="{{ $index >= 12 ? 'extra-row d-none' : '' }}">
+                        <td>{{ $record->type }}</td>
+                        <td>₱{{ number_format($record->amount, 0) }}</td>
+                        <td>{{ $record->updated_by ? \App\Models\User::find($record->updated_by)->name : 'System' }}</td>
+                        <td>{{ \Carbon\Carbon::parse($record->changed_at)->format('M d, Y h:i A') }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">No fine history found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- See More / See Less Button -->
+    @if(count($history) > 12)
+        <div class="text-center mt-3">
+            <button id="toggleBtn" class="btn btn-outline-primary">See More</button>
+        </div>
+    @endif
+</div>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleBtn = document.getElementById('toggleBtn');
+        let expanded = false;
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function () {
+                const rows = document.querySelectorAll('.extra-row');
+                rows.forEach(row => row.classList.toggle('d-none'));
+
+                expanded = !expanded;
+                toggleBtn.textContent = expanded ? 'See Less' : 'See More';
+            });
+        }
+    });
+</script>
+
 
         <!-- Fine Configuration -->
         <div class="card shadow mb-5 border-0 rounded-2 p-4">
@@ -39,19 +102,21 @@
             <form action="{{ route('settings.updateFines') }}" method="POST">
                 @csrf
                 <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Absentee Fine (Member)</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="number" name="absent_member" class="form-control" value="{{ $fines->absent_member ?? 0 }}" min="0" step="1">
-                        </div>
-                        <small class="form-text text-muted">Set the fine for members who are absent.</small>
-                    </div>
+                    <!-- Absentee Fine (Member) -->
+<div class="col-md-6">
+    <label class="form-label fw-semibold">Absentee Fine (Member)</label>
+    <div class="input-group">
+        <span class="input-group-text">₱</span>
+        <input type="number" name="absent_member" class="form-control" value="{{ (int) ($fines->absent_member ?? 0) }}" min="0" step="1">
+
+    </div>
+<small class="form-text text-muted">Set the fine for members who are absent.</small>
+</div>                                                                                                                                                              
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Absentee Fine (Officer)</label>
                         <div class="input-group">
                             <span class="input-group-text">₱</span>
-                            <input type="number" name="absent_officer" class="form-control" value="{{ $fines->absent_officer ?? 0 }}" min="0" step="1">
+                            <input type="number" name="absent_officer" class="form-control" value="{{ (int) ($fines->absent_officer ?? 0) }}" min="0" step="1">
                         </div>
                         <small class="form-text text-muted">Set the fine for officers who are absent.</small>
                     </div>
@@ -61,7 +126,7 @@
                         <label class="form-label fw-semibold">Late Fine (Member)</label>
                         <div class="input-group">
                             <span class="input-group-text">₱</span>
-                            <input type="number" name="late_member" class="form-control" value="{{ $fines->late_member ?? 0 }}" min="0" step="1">
+                            <input type="number" name="late_member" class="form-control" value="{{ (int) ($fines->late_member ?? 0) }}" min="0" step="1">
                         </div>
                         <small class="form-text text-muted">Set the fine for members who arrive late.</small>
                     </div>
@@ -69,7 +134,7 @@
                         <label class="form-label fw-semibold">Late Fine (Officer)</label>
                         <div class="input-group">
                             <span class="input-group-text">₱</span>
-                            <input type="number" name="late_officer" class="form-control" value="{{ $fines->late_officer ?? 0 }}" min="0" step="1">
+                            <input type="number" name="late_officer" class="form-control" value="{{ (int) ($fines->late_officer ?? 0) }}" min="0" step="1">
                         </div>
                         <small class="form-text text-muted">Set the fine for officers who arrive late.</small>
                     </div>
@@ -80,37 +145,41 @@
             </form>
         </div>
 
-        <!-- Academic Year and Term Configuration -->
-        <div class="card shadow border-0 rounded-2 p-4">
-            <h4 class="fw-bold mb-4">Academic Year & Term Settings</h4>
-            <form action="{{ route('settings.updateAcademicYear') }}" method="POST">
-                @csrf
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Academic Year</label>
-                        <select name="academic_year" class="form-select">
-                            <option value="2024-2025" {{ ($settings->academic_year ?? '') === '2024-2025' ? 'selected' : '' }}>2024-2025</option>
-                            <option value="2025-2026" {{ ($settings->academic_year ?? '') === '2025-2026' ? 'selected' : '' }}>2025-2026</option>
-                            <option value="2026-2027" {{ ($settings->academic_year ?? '') === '2026-2027' ? 'selected' : '' }}>2026-2027</option>
-                            <!-- Add more years as needed -->
-                        </select>
-                        <small class="form-text text-muted">Select the current academic year.</small>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Current Term</label>
-                        <select name="term" class="form-select">
-                            <option value="1st Semester" {{ ($settings->term ?? '') === '1st Semester' ? 'selected' : '' }}>1st Semester</option>
-                            <option value="2nd Semester" {{ ($settings->term ?? '') === '2nd Semester' ? 'selected' : '' }}>2nd Semester</option>
-                            <option value="Summer" {{ ($settings->term ?? '') === 'Summer' ? 'selected' : '' }}>Summer</option>
-                        </select>
-                        <small class="form-text text-muted">Select the current academic term.</small>
-                    </div>
-                </div>
-                <div class="text-end">
-                    <button type="submit" class="btn btn-success px-4">Save Academic Settings</button>
-                </div>
-            </form>
+<!-- Academic Year and Term Configuration -->
+<div class="card shadow border-0 rounded-2 p-4">
+    <h4 class="fw-bold mb-4">Academic Year & Term Settings</h4>
+    <form action="{{ route('settings.updateAcademicYear') }}" method="POST">
+        @csrf
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Academic Year & Term</label>
+            <input
+                type="text"
+                name="academic_term"
+                class="form-control"
+                placeholder="e.g., 24-1 First Sem A.Y. 2024-2025"
+                value="{{ $academic_term ?? '' }}"
+            >
+            <small class="form-text text-muted">Example: 24-1 First Sem A.Y. 2024-2025</small>
         </div>
+        <div class="text-end">
+            <button type="submit" class="btn btn-success px-4">Save Academic Settings</button>
+        </div>
+    </form>
+</div>
+</div>
+</div>
     </main>
 </body>
+<script>
+document.getElementById("fineSearch").addEventListener("keyup", function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#fineHistoryTable tbody tr");
+
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+    });
+});
+</script>
+
 </html>
