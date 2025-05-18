@@ -114,59 +114,58 @@
 
     {{-- Modal: Add Organization --}}
     <div class="modal fade" id="addOrgModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content shadow glassy-bg">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Organization</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('orgs.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="org_name" class="form-label">Organization Name</label>
-                            <input type="text" name="org_name" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea name="description" class="form-control" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="org_logo" class="form-label">Organization Logo</label>
-                            <input type="file" name="org_logo" class="form-control" accept="image/*" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="bg_image" class="form-label">Background Image</label>
-                            <input type="file" name="bg_image" class="form-control" accept="image/*" required>
-                        </div>
-                        <hr>
-                    <h5 class="mt-4">Org Admin Account</h5>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow glassy-bg">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Organization</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('orgs.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
                     <div class="mb-3">
-                        <label for="username" class="form-label">Full Name</label>
-                        <input type="text" name="name" class="form-control" required>
-
+                        <label for="org_name" class="form-label">Organization Name <span class="text-danger">*</span></label>
+                        <input type="text" name="org_name" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
+                        <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                        <textarea name="description" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="org_logo" class="form-label">Organization Logo <span class="text-danger">*</span></label>
+                        <input type="file" name="org_logo" class="form-control" accept="image/*" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bg_image" class="form-label">Background Image <span class="text-danger">*</span></label>
+                        <input type="file" name="bg_image" class="form-control" accept="image/*" required>
+                    </div>
+                    <hr>
+                    <h5 class="mt-4">Org Admin Account</h5>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                         <input type="email" name="email" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
+                        <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
                         <input type="password" name="password" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label for="org_admin_org" class="form-label">Organization</label>
+                        <label for="org_admin_org" class="form-label">Organization <span class="text-danger">*</span></label>
                         <input type="text" id="org_admin_org" name="org_admin_org" class="form-control" readonly>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <button type="submit" class="btn btn-primary">Create Organization</button>
                     </div>
-                    </div>
-
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
+</div>
+
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         const orgInput = document.querySelector('[name="org_name"]');
