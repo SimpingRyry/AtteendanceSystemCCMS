@@ -95,6 +95,8 @@
                         </div>
                     </form>
                 </div>
+                <h2 class="fw-bold text-center" style="color:#232946;">Evaluation Table</h2>
+
 
                 {{-- 1️⃣  TABLE LIST ----------------------------------------------------- --}}
                 <table class="table table-hover align-middle">

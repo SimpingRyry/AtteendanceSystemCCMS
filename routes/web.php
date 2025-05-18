@@ -85,6 +85,9 @@ Route::get('/device_page', function () {
 Route::get('/student_payment', function () {
     return view('student_payment');
 });
+Route::get('/evaluation_student', function () {
+    return view('evaluation_student');
+});
 Route::get('/reports', function () {
     return view('reports');
 });
