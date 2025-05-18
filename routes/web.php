@@ -124,6 +124,7 @@ Route::delete('/evaluations/{evaluation}', [EvaluationController::class,'destroy
 Route::resource('evaluation', App\Http\Controllers\EvaluationController::class);
 Route::get('evaluation/{evaluation}/questions', [App\Http\Controllers\EvaluationController::class,'questions'])
      ->name('evaluation.questions');   // used by the modal’s AJAX call
+Route::put('/evaluation/{evaluation}', [EvaluationController::class, 'update'])->name('evaluation.update');
 
 
 

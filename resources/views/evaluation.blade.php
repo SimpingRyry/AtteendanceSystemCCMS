@@ -119,11 +119,11 @@
                                 </button>
 
                                 <button class="btn btn-sm btn-warning edit-btn"
-        data-id="{{ $evaluation->id }}"
-        data-bs-toggle="modal"
-        data-bs-target="#editModal">
-    <i class="fa fa-pen"></i>
-</button>
+                                    data-id="{{ $evaluation->id }}"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editModal">
+                                    <i class="fa fa-pen"></i>
+                                </button>
 
                                 <form action="{{ route('evaluation.destroy',$evaluation) }}"
                                     method="POST" class="d-inline"
@@ -175,43 +175,43 @@
         </div>
     </div>
     <!-- Edit modal -->
-<div class="modal fade" id="editModal" tabindex="-1">
-  <div class="modal-dialog">
-    <form id="editForm" class="modal-content">
-        @csrf  @method('PUT')
-        <div class="modal-header bg-warning">
-            <h5 class="modal-title">Edit Evaluation</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form id="editForm" class="modal-content">
+                @csrf @method('PUT')
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">Edit Evaluation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="edit_id">
+
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" name="title" class="form-control" id="edit_title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" id="edit_desc" rows="3"></textarea>
+                    </div>
+
+                    <!-- NEW: Questions section -->
+                    <div class="mb-3">
+                        <label class="form-label">Questions</label>
+                        <div id="editQuestionsContainer"></div>
+                        <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addQuestionBtn">Add Question</button>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-success" id="saveBtn">Save</button>
+                </div>
+            </form>
         </div>
-
-        <div class="modal-body">
-            <input type="hidden" name="id" id="edit_id">
-
-            <div class="mb-3">
-                <label class="form-label">Title</label>
-                <input type="text"  name="title" class="form-control" id="edit_title" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Description</label>
-                <textarea name="description" class="form-control" id="edit_desc" rows="3"></textarea>
-            </div>
-
-            <!-- NEW: Questions section -->
-            <div class="mb-3">
-                <label class="form-label">Questions</label>
-                <div id="editQuestionsContainer"></div>
-                <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="addQuestionBtn">Add Question</button>
-            </div>
-        </div>
-
-        <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button class="btn btn-success" id="saveBtn">Save</button>
-        </div>
-    </form>
-  </div>
-</div>
+    </div>
 
 
 
@@ -225,114 +225,187 @@
     </script>
     @endif
     <script>
-document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
 
-    const editModal = document.getElementById('editModal');
-    const form      = document.getElementById('editForm');
-    const questionsContainer = document.getElementById('editQuestionsContainer');
-    const addQuestionBtn = document.getElementById('addQuestionBtn');
+            /* -------------------------------------------------
+               DOM handles
+            --------------------------------------------------*/
+            const editModal = document.getElementById('editModal');
+            const form = document.getElementById('editForm');
+            const questionsContainer = document.getElementById('editQuestionsContainer');
+            const addQuestionBtn = document.getElementById('addQuestionBtn');
 
-    // Helper to render a question input block
-    function createQuestionInput(idx, question = {}) {
-        const div = document.createElement('div');
-        div.classList.add('mb-2');
-        div.innerHTML = `
-            <input type="hidden" name="questions[${idx}][id]" value="${question.id ?? ''}">
-            <input type="text" name="questions[${idx}][text]" class="form-control mb-1" value="${question.question ?? ''}" placeholder="Question text" required>
+            /* -------------------------------------------------
+               Helper → build one question block
+            --------------------------------------------------*/
+            function createQuestionInput(idx, q = {}) {
+                const div = document.createElement('div');
+                div.classList.add('border', 'p-2', 'rounded', 'mb-2', 'question-block');
+                div.innerHTML = `
+            <input type="hidden" name="questions[${idx}][id]" value="${q.id ?? ''}">
 
-            <button type="button" class="btn btn-sm btn-danger remove-question-btn">Remove</button>
+            <label class="form-label mb-0">Question</label>
+            <input type="text"
+                   name="questions[${idx}][question]"
+                   class="form-control mb-1"
+                   value="${q.question ?? ''}"
+                   required>
+
+            <div class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <select name="questions[${idx}][type]" class="form-select q-type-select">
+                        <option value="short"     ${q.type==='short'?'selected':''}>Short answer</option>
+                        <option value="paragraph" ${q.type==='paragraph'?'selected':''}>Paragraph</option>
+                        <option value="mcq"       ${q.type==='mcq'?'selected':''}>Multiple choice</option>
+                        <option value="checkbox"  ${q.type==='checkbox'?'selected':''}>Checkboxes</option>
+                    </select>
+                </div>
+
+                <div class="col-auto">
+                    <div class="form-check">
+                        <input  class="form-check-input" type="checkbox"
+                                name="questions[${idx}][is_required]"
+                                ${q.is_required ? 'checked' : ''}>
+                        <label class="form-check-label">Required</label>
+                    </div>
+                </div>
+
+                <div class="col-auto ms-auto">
+                    <button type="button" class="btn btn-sm btn-danger remove-question-btn">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <textarea class="form-control mt-2 options-box"
+                      placeholder="Comma-separated options (e.g. Yes,No,Maybe)"
+                      ${['mcq','checkbox'].includes(q.type ?? '') ? '' : 'hidden'}>${(q.options ?? []).join(', ')}</textarea>
         `;
-        return div;
-    }
+                return div;
+            }
 
-    // Load evaluation + questions into modal fields
-    editModal.addEventListener('show.bs.modal', async e => {
-        const btn  = e.relatedTarget;
-        const id   = btn.dataset.id;
+            /* -------------------------------------------------
+               Re-index helper (after delete)
+            --------------------------------------------------*/
+            function reindex() {
+                [...questionsContainer.children].forEach((div, i) => {
+                    div.querySelectorAll('[name]').forEach(el => {
+                        el.name = el.name.replace(/questions\[\d+]/, `questions[${i}]`);
+                    });
+                });
+            }
 
-        const res  = await fetch(`{{ url('evaluation') }}/${id}/questions`);
-        const data = await res.json();
+            /* -------------------------------------------------
+               1️⃣  Open modal → fetch & render
+            --------------------------------------------------*/
+            editModal.addEventListener('show.bs.modal', async e => {
+                const id = e.relatedTarget.dataset.id;
 
-        document.getElementById('edit_id').value    = data.id;
-        document.getElementById('edit_title').value = data.title;
-        document.getElementById('edit_desc').value  = data.description ?? '';
+                const res = await fetch(`{{ url('evaluation') }}/${id}/questions`);
+                const data = await res.json();
 
-        // Clear old questions
-        questionsContainer.innerHTML = '';
+                document.getElementById('edit_id').value = data.id;
+                document.getElementById('edit_title').value = data.title;
+                document.getElementById('edit_desc').value = data.description ?? '';
 
-        // Render questions
-        if (data.questions && data.questions.length > 0) {
-            data.questions.forEach((q, idx) => {
-                const questionInput = createQuestionInput(idx, q);
-                questionsContainer.appendChild(questionInput);
+                questionsContainer.innerHTML = '';
+                (data.questions ?? []).forEach((q, idx) => {
+                    questionsContainer.appendChild(createQuestionInput(idx, q));
+                });
             });
-        }
-    });
 
-    // Add new blank question input
-    addQuestionBtn.addEventListener('click', () => {
-        const idx = questionsContainer.children.length;
-        const questionInput = createQuestionInput(idx);
-        questionsContainer.appendChild(questionInput);
-    });
-
-    // Remove question input (event delegation)
-    questionsContainer.addEventListener('click', e => {
-        if (e.target.classList.contains('remove-question-btn')) {
-            e.target.parentElement.remove();
-            // Optionally re-index inputs after removal
-            [...questionsContainer.children].forEach((div, idx) => {
-                div.querySelector('input[type="hidden"]').name = `questions[${idx}][id]`;
-                div.querySelector('input[type="text"]').name = `questions[${idx}][text]`;
+            /* -------------------------------------------------
+               2️⃣  Add blank question
+            --------------------------------------------------*/
+            addQuestionBtn.addEventListener('click', () => {
+                const idx = questionsContainer.children.length;
+                questionsContainer.appendChild(createQuestionInput(idx));
             });
-        }
-    });
 
-    // Handle form submission with questions array
-    form.addEventListener('submit', async ev => {
-        ev.preventDefault();
-        const id = document.getElementById('edit_id').value;
+            /* -------------------------------------------------
+               3️⃣  Remove question (delegated)
+            --------------------------------------------------*/
+            questionsContainer.addEventListener('click', e => {
+                if (e.target.classList.contains('remove-question-btn') || e.target.closest('.remove-question-btn')) {
+                    e.target.closest('.question-block').remove();
+                    reindex();
+                }
+            });
 
-        // Collect questions from inputs
-        const questions = [];
-[...questionsContainer.children].forEach(div => {
-    const qid = div.querySelector('input[type="hidden"]').value;
-    const qtext = div.querySelector('input[type="text"]').value.trim();
-    if (qtext) {
-        questions.push({ 
-            id: qid || null, 
-            question: qtext,  // <-- Change key from "text" to "question"
-            type: 'text',     // or your actual question type if you have UI for this
-            is_required: false // or true if you have UI for this
+            /* -------------------------------------------------
+               4️⃣  Toggle options textarea when type changes
+            --------------------------------------------------*/
+            questionsContainer.addEventListener('change', e => {
+                if (e.target.classList.contains('q-type-select')) {
+                    const block = e.target.closest('.question-block');
+                    const box = block.querySelector('.options-box');
+                    box.hidden = !['mcq', 'checkbox'].includes(e.target.value);
+                }
+            });
+
+            /* -------------------------------------------------
+               5️⃣  Submit → collect payload & PUT
+            --------------------------------------------------*/
+            form.addEventListener('submit', async ev => {
+                ev.preventDefault();
+                const evalId = document.getElementById('edit_id').value;
+
+                const questions = [];
+                [...questionsContainer.children].forEach(block => {
+                    const idField = block.querySelector('input[type="hidden"]').value;
+                    const textField = block.querySelector('input[name$="[question]"]').value.trim();
+                    const typeField = block.querySelector('.q-type-select').value;
+                    const reqFlag = block.querySelector('input[type="checkbox"]').checked;
+                    const optsBox = block.querySelector('.options-box');
+                    const options = optsBox && !optsBox.hidden ?
+                        optsBox.value.split(',').map(o => o.trim()).filter(Boolean) :
+                        null;
+
+                    questions.push({
+                        id: idField || null,
+                        question: textField,
+                        type: typeField,
+                        options: options,
+                        is_required: reqFlag,
+                    });
+                });
+
+                const payload = {
+                    _token: '{{ csrf_token() }}',
+                    title: document.getElementById('edit_title').value.trim(),
+                    description: document.getElementById('edit_desc').value.trim(),
+                    questions_json: JSON.stringify(questions),
+                };
+
+                try {
+                    const res = await fetch(`{{ url('evaluation') }}/${evalId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload),
+                    });
+
+                    if (res.ok) {
+                        // reload page or you can also close modal & update UI dynamically
+                        location.reload();
+                    } else {
+                        const err = await res.json();
+                        alert(`Save failed: ${err.message || 'Unknown error'}`);
+                        console.error(err);
+                    }
+                } catch (error) {
+                    alert('Save failed: Network error');
+                    console.error(error);
+                }
+            });
+
         });
-    }
-});
+    </script>
 
 
-        const payload = {
-    _token: '{{ csrf_token() }}',
-    _method: 'PUT',
-    title: document.getElementById('edit_title').value,
-    description: document.getElementById('edit_desc').value,
-    questions_json: JSON.stringify(questions)  // <-- Send JSON string with key "questions_json"
-};
 
-
-        const res = await fetch(`{{ url('evaluation') }}/${id}`, {
-            method: 'POST',
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (res.ok) {
-            location.reload();
-        } else {
-            alert('Save failed');
-        }
-    });
-
-});
-</script>
 
 
     <script>
@@ -371,125 +444,126 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     <script>
+        /* -------------------------------------------------
+   SIMPLE FORMS  –  BUILDER  +  PREVIEW
+--------------------------------------------------*/
         let questions = [];
 
         function addQuestion() {
-            const index = questions.length;
-            const container = document.getElementById('questions_container');
+            const i = questions.length;
+            const box = document.getElementById('questions_container');
 
-            const questionHTML = `
+            box.insertAdjacentHTML('beforeend', `
         <div class="card mb-3 p-3 shadow-sm">
             <div class="mb-2">
-                <label>Question</label>
-                <input type="text" name="questions[${index}][question]" class="form-control" required>
+                <label class="fw-semibold">Question</label>
+                <input type="text" name="questions[${i}][question]" class="form-control" required>
             </div>
+
             <div class="mb-2">
-                <label>Type</label>
-                <select name="questions[${index}][type]" class="form-select" onchange="handleTypeChange(this, ${index})">
-                    <option value="text">Short Answer</option>
+                <label class="fw-semibold">Type</label>
+                <select name="questions[${i}][type]" class="form-select"
+                        onchange="toggleOptions(this, ${i})">
+                    <option value="text">Short answer</option>
                     <option value="textarea">Paragraph</option>
-                    <option value="radio">Multiple Choice</option>
+                    <option value="radio">Multiple choice</option>
                     <option value="checkbox">Checkboxes</option>
                 </select>
             </div>
-            <div class="mb-2 d-none" id="options_container_${index}">
-                <label>Options (one per line)</label>
-                <textarea name="questions[${index}][options]" class="form-control" rows="3"></textarea>
+
+            <div id="opts_${i}" class="mb-2 d-none">
+                <label class="fw-semibold">Options (one per line)</label>
+                <textarea name="questions[${i}][options]" class="form-control" rows="3"
+                          placeholder="e.g. Yes&#10;No&#10;Maybe"></textarea>
             </div>
+
             <div class="form-check mb-2">
-                <input type="checkbox" name="questions[${index}][is_required]" class="form-check-input" value="1">
+                <input type="checkbox" name="questions[${i}][is_required]" class="form-check-input" value="1">
                 <label class="form-check-label">Required</label>
             </div>
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeQuestion(this)">Remove</button>
+
+            <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.card').remove()">Remove</button>
         </div>
-    `;
+    `);
 
-            container.insertAdjacentHTML('beforeend', questionHTML);
-            questions.push(index);
+            questions.push(i);
         }
 
-        function handleTypeChange(select, index) {
-            const container = document.getElementById(`options_container_${index}`);
-            if (select.value === 'radio' || select.value === 'checkbox') {
-                container.classList.remove('d-none');
-            } else {
-                container.classList.add('d-none');
-            }
-        }
-
-        function removeQuestion(btn) {
-            const card = btn.closest('.card');
-            card.remove();
+        function toggleOptions(select, idx) {
+            document.getElementById(`opts_${idx}`).classList
+                .toggle('d-none', !(select.value === 'radio' || select.value === 'checkbox'));
         }
 
         function previewForm() {
-            const formData = new FormData(document.getElementById('evaluationForm'));
-            const questionList = [];
-            const previewContainer = document.getElementById('preview_questions');
-            previewContainer.innerHTML = '';
+            /* -------- collect data -------- */
+            const fd = new FormData(document.getElementById('evaluationForm'));
+            const list = [];
 
-            for (let [key, value] of formData.entries()) {
-                const match = key.match(/questions\[(\d+)]\[(.+)]/);
-                if (match) {
-                    const [_, index, field] = match;
-                    if (!questionList[index]) questionList[index] = {};
-                    if (field === 'is_required') {
-                        questionList[index][field] = true;
-                    } else if (field === 'options') {
-                        questionList[index][field] = value;
-                    } else {
-                        questionList[index][field] = value;
-                    }
+            fd.forEach((val, key) => {
+                const m = key.match(/^questions\[(\d+)]\[(.+)]$/);
+                if (!m) return;
+
+                const [, idx, field] = m;
+                list[idx] ??= {
+                    options: []
+                };
+
+                switch (field) {
+                    case 'is_required':
+                        list[idx][field] = true;
+                        break;
+                    case 'options':
+                        /* textarea → array (trim empty) */
+                        list[idx][field] = val.split('\n').map(v => v.trim()).filter(Boolean);
+                        break;
+                    default:
+                        list[idx][field] = val;
                 }
-            }
+            });
 
-            document.getElementById('preview_title').innerText = document.getElementById('eval_title').value;
-            document.getElementById('preview_desc').innerText = document.getElementById('eval_desc').value;
+            /* -------- render preview -------- */
+            document.getElementById('preview_title').textContent =
+                document.getElementById('eval_title').value;
+            document.getElementById('preview_desc').textContent =
+                document.getElementById('eval_desc').value;
 
-            questionList.forEach((q, i) => {
-                const field = document.createElement('div');
-                field.classList.add('mb-3');
+            const tgt = document.getElementById('preview_questions');
+            tgt.innerHTML = '';
 
-                const label = document.createElement('label');
-                label.className = 'form-label fw-semibold';
-                label.innerText = (i + 1) + '. ' + q.question + (q.is_required ? ' *' : '');
-                field.appendChild(label);
+            list.forEach((q, i) => {
+                const wrap = document.createElement('div');
+                wrap.className = 'mb-3';
 
-                let input;
+                wrap.insertAdjacentHTML('beforeend',
+                    `<label class="form-label fw-semibold">${i + 1}. ${q.question}${q.is_required ? ' <span class="text-danger">*</span>' : ''}</label>`
+                );
 
+                let field;
                 switch (q.type) {
                     case 'text':
-                        input = document.createElement('input');
-                        input.type = 'text';
-                        input.className = 'form-control';
+                        field = `<input type="text" class="form-control" disabled>`;
                         break;
                     case 'textarea':
-                        input = document.createElement('textarea');
-                        input.className = 'form-control';
+                        field = `<textarea class="form-control" disabled></textarea>`;
                         break;
                     case 'radio':
                     case 'checkbox':
-                        input = document.createElement('div');
-                        const options = q.options ? q.options.split('\n') : ['Option 1'];
-                        options.forEach(opt => {
-                            const optDiv = document.createElement('div');
-                            optDiv.className = 'form-check';
-                            optDiv.innerHTML = `
-                        <input type="${q.type}" class="form-check-input" disabled>
-                        <label class="form-check-label">${opt.trim()}</label>
-                    `;
-                            input.appendChild(optDiv);
-                        });
+                        field = q.options.length ? q.options : ['Option 1'];
+                        field = field.map(opt => `
+                      <div class="form-check">
+                          <input type="${q.type}" class="form-check-input" disabled>
+                          <label class="form-check-label">${opt}</label>
+                      </div>`).join('');
                         break;
                 }
-
-                if (input) field.appendChild(input);
-                previewContainer.appendChild(field);
+                wrap.insertAdjacentHTML('beforeend', field);
+                tgt.appendChild(wrap);
             });
 
-            document.getElementById('questions_json').value = JSON.stringify(questionList);
+            /* send JSON ready for controller */
+            document.getElementById('questions_json').value = JSON.stringify(list);
 
-            // Toggle views
+            /* toggle screens */
             document.getElementById('builder_mode').classList.add('d-none');
             document.getElementById('preview_mode').classList.remove('d-none');
         }
@@ -499,6 +573,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('preview_mode').classList.add('d-none');
         }
     </script>
+
 
 
     <!-- Bootstrap JS -->
