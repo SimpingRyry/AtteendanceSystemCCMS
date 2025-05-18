@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
-
+use App\Models\User;
+use App\Models\Notification;
 class EventsController extends Controller
 {
 
@@ -13,56 +14,64 @@ class EventsController extends Controller
         return view('events'); // Blade view
     }
     public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'venue' => 'nullable|string',
-            'event_date' => 'required|date',
-            'timeouts' => 'required|in:2,4',
-            'course' => 'nullable|string',
-            'repeat_dates' => 'nullable|string' // should be comma-separated dates
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'venue' => 'nullable|string',
+        'event_date' => 'required|date',
+        'timeouts' => 'required|in:2,4',
+        'course' => 'nullable|string',
+        'repeat_dates' => 'nullable|string'
+    ]);
+
+    $times = [];
+
+    if ($request->timeouts == 2) {
+        $times = [$request->half_start, $request->half_end];
+    } elseif ($request->timeouts == 4) {
+        $times = [
+            $request->morning_start,
+            $request->morning_end,
+            $request->afternoon_start,
+            $request->afternoon_end
+        ];
+    }
+
+    $dates = [$request->event_date];
+
+    if (!empty($request->repeat_dates)) {
+        $extraDates = explode(',', $request->repeat_dates);
+        $extraDates = array_map('trim', $extraDates);
+        $dates = array_merge($dates, $extraDates);
+    }
+
+    foreach ($dates as $date) {
+        $event = Event::create([
+            'name' => $request->name,
+            'venue' => $request->venue,
+            'event_date' => $date,
+            'timeouts' => $request->timeouts,
+            'times' => json_encode($times),
+            'course' => $request->course,
         ]);
-    
-        // Determine times based on the selected option
-        $times = [];
-    
-        if ($request->timeouts == 2) {
-            $times = [$request->half_start, $request->half_end];
-        } elseif ($request->timeouts == 4) {
-            $times = [
-                $request->morning_start,
-                $request->morning_end,
-                $request->afternoon_start,
-                $request->afternoon_end
-            ];
-        }
-    
-        // Initial event (main date)
-        $dates = [$request->event_date];
-    
-        // Add repeated dates if available
-        if (!empty($request->repeat_dates)) {
-            $extraDates = explode(',', $request->repeat_dates);
-            $extraDates = array_map('trim', $extraDates);
-            $dates = array_merge($dates, $extraDates);
-        }
-    
-        // Create an event for each date
-        foreach ($dates as $date) {
-            Event::create([
-                'name' => $request->name,
-                'description' => $request->description,
-                'venue' => $request->venue,
-                'event_date' => $date,
-                'timeouts' => $request->timeouts,
-                'times' => json_encode($times),
-                'course' => $request->course,
+
+        // ✅ Send notifications based on course
+        $recipients = \App\Models\User::when($request->course && $request->course !== 'All', function ($query) use ($request) {
+            return $query->where('course', $request->course);
+        })->get();
+
+        foreach ($recipients as $user) {
+            \App\Models\Notification::create([
+                'user_id' => $user->id,
+                'title' => 'New Event: ' . $event->name,
+                'message' => 'An event is scheduled for ' . $event->event_date . ' at ' . $event->venue,
             ]);
         }
-    
-        return redirect()->back()->with('success', 'Events created successfully!');
     }
+
+    return redirect()->back()->with('success', 'Events created and notifications sent successfully!');
+}
    public function fetchEvents()
 {
     $events = Event::all();
