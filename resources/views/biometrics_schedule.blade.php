@@ -24,6 +24,7 @@
             <tr>
                 <th>#</th>
                 <th>Student Name</th>
+                <th>Section</th>
             </tr>
         </thead>
         <tbody>
@@ -31,6 +32,8 @@
                 <tr>
                     <td>{{ ($index * 45) + $i + 1 }}</td>
                     <td>{{ $student->name }}</td>
+                    <td>{{ $student->section}}</td>
+
                 </tr>
             @endforeach
         </tbody>

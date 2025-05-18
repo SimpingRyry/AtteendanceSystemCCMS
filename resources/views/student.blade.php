@@ -48,6 +48,9 @@
 
     <!-- Button Row -->
     <div class="d-flex justify-content-end gap-2 mb-4">
+      <button class="btn btn-outline-secondary rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#filterPanel" aria-expanded="false" aria-controls="filterPanel">
+        <i class="bi bi-funnel-fill me-1"></i> Filter
+      </button>
       <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#uploadCSVModal">
         <i class="bi bi-upload me-1"></i> Import CSV
       </button>
@@ -56,38 +59,42 @@
       </button>
     </div>
 
-    <!-- Filter Cards -->
-    <div class="row g-3 mb-4">
-      @foreach (['Organization', 'Block', 'Year Level', 'Status'] as $label)
-      <div class="col-md">
-        <div class="border rounded-3 p-3 bg-light">
-          <label class="form-label small text-muted">{{ $label }}</label>
-          @if ($label == 'Organization')
-          <select class="form-select form-select-sm">
-            <option selected disabled>Select Organization</option>
-            <option>ITS</option>
-            <option>Praxis</option>
-          </select>
-          @else
-          <select class="form-select form-select-sm">
-            <option selected disabled>Select {{ $label }}</option>
-            @if ($label == 'Block')
-              @foreach (['A', 'B', 'C', 'D'] as $option)
-              <option>{{ $option }}</option>
-              @endforeach
-            @elseif ($label == 'Year Level')
-              @foreach (range(1, 4) as $year)
-              <option>{{ $year }}</option>
-              @endforeach
-            @else
-              <option>Registered</option>
-              <option>Unregistered</option>
-            @endif
-          </select>
-          @endif
+    <!-- Collapsible Filter Panel -->
+    <div class="collapse mb-4" id="filterPanel">
+      <div class="p-4 rounded-4 shadow-sm bg-light border">
+        <div class="row g-3">
+          @foreach (['Organization', 'Block', 'Year Level', 'Status'] as $label)
+          <div class="col-md">
+            <div class="border rounded-3 p-3 bg-white">
+              <label class="form-label small text-muted">{{ $label }}</label>
+              @if ($label == 'Organization')
+              <select class="form-select form-select-sm">
+                <option selected disabled>Select Organization</option>
+                <option>ITS</option>
+                <option>Praxis</option>
+              </select>
+              @else
+              <select class="form-select form-select-sm">
+                <option selected disabled>Select {{ $label }}</option>
+                @if ($label == 'Block')
+                  @foreach (['A', 'B', 'C', 'D'] as $option)
+                  <option>{{ $option }}</option>
+                  @endforeach
+                @elseif ($label == 'Year Level')
+                  @foreach (range(1, 4) as $year)
+                  <option>{{ $year }}</option>
+                  @endforeach
+                @else
+                  <option>Registered</option>
+                  <option>Unregistered</option>
+                @endif
+              </select>
+              @endif
+            </div>
+          </div>
+          @endforeach
         </div>
       </div>
-      @endforeach
     </div>
 
     <!-- Search -->

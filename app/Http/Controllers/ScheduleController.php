@@ -40,23 +40,22 @@ class ScheduleController extends Controller
     }
 
     public function generateBiometricsSchedule(Request $request)
-        {
-
-            $date = $request->input('date', now()->format('F d, Y'));
-
-            $students = Student::where('status', 'Unregistered')
-                ->orderBy('name')
-                ->get();
-        
-            $chunks = $students->chunk(45);
-        
-            $pdf = Pdf::loadView('biometrics_schedule', [
-                'title' => 'Biometric Registration Schedule',
-                'scheduleDate' => \Carbon\Carbon::parse($date)->format('F d, Y'),
-                'batch' => null, // No batch input — just pass null
-                'chunks' => $chunks
-            ]);
-        
-            return $pdf->download('biometrics_schedule.pdf');
+    {
+        $date = $request->input('date', now()->format('F d, Y'));
+    
+        $students = Student::where('status', 'Unregistered')
+            ->orderBy('name')
+            ->get();
+    
+        $chunks = $students->chunk(10);
+    
+        $pdf = Pdf::loadView('biometrics_schedule', [
+            'title' => 'Biometric Registration Schedule',
+            'scheduleDate' => \Carbon\Carbon::parse($date)->format('F d, Y'),
+            'batch' => null,
+            'chunks' => $chunks
+        ]);
+    
+        return $pdf->stream('biometrics_schedule.pdf'); // <-- changed from download() to stream()
     }
 }

@@ -29,7 +29,7 @@
     <nav class="navbar-dark">
         <ul class="navbar-nav">
 
-            @if (Auth::user()->role === 'member')
+            @if (Auth::user()->role === 'Member')
                 <!-- MEMBER ROLE MENU -->
 
                 <li class="mb-2">
@@ -72,7 +72,7 @@
                 </li>
 
                 <li>
-                    @if (Auth::user()->role === 'super admin')
+                    @if (Auth::user()->role === 'Super Admin')
                         <a href="{{ url('super_dashboard') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('super_dashboard') ? 'active-link' : '' }}">
                             <img src="{{ asset('images/dashh_ico.png') }}" alt="Super Dashboard" class="sidebar-icon">
                             <span>Dashboard</span>
@@ -151,12 +151,12 @@
                     </li>
 
                     <li>
-    @if (Auth::user()->role === 'super admin')
+    @if (Auth::user()->role === 'Super Admin')
         <a href="{{ url('accounts') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('accounts') ? 'active-link' : '' }}">
             <img src="{{ asset('images/add_account.png') }}" alt="Accounts" class="sidebar-icon">
             <span>Accounts</span>
         </a>
-    @elseif (Auth::user()->role === 'admin')
+    @elseif (Auth::user()->role === 'Admin')
         <a href="{{ url('officers') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('officers') ? 'active-link' : '' }}">
             <img src="{{ asset('images/add_account.png') }}" alt="Officers" class="sidebar-icon">
             <span>Officers</span>
@@ -164,13 +164,14 @@
     @endif
 </li>
 
-                    <li>
-                        <a href="{{ url('manage_orgs_page') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}">
-                            <img src="{{ asset('images/org_ico.png') }}" alt="Manage Orgs" class="sidebar-icon">
-                            <span>Organization
-                            </span>
-                        </a>
-                    </li>
+@if (Auth::user()->role === 'Super Admin')
+    <li>
+        <a href="{{ url('manage_orgs_page') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}">
+            <img src="{{ asset('images/org_ico.png') }}" alt="Manage Orgs" class="sidebar-icon">
+            <span>Organization</span>
+        </a>
+    </li>
+@endif
 
                     <li>
                         <a href="{{ url('logs') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('logs') ? 'active-link' : '' }}">
