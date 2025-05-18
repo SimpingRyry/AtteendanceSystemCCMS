@@ -12,10 +12,6 @@ class EvaluationController extends Controller
     /**
      * Show the evaluation form builder.
      */
-    public function create()
-    {
-        return view('evaluation.create');
-    }
 
     /**
      * Store the new evaluation with its questions.
@@ -50,10 +46,13 @@ class EvaluationController extends Controller
 
             DB::commit();
 
-            return redirect()->route('evaluation.create')->with('success', 'Evaluation saved successfully!');
+            return redirect()
+       ->back()               // or ->route('evaluation.index') if you prefer
+       ->with('success', 'Evaluation created successfully!');
+
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Something went wrong. ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 }

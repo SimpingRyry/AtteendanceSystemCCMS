@@ -116,7 +116,6 @@ Route::get('/report/student-roster', [ReportController::class, 'generateStudentR
 use App\Http\Controllers\EvaluationController;
 use Illuminate\Console\Scheduling\Schedule;
 
-Route::get('/evaluation/create', [EvaluationController::class, 'create'])->name('evaluation.create');
 Route::post('/evaluation/store', [EvaluationController::class, 'store'])->name('evaluation.store');
 
 

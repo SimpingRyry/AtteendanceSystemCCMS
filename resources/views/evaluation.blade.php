@@ -83,6 +83,30 @@
         </div>
     </div>
 </main>
+{{-- Success Modal (keep this where it already is) --}}
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="successModalLabel">Success</h5>
+      </div>
+      <div class="modal-body">
+        {{ session('success') ?? 'Evaluation saved successfully!' }}
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Auto-show if flash exists --}}
+@if (session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
+        });
+    </script>
+@endif
+
 
 <script>
 let questions = [];
@@ -213,6 +237,7 @@ function backToEdit() {
     document.getElementById('preview_mode').classList.add('d-none');
 }
 </script>
+
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
