@@ -117,6 +117,15 @@ use App\Http\Controllers\EvaluationController;
 use Illuminate\Console\Scheduling\Schedule;
 
 Route::post('/evaluation/store', [EvaluationController::class, 'store'])->name('evaluation.store');
+Route::get('/evaluations', fn() => \App\Models\Evaluation::all());
+Route::delete('/evaluations/{evaluation}', [EvaluationController::class,'destroy']);
+// existing POST /evaluation (store) already there
+
+Route::resource('evaluation', App\Http\Controllers\EvaluationController::class);
+Route::get('evaluation/{evaluation}/questions', [App\Http\Controllers\EvaluationController::class,'questions'])
+     ->name('evaluation.questions');   // used by the modal’s AJAX call
+
+
 
 
 

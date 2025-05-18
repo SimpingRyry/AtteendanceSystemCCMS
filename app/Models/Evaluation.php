@@ -11,7 +11,8 @@ class Evaluation extends Model
 
     public function questions()
     {
-        return $this->hasMany(EvaluationQuestion::class);
+        return $this->hasMany(EvaluationQuestion::class)->orderBy('order');
     }
+    
 }
 
