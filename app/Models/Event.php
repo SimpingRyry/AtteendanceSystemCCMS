@@ -18,6 +18,7 @@ class Event extends Model
     // Define the fields that can be mass-assigned
     protected $fillable = [
         'name',
+        'description',
         'venue',
         'event_date',
         'timeouts',
@@ -29,4 +30,5 @@ class Event extends Model
     protected $casts = [
         'times' => 'array',
     ];
+    
 }

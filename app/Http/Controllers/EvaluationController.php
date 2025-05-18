@@ -9,18 +9,23 @@ use Illuminate\Support\Facades\DB;
 
 class EvaluationController extends Controller
 {
-    /**
-     * Show the evaluation form builder.
-     */
+    /* -------------------------------------------------
+       LIST
+    --------------------------------------------------*/
+    public function index()
+    {
+        $evaluations = Evaluation::latest()->get();   // or ->paginate(10)
+        return view('evaluation', compact('evaluations'));
+    }
 
-    /**
-     * Store the new evaluation with its questions.
-     */
+    /* -------------------------------------------------
+       CREATE
+    --------------------------------------------------*/
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'title'          => 'required|string|max:255',
+            'description'    => 'nullable|string',
             'questions_json' => 'required|json'
         ]);
 
@@ -28,7 +33,7 @@ class EvaluationController extends Controller
 
         try {
             $evaluation = Evaluation::create([
-                'title' => $request->title,
+                'title'       => $request->title,
                 'description' => $request->description,
             ]);
 
@@ -37,23 +42,93 @@ class EvaluationController extends Controller
             foreach ($questions as $index => $q) {
                 EvaluationQuestion::create([
                     'evaluation_id' => $evaluation->id,
-                    'question' => $q['question'],
-                    'type' => $q['type'],
-                    'order' => $index + 1,
-                    'is_required' => isset($q['is_required']) ? 1 : 0,
+                    'question'      => $q['question'],
+                    'type'          => $q['type'],
+                    'options'       => $q['options'] ?? null,
+                    'order'         => $index + 1,
+                    'is_required'   => !empty($q['is_required']),
                 ]);
             }
 
             DB::commit();
 
             return redirect()
-       ->back()               // or ->route('evaluation.index') if you prefer
-       ->with('success', 'Evaluation created successfully!');
-
-        } catch (\Exception $e) {
+                    ->back()
+                    ->with('success', 'Evaluation created successfully!');
+        } catch (\Throwable $e) {
             DB::rollBack();
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
+        }
+    }
+
+    /* -------------------------------------------------
+       AJAX for edit-modal
+    --------------------------------------------------*/
+    public function questions(Evaluation $evaluation)
+    {
+        return response()->json(
+            $evaluation->load('questions')
+        );
+    }
+
+    /* -------------------------------------------------
+       UPDATE
+    --------------------------------------------------*/
+    public function update(Request $request, Evaluation $evaluation)
+    {
+        $validated = $request->validate([
+            'title'          => 'required|string|max:255',
+            'description'    => 'nullable|string',
+            'questions_json' => 'required|json',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            /* 1️⃣  update evaluation fields */
+            $evaluation->update([
+                'title'       => $validated['title'],
+                'description' => $validated['description'] ?? null,
+            ]);
+
+            $questions = json_decode($validated['questions_json'], true);
+
+            /* 2️⃣  prune deleted rows */
+            $submittedIds = collect($questions)->pluck('id')->filter()->all();
+            EvaluationQuestion::where('evaluation_id', $evaluation->id)
+                ->whereNotIn('id', $submittedIds)
+                ->delete();
+
+            /* 3️⃣  upsert each question */
+            foreach ($questions as $index => $q) {
+                $data = [
+                    'question'    => $q['question'],
+                    'type'        => $q['type'] ?? 'text',
+                    'options'     => $q['options'] ?? null,
+                    'order'       => $index + 1,
+                    'is_required' => !empty($q['is_required']),
+                ];
+
+                if (!empty($q['id'])) {
+                    // update
+                    EvaluationQuestion::where('id', $q['id'])->update($data);
+                } else {
+                    // insert
+                    $data['evaluation_id'] = $evaluation->id;
+                    EvaluationQuestion::create($data);
+                }
+            }
+
+            DB::commit();
+
+            // Return JSON success response for AJAX
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Evaluation and questions updated!'
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
         }
     }
 }
-
