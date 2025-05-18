@@ -34,9 +34,9 @@ class LoginController extends Controller
         ]);
 
         // Check role and redirect accordingly
-        if ($user->role === 'member') {
+        if ($user->role === 'Member') {
             return redirect()->intended('/student_dashboard');
-        } elseif ($user->role === 'super admin') {
+        } elseif ($user->role === 'Super Admin') {
             return redirect()->intended(default: '/super_dashboard');
         } else {
             return redirect()->intended('/dashboard_page');
