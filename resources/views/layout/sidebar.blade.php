@@ -63,6 +63,12 @@
                         <span>Profile</span>
                     </a>
                 </li>
+                <li>
+                        <a href="{{ url('evaluation_student') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('evaluation_student') ? 'active-link' : '' }}">
+                            <img src="{{ asset('images/evaluation_ico.png') }}" alt="eval" class="sidebar-icon">
+                            <span>Evaluation</span>
+                        </a>
+                    </li>
 
             @else
                 <!-- NON-MEMBER FULL MENU -->
@@ -144,7 +150,7 @@
                     </li>
 
                     <li>
-                        <a href="{{ url('evaluation_student') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('evaluation_student') ? 'active-link' : '' }}">
+                        <a href="{{ url('evaluation') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('evaluation') ? 'active-link' : '' }}">
                             <img src="{{ asset('images/evaluation_ico.png') }}" alt="eval" class="sidebar-icon">
                             <span>Evaluation</span>
                         </a>
