@@ -45,9 +45,11 @@
             <!-- Sidebar -->
             <div class="col-md-4 col-lg-3 mt-3"> <!-- Add margin-top -->
                 <div class="d-flex flex-column gap-3">
-                    <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addEventModal">
-                        <span class="me-2">+</span> Add Event
-                    </button>
+                @if(Auth::user()->role !== 'Member')
+            <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                <span class="me-2">+</span> Add Event
+            </button>
+        @endif
 
                     <div>
                         <label for="monthFilter" class="form-label small">Filter by Month</label>
