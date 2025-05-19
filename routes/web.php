@@ -67,6 +67,7 @@ Route::get('/profile', function () {
 });
 Route::post('/events', [EventsController::class, 'store'])->name('events.store');
 Route::post('/events/update', [EventsController::class, 'update'])->name('events.update');
+// ROUTES FOR STUDENT_EVALLLL
 
 
 // Route to fetch all events from the database (GET request)
@@ -84,6 +85,9 @@ Route::get('/device_page', function () {
 });
 Route::get('/student_payment', function () {
     return view('student_payment');
+});
+Route::get('/evaluation_student', function () {
+    return view('evaluation_student');
 });
 Route::get('/reports', function () {
     return view('reports');
@@ -117,6 +121,33 @@ use App\Http\Controllers\EvaluationController;
 use Illuminate\Console\Scheduling\Schedule;
 
 Route::post('/evaluation/store', [EvaluationController::class, 'store'])->name('evaluation.store');
+Route::get('/evaluations', fn() => \App\Models\Evaluation::all());
+Route::delete('/evaluations/{evaluation}', [EvaluationController::class,'destroy']);
+// existing POST /evaluation (store) already there
+
+Route::resource('evaluation', App\Http\Controllers\EvaluationController::class);
+Route::get('evaluation/{evaluation}/questions', [App\Http\Controllers\EvaluationController::class,'questions'])
+     ->name('evaluation.questions');   // used by the modal’s AJAX call
+Route::put('/evaluation/{evaluation}', [EvaluationController::class, 'update'])->name('evaluation.update');
+
+
+// GET list of evaluations for students
+Route::get('/student/evaluations', [EvaluationController::class,'indexForStudent'])
+      ->name('student.evaluations');
+
+// AJAX – return evaluation + questions JSON
+Route::get('/student/evaluation/{evaluation}/json', [EvaluationController::class,'json'])
+      ->name('evaluation.json');
+
+// POST answers (from the modal’s form)
+Route::post('/student/evaluation/{evaluation}/answer', [EvaluationController::class,'submitAnswers'])
+      ->name('evaluation.submit');
+
+      Route::middleware(['auth'])->group(function () {
+    Route::get('/student/evaluations', [EvaluationController::class, 'studentIndex'])
+         ->name('student.evaluations');
+});
+
 
 
 

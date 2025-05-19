@@ -45,9 +45,11 @@
             <!-- Sidebar -->
             <div class="col-md-4 col-lg-3 mt-3"> <!-- Add margin-top -->
                 <div class="d-flex flex-column gap-3">
-                    <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addEventModal">
-                        <span class="me-2">+</span> Add Event
-                    </button>
+                @if(Auth::user()->role !== 'Member')
+            <button class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addEventModal">
+                <span class="me-2">+</span> Add Event
+            </button>
+        @endif
 
                     <div>
                         <label for="monthFilter" class="form-label small">Filter by Month</label>
@@ -88,7 +90,7 @@
             </div>
 
             <div class="modal-body">
-                <form id="eventForm" method="POST" action="{{ route('events.store') }}">
+                <form id="eventForm" method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
                     @csrf
 
                     <div class="row">
@@ -166,12 +168,10 @@
                         <div class="mb-3 col-md-6">
                             <label for="course" class="form-label">Tag Course</label>
                             <select class="form-select" id="course" name="course" onchange="appendCourseTag()">
-                            <option value="">-- Select Course --</option>
-
+                                <option value="">-- Select Course --</option>
                                 <option value="BSIS">BSIS</option>
                                 <option value="BSIT">BSIT</option>
                                 <option value="All">All</option>
-
                             </select>
                         </div>
                         <div class="mb-3 col-md-6">
@@ -185,6 +185,12 @@
                         <div id="courseTags" class="d-flex flex-wrap"></div>
                     </div>
 
+                    <!-- Attached Memo Image Upload -->
+                    <div class="mb-3">
+                        <label for="attachedMemo" class="form-label">Attached Memo</label>
+                        <input type="file" class="form-control" id="attachedMemo" name="attached_memo" accept="image/*">
+                    </div>
+
                     <div class="modal-footer mt-3">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Save Event</button>
@@ -194,6 +200,7 @@
         </div>
     </div>
 </div>
+
 
 <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventDetailsLabel" aria-hidden="true">
     <div class="modal-dialog">

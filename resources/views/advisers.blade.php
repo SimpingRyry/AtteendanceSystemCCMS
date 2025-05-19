@@ -21,7 +21,6 @@
     <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
 
     <title>CCMS Attendance System</title>
-
 </head>
 
 <body style="background-color: #fffffe;">
@@ -35,12 +34,22 @@
     <main>
         <div class="container outer-box mt-5 pt-5 pb-4">
             <div class="container inner-glass shadow p-4" id="main_box">
+
                 <!-- Heading -->
-        <div class="mb-3">
-          <h2 class="fw-bold" style="color: #232946;">Advisers</h2>
-          <small style="color: #989797;">Manage /</small>
-          <small style="color: #444444;">Adviser</small>
-        </div>
+                <div class="mb-3">
+                    <h2 class="fw-bold" style="color: #232946;">Advisers</h2>
+                    <small style="color: #989797;">Manage /</small>
+                    <small style="color: #444444;">Adviser</small>
+                </div>
+
+                <!-- Add Adviser Button -->
+                <div class="mb-3 text-end">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAdviserModal">
+                        <i class="fas fa-user-plus me-1"></i> Add Adviser
+                    </button>
+                </div>
+
+                <!-- Advisers Table -->
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped align-middle">
                         <thead class="table-primary text-center">
@@ -51,7 +60,7 @@
                                 <th>Organization</th>
                             </tr>
                         </thead>
-                        <tbody class="text-center">
+                        <!-- <tbody class="text-center">
                             @forelse ($advisers as $index => $adviser)
                             <tr>
                                 <td>{{ $index + 1 }}</td>
@@ -64,13 +73,60 @@
                                 <td colspan="4">No data</td>
                             </tr>
                             @endforelse
-                        </tbody>
+                        </tbody> -->
                     </table>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Add Adviser Modal -->
+    <div class="modal fade" id="addAdviserModal" tabindex="-1" aria-labelledby="addAdviserModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form action="" method="POST">
+            @csrf
+            <div class="modal-header">
+              <h5 class="modal-title" id="addAdviserModalLabel">Add Adviser</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+              <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input name="name" type="text" class="form-control" id="name" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input name="email" type="email" class="form-control" id="email" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input name="password" type="password" class="form-control" id="password" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="org" class="form-label">Organization</label>
+                <select name="org" id="org" class="form-select" required>
+                  <option value="" disabled selected>Select Organization</option>
+                  <option value="Org 1">Org 1</option>
+                  <option value="Org 2">Org 2</option>
+                  <option value="Org 3">Org 3</option>
+                  <!-- Add more options as needed -->
+                </select>
+              </div>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">Add Adviser</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"

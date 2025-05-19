@@ -260,7 +260,7 @@
               <input type="text" class="form-control" id="modalAddress" value="${data.address}" readonly>
             </div>
             <div class="col-12">
-              <label>Email</label>
+              <label>Email <span class="text-danger">*</span></label>
               <input type="email" name="email" class="form-control" placeholder="Enter Email" required>
             </div>
           </div>
@@ -268,28 +268,24 @@
           <!-- Role/Position -->
           <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Role / Position</h4>
           <div class="mb-4">
-            <label for="roleSelect">Select Role</label>
+            <label for="roleSelect">Select Role <span class="text-danger">*</span></label>
             <select name="role" id="roleSelect" class="form-select" required>
               @if(auth()->user()->org == 'ITS')
-                <option value="">-- Select Role --</option>
-                <option value="IT Support">IT Support</option>
-                <option value="Network Admin">Network Admin</option>
-                <option value="System Analyst">System Analyst</option>
+              <option value="">-- Select Role --</option>
+                <option value="member">Member</option>
+                <option value="officer">Officer</option>
               @elseif(auth()->user()->org == 'PRAXIS')
                 <option value="">-- Select Role --</option>
-                <option value="Research Assistant">Research Assistant</option>
-                <option value="Project Coordinator">Project Coordinator</option>
-                <option value="Field Agent">Field Agent</option>
+                <option value="member">Member</option>
+                <option value="officer">Officer</option>
               @elseif(auth()->user()->org == 'SG')
-                <option value="">-- Select Role --</option>
-                <option value="Security Guard">Security Guard</option>
-                <option value="Supervisor">Supervisor</option>
-                <option value="Admin Officer">Admin Officer</option>
+              <option value="">-- Select Role --</option>
+                <option value="member">Member</option>
+                <option value="officer">Officer</option>
               @else
                 <option value="">-- Select Role --</option>
                 <option value="member">Member</option>
                 <option value="officer">Officer</option>
-
               @endif
             </select>
           </div>
@@ -297,12 +293,12 @@
           <!-- Organization Dropdown for Super Admin -->
           @if(auth()->user()->role == 'super admin')
             <div class="mb-4">
-              <label for="organizationSelect">Select Organization</label>
+              <label for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
               <select name="organization" id="organizationSelect" class="form-select" required>
                 <option value="">-- Select Organization --</option>
                 @foreach ($org_list as $org)
-        <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
-    @endforeach
+                  <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
+                @endforeach
               </select>
             </div>
           @endif
