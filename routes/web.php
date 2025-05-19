@@ -67,6 +67,7 @@ Route::get('/profile', function () {
 });
 Route::post('/events', [EventsController::class, 'store'])->name('events.store');
 Route::post('/events/update', [EventsController::class, 'update'])->name('events.update');
+// ROUTES FOR STUDENT_EVALLLL
 
 
 // Route to fetch all events from the database (GET request)
@@ -129,6 +130,23 @@ Route::get('evaluation/{evaluation}/questions', [App\Http\Controllers\Evaluation
      ->name('evaluation.questions');   // used by the modal’s AJAX call
 Route::put('/evaluation/{evaluation}', [EvaluationController::class, 'update'])->name('evaluation.update');
 
+
+// GET list of evaluations for students
+Route::get('/student/evaluations', [EvaluationController::class,'indexForStudent'])
+      ->name('student.evaluations');
+
+// AJAX – return evaluation + questions JSON
+Route::get('/student/evaluation/{evaluation}/json', [EvaluationController::class,'json'])
+      ->name('evaluation.json');
+
+// POST answers (from the modal’s form)
+Route::post('/student/evaluation/{evaluation}/answer', [EvaluationController::class,'submitAnswers'])
+      ->name('evaluation.submit');
+
+      Route::middleware(['auth'])->group(function () {
+    Route::get('/student/evaluations', [EvaluationController::class, 'studentIndex'])
+         ->name('student.evaluations');
+});
 
 
 
