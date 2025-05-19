@@ -14,13 +14,146 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&display=swap" rel="stylesheet" />
   
   <!-- FullCalendar -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css" />
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="{{ asset('css/home_page.css') }}">
 </head>
+<style>
+    .bg-purple {
+    background-color: #8A2BE2 !important;
+   
+}
+/* Event styling with smaller fonts and subtle enhancements */
+.fc-event {
+    position: relative;
+    background-color: #1976d2;
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: none;
+    box-shadow: none;
+    transition: background-color 0.2s ease;
+}
 
+.fc-event:hover {
+    background-color: #115293;
+}
+
+/* Icon Hover Panel */
+.event-icons {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    display: none;
+    background-color: rgba(0, 0, 0, 0.75);
+    padding: 5px 8px;
+    border-radius: 8px;
+    z-index: 9999;
+    white-space: nowrap;
+}
+
+.event-icons i {
+    color: white;
+    font-size: 12px;
+    margin: 0 4px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.event-icons i:hover {
+    transform: scale(1.2);
+    color: #ffeb3b;
+}
+
+.fc-event:hover .event-icons {
+    display: block;
+}
+
+/* Calendar Container */
+#calendarWrapper {
+    background: white;
+    border: 1px solid #e0e0e0;
+    box-shadow: none;
+}
+
+/* Calendar Appearance */
+#calendar {
+    font-family: 'Poppins', 'Roboto', sans-serif;
+}
+
+.fc-toolbar-title {
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.fc-button {
+    background-color: #1976d2;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.fc-button-primary:not(:disabled).fc-button-active,
+.fc-button-primary:not(:disabled):hover {
+    background-color: #115293;
+}
+
+/* Today Cell */
+.fc-day-today {
+    background-color: #f1f8ff !important;
+}
+
+/* Flat cell borders */
+.fc-daygrid-day {
+    border: 1px solid #f1f1f1;
+}
+
+/* Hide calendar grid border */
+.fc-scrollgrid {
+    border: none !important;
+}
+
+main {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+    background-color: #f9f9f9;
+}
+
+/* Ensure sidebar contents are spaced from the top */
+.col-md-4 .d-flex.flex-column {
+    padding-top: 1rem;
+}
+
+/* Add top margin to calendar wrapper */
+#calendarWrapper {
+    margin-top: 0.5rem;
+    padding: 1.1rem;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+}
+
+/* Optionally add box spacing to main row */
+.row.g-4 {
+    margin-top: 1rem;
+}
+
+/* Optional: unify sidebar cards and button spacing */
+#monthFilter,
+#eventSearch,
+#addEventModal {
+    margin-top: 0.5rem;
+}
+</style>
 <body>
 
   <!-- Navbar -->
@@ -281,13 +414,32 @@
       </div>
     </div>
   </section>
-  <section id="events" class="bg-light mt-5">
-    <div class="container mt-5">
-      <h2 class="text-center mb-4 mt-5">Upcoming Events</h2>
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Upcoming Events</h2>
+  <div class="row">
+    <!-- Calendar (Main Section) -->
+    <div class="col-md-8 col-lg-9">
       <div id="calendar"></div>
     </div>
 
-  </section>
+    <!-- Sidebar (Right Section) -->
+    <div class="col-md-4 col-lg-3 mt-3">
+      <div class="d-flex flex-column gap-3">
+
+
+        <input type="text" class="form-control" id="eventSearch" placeholder="Search events...">
+
+        <div class="border rounded-3 p-3 bg-white">
+          <h6 class="text-center fw-semibold mb-2">Upcoming Events</h6>
+          <ul id="upcomingEventsList" class="list-group list-group-flush small">
+            <!-- Dynamically filled -->
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
   <!-- Contact Section -->
   <section id="contact" class="bg-white text-dark mt-5">
@@ -315,27 +467,67 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
   <script>
-    $(document).ready(function() {
-      $('#calendar').fullCalendar({
-        defaultView: 'month',
-        editable: false,
-        events: [{
-            title: 'Bday ni ver',
-            start: '2025-04-06'
-          },
-          {
-            title: 'Sana walang pasok',
-            start: '2025-04-15',
-            end: '2025-04-16'
-          },
-          {
-            title: 'Sana walang pasok',
-            start: '2025-04-16',
-            end: '2025-04-16'
-          }
-        ]
-      });
+  document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      events: {
+        url: "{{ route('events.fetch') }}", // Laravel route to fetch events
+        method: 'GET',
+        failure: function() {
+          alert('There was an error fetching events!');
+        }
+      },
+      eventColor: '#378006' // Optional: custom color
     });
+
+    calendar.render(); // First render the calendar
+
+// Then populate sidebar with upcoming events
+fetch("{{ route('events.fetch') }}")
+  .then(response => response.json())
+  .then(events => {
+    const list = document.getElementById('upcomingEventsList');
+    list.innerHTML = ''; // Clear current content
+
+    const today = new Date();
+    const upcoming = events.filter(event => {
+      const eventDate = new Date(event.start);
+      return eventDate >= today;
+    }).sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    upcoming.forEach(event => {
+      const date = new Date(event.start);
+      const formattedDate = date.toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+
+      let badgeClass = 'bg-primary';
+      if (event.extendedProps?.course === 'BSIT') {
+        badgeClass = 'bg-info text-dark';
+      } else if (event.extendedProps?.course === 'BSIS') {
+        badgeClass = 'bg-purple text-white';
+      } else if (event.extendedProps?.course === 'All') {
+        badgeClass = 'bg-success text-white';
+      }
+
+      const li = document.createElement('li');
+      li.className = 'list-group-item d-flex justify-content-between align-items-center rounded-3 mb-2 shadow-sm';
+      li.innerHTML = `
+        ${event.title}
+        <span class="badge ${badgeClass} rounded-pill">${formattedDate}</span>
+      `;
+
+      list.appendChild(li);
+    });
+  })
+  .catch(error => {
+    console.error("Error fetching upcoming events:", error);
+  });
+  });
     window.onscroll = function() {
       changeNavbarColorOnScroll()
     };
@@ -555,6 +747,9 @@ toggleBtn.addEventListener('click', () => {
 
   <!-- Bootstrap Script -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
 </body>
 
 </html>
