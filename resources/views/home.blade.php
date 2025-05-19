@@ -266,17 +266,9 @@ main {
     </div>
     <!-- Card Grid -->
     <section class="container py-5">
-      <div class="row g-4">
-        @for ($i = 1; $i <= 6; $i++)
-          <div class="col-md-4">
-          <div class="card shadow-lg border-0 p-3">
-            <div class="card-body text-center">
-              <h5 class="card-title fw-bold">Event {{ $i }}</h5>
-              <p class="card-text">Short details about Event {{ $i }}.</p>
-            </div>
-          </div>
-      </div>
-      @endfor
+      <div class="row" id="eventCardContainer">
+  <!-- Cards will be inserted here -->
+</div>
       </div>
     </section>
   </section>
@@ -351,11 +343,11 @@ main {
         </div>
       </div>
 
-      <!-- Developer Profiles -->
-      <div class="card border-0 p-4 mt-5">
+
+      <!-- <div class="card border-0 p-4 mt-5">
         <h2 class="mb-4 text-center">Meet the Developers</h2>
         <div class="row row-cols-1 row-cols-md-4 g-4 text-center">
-          <!-- Developer 1 -->
+
           <div class="col">
             <div class="card border-0 p-3 d-flex flex-column align-items-center h-100"
               style="box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3); border-radius: 12px;">
@@ -369,7 +361,7 @@ main {
             </div>
           </div>
 
-          <!-- Developer 2 -->
+
           <div class="col">
             <div class="card border-0 p-3 d-flex flex-column align-items-center h-100"
               style="box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3); border-radius: 12px;">
@@ -383,7 +375,6 @@ main {
             </div>
           </div>
 
-          <!-- Developer 3 -->
           <div class="col">
             <div class="card border-0 p-3 d-flex flex-column align-items-center h-100"
               style="box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3); border-radius: 12px;">
@@ -397,7 +388,6 @@ main {
             </div>
           </div>
 
-          <!-- Developer 4 -->
           <div class="col">
             <div class="card border-0 p-3 d-flex flex-column align-items-center h-100"
               style="box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3); border-radius: 12px;">
@@ -411,11 +401,11 @@ main {
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
   </section>
 <div class="container mt-5">
-  <h2 class="text-center mb-4">Upcoming Events</h2>
+  <h2 class="text-center mb-4">Calendar</h2>
   <div class="row">
     <!-- Calendar (Main Section) -->
     <div class="col-md-8 col-lg-9">
@@ -447,13 +437,12 @@ main {
       <h2 class="mb-4">Contact Us</h2>
       <p>Email: info@ticktax-ccms.com</p>
       <p>Facebook: fb.com/ticktaxccms</p>
-      <p>Phone: (123) 456-7890</p>
     </div>
   </section>
   <footer class="bg-dark text-white text-center py-4">
     <div class="container">
       <p class="mb-0">© 2025 CCMS Attendance System. All Rights Reserved.</p>
-      <p class="mb-0">Developed by Yuki Golimlim</p>
+      <p class="mb-0">Developed by TickTax Team</p>
       <div class="mt-2">
         <a href="#" class="text-white me-3"><i class="fab fa-facebook"></i></a>
         <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
@@ -742,6 +731,60 @@ const logoSidebar = document.querySelector('.logo-sidebar');
 toggleBtn.addEventListener('click', () => {
   logoSidebar.classList.toggle('show');
 });
+function loadUpcomingEventCards() {
+  fetch("{{ route('events.fetch') }}")
+    .then(response => response.json())
+    .then(events => {
+      const container = document.getElementById('eventCardContainer');
+      container.innerHTML = ''; // Clear existing cards
+
+      const today = new Date();
+      const upcoming = events.filter(event => {
+        const eventDate = new Date(event.start);
+        return eventDate >= today;
+      }).sort((a, b) => new Date(a.start) - new Date(b.start));
+
+      upcoming.forEach(event => {
+        const date = new Date(event.start);
+        const formattedDate = date.toLocaleDateString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+
+        let badgeClass = 'bg-primary';
+        if (event.extendedProps?.course === 'BSIT') {
+          badgeClass = 'bg-info text-dark';
+        } else if (event.extendedProps?.course === 'BSIS') {
+          badgeClass = 'bg-purple text-white';
+        } else if (event.extendedProps?.course === 'All') {
+          badgeClass = 'bg-success text-white';
+        }
+
+        const card = document.createElement('div');
+        card.className = 'col-md-4 mb-3';
+
+        card.innerHTML = `
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title">${event.title}</h5>
+              <p class="card-text mb-2"><i class="bi bi-calendar-event"></i> ${formattedDate}</p>
+              <span class="badge ${badgeClass}">${event.extendedProps?.course || 'General'}</span>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    })
+    .catch(error => {
+      console.error("Error loading event cards:", error);
+    });
+}
+document.addEventListener('DOMContentLoaded', function () {
+  loadUpcomingEventCards();
+});
+
 
   </script>
 
