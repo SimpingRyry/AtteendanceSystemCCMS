@@ -59,7 +59,7 @@
           </div>
           <div class="col-md-3">
             <div class="card text-center shadow-sm p-3 rounded-4">
-              <h6 class="text-muted">My Events</h6>
+              <h6 class="text-muted">Upcoming Events</h6>
               <h2><span id="myEvents">0</span></h2>
             </div>
           </div>
@@ -82,7 +82,7 @@
           <!-- My Attendance Chart -->
           <div class="col-lg-6">
             <div class="card shadow-sm p-3 rounded-4">
-              <h6 class="mb-3 text-center">My Attendance Overview</h6>
+              <h6 class="mb-3 text-center">Fines Overview</h6>
               <canvas id="myAttendanceChart" style="height: 300px;"></canvas>
             </div>
           </div>

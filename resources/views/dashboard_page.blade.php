@@ -103,12 +103,12 @@
 
       <!-- Charts Row -->
       <div class="row g-4 mb-4">
-        <div class="col-lg-6">
-          <div class="card shadow-sm p-3 rounded-4">
-            <h6 class="mb-3 text-center">Absentees Report</h6>
-            <canvas id="absenteesChart" style="height: 300px;"></canvas>
-          </div>
-        </div>
+      <div class="col-lg-6">
+  <div class="card shadow-sm p-3 rounded-4">
+    <h6 class="mb-3 text-center">Fines Issued by Month</h6>
+    <canvas id="finesChart" style="height: 300px;"></canvas>
+  </div>
+</div>
         <div class="col-lg-6">
           <div class="card shadow-sm p-3 rounded-4">
             <h6 class="mb-3 text-center">Registration Status</h6>
@@ -212,30 +212,30 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const absenteeCtx = document.getElementById('absenteesChart').getContext('2d');
-        new Chart(absenteeCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Praxis', 'ITS'],
-                datasets: [{
-                    label: 'Total Absentees',
-                    data: [14, 23],
-                    backgroundColor: ['#1976d2', '#2e7d32'], 
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
+       const finesChartCtx = document.getElementById('finesChart').getContext('2d');
+new Chart(finesChartCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Nov 2024', 'Dec 2024', 'Mar 2025', 'Apr 2025'],
+        datasets: [{
+            label: 'Fines Issued (₱)',
+            data: [9400, 10800, 8650, 12450],
+            backgroundColor: '#ff6f61',
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: true }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
             }
-        });
+        }
+    }
+});
 
         const ctx = document.getElementById('registrationChart').getContext('2d');
     const registrationChart = new Chart(ctx, {
