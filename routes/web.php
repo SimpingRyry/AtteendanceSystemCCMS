@@ -132,7 +132,7 @@ Route::put('/evaluation/{evaluation}', [EvaluationController::class, 'update'])-
 
 
 // GET list of evaluations for students
-Route::get('/student/evaluations', [EvaluationController::class,'indexForStudent'])
+Route::get('/student/evaluations', [EvaluationController::class,'studentIndex'])
       ->name('student.evaluations');
 
 // AJAX – return evaluation + questions JSON
@@ -149,6 +149,7 @@ Route::post('/student/evaluation/{evaluation}/answer', [EvaluationController::cl
 });
 
 
+Route::get('/evaluation_student', [EvaluationController::class,'studentIndex']);
 
 
 Route::post('/orgs', [OrgListController::class, 'store'])->name('orgs.store');

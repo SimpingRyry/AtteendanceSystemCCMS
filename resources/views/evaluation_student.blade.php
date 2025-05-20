@@ -191,31 +191,35 @@ document.addEventListener('DOMContentLoaded', () => {
     /* -------------------------------------------------
        Submit answers
     --------------------------------------------------*/
-    form.addEventListener('submit', async e => {
-        e.preventDefault();
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        const url  = `/student/evaluation/${currentEvalId}/answer`;
-        const data = new FormData(form);
+form.addEventListener('submit', async e => {
+    e.preventDefault();
 
-        try{
-            const res = await fetch(url, {
-                method : 'POST',
-                headers: { 'X-CSRF-TOKEN' : '{{ csrf_token() }}' },
-                body   : data
-            });
+    const url  = `/student/evaluation/${currentEvalId}/answer`;
+    const data = new FormData(form);
 
-            if(res.ok){
-                bsModal.hide();
-                location.reload();
-            }else{
-                const err = await res.json();
-                alert(err.message || 'Submission failed');
-            }
-        }catch(err){
-            alert('Network error');
-            console.error(err);
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: data
+        });
+
+        if (res.ok) {
+            bsModal.hide();
+            location.reload();
+        } else {
+            const err = await res.json();
+            alert(err.message || 'Submission failed');
         }
-    });
+    } catch (err) {
+        alert('Network error');
+        console.error(err);
+    }
+});
 
 });
 </script>

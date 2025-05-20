@@ -7,6 +7,7 @@ use App\Models\Evaluation;
 use App\Models\EvalAnswer;
 use App\Models\UserProfile;
 use App\Models\EvaluationQuestion;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class EvaluationController extends Controller
@@ -194,7 +195,7 @@ class EvaluationController extends Controller
                 EvalAnswer::create([
                     'evaluation_id' => $evaluation->id,
                     'question_id'   => $question->id,
-                    'student_id'    => UserProfile::id(),
+                    'student_id'    =>  decrypt(auth()->user()->name),
                     'answer'        => $answer,
                 ]);
             }
