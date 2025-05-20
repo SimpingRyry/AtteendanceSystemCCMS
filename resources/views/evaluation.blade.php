@@ -68,6 +68,17 @@
                         {{-- === Builder Mode === --}}
                         <div id="builder_mode">
                             <div class="mb-3">
+                                <label class="form-label fw-semibold">Filter by Event</label>
+                                <select class="form-select" name="event_id" id="event_id" required>
+    <option value="">Select event</option>
+    @foreach($eventNames as $id => $name)
+        <option value="{{ $id }}">{{ $name }}</option>
+    @endforeach
+</select>
+                            </div>
+
+
+                            <div class="mb-3">
                                 <label class="form-label fw-semibold">Evaluation Title</label>
                                 <input type="text" name="title" class="form-control" id="eval_title" required>
                             </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Evaluation;
 use App\Models\EvalAnswer;
+use App\Models\Event;
 use App\Models\UserProfile;
 use App\Models\EvaluationQuestion;
 use App\Models\User;
@@ -17,9 +18,21 @@ class EvaluationController extends Controller
     --------------------------------------------------*/
     public function index()
     {
-        $evaluations = Evaluation::latest()->get();   // or ->paginate(10)
-        return view('evaluation', compact('evaluations'));
+        $evaluations = Evaluation::latest()->get();
+        $eventNames = Event::pluck('name');
+        return view('evaluation', compact('evaluations', 'eventNames'));
     }
+    public function create()
+    {
+        $eventNames = Event::pluck('name'); // gets all event names
+
+        return view('evaluation', [
+            'evaluations' => Evaluation::latest()->get(),
+            'eventNames' => $eventNames
+        ]);
+    }
+
+
 
     /* -------------------------------------------------
        CREATE
@@ -56,11 +69,11 @@ class EvaluationController extends Controller
             DB::commit();
 
             return redirect()
-                    ->back()
-                    ->with('success', 'Evaluation created successfully!');
+                ->back()
+                ->with('success', 'Evaluation created successfully!');
         } catch (\Throwable $e) {
             DB::rollBack();
-            return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -131,16 +144,16 @@ class EvaluationController extends Controller
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();
-            return response()->json(['status'=>'error','message'=>$e->getMessage()],500);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
     public function studentIndex()
-{
-    $evaluations = Evaluation::latest()->get();   // or whatever subset students should see
-    return view('evaluation_student', [
-        'evaluations' => $evaluations   // ← don’t forget to pass it
-    ]);
-}
+    {
+        $evaluations = Evaluation::latest()->get();   // or whatever subset students should see
+        return view('evaluation_student', [
+            'evaluations' => $evaluations   // ← don’t forget to pass it
+        ]);
+    }
 
     /**
      * AJAX – return evaluation + its questions as JSON.
@@ -167,13 +180,13 @@ class EvaluationController extends Controller
         $request->validate([
             'responses'               => 'required|array|min:1',
             'responses.*.question_id' => 'required|integer|exists:evaluation_questions,id',
-            'responses.*.answer'      => 'nullable',   // validation per-type happens below
+            'responses.*.answer'      => 'nullable',
         ]);
 
-        // make sure all incoming q-ids belong to this evaluation (basic tamper-proofing)
         $validIds = $evaluation->questions()->pluck('id')->all();
+
         foreach ($request->responses as $resp) {
-            if (! in_array($resp['question_id'], $validIds)) {
+            if (!in_array($resp['question_id'], $validIds)) {
                 return response()->json([
                     'status'  => 'error',
                     'message' => 'Invalid question detected.'
@@ -186,23 +199,22 @@ class EvaluationController extends Controller
             foreach ($request->responses as $resp) {
                 $question = $evaluation->questions->firstWhere('id', $resp['question_id']);
 
-                // Normalise checkbox array into comma-separated string
                 $answer = $resp['answer'];
                 if ($question->type === 'checkbox') {
-                    $answer = is_array($answer) ? implode(',', $answer) : null;
+                    $answer = is_array($answer) ? implode(', ', $answer) : null;
                 }
 
                 EvalAnswer::create([
-                    'evaluation_id' => $evaluation->id,
-                    'question_id'   => $question->id,
-                    'student_id'    =>  decrypt(auth()->user()->name),
-                    'answer'        => $answer,
+                    'evaluation_id'           => $evaluation->id,
+                    'evaluation_question_id'  => $question->id, // ✅ fixed key
+                    'student_id'             => $request->student_id, // ← pass this from the form  // ❗ using `auth()->id()` instead of decrypt(name)
+                    'answer'                  => $answer,
+                    'submitted_at'            => now()
                 ]);
             }
 
             DB::commit();
-            return response()->json(['status'=>'success'], 200);
-
+            return response()->json(['status' => 'success'], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([

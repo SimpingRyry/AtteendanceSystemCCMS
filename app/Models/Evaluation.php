@@ -13,6 +13,10 @@ class Evaluation extends Model
     {
         return $this->hasMany(EvaluationQuestion::class)->orderBy('order');
     }
+    public function event()
+{
+    return $this->belongsTo(Event::class);
+}
     
 }
 

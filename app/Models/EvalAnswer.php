@@ -12,6 +12,7 @@ class EvalAnswer extends Model
         'evaluation_question_id',
         'student_id',
         'answer',
+        'submitted_at'
     ];
 
     public function evaluation() { return $this->belongsTo(Evaluation::class); }
