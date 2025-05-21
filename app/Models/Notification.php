@@ -7,10 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Notification extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'title',
-        'message',
-        'is_read',
-    ];
+// app/Models/Notification.php
+
+protected $fillable = ['title', 'message', 'user_id', 'seen'];
+
 }

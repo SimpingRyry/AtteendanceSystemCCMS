@@ -15,7 +15,7 @@ use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ReportController;
-
+use App\Http\Controllers\NotificationController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -76,6 +76,7 @@ Route::get('/events', [EventsController::class, 'index']);
 
 Route::get('/api/events', [EventsController::class, 'fetchEvents'])->name('events.fetch');
 
+Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->middleware('auth');
 
 
 Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
@@ -172,3 +173,4 @@ Route::post('/logout', function () {
 
 Route::post('/generate-biometrics-schedule', [ScheduleController::class, 'generateBiometricsSchedule']);
 
+Route::post('/notifications/mark-seen', [NotificationController::class, 'markAllAsSeen'])->name('notifications.markSeen');
