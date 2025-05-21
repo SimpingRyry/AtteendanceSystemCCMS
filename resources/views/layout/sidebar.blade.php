@@ -69,12 +69,6 @@
                             <span>Evaluation</span>
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ url('clearance') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('clearance') ? 'active-link' : '' }}">
-                            <img src="{{ asset('images/evaluation_ico.png') }}" alt="eval" class="sidebar-icon">
-                            <span>Clearance</span>
-                        </a>
-                    </li>
 
             @else
                 <!-- NON-MEMBER FULL MENU -->
@@ -152,6 +146,13 @@
                         <a href="{{ url('config') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('config') ? 'active-link' : '' }}">
                             <img src="{{ asset('images/config_ico.png') }}" alt="Configure" class="sidebar-icon">
                             <span>Configure</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ url('clearance') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('clearance') ? 'active-link' : '' }}">
+                            <img src="{{ asset('images/evaluation_ico.png') }}" alt="eval" class="sidebar-icon">
+                            <span>Clearance</span>
                         </a>
                     </li>
 

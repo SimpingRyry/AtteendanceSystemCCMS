@@ -123,6 +123,11 @@ Route::get('/report/student-roster', [ReportController::class, 'generateStudentR
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\StudentEvaluationController;
 use Illuminate\Console\Scheduling\Schedule;
+use App\Http\Controllers\ClearanceController;
+
+Route::get('/clearance', [ClearanceController::class, 'showFinanceClearance'])->name('clearance');
+Route::get('/clearance/pdf', [ClearanceController::class, 'downloadPDF'])->name('clearance.pdf');
+
 
 Route::post('/evaluation/store', [EvaluationController::class, 'store'])->name('evaluation.store');
 Route::get('/evaluations', fn() => \App\Models\Evaluation::all());
