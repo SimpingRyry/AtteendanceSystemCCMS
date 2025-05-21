@@ -41,28 +41,28 @@
   </a>
 
   <!-- Notification Dropdown -->
-  <div class="dropdown order-2">
-    <a class="nav-link text-white position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-      <i class="bi bi-bell fs-5"></i>
-      @if($notifications->count() > 0)
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-          {{ $notifications->count() }}
-          <span class="visually-hidden">unread notifications</span>
-        </span>
-      @endif
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" style="min-width: 300px;">
-      @forelse ($notifications as $notif)
-        <li class="dropdown-item small">
-          <strong>{{ $notif->title }}</strong><br>
-          <span>{{ $notif->message }}</span><br>
-          <small class="text-muted">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>
-        </li>
-      @empty
-        <li class="dropdown-item text-muted">No new notifications</li>
-      @endforelse
-    </ul>
-  </div>
+  <div class="dropdown order-2 position-relative">
+  <a class="nav-link text-white position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-bell fs-5"></i>
+    @if($notifications->count() > 0)
+    <span class="position-absolute start-75 translate-middle badge rounded-pill bg-danger" style="top: 20%;">
+        {{ $notifications->count() }}
+        <span class="visually-hidden">unread notifications</span>
+      </span>
+    @endif
+  </a>
+  <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" style="min-width: 300px;">
+    @forelse ($notifications as $notif)
+      <li class="dropdown-item small">
+        <strong>{{ $notif->title }}</strong><br>
+        <span>{{ $notif->message }}</span><br>
+        <small class="text-muted">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>
+      </li>
+    @empty
+      <li class="dropdown-item text-muted">No new notifications</li>
+    @endforelse
+  </ul>
+</div>
 
 </div>
 

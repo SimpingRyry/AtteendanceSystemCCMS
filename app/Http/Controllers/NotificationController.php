@@ -13,7 +13,7 @@ class NotificationController extends Controller
     {
         $notifications = Notification::where('user_id', auth()->id())
             ->latest()
-            ->take(10)
+            ->take(3)
             ->get();
 
         return response()->json($notifications);
