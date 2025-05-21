@@ -70,11 +70,11 @@
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Filter by Event</label>
                                 <select class="form-select" name="event_id" id="event_id" required>
-    <option value="">Select event</option>
-    @foreach($eventNames as $id => $name)
-        <option value="{{ $id }}">{{ $name }}</option>
-    @endforeach
-</select>
+                                    <option value="">Select event</option>
+                                    @foreach($eventNames as $id => $name)
+                                    <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
 
 

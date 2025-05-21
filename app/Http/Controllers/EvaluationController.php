@@ -13,18 +13,20 @@ use Illuminate\Support\Facades\DB;
 
 class EvaluationController extends Controller
 {
-    /* -------------------------------------------------
-       LIST
-    --------------------------------------------------*/
+    // ----------------------------------------------
+    // LIST
+    // ----------------------------------------------
     public function index()
     {
         $evaluations = Evaluation::latest()->get();
-        $eventNames = Event::pluck('name');
+        $eventNames = Event::pluck('name', 'id'); // Fixed: Use id=>name pair
+
         return view('evaluation', compact('evaluations', 'eventNames'));
     }
+
     public function create()
     {
-        $eventNames = Event::pluck('name'); // gets all event names
+        $eventNames = Event::pluck('name', 'id');
 
         return view('evaluation', [
             'evaluations' => Evaluation::latest()->get(),
@@ -32,54 +34,61 @@ class EvaluationController extends Controller
         ]);
     }
 
-
-
-    /* -------------------------------------------------
-       CREATE
-    --------------------------------------------------*/
+    // ----------------------------------------------
+    // STORE
+    // ----------------------------------------------
     public function store(Request $request)
-    {
-        $request->validate([
-            'title'          => 'required|string|max:255',
-            'description'    => 'nullable|string',
-            'questions_json' => 'required|json'
+{
+    $request->validate([
+        'event_id'       => 'required|exists:events,id',
+        'title'          => 'required|string|max:255',
+        'description'    => 'nullable|string',
+        'questions_json' => 'required|json'
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        // Fetch the event to get 'name' and 'course'
+        $event = Event::findOrFail($request->event_id);
+
+        // Save evaluation with event name and course
+        $evaluation = Evaluation::create([
+            'event_id'    => $event->id,
+            'event'       => $event->name,   // store event name as string
+            'course'      => $event->course, // store course as string
+            'title'       => $request->title,
+            'description' => $request->description,
         ]);
 
-        DB::beginTransaction();
+        $questions = json_decode($request->questions_json, true);
 
-        try {
-            $evaluation = Evaluation::create([
-                'title'       => $request->title,
-                'description' => $request->description,
+        foreach ($questions as $index => $q) {
+            EvaluationQuestion::create([
+                'evaluation_id' => $evaluation->id,
+                'question'      => $q['question'],
+                'type'          => $q['type'],
+                'options'       => $q['options'] ?? null,
+                'order'         => $index + 1,
+                'is_required'   => !empty($q['is_required']),
             ]);
-
-            $questions = json_decode($request->questions_json, true);
-
-            foreach ($questions as $index => $q) {
-                EvaluationQuestion::create([
-                    'evaluation_id' => $evaluation->id,
-                    'question'      => $q['question'],
-                    'type'          => $q['type'],
-                    'options'       => $q['options'] ?? null,
-                    'order'         => $index + 1,
-                    'is_required'   => !empty($q['is_required']),
-                ]);
-            }
-
-            DB::commit();
-
-            return redirect()
-                ->back()
-                ->with('success', 'Evaluation created successfully!');
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
-    }
 
-    /* -------------------------------------------------
-       AJAX for edit-modal
-    --------------------------------------------------*/
+        DB::commit();
+
+        return redirect()
+            ->back()
+            ->with('success', 'Evaluation created successfully!');
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+    }
+}
+
+
+    // ----------------------------------------------
+    // FETCH QUESTIONS (AJAX)
+    // ----------------------------------------------
     public function questions(Evaluation $evaluation)
     {
         return response()->json(
@@ -87,9 +96,9 @@ class EvaluationController extends Controller
         );
     }
 
-    /* -------------------------------------------------
-       UPDATE
-    --------------------------------------------------*/
+    // ----------------------------------------------
+    // UPDATE
+    // ----------------------------------------------
     public function update(Request $request, Evaluation $evaluation)
     {
         $validated = $request->validate([
@@ -101,7 +110,7 @@ class EvaluationController extends Controller
         DB::beginTransaction();
 
         try {
-            /* 1️⃣  update evaluation fields */
+            // Update evaluation fields
             $evaluation->update([
                 'title'       => $validated['title'],
                 'description' => $validated['description'] ?? null,
@@ -109,13 +118,13 @@ class EvaluationController extends Controller
 
             $questions = json_decode($validated['questions_json'], true);
 
-            /* 2️⃣  prune deleted rows */
+            // Remove deleted questions
             $submittedIds = collect($questions)->pluck('id')->filter()->all();
             EvaluationQuestion::where('evaluation_id', $evaluation->id)
                 ->whereNotIn('id', $submittedIds)
                 ->delete();
 
-            /* 3️⃣  upsert each question */
+            // Insert or update each question
             foreach ($questions as $index => $q) {
                 $data = [
                     'question'    => $q['question'],
@@ -126,10 +135,8 @@ class EvaluationController extends Controller
                 ];
 
                 if (!empty($q['id'])) {
-                    // update
                     EvaluationQuestion::where('id', $q['id'])->update($data);
                 } else {
-                    // insert
                     $data['evaluation_id'] = $evaluation->id;
                     EvaluationQuestion::create($data);
                 }
@@ -137,7 +144,6 @@ class EvaluationController extends Controller
 
             DB::commit();
 
-            // Return JSON success response for AJAX
             return response()->json([
                 'status' => 'success',
                 'message' => 'Evaluation and questions updated!'
@@ -147,40 +153,37 @@ class EvaluationController extends Controller
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
+
+    // ----------------------------------------------
+    // STUDENT VIEW
+    // ----------------------------------------------
     public function studentIndex()
     {
-        $evaluations = Evaluation::latest()->get();   // or whatever subset students should see
+        $evaluations = Evaluation::latest()->get();
+
         return view('evaluation_student', [
-            'evaluations' => $evaluations   // ← don’t forget to pass it
+            'evaluations' => $evaluations
         ]);
     }
 
-    /**
-     * AJAX – return evaluation + its questions as JSON.
-     * Route:  GET /student/evaluation/{evaluation}/json
-     */
+    // ----------------------------------------------
+    // GET EVALUATION + QUESTIONS (AJAX)
+    // ----------------------------------------------
     public function json(Evaluation $evaluation)
     {
         return response()->json($evaluation->load('questions'));
     }
 
-    /**
-     * Store a student's answers.
-     * Route:  POST /student/evaluation/{evaluation}/answer
-     *
-     * Expected payload (from the modal):
-     *  responses = [
-     *     [ 'question_id' => 5, 'answer' => 'Yes' ],
-     *     [ 'question_id' => 6, 'answer' => ['A','B'] ],   // checkbox array
-     *     …
-     *  ]
-     */
+    // ----------------------------------------------
+    // SUBMIT STUDENT ANSWERS
+    // ----------------------------------------------
     public function submitAnswers(Request $request, Evaluation $evaluation)
     {
         $request->validate([
             'responses'               => 'required|array|min:1',
             'responses.*.question_id' => 'required|integer|exists:evaluation_questions,id',
             'responses.*.answer'      => 'nullable',
+            'student_id'              => 'required|exists:users,id' // Ensure student ID is valid
         ]);
 
         $validIds = $evaluation->questions()->pluck('id')->all();
@@ -195,6 +198,7 @@ class EvaluationController extends Controller
         }
 
         DB::beginTransaction();
+
         try {
             foreach ($request->responses as $resp) {
                 $question = $evaluation->questions->firstWhere('id', $resp['question_id']);
@@ -205,15 +209,16 @@ class EvaluationController extends Controller
                 }
 
                 EvalAnswer::create([
-                    'evaluation_id'           => $evaluation->id,
-                    'evaluation_question_id'  => $question->id, // ✅ fixed key
-                    'student_id'             => $request->student_id, // ← pass this from the form  // ❗ using `auth()->id()` instead of decrypt(name)
-                    'answer'                  => $answer,
-                    'submitted_at'            => now()
+                    'evaluation_id'          => $evaluation->id,
+                    'evaluation_question_id' => $question->id,
+                    'student_id'             => $request->student_id,
+                    'answer'                 => $answer,
+                    'submitted_at'           => now()
                 ]);
             }
 
             DB::commit();
+
             return response()->json(['status' => 'success'], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
