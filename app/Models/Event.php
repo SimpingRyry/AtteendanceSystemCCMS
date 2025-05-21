@@ -24,11 +24,14 @@ class Event extends Model
         'timeouts',
         'course',
         'times', // Store times as JSON
+        'guests',
+        'description'
     ];
 
     // If you're storing the times as a JSON column, you can cast it
     protected $casts = [
         'times' => 'array',
+        'guests' => 'array'
     ];
     
 }

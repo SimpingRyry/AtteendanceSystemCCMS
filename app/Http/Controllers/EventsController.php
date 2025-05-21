@@ -14,64 +14,111 @@ class EventsController extends Controller
         return view('events'); // Blade view
     }
     public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'venue' => 'nullable|string',
-        'event_date' => 'required|date',
-        'timeouts' => 'required|in:2,4',
-        'course' => 'nullable|string',
-        'repeat_dates' => 'nullable|string'
-    ]);
-
-    $times = [];
-
-    if ($request->timeouts == 2) {
-        $times = [$request->half_start, $request->half_end];
-    } elseif ($request->timeouts == 4) {
-        $times = [
-            $request->morning_start,
-            $request->morning_end,
-            $request->afternoon_start,
-            $request->afternoon_end
-        ];
-    }
-
-    $dates = [$request->event_date];
-
-    if (!empty($request->repeat_dates)) {
-        $extraDates = explode(',', $request->repeat_dates);
-        $extraDates = array_map('trim', $extraDates);
-        $dates = array_merge($dates, $extraDates);
-    }
-
-    foreach ($dates as $date) {
-        $event = Event::create([
-            'name' => $request->name,
-            'venue' => $request->venue,
-            'event_date' => $date,
-            'timeouts' => $request->timeouts,
-            'times' => json_encode($times),
-            'course' => $request->course,
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'venue' => 'nullable|string',
+            'event_date' => 'required|date',
+            'timeouts' => 'required|in:2,4',
+            'course' => 'nullable|string',
+            'repeat_dates' => 'nullable|string',
+            'guests' => 'nullable|string'
         ]);
-
-        // ✅ Send notifications based on course
-        $recipients = \App\Models\User::when($request->course && $request->course !== 'All', function ($query) use ($request) {
-            return $query->where('course', $request->course);
-        })->get();
-
-        foreach ($recipients as $user) {
-            \App\Models\Notification::create([
-                'user_id' => $user->id,
-                'title' => 'New Event: ' . $event->name,
-                'message' => 'An event is scheduled for ' . $event->event_date . ' at ' . $event->venue,
-            ]);
+    
+        $times = [];
+    
+        if ($request->timeouts == 2) {
+            $times = [$request->half_start, $request->half_end];
+        } elseif ($request->timeouts == 4) {
+            $times = [
+                $request->morning_start,
+                $request->morning_end,
+                $request->afternoon_start,
+                $request->afternoon_end
+            ];
         }
+    
+        $dates = [$request->event_date];
+    
+        if (!empty($request->repeat_dates)) {
+            $extraDates = explode(',', $request->repeat_dates);
+            $extraDates = array_map('trim', $extraDates);
+            $dates = array_merge($dates, $extraDates);
+        }
+    
+        // ✅ Determine course based on user role or organization
+        $user = auth()->user();
+        $role = $user->role ?? null;
+        $organization = $user->org ?? null;
+        $course = null;
+    
+        if ($role === 'Super Admin') {
+            $course = $request->course;
+        } elseif ($organization === 'Information Technology Society' || $organization === 'ITS') {
+            $course = 'BSIT';
+        } elseif ($organization === 'PRAXIS') {
+            $course = 'BSIS';
+        } elseif ($organization === 'CCMS Student Government') {
+            $course = 'All';
+        }
+    
+        // ✅ Parse guest emails
+        $guestEmails = [];
+    
+        if (!empty($request->guests)) {
+            $guestEmails = array_filter(array_map('trim', explode(',', $request->guests)));
+        }
+    
+        foreach ($dates as $date) {
+            $event = Event::create([
+                'name' => $request->name,
+                'venue' => $request->venue,
+                'event_date' => $date,
+                'timeouts' => $request->timeouts,
+                'times' => json_encode($times),
+                'course' => $course,
+                'guests' => json_encode($guestEmails),
+                'description' => $request->description,
+            ]);
+    
+            // ✅ Notify users based on course
+            $recipients = \App\Models\User::when($course && $course !== 'All', function ($query) use ($course) {
+                return $query->where(function ($q) use ($course) {
+                    if ($course === 'BSIT') {
+                        $q->whereIn('org', ['Information Technology Society', 'ITS']);
+                    } elseif ($course === 'BSIS') {
+                        $q->where('org', 'PRAXIS');
+                    }
+                });
+            })->get();
+    
+            foreach ($recipients as $user) {
+                \App\Models\Notification::create([
+                    'user_id' => $user->id,
+                    'title' => 'New Event: ' . $event->name,
+                    'message' => 'An event is scheduled for ' . $event->event_date . ' at ' . $event->venue,
+                ]);
+            }
+    
+            // ✅ Notify tagged guests
+            if (!empty($guestEmails)) {
+                $guestUsers = \App\Models\User::whereIn('email', $guestEmails)->get();
+    
+                foreach ($guestUsers as $guest) {
+                    \App\Models\Notification::create([
+                        'user_id' => $guest->id,
+                        'title' => 'You were tagged in an event: ' . $event->name,
+                        'message' => 'You were invited to the event on ' . $event->event_date . ' at ' . $event->venue,
+                    ]);
+                }
+            }
+        }
+    
+        return redirect()->back()->with('success', 'Events created and notifications sent successfully!');
     }
-
-    return redirect()->back()->with('success', 'Events created and notifications sent successfully!');
-}
+    
+    
    public function fetchEvents()
 {
     $events = Event::all();
@@ -80,6 +127,7 @@ class EventsController extends Controller
 
     foreach ($events as $event) {
         $times = json_decode($event->times, true); // Decode the JSON times array
+        $guests = json_decode($event->guests,true);
 
         if ($event->timeouts == 2) {
             // Half day event (single event)
@@ -93,6 +141,8 @@ class EventsController extends Controller
                     'venue' => $event->venue,
                     'timeout' => $event->timeouts,
                     'times' => $times,
+                    'guests' => $guests,
+                    'description' => $event->description
                 ],
 'color' => $event->course === 'BSIS' ? 'violet' : ($event->course === 'All' ? 'green' : 'blue'),
             ];
@@ -108,6 +158,7 @@ class EventsController extends Controller
                     'venue' => $event->venue,
                     'timeout' => $event->timeouts,
                     'times' => $times,
+                    'guests' => $guests
                 ],
 'color' => $event->course === 'BSIS' ? 'violet' : ($event->course === 'All' ? 'green' : 'blue'),
             ];

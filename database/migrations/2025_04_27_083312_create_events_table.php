@@ -20,7 +20,11 @@ return new class extends Migration
             $table->date('event_date');
             $table->integer('timeouts');
             $table->string('course');
-            $table->json('times'); // Store the times as JSON
+            $table->json('times'); 
+            $table->json('guests'); 
+            
+            
+            // Store the times as JSON
             // Remove this line if you don't want timestamps
             //$table->timestamps();
         });

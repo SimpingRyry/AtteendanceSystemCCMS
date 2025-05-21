@@ -174,10 +174,11 @@
                                 <option value="All">All</option>
                             </select>
                         </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="guests" class="form-label">Add Guests (Optional)</label>
-                            <input type="text" class="form-control" id="guests" name="guests" placeholder="Separate emails by commas">
-                        </div>
+                        <div class="mb-3 col-md-6 position-relative">
+    <label for="guests" class="form-label">Add Guests (Optional)</label>
+    <input type="text" class="form-control" id="guests" name="guests" placeholder="Type @ to tag admins">
+    <div id="mentionDropdown" class="list-group position-absolute w-100 z-3" style="display: none; max-height: 200px; overflow-y: auto;"></div>
+</div>
                     </div>
 
                     <div class="mb-3">
@@ -275,7 +276,86 @@
   </div>
 </div>
 
+<div class="modal fade" id="viewEventModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewEventName"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Venue:</strong> <span id="viewEventVenue"></span></p>
+        <p><strong>Date:</strong> <span id="viewEventDate"></span></p>
+        <p><strong>Time:</strong> <span id="viewEventTimes"></span></p>
+        <p><strong>Description & Guests:</strong><br><span id="viewEventDescGuests"></span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+let adminUsers = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+    const guestsInput = document.getElementById("guests");
+    const mentionDropdown = document.getElementById("mentionDropdown");
+
+    // Load admin users
+    fetch('/admin-users') // Laravel route returns admins
+        .then(res => res.json())
+        .then(data => adminUsers = data);
+
+    guestsInput.addEventListener("input", (e) => {
+        const value = e.target.value;
+        const atIndex = value.lastIndexOf("@");
+
+        if (atIndex !== -1) {
+            const query = value.substring(atIndex + 1).toLowerCase();
+            const matches = adminUsers.filter(user =>
+                user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query)
+            );
+
+            if (matches.length) {
+                mentionDropdown.innerHTML = matches.map(user => `
+                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" data-email="${user.email}">
+                        <img src="${user.profile_picture || '/default-avatar.png'}" class="rounded-circle me-2" width="30" height="30">
+                        <div>
+                            <strong>${user.name}</strong><br>
+                            <small>${user.email}</small>
+                        </div>
+                    </a>
+                `).join("");
+                mentionDropdown.style.display = "block";
+            } else {
+                mentionDropdown.style.display = "none";
+            }
+        } else {
+            mentionDropdown.style.display = "none";
+        }
+    });
+
+    mentionDropdown.addEventListener("click", function (e) {
+        e.preventDefault();
+        const item = e.target.closest("a");
+        if (item) {
+            const email = item.dataset.email;
+            const value = guestsInput.value;
+            const atIndex = value.lastIndexOf("@");
+            guestsInput.value = value.substring(0, atIndex) + email + ', ';
+            mentionDropdown.style.display = "none";
+        }
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!mentionDropdown.contains(e.target) && e.target !== guestsInput) {
+            mentionDropdown.style.display = "none";
+        }
+    });
+});
+</script>
+
 <script>
     flatpickr("#repeatDates", {
         mode: "multiple",
@@ -513,6 +593,45 @@ document.addEventListener('DOMContentLoaded', function () {
             const viewIcon = iconContainer.querySelector('.fa-eye');
             viewIcon.addEventListener('click', function (e) {
                 e.stopPropagation();
+
+    // Extract data
+    const title = event.title;
+    const venue = event.extendedProps.venue || 'N/A';
+    const date = event.start.toLocaleDateString();
+    const times = event.extendedProps.times || [];
+    const description = event.extendedProps.description || '';
+    const guests = event.extendedProps.guests || [];
+
+    // Format time labels
+    let timeDisplay = '';
+    if (times.length === 2) {
+        timeDisplay = `<strong>Time In:</strong> ${times[0]} <br><strong>Time Out:</strong> ${times[1]}`;
+    } else if (times.length === 4) {
+        timeDisplay = `
+            <strong>Morning Time In:</strong> ${times[0]} <br>
+            <strong>Morning Time Out:</strong> ${times[1]} <br>
+            <strong>Afternoon Time In:</strong> ${times[2]} <br>
+            <strong>Afternoon Time Out:</strong> ${times[3]}
+        `;
+    } else {
+        timeDisplay = times.map((t, i) => `<strong>Time ${i + 1}:</strong> ${t}`).join('<br>');
+    }
+
+    // Highlight guests
+    const guestBadges = guests.map(guest => `<span class="badge bg-primary me-1">${guest}</span>`).join(' ');
+
+    // Populate modal
+    document.getElementById('viewEventName').innerText = title;
+    document.getElementById('viewEventVenue').innerText = venue;
+    document.getElementById('viewEventDate').innerText = date;
+    document.getElementById('viewEventTimes').innerHTML = timeDisplay;
+    document.getElementById('viewEventDescGuests').innerHTML = `
+        ${description ? `<p>${description}</p>` : ''}
+        ${guests.length ? `<div>${guestBadges}</div>` : '<span class="text-muted">No guests listed.</span>'}
+    `;
+
+    // Show modal
+    new bootstrap.Modal(document.getElementById('viewEventModal')).show();
                 // You can trigger the same logic used in eventClick here if needed
             });
 
@@ -528,32 +647,43 @@ document.addEventListener('DOMContentLoaded', function () {
         eventClick: function (info) {
             info.jsEvent.preventDefault();
 
-            document.getElementById('modalEventName').innerText = info.event.title;
-            document.getElementById('modalEventVenue').innerText = info.event.extendedProps.venue;
-            document.getElementById('modalEventDate').innerText = info.event.start.toLocaleDateString();
-            document.getElementById('modalEventTimeouts').innerText = info.event.extendedProps.timeout;
-            document.getElementById('modalEventTimes').innerText = info.event.extendedProps.times.join(' - ');
-            document.getElementById('modalEventCourse').innerText = info.event.extendedProps.course;
+             const title = info.event.title;
+    const venue = info.event.extendedProps.venue || 'N/A';
+    const date = info.event.start.toLocaleDateString();
+    const times = info.event.extendedProps.times || [];
+    const description = info.event.extendedProps.description || '';
+    const guests = info.event.extendedProps.guests || [];
 
-            const currentDate = new Date();
-            const eventDate = new Date(info.event.start);
+    // Format time labels
+    let timeDisplay = '';
+    if (times.length === 2) {
+        timeDisplay = `<strong>Time In:</strong> ${times[0]} <br><strong>Time Out:</strong> ${times[1]}`;
+    } else if (times.length === 4) {
+        timeDisplay = `
+            <strong>Morning Time In:</strong> ${times[0]} <br>
+            <strong>Morning Time Out:</strong> ${times[1]} <br>
+            <strong>Afternoon Time In:</strong> ${times[2]} <br>
+            <strong>Afternoon Time Out:</strong> ${times[3]}
+        `;
+    } else {
+        timeDisplay = times.map((t, i) => `<strong>Time ${i + 1}:</strong> ${t}`).join('<br>');
+    }
 
-            currentDate.setHours(0, 0, 0, 0);
-            eventDate.setHours(0, 0, 0, 0);
+    // Highlight guests
+    const guestBadges = guests.map(guest => `<span class="badge bg-primary me-1">${guest}</span>`).join(' ');
 
-            const generateBtn = document.getElementById('generateAttendanceBtn');
-            const attendanceNote = document.getElementById('attendanceNote');
+    // Populate modal
+    document.getElementById('viewEventName').innerText = title;
+    document.getElementById('viewEventVenue').innerText = venue;
+    document.getElementById('viewEventDate').innerText = date;
+    document.getElementById('viewEventTimes').innerHTML = timeDisplay;
+    document.getElementById('viewEventDescGuests').innerHTML = `
+        ${description ? `<p>${description}</p>` : ''}
+        ${guests.length ? `<div>${guestBadges}</div>` : '<span class="text-muted">No guests listed.</span>'}
+    `;
 
-            if (eventDate >= currentDate) {
-                generateBtn.disabled = false;
-                attendanceNote.style.display = 'none';
-            } else {
-                generateBtn.disabled = true;
-                attendanceNote.style.display = 'block';
-                attendanceNote.innerText = `Available on ${eventDate.toLocaleDateString()}`;
-            }
-
-            new bootstrap.Modal(document.getElementById('eventModal')).show();
+    // Show modal
+    new bootstrap.Modal(document.getElementById('viewEventModal')).show();
         },
         eventTimeFormat: {
             hour: '2-digit',
