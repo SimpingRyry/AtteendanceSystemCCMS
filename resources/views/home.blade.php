@@ -86,54 +86,6 @@
     font-family: 'Poppins', 'Roboto', sans-serif;
 }
 
-.fc-toolbar-title {
-    font-size: 1.4rem;
-    font-weight: 500;
-    color: #333;
-}
-
-.fc-button {
-    background-color: #1976d2;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 0.85rem;
-    color: white;
-    transition: background-color 0.3s ease;
-}
-
-.fc-button-primary:not(:disabled).fc-button-active,
-.fc-button-primary:not(:disabled):hover {
-    background-color: #115293;
-}
-
-/* Today Cell */
-.fc-day-today {
-    background-color: #f1f8ff !important;
-}
-
-/* Flat cell borders */
-.fc-daygrid-day {
-    border: 1px solid #f1f1f1;
-}
-
-/* Hide calendar grid border */
-.fc-scrollgrid {
-    border: none !important;
-}
-
-main {
-    padding-top: 1.5rem;
-    padding-bottom: 2rem;
-    background-color: #f9f9f9;
-}
-
-/* Ensure sidebar contents are spaced from the top */
-.col-md-4 .d-flex.flex-column {
-    padding-top: 1rem;
-}
-
-/* Add top margin to calendar wrapper */
 #calendarWrapper {
     margin-top: 0.5rem;
     padding: 1.1rem;
