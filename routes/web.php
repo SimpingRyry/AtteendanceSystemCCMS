@@ -93,6 +93,9 @@ Route::get('/evaluation_student', function () {
 Route::get('/reports', function () {
     return view('reports');
 });
+Route::get('/clearance', function () {
+    return view('clearance');
+});
 Route::get('/config', [SettingsController::class, 'index'])->name('settings.index');
 Route::post('/config/fines', [SettingsController::class, 'updateFines'])->name('settings.updateFines');
 Route::post('/config/academic', [SettingsController::class, 'updateAcademic'])->name('settings.updateAcademicYear');
@@ -119,7 +122,13 @@ Route::get('/report/student-list', [ReportController::class, 'generateStudentLis
 Route::get('/report/student-roster', [ReportController::class, 'generateStudentRoster'])->name('report.studentRoster');
 
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\StudentEvaluationController;
 use Illuminate\Console\Scheduling\Schedule;
+use App\Http\Controllers\ClearanceController;
+
+Route::get('/clearance', [ClearanceController::class, 'showFinanceClearance'])->name('clearance');
+Route::get('/clearance/pdf', [ClearanceController::class, 'downloadPDF'])->name('clearance.pdf');
+
 
 Route::post('/evaluation/store', [EvaluationController::class, 'store'])->name('evaluation.store');
 Route::get('/evaluations', fn() => \App\Models\Evaluation::all());
@@ -132,25 +141,22 @@ Route::get('evaluation/{evaluation}/questions', [App\Http\Controllers\Evaluation
 Route::put('/evaluation/{evaluation}', [EvaluationController::class, 'update'])->name('evaluation.update');
 
 
-// GET list of evaluations for students
-Route::get('/student/evaluations', [EvaluationController::class,'studentIndex'])
-      ->name('student.evaluations');
-
-// AJAX – return evaluation + questions JSON
-Route::get('/student/evaluation/{evaluation}/json', [EvaluationController::class,'json'])
-      ->name('evaluation.json');
-
-// POST answers (from the modal’s form)
-Route::post('/student/evaluation/{evaluation}/answer', [EvaluationController::class,'submitAnswers'])
-      ->name('evaluation.submit');
-
-      Route::middleware(['auth'])->group(function () {
-    Route::get('/student/evaluations', [EvaluationController::class, 'studentIndex'])
+Route::middleware(['auth'])->group(function () {
+    // GET list of evaluations for students
+    Route::get('/evaluation_student', [StudentEvaluationController::class, 'index'])
          ->name('student.evaluations');
+
+    // AJAX – return evaluation + questions JSON
+    Route::get('/evaluation_student/{evaluation}/json', [StudentEvaluationController::class,'json'])
+         ->name('evaluation.json');
+
+    // POST answers (from the modal’s form)
+    Route::post('/evaluation_student/{evaluation}/answer', [StudentEvaluationController::class,'submitAnswers'])
+         ->name('evaluation.submit');
 });
 
 
-Route::get('/evaluation_student', [EvaluationController::class,'studentIndex']);
+Route::get('/evaluation_student', [StudentEvaluationController::class,'index']);
 
 
 Route::post('/orgs', [OrgListController::class, 'store'])->name('orgs.store');
@@ -173,4 +179,7 @@ Route::post('/logout', function () {
 
 Route::post('/generate-biometrics-schedule', [ScheduleController::class, 'generateBiometricsSchedule']);
 
+Route::get('/admin-users', function () {
+    return \App\Models\User::where('role', 'Admin')->get(['name', 'email', 'picture']);
+});
 Route::post('/notifications/mark-seen', [NotificationController::class, 'markAllAsSeen'])->name('notifications.markSeen');

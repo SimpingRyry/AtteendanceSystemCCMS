@@ -150,6 +150,13 @@
                     </li>
 
                     <li>
+                        <a href="{{ url('clearance') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('clearance') ? 'active-link' : '' }}">
+                            <img src="{{ asset('images/evaluation_ico.png') }}" alt="eval" class="sidebar-icon">
+                            <span>Clearance</span>
+                        </a>
+                    </li>
+
+                    <li>
                         <a href="{{ url('evaluation') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('evaluation') ? 'active-link' : '' }}">
                             <img src="{{ asset('images/evaluation_ico.png') }}" alt="eval" class="sidebar-icon">
                             <span>Evaluation</span>
