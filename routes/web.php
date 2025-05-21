@@ -92,6 +92,9 @@ Route::get('/evaluation_student', function () {
 Route::get('/reports', function () {
     return view('reports');
 });
+Route::get('/clearance', function () {
+    return view('clearance');
+});
 Route::get('/config', [SettingsController::class, 'index'])->name('settings.index');
 Route::post('/config/fines', [SettingsController::class, 'updateFines'])->name('settings.updateFines');
 Route::post('/config/academic', [SettingsController::class, 'updateAcademic'])->name('settings.updateAcademicYear');
