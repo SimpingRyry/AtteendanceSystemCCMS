@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Event;
-use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Event;
+use Illuminate\Support\Str;
 use App\Models\Notification;
+use Illuminate\Http\Request;
+
 class EventsController extends Controller
 {
 
@@ -54,11 +56,11 @@ class EventsController extends Controller
         $course = null;
     
         if ($role === 'Super Admin') {
-            $course = $request->course;
+            $course = 'MAIN-' . $request->course;
         } elseif ($organization === 'Information Technology Society' || $organization === 'ITS') {
-            $course = 'BSIT';
+            $course = 'MAIN-BSIT';
         } elseif ($organization === 'PRAXIS') {
-            $course = 'BSIS';
+            $course = 'MAIN-BSIS';
         } elseif ($organization === 'CCMS Student Government') {
             $course = 'All';
         }
@@ -85,9 +87,9 @@ class EventsController extends Controller
             // ✅ Notify users based on course
             $recipients = \App\Models\User::when($course && $course !== 'All', function ($query) use ($course) {
                 return $query->where(function ($q) use ($course) {
-                    if ($course === 'BSIT') {
+                    if ($course === 'MAIN-BSIT') {
                         $q->whereIn('org', ['Information Technology Society', 'ITS']);
-                    } elseif ($course === 'BSIS') {
+                    } elseif ($course === 'MAIN-BSIS') {
                         $q->where('org', 'PRAXIS');
                     }
                 });
@@ -119,56 +121,54 @@ class EventsController extends Controller
     }
     
     
-   public function fetchEvents()
-{
-    $events = Event::all();
-
-    $calendarEvents = [];
-
-    foreach ($events as $event) {
-        $times = json_decode($event->times, true); // Decode the JSON times array
-        $guests = json_decode($event->guests,true);
-
-        if ($event->timeouts == 2) {
-            // Half day event (single event)
-            $calendarEvents[] = [
-                'title' => $event->name,
-                'start' => $event->event_date . 'T' . $times[0],
-                'end' => $event->event_date . 'T' . $times[1],
-                'extendedProps' => [
-                    'id' => $event->id,
-                    'course' => $event->course,
-                    'venue' => $event->venue,
-                    'timeout' => $event->timeouts,
-                    'times' => $times,
-                    'guests' => $guests,
-                    'description' => $event->description
-                ],
-'color' => $event->course === 'BSIS' ? 'violet' : ($event->course === 'All' ? 'green' : 'blue'),
-            ];
-        } elseif ($event->timeouts == 4) {
-            // Full day event as one combined event (no duplicate morning and afternoon)
-            $calendarEvents[] = [
-                'title' => $event->name,
-                'start' => $event->event_date . 'T' . $times[0], // morning start
-                'end' => $event->event_date . 'T' . $times[3],   // afternoon end
-                'extendedProps' => [
-                    'id' => $event->id,
-                    'course' => $event->course,
-                    'venue' => $event->venue,
-                    'timeout' => $event->timeouts,
-                    'times' => $times,
-                    'guests' => $guests
-                ],
-'color' => $event->course === 'BSIS' ? 'violet' : ($event->course === 'All' ? 'green' : 'blue'),
-            ];
+    public function fetchEvents()
+    {
+        $events = Event::all();
+        $calendarEvents = [];
+    
+        foreach ($events as $event) {
+            $times = json_decode($event->times, true);
+            $guests = json_decode($event->guests, true);
+    
+            // Clean the course name
+            $cleanCourse = Str::replaceFirst('MAIN-', '', $event->course);
+    
+            if ($event->timeouts == 2) {
+                $calendarEvents[] = [
+                    'title' => $event->name,
+                    'start' => $event->event_date . 'T' . $times[0],
+                    'end' => $event->event_date . 'T' . $times[1],
+                    'extendedProps' => [
+                        'id' => $event->id,
+                        'course' => $cleanCourse,
+                        'venue' => $event->venue,
+                        'timeout' => $event->timeouts,
+                        'times' => $times,
+                        'guests' => $guests,
+                        'description' => $event->description
+                    ],
+                    'color' => $cleanCourse === 'BSIS' ? 'violet' : ($cleanCourse === 'All' ? 'green' : 'blue'),
+                ];
+            } elseif ($event->timeouts == 4) {
+                $calendarEvents[] = [
+                    'title' => $event->name,
+                    'start' => $event->event_date . 'T' . $times[0],
+                    'end' => $event->event_date . 'T' . $times[3],
+                    'extendedProps' => [
+                        'id' => $event->id,
+                        'course' => $cleanCourse,
+                        'venue' => $event->venue,
+                        'timeout' => $event->timeouts,
+                        'times' => $times,
+                        'guests' => $guests
+                    ],
+                    'color' => $cleanCourse === 'BSIS' ? 'violet' : ($cleanCourse === 'All' ? 'green' : 'blue'),
+                ];
+            }
         }
-        // You can add other conditions for different timeout values if needed
+    
+        return response()->json($calendarEvents);
     }
-
-    return response()->json($calendarEvents);
-}
-
 public function update(Request $request)
 {
     // dd($request->all());
