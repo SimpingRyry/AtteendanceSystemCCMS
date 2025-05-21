@@ -15,7 +15,7 @@ use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ReportController;
-
+use App\Http\Controllers\NotificationController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -76,6 +76,7 @@ Route::get('/events', [EventsController::class, 'index']);
 
 Route::get('/api/events', [EventsController::class, 'fetchEvents'])->name('events.fetch');
 
+Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->middleware('auth');
 
 
 Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
@@ -91,6 +92,9 @@ Route::get('/evaluation_student', function () {
 });
 Route::get('/reports', function () {
     return view('reports');
+});
+Route::get('/clearance', function () {
+    return view('clearance');
 });
 Route::get('/config', [SettingsController::class, 'index'])->name('settings.index');
 Route::post('/config/fines', [SettingsController::class, 'updateFines'])->name('settings.updateFines');
@@ -120,6 +124,11 @@ Route::get('/report/student-roster', [ReportController::class, 'generateStudentR
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\StudentEvaluationController;
 use Illuminate\Console\Scheduling\Schedule;
+use App\Http\Controllers\ClearanceController;
+
+Route::get('/clearance', [ClearanceController::class, 'showFinanceClearance'])->name('clearance');
+Route::get('/clearance/pdf', [ClearanceController::class, 'downloadPDF'])->name('clearance.pdf');
+
 
 Route::post('/evaluation/store', [EvaluationController::class, 'store'])->name('evaluation.store');
 Route::get('/evaluations', fn() => \App\Models\Evaluation::all());
@@ -173,3 +182,4 @@ Route::post('/generate-biometrics-schedule', [ScheduleController::class, 'genera
 Route::get('/admin-users', function () {
     return \App\Models\User::where('role', 'Admin')->get(['name', 'email', 'picture']);
 });
+Route::post('/notifications/mark-seen', [NotificationController::class, 'markAllAsSeen'])->name('notifications.markSeen');

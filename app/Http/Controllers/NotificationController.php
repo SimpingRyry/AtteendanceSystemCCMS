@@ -18,22 +18,22 @@ class NotificationController extends Controller
 
         return response()->json($notifications);
     }
+public function markAsRead($id)
+{
+    $notification = Notification::findOrFail($id);
+    $notification->read_at = now();
+    $notification->save();
 
-    public function markAsRead($id)
-    {
-        $notif = Notification::where('id', $id)
-            ->where('user_id', auth()->id())
-            ->firstOrFail();
+    return response()->json(['success' => true]);
+}
 
-        $notif->is_read = true;
-        $notif->save();
+public function markAllAsRead()
+{
+    Notification::where('user_id', auth()->id())
+        ->whereNull('read_at')
+        ->update(['read_at' => now()]);
 
-        return response()->json(['success' => true]);
-    }
+    return response()->json(['success' => true]);
+}
 
-    public function markAllAsRead()
-    {
-        Notification::where('user_id', auth()->id())->update(['is_read' => true]);
-        return response()->json(['success' => true]);
-    }
 }
