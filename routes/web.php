@@ -118,6 +118,7 @@ Route::get('/report/student-list', [ReportController::class, 'generateStudentLis
 Route::get('/report/student-roster', [ReportController::class, 'generateStudentRoster'])->name('report.studentRoster');
 
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\StudentEvaluationController;
 use Illuminate\Console\Scheduling\Schedule;
 
 Route::post('/evaluation/store', [EvaluationController::class, 'store'])->name('evaluation.store');
@@ -131,25 +132,22 @@ Route::get('evaluation/{evaluation}/questions', [App\Http\Controllers\Evaluation
 Route::put('/evaluation/{evaluation}', [EvaluationController::class, 'update'])->name('evaluation.update');
 
 
-// GET list of evaluations for students
-Route::get('/student/evaluations', [EvaluationController::class,'studentIndex'])
-      ->name('student.evaluations');
-
-// AJAX – return evaluation + questions JSON
-Route::get('/student/evaluation/{evaluation}/json', [EvaluationController::class,'json'])
-      ->name('evaluation.json');
-
-// POST answers (from the modal’s form)
-Route::post('/student/evaluation/{evaluation}/answer', [EvaluationController::class,'submitAnswers'])
-      ->name('evaluation.submit');
-
-      Route::middleware(['auth'])->group(function () {
-    Route::get('/student/evaluations', [EvaluationController::class, 'studentIndex'])
+Route::middleware(['auth'])->group(function () {
+    // GET list of evaluations for students
+    Route::get('/evaluation_student', [StudentEvaluationController::class, 'index'])
          ->name('student.evaluations');
+
+    // AJAX – return evaluation + questions JSON
+    Route::get('/evaluation_student/{evaluation}/json', [StudentEvaluationController::class,'json'])
+         ->name('evaluation.json');
+
+    // POST answers (from the modal’s form)
+    Route::post('/evaluation_student/{evaluation}/answer', [StudentEvaluationController::class,'submitAnswers'])
+         ->name('evaluation.submit');
 });
 
 
-Route::get('/evaluation_student', [EvaluationController::class,'studentIndex']);
+Route::get('/evaluation_student', [StudentEvaluationController::class,'index']);
 
 
 Route::post('/orgs', [OrgListController::class, 'store'])->name('orgs.store');
