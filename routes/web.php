@@ -172,3 +172,6 @@ Route::post('/logout', function () {
 
 Route::post('/generate-biometrics-schedule', [ScheduleController::class, 'generateBiometricsSchedule']);
 
+Route::get('/admin-users', function () {
+    return \App\Models\User::where('role', 'Admin')->get(['name', 'email', 'picture']);
+});
