@@ -291,7 +291,7 @@
           </div>
 
           <!-- Organization Dropdown for Super Admin -->
-          @if(auth()->user()->role == 'super admin')
+          @if(auth()->user()->role == 'Super Admin')
             <div class="mb-4">
               <label for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
               <select name="organization" id="organizationSelect" class="form-select" required>

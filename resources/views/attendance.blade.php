@@ -41,15 +41,7 @@
             </div>
 
             <form method="GET" class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <label for="event" class="form-label">Filter by Event</label>
-                    <select name="event" id="event" class="form-select">
-                        <option value="">All Events</option>
-                        <option value="Event 1">Event 1</option>
-                        <option value="Event 2">Event 2</option>
-                        <!-- Add more as needed -->
-                    </select>
-                </div>
+                
 
                 <div class="col-md-4">
                     <label for="program" class="form-label">Filter by Program</label>
@@ -97,7 +89,7 @@
 
             <div class="mb-3">
                 <a href="#" class="btn btn-sm btn-primary">
-                    <i class="fas fa-file-pdf"></i> Generate PDF
+                    <i class="fas fa-file-pdf"></i> Record Attendance
                 </a>
             </div>
         </div>

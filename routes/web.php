@@ -104,6 +104,10 @@ Route::post('/config/fines', [SettingsController::class, 'updateFines'])->name('
 Route::post('/config/academic', [SettingsController::class, 'updateAcademic'])->name('settings.updateAcademicYear');
 
 Route::get('/student', [StudentController::class, 'index']);
+Route::get('/advisers', [AdviserController::class, 'index']);
+Route::post('/advisers/store', [AdviserController::class, 'store'])->name('advisers.store');
+
+
 
 Route::get('/manage_orgs_page', [App\Http\Controllers\OrgListController::class, 'index'])->name('orgs.index');
 
@@ -163,6 +167,7 @@ Route::middleware(['auth'])->group(function () {
          ->name('evaluation.submit');
 });
 
+Route::post('/advisers/store', [AdviserController::class, 'store'])->name('advisers.store');
 
 Route::get('/evaluation_student', [StudentEvaluationController::class,'index']);
 
