@@ -7,6 +7,7 @@ use App\Models\Event;
 use Illuminate\Support\Str;
 use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EventsController extends Controller
 {
@@ -123,6 +124,10 @@ class EventsController extends Controller
     
     public function fetchEvents()
     {
+        $user = Auth::user(); // Get the logged-in user
+        $userOrg = $user->org;
+    
+        // Get all events
         $events = Event::all();
         $calendarEvents = [];
     
@@ -133,6 +138,22 @@ class EventsController extends Controller
             // Clean the course name
             $cleanCourse = Str::replaceFirst('MAIN-', '', $event->course);
     
+            // Filter based on user org
+            if (
+                ($userOrg === 'Information Technology Society' || $userOrg === 'ITS') && $cleanCourse !== 'BSIT' &&
+                $cleanCourse !== 'All'
+            ) {
+                continue;
+            }
+    
+            if (
+                $userOrg === 'PRAXIS' && $cleanCourse !== 'BSIS' &&
+                $cleanCourse !== 'All'
+            ) {
+                continue;
+            }
+    
+            // Event with 2 timeouts
             if ($event->timeouts == 2) {
                 $calendarEvents[] = [
                     'title' => $event->name,
@@ -149,7 +170,9 @@ class EventsController extends Controller
                     ],
                     'color' => $cleanCourse === 'BSIS' ? 'violet' : ($cleanCourse === 'All' ? 'green' : 'blue'),
                 ];
-            } elseif ($event->timeouts == 4) {
+            }
+            // Event with 4 timeouts
+            elseif ($event->timeouts == 4) {
                 $calendarEvents[] = [
                     'title' => $event->name,
                     'start' => $event->event_date . 'T' . $times[0],
