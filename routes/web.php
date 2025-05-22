@@ -196,3 +196,4 @@ Route::get('/admin-users', function () {
     return \App\Models\User::where('role', 'Admin')->get(['name', 'email', 'picture']);
 });
 Route::post('/notifications/mark-seen', [NotificationController::class, 'markAllAsSeen'])->name('notifications.markSeen');
+Route::get('/public-events', [EventsController::class, 'publicFetchEvents'])->name('events.public.fetch');
