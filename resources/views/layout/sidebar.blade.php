@@ -119,6 +119,12 @@
                         <span>Events</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ url('attendance') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('attendance') ? 'active-link' : '' }}">
+                        <img src="{{ asset('images/event_ico.png') }}" alt="Events" class="sidebar-icon">
+                        <span>Attendance</span>
+                    </a>
+                </li>
 
                 <li>
                     <a href="{{ url('payment') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('payment') ? 'active-link' : '' }}">
