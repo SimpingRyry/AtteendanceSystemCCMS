@@ -56,7 +56,7 @@ class OrgListController extends Controller
         $user->email = $request->email;
         $user->password = Hash::make($request->password); // Always hash passwords!
         $user->org = $organization->org_name; // Save org name to 'org' column
-        $user->role = 'admin';
+        $user->role = 'Admin';
         $user->save();
     
         return redirect()->back()->with('success', 'Organization and Admin created successfully.');
