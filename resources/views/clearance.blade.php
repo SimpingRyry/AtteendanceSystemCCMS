@@ -65,42 +65,47 @@
                     </div>
                 </form>
 
-
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Student ID</th>
-                                <th>Organization</th>
-                                <th>Program</th>
-                                <th>Fine Amount (₱)</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($financeSummary as $record)
-                            <tr>
-                                <td>{{ $record->student_id }}</td>
-                                <td>{{ $record->org }}</td>
-                                <td>{{ $record->program }}</td>
-                                <td>₱{{ number_format($record->total_fines, 2) }}</td>
-                                <td>
-                                    @if($record->total_fines > 0)
-                                    <span class="badge bg-danger">Not Eligible</span>
-                                    @else
-                                    <span class="badge bg-success">Eligible</span>
-                                    @endif
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mb-3">
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Student ID</th>
+                <th>Organization</th>
+                <th>Program</th>
+                <th>Fine Amount (₱)</th>
+                <th>Status</th>
+                <th>Action</th> <!-- NEW: Action Column -->
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($financeSummary as $record)
+            <tr>
+                <td>{{ $record->student_id }}</td>
+                <td>{{ $record->org }}</td>
+                <td>{{ $record->program }}</td>
+                <td>₱{{ number_format($record->total_fines, 2) }}</td>
+                <td>
+                    @if($record->total_fines > 0)
+                        <span class="badge bg-danger">Not Eligible</span>
+                    @else
+                        <span class="badge bg-success">Eligible</span>
+                    @endif
+                </td>
+                <td>
+                    <a href="" class="btn btn-sm btn-primary">
+                        <i class="fas fa-file-pdf"></i> Generate Clearance
+                    </a>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+                <!-- <div class="mb-3">
     <a href="{{ route('clearance.pdf', ['org' => request('org'), 'program' => request('program')]) }}" class="btn btn-sm btn-primary">
         <i class="fas fa-file-pdf"></i> Generate PDF
     </a>
-</div>
+</div> -->
             </div>
         </div>
     </main>

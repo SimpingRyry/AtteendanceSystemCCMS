@@ -163,8 +163,15 @@
                         <input type="text" id="repeatDates" class="form-control" placeholder="Select one or more dates">
                         <input type="hidden" id="repeatDatesHidden" name="repeat_dates">
                     </div>
+                    
 
                     <div class="row">
+
+                    @php
+            $userRole = auth()->user()->role ?? '';
+
+          @endphp
+                        @if($userRole === 'Super Admin')
                         <div class="mb-3 col-md-6">
                             <label for="course" class="form-label">Tag Course</label>
                             <select class="form-select" id="course" name="course" onchange="appendCourseTag()">
@@ -174,17 +181,19 @@
                                 <option value="All">All</option>
                             </select>
                         </div>
+                        @endif
                         <div class="mb-3 col-md-6 position-relative">
     <label for="guests" class="form-label">Add Guests (Optional)</label>
-    <input type="text" class="form-control" id="guests" name="guests" placeholder="Type @ to tag admins">
+    <input type="text" class="form-control" id="guests" name="guests" placeholder="Type @ to tag officers">
     <div id="mentionDropdown" class="list-group position-absolute w-100 z-3" style="display: none; max-height: 200px; overflow-y: auto;"></div>
 </div>
                     </div>
-
+                    @if($userRole === 'Super Admin')
                     <div class="mb-3">
                         <label class="form-label">Tagged Courses</label>
                         <div id="courseTags" class="d-flex flex-wrap"></div>
                     </div>
+                    @endif
 
                     <!-- Attached Memo Image Upload -->
                     <div class="mb-3">
