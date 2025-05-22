@@ -236,67 +236,69 @@
     </div>
 
     <!-- About Content -->
-    <div class="container text-center mt-5 mb-5">
-      <!-- Main Card View -->
-      <div class="card border-0 p-4 mt-4">
-        <div class="row gy-3 gy-md-4 mt-5 mb-5 gy-lg-0 align-items-lg-center">
-          <div class="col-12 d-flex align-items-center justify-content-center">
-            <!-- Logo in CardView -->
-            <div class="col-5 d-flex justify-content-end">
-              <div class="card p-3 border-3" style="width: 80%; border-color: #000;">
-                <img src="{{ asset('images/tikatax_logo.png') }}" alt="CCMS Logo" class="img-fluid">
-              </div>
-            </div>
-            <!-- Description -->
-            <div class="col-7 ps-4">
-              <h2 class="mb-3">What is CCMS: Attendance System?</h2>
-              <p class="lead text-muted text-justify">
-                The College of Computing and Multimedia Studies (CCMS) at Camarines Norte State College
-                is revolutionizing attendance tracking through an IoT-driven system. Traditional methods,
-                such as manual logs and signatures, are prone to inaccuracies, time consumption, and
-                attendance fraud. Our system leverages biometric fingerprint authentication for reliable
-                tracking, automates fine imposition for non-compliance, and streamlines event monitoring.
-                By integrating security measures and real-time data processing, this system enhances
-                accountability while reducing administrative workload.
+<div class="container text-center mt-5 mb-5">
+  <!-- Main Card View -->
+  <div class="card border-0 p-4 mt-4">
+    <div class="row gy-4 align-items-center flex-column flex-md-row">
+      <!-- Logo in CardView -->
+      <div class="col-12 col-md-5 d-flex justify-content-center justify-content-md-end">
+        <div class="card p-3 border-3 w-100" style="max-width: 300px; border-color: #000;">
+          <img src="{{ asset('images/tikatax_logo.png') }}" alt="CCMS Logo" class="img-fluid">
+        </div>
+      </div>
+
+      <!-- Description (Stacks below on small screens) -->
+      <div class="col-12 col-md-7 text-start">
+        <h2 class="mb-3 mt-3 mt-md-0">What is CCMS: Attendance System?</h2>
+        <p class="lead text-muted text-justify">
+          The College of Computing and Multimedia Studies (CCMS) at Camarines Norte State College
+          is revolutionizing attendance tracking through an IoT-driven system. Traditional methods,
+          such as manual logs and signatures, are prone to inaccuracies, time consumption, and
+          attendance fraud. Our system leverages biometric fingerprint authentication for reliable
+          tracking, automates fine imposition for non-compliance, and streamlines event monitoring.
+          By integrating security measures and real-time data processing, this system enhances
+          accountability while reducing administrative workload.
+        </p>
+      </div>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="row gy-4 gx-xxl-5 mt-5">
+      <!-- Biometric Feature -->
+      <div class="col-12 col-md-6">
+        <div class="card p-3 shadow-sm h-100">
+          <div class="d-flex align-items-start">
+            <img src="{{ asset('images/fingerpr_ico.jpeg') }}" alt="B" width="40" class="me-3 rounded-circle">
+            <div>
+              <h2 class="h5 mb-2">Biometric Authentication</h2>
+              <p class="text-secondary mb-0 text-justify">
+                Say goodbye to manual logs! Our system ensures secure and fraud-proof attendance
+                tracking using fingerprint scanning technology.
               </p>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="row gy-4 gy-md-0 gx-xxl-5 mt-5">
-          <!-- First Feature -->
-          <div class="col-12 col-md-6 offset-md-6">
-            <div class="card p-3 shadow-sm">
-              <div class="d-flex align-items-center">
-                <img src="{{ asset('images/fingerpr_ico.jpeg') }}" alt="B" width="40" class="me-3 rounded-circle">
-                <div>
-                  <h2 class="h4 mb-3">Biometric Authentication</h2>
-                  <p class="text-secondary mb-0 text-justify">
-                    Say goodbye to manual logs! Our system ensures secure and fraud-proof attendance
-                    tracking using fingerprint scanning technology.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Second Feature -->
-          <div class="col-12 col-md-6">
-            <div class="card p-3 shadow-sm">
-              <div class="d-flex align-items-center">
-                <img src="{{ asset('images/realtime_icon.png') }}" alt="R" width="40" class="me-3 rounded-circle">
-                <div>
-                  <h2 class="h4 mb-3">Real-Time Monitoring</h2>
-                  <p class="text-secondary mb-0 text-justify">
-                    Administrators can track attendance records instantly, ensuring transparency
-                    and efficiency in student and faculty attendance tracking.
-                  </p>
-                </div>
-              </div>
+      <!-- Real-Time Feature -->
+      <div class="col-12 col-md-6">
+        <div class="card p-3 shadow-sm h-100">
+          <div class="d-flex align-items-start">
+            <img src="{{ asset('images/realtime_icon.png') }}" alt="R" width="40" class="me-3 rounded-circle">
+            <div>
+              <h2 class="h5 mb-2">Real-Time Monitoring</h2>
+              <p class="text-secondary mb-0 text-justify">
+                Administrators can track attendance records instantly, ensuring transparency
+                and efficiency in student and faculty attendance tracking.
+              </p>
             </div>
           </div>
         </div>
       </div>
+    </div> <!-- End feature row -->
+  </div>
+</div>
+
 
 
       <!-- <div class="card border-0 p-4 mt-5">
