@@ -86,9 +86,9 @@
                                 <td>₱{{ number_format($record->total_fines, 2) }}</td>
                                 <td>
                                     @if($record->total_fines > 0)
-                                    <span class="badge bg-danger">Not Cleared</span>
+                                    <span class="badge bg-danger">Not Eligible</span>
                                     @else
-                                    <span class="badge bg-success">Cleared</span>
+                                    <span class="badge bg-success">Eligible</span>
                                     @endif
                                 </td>
                             </tr>
