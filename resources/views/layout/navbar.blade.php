@@ -21,22 +21,28 @@
 }
 </style>
 
-<nav class="navbar navbar-expand-lg navbar-floaty custom-navbar fixed-top" style="background-color:#232946;">
-  <div class="container-fluid">
-    <button class="navbar-toggler me-2" type="button"
-      data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample"
-      aria-controls="offcanvasExample">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+<nav class="navbar navbar-expand-lg custom-navbar fixed-top" style="background-color:#232946;">
+  <div class="container-fluid d-flex align-items-center">
 
-    <a class="navbar-brand text-white" href="#">TICKTAX</a>
+    <!-- Left Side: Hamburger and Brand -->
+    <div class="d-flex align-items-center">
+      <!-- Hamburger menu -->
+      <button class="navbar-toggler border-0 me-2" type="button" data-bs-toggle="offcanvas"
+        data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
-    <div class="d-flex flex-row align-items-center gap-3 ms-auto">
+      <!-- Brand -->
+      <a class="navbar-brand text-white mb-0 d-none d-lg-block" href="#" style="font-weight: bold;">TICKTAX</a>
+      </div>
 
-      <a class="nav-link d-flex align-items-center gap-2 text-white profile-button order-1" href="#">
+    <!-- Right Side: Profile and Notification -->
+    <div class="d-flex align-items-center gap-3 ms-auto">
+      <!-- Profile -->
+      <a class="nav-link d-flex align-items-center gap-2 text-white profile-button" href="#">
         <img src="{{ asset('images/' . ($user->picture ?? 'default.png')) }}" 
-             alt="Profile" class="rounded-circle profile-img" style="width: 40px; height: 40px; object-fit: cover;">
-        <div class="d-flex flex-column lh-sm">
+             alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+        <div class="d-flex flex-column lh-sm text-start">
           <span class="profile-name">{{ $user->name ?? 'No Name' }}</span>
           <small class="profile-role">
             @php
@@ -53,36 +59,44 @@
         </div>
       </a>
 
-      <div class="dropdown order-2">
-  <a class="nav-link text-white position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    <i class="bi bi-bell fs-5"></i>
+      <!-- Notification Bell -->
+      <div class="dropdown">
+        <a class="nav-link text-white position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-bell fs-5"></i>
+          @if($unreadCount > 0)
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+              {{ $unreadCount }}
+              <span class="visually-hidden">unread notifications</span>
+            </span>
+          @endif
+        </a>
 
-    @if($unreadCount > 0)
-      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-        {{ $unreadCount }}
-        <span class="visually-hidden">unread notifications</span>
-      </span>
-    @endif
-  </a>
-
-  <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" style="min-width: 300px;">
-    @forelse ($notifications as $notif)
-      <li class="dropdown-item small notification-item {{ $notif->read_at ? 'text-muted' : '' }}"
-          data-id="{{ $notif->id }}"
-          style= "{{ $notif->read_at ? 'opacity: 0.6;' : '' }}">
-        <strong>{{ $notif->title }}</strong><br>
-        <span>{{ $notif->message }}</span><br>
-        <small class="text-muted">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>
-      </li>
-    @empty
-      <li class="dropdown-item text-muted">No new notifications</li>
-    @endforelse
-  </ul>
-</div>
-
+        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" style="min-width: 300px;">
+          @forelse ($notifications as $notif)
+            <li class="dropdown-item small notification-item {{ $notif->read_at ? 'text-muted' : '' }}"
+                data-id="{{ $notif->id }}"
+                style="{{ $notif->read_at ? 'opacity: 0.6;' : '' }}">
+              <strong>{{ $notif->title }}</strong><br>
+              <span>{{ $notif->message }}</span><br>
+              <small class="text-muted">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>
+            </li>
+          @empty
+            <li class="dropdown-item text-muted">No new notifications</li>
+          @endforelse
+        </ul>
+      </div>
     </div>
+    
   </div>
 </nav>
+
+
+
+<style>
+  .navbar-toggler-icon {
+  filter: invert(1);
+}
+</style>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const dropdownElement = document.getElementById('notificationDropdown');
