@@ -10,6 +10,7 @@ use App\Models\UserProfile;
 use App\Models\EvaluationQuestion;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class EvaluationController extends Controller
 {
@@ -33,6 +34,29 @@ class EvaluationController extends Controller
             'eventNames' => $eventNames
         ]);
     }
+
+    public function getEvaluationJson($id)
+{
+    $evaluation = Evaluation::with(['question' => function($q) {
+        $q->orderBy('order');
+    }])->findOrFail($id);
+
+    return response()->json([
+        'id' => $evaluation->id,
+        'title' => $evaluation->title,
+        'description' => $evaluation->description,
+        'questions' => $evaluation->question->map(function ($q) {
+            return [
+                'id' => $q->id,
+                'question' => $q->question,
+                'type' => $q->type,
+                'order' => $q->order,
+                'is_required' => true,
+                'options' => is_string($q->options) ? json_decode($q->options, true) : $q->options,
+            ];
+        })
+    ]);
+}
 
     // ----------------------------------------------
     // STORE
@@ -95,6 +119,50 @@ class EvaluationController extends Controller
             $evaluation->load('questions')
         );
     }
+    public function getEvaluationWithQuestions($id)
+{
+    $evaluation = Evaluation::with(['questions']) // eager-load the related questions
+        ->findOrFail($id);
+
+        return response()->json([
+            'id' => $evaluation->id,
+            'title' => $evaluation->title,
+            'description' => $evaluation->description,
+            'questions' => $evaluation->questions->map(function ($q) {
+                return [
+                    'id' => $q->id,
+                    'question' => $q->question,
+                    'type' => $q->type,
+                    'order' => $q->order,
+                    'is_required' => true,
+                    'options' => is_string($q->options) ? json_decode($q->options, true) : $q->options,
+                ];
+            })
+        ]);
+}
+
+public function submitAnswers(Request $request)
+{
+    $data = $request->validate([
+        'evaluation_id' => 'required|exists:evaluation,id',
+        'responses' => 'required|array',
+        'responses.*.question_id' => 'required|exists:evaluation_questions,id',
+        'responses.*.answer' => 'nullable', // can be array (checkbox), string (text), or null
+    ]);
+
+    foreach ($data['responses'] as $resp) {
+        $answer = is_array($resp['answer']) ? json_encode($resp['answer']) : $resp['answer'];
+
+        \App\Models\EvaluationAnswer::create([
+            'evaluation_id' => $data['evaluation_id'],
+            'question_id' => $resp['question_id'],
+            'student_id' => Auth::user()->student_id, // Adjust based on your system
+            'answer' => $answer,
+        ]);
+    }
+
+    return response()->json(['message' => 'Answers submitted successfully.']);
+}
 
     // ----------------------------------------------
     // UPDATE

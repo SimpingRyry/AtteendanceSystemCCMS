@@ -142,7 +142,9 @@ Route::resource('evaluation', App\Http\Controllers\EvaluationController::class);
 Route::get('evaluation/{evaluation}/questions', [App\Http\Controllers\EvaluationController::class,'questions'])
      ->name('evaluation.questions');   // used by the modal’s AJAX call
 Route::put('/evaluation/{evaluation}', [EvaluationController::class, 'update'])->name('evaluation.update');
+Route::get('/student/evaluation/{id}/json', [EvaluationController::class, 'getEvaluationJson']);
 
+Route::post('/student/evaluation/submit', [EvaluationController::class, 'submitAnswers']);
 
 Route::middleware(['auth'])->group(function () {
     // GET list of evaluations for students
@@ -150,6 +152,9 @@ Route::middleware(['auth'])->group(function () {
          ->name('student.evaluations');
 
     // AJAX – return evaluation + questions JSON
+
+    Route::get('/student/evaluation/{id}/json', [EvaluationController::class, 'getEvaluationWithQuestions']);
+
     Route::get('/evaluation_student/{evaluation}/json', [StudentEvaluationController::class,'json'])
          ->name('evaluation.json');
 

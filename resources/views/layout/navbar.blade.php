@@ -69,7 +69,7 @@
     @forelse ($notifications as $notif)
       <li class="dropdown-item small notification-item {{ $notif->read_at ? 'text-muted' : '' }}"
           data-id="{{ $notif->id }}"
-          style = "{{ $notif->read_at ? 'opacity: 0.6;' : '' }}">
+          style= "{{ $notif->read_at ? 'opacity: 0.6;' : '' }}">
         <strong>{{ $notif->title }}</strong><br>
         <span>{{ $notif->message }}</span><br>
         <small class="text-muted">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>

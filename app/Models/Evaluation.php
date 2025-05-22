@@ -11,7 +11,7 @@ class Evaluation extends Model
 
     public function questions()
     {
-        return $this->hasMany(EvaluationQuestion::class)->orderBy('order');
+        return $this->hasMany(EvaluationQuestion::class, 'evaluation_id');
     }
     public function event()
 {
