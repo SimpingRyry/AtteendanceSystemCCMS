@@ -60,7 +60,7 @@
                                 <th>Organization</th>
                             </tr>
                         </thead>
-                        <!-- <tbody class="text-center">
+                        <tbody class="text-center">
                             @forelse ($advisers as $index => $adviser)
                             <tr>
                                 <td>{{ $index + 1 }}</td>
@@ -73,7 +73,7 @@
                                 <td colspan="4">No data</td>
                             </tr>
                             @endforelse
-                        </tbody> -->
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -84,7 +84,7 @@
     <div class="modal fade" id="addAdviserModal" tabindex="-1" aria-labelledby="addAdviserModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
-          <form action="" method="POST">
+        <form action="{{ route('advisers.store') }}" method="POST">
             @csrf
             <div class="modal-header">
               <h5 class="modal-title" id="addAdviserModalLabel">Add Adviser</h5>
@@ -109,13 +109,12 @@
 
               <div class="mb-3">
                 <label for="org" class="form-label">Organization</label>
-                <select name="org" id="org" class="form-select" required>
-                  <option value="" disabled selected>Select Organization</option>
-                  <option value="Org 1">Org 1</option>
-                  <option value="Org 2">Org 2</option>
-                  <option value="Org 3">Org 3</option>
-                  <!-- Add more options as needed -->
-                </select>
+                <select name="organization" id="organizationSelect" class="form-select" required>
+                <option value="">-- Select Organization --</option>
+                @foreach ($org_list as $org)
+                  <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
+                @endforeach
+              </select>
               </div>
 
             </div>

@@ -54,9 +54,9 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label for="deptFilter" class="form-label">Filter by Department</label>
+                    <label for="deptFilter" class="form-label">Filter by Organization</label>
                     <select id="deptFilter" class="form-select" onchange="applyFilters()">
-                        <option value="">All Departments</option>
+                        <option value="">All Organization</option>
                         <option value="ITS">ITS</option>
                         <option value="PRAXIS">PRAXIS</option>
                         <option value="CCMS-SG">CCMS-SG</option>

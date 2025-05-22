@@ -121,7 +121,7 @@
                 </li>
                 <li>
                     <a href="{{ url('attendance') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('attendance') ? 'active-link' : '' }}">
-                        <img src="{{ asset('images/event_ico.png') }}" alt="Events" class="sidebar-icon">
+                        <img src="{{ asset('images/attendance.png') }}" alt="Events" class="sidebar-icon">
                         <span>Attendance</span>
                     </a>
                 </li>

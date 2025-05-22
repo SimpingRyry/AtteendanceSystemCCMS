@@ -11,10 +11,13 @@ class Adviser extends Model
 
     // Explicitly define table name if it's not plural
     protected $table = 'adviser';
+    public $timestamps = false;
+
 
     protected $fillable = [
         'name',
         'email',
         'org',
+        'password'
     ];
 }
