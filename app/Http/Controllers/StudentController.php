@@ -61,9 +61,9 @@ class StudentController extends Controller
         $user->password = Hash::make($request->student_id);
         $user->picture = $filename;
         $user->role = $request->role;
-    
+        $user->student_id = $request->student_id;
         // Set organization based on user role
-        $user->org = (Auth::user()->role === 'admin') ? Auth::user()->org : $request->organization;
+        $user->org = (Auth::user()->role === 'Admin') ? Auth::user()->org : $request->organization;
     
         $user->save();
     
