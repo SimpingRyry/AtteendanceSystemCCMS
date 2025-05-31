@@ -284,7 +284,7 @@
                 <option value="officer">Officer</option>
               @else
                 <option value="">-- Select Role --</option>
-                <option value="member">Member</option>
+                <option value="Member">Member</option>
                 <option value="officer">Officer</option>
               @endif
             </select>

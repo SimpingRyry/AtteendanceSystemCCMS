@@ -70,9 +70,17 @@ public function updateAcademic(Request $request)
         'academic_term' => 'required|string|max:255',
     ]);
 
+    $academicTerm = $request->academic_term;
+
+    // Get code part before any space or extra characters (e.g., "24-1" from "24-1 First Semester")
+    $acadCode = explode(' ', $academicTerm)[0];
+
     Setting::updateOrCreate(
-        ['key' => 'academic_term'],
-        ['value' => $request->academic_term]
+        ['id' => 1], // or any unique identifier
+        [
+            'academic_term' => $academicTerm,
+            'acad_code' => $acadCode,
+        ]
     );
 
     return redirect()->back()->with('success', 'Academic term updated successfully!');
