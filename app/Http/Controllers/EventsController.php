@@ -222,5 +222,51 @@ public function update(Request $request)
 
     return redirect()->back()->with('success', 'Events created successfully!');
 }
-    
+    public function publicFetchEvents()
+{
+    $events = Event::all();
+    $calendarEvents = [];
+
+    foreach ($events as $event) {
+        $times = json_decode($event->times, true);
+        $guests = json_decode($event->guests, true);
+        $cleanCourse = Str::replaceFirst('MAIN-', '', $event->course);
+
+        if ($event->timeouts == 2) {
+            $calendarEvents[] = [
+                'title' => $event->name,
+                'start' => $event->event_date . 'T' . $times[0],
+                'end' => $event->event_date . 'T' . $times[1],
+                'extendedProps' => [
+                    'id' => $event->id,
+                    'course' => $cleanCourse,
+                    'venue' => $event->venue,
+                    'timeout' => $event->timeouts,
+                    'times' => $times,
+                    'guests' => $guests,
+                    'description' => $event->description
+                ],
+                'color' => $cleanCourse === 'BSIS' ? 'violet' : ($cleanCourse === 'All' ? 'green' : 'blue'),
+            ];
+        } elseif ($event->timeouts == 4) {
+            $calendarEvents[] = [
+                'title' => $event->name,
+                'start' => $event->event_date . 'T' . $times[0],
+                'end' => $event->event_date . 'T' . $times[3],
+                'extendedProps' => [
+                    'id' => $event->id,
+                    'course' => $cleanCourse,
+                    'venue' => $event->venue,
+                    'timeout' => $event->timeouts,
+                    'times' => $times,
+                    'guests' => $guests
+                ],
+                'color' => $cleanCourse === 'BSIS' ? 'violet' : ($cleanCourse === 'All' ? 'green' : 'blue'),
+            ];
+        }
+    }
+
+    return response()->json($calendarEvents);
+}
+
 }

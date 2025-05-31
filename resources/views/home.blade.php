@@ -12,7 +12,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100..900&display=swap" rel="stylesheet" />
-  
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
   <!-- FullCalendar -->
 <!-- FullCalendar CSS -->
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
@@ -233,67 +236,69 @@
     </div>
 
     <!-- About Content -->
-    <div class="container text-center mt-5 mb-5">
-      <!-- Main Card View -->
-      <div class="card border-0 p-4 mt-4">
-        <div class="row gy-3 gy-md-4 mt-5 mb-5 gy-lg-0 align-items-lg-center">
-          <div class="col-12 d-flex align-items-center justify-content-center">
-            <!-- Logo in CardView -->
-            <div class="col-5 d-flex justify-content-end">
-              <div class="card p-3 border-3" style="width: 80%; border-color: #000;">
-                <img src="{{ asset('images/tikatax_logo.png') }}" alt="CCMS Logo" class="img-fluid">
-              </div>
-            </div>
-            <!-- Description -->
-            <div class="col-7 ps-4">
-              <h2 class="mb-3">What is CCMS: Attendance System?</h2>
-              <p class="lead text-muted text-justify">
-                The College of Computing and Multimedia Studies (CCMS) at Camarines Norte State College
-                is revolutionizing attendance tracking through an IoT-driven system. Traditional methods,
-                such as manual logs and signatures, are prone to inaccuracies, time consumption, and
-                attendance fraud. Our system leverages biometric fingerprint authentication for reliable
-                tracking, automates fine imposition for non-compliance, and streamlines event monitoring.
-                By integrating security measures and real-time data processing, this system enhances
-                accountability while reducing administrative workload.
+<div class="container text-center mt-5 mb-5">
+  <!-- Main Card View -->
+  <div class="card border-0 p-4 mt-4">
+    <div class="row gy-4 align-items-center flex-column flex-md-row">
+      <!-- Logo in CardView -->
+      <div class="col-12 col-md-5 d-flex justify-content-center justify-content-md-end">
+        <div class="card p-3 border-3 w-100" style="max-width: 300px; border-color: #000;">
+          <img src="{{ asset('images/tikatax_logo.png') }}" alt="CCMS Logo" class="img-fluid">
+        </div>
+      </div>
+
+      <!-- Description (Stacks below on small screens) -->
+      <div class="col-12 col-md-7 text-start">
+        <h2 class="mb-3 mt-3 mt-md-0">What is CCMS: Attendance System?</h2>
+        <p class="lead text-muted text-justify">
+          The College of Computing and Multimedia Studies (CCMS) at Camarines Norte State College
+          is revolutionizing attendance tracking through an IoT-driven system. Traditional methods,
+          such as manual logs and signatures, are prone to inaccuracies, time consumption, and
+          attendance fraud. Our system leverages biometric fingerprint authentication for reliable
+          tracking, automates fine imposition for non-compliance, and streamlines event monitoring.
+          By integrating security measures and real-time data processing, this system enhances
+          accountability while reducing administrative workload.
+        </p>
+      </div>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="row gy-4 gx-xxl-5 mt-5">
+      <!-- Biometric Feature -->
+      <div class="col-12 col-md-6">
+        <div class="card p-3 shadow-sm h-100">
+          <div class="d-flex align-items-start">
+            <img src="{{ asset('images/fingerpr_ico.jpeg') }}" alt="B" width="40" class="me-3 rounded-circle">
+            <div>
+              <h2 class="h5 mb-2">Biometric Authentication</h2>
+              <p class="text-secondary mb-0 text-justify">
+                Say goodbye to manual logs! Our system ensures secure and fraud-proof attendance
+                tracking using fingerprint scanning technology.
               </p>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="row gy-4 gy-md-0 gx-xxl-5 mt-5">
-          <!-- First Feature -->
-          <div class="col-12 col-md-6 offset-md-6">
-            <div class="card p-3 shadow-sm">
-              <div class="d-flex align-items-center">
-                <img src="{{ asset('images/fingerpr_ico.jpeg') }}" alt="B" width="40" class="me-3 rounded-circle">
-                <div>
-                  <h2 class="h4 mb-3">Biometric Authentication</h2>
-                  <p class="text-secondary mb-0 text-justify">
-                    Say goodbye to manual logs! Our system ensures secure and fraud-proof attendance
-                    tracking using fingerprint scanning technology.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Second Feature -->
-          <div class="col-12 col-md-6">
-            <div class="card p-3 shadow-sm">
-              <div class="d-flex align-items-center">
-                <img src="{{ asset('images/realtime_icon.png') }}" alt="R" width="40" class="me-3 rounded-circle">
-                <div>
-                  <h2 class="h4 mb-3">Real-Time Monitoring</h2>
-                  <p class="text-secondary mb-0 text-justify">
-                    Administrators can track attendance records instantly, ensuring transparency
-                    and efficiency in student and faculty attendance tracking.
-                  </p>
-                </div>
-              </div>
+      <!-- Real-Time Feature -->
+      <div class="col-12 col-md-6">
+        <div class="card p-3 shadow-sm h-100">
+          <div class="d-flex align-items-start">
+            <img src="{{ asset('images/realtime_icon.png') }}" alt="R" width="40" class="me-3 rounded-circle">
+            <div>
+              <h2 class="h5 mb-2">Real-Time Monitoring</h2>
+              <p class="text-secondary mb-0 text-justify">
+                Administrators can track attendance records instantly, ensuring transparency
+                and efficiency in student and faculty attendance tracking.
+              </p>
             </div>
           </div>
         </div>
       </div>
+    </div> <!-- End feature row -->
+  </div>
+</div>
+
 
 
       <!-- <div class="card border-0 p-4 mt-5">
@@ -363,6 +368,23 @@
     <div class="col-md-8 col-lg-9">
       <div id="calendar"></div>
     </div>
+    <div class="modal fade" id="viewEventModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="viewEventName" class="modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Venue:</strong> <span id="viewEventVenue"></span></p>
+        <p><strong>Date:</strong> <span id="viewEventDate"></span></p>
+        <p><strong>Times:</strong><br><span id="viewEventTimes"></span></p>
+        <div id="viewEventDescGuests"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
     <!-- Sidebar (Right Section) -->
     <div class="col-md-4 col-lg-3 mt-3">
@@ -408,67 +430,130 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
   <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var calendarEl = document.getElementById('calendar');
+ document.addEventListener('DOMContentLoaded', function () {
+    const calendarEl = document.getElementById('calendar');
+    const upcomingEventsList = document.getElementById('upcomingEventsList');
 
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: 'dayGridMonth',
-      events: {
-        url: "{{ route('events.fetch') }}", // Laravel route to fetch events
-        method: 'GET',
-        failure: function() {
-          alert('There was an error fetching events!');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: {
+            url: "{{ route('events.fetch') }}",
+            method: 'GET',
+            failure: function () {
+                alert('There was an error while fetching events!');
+            }
+        },
+        eventDidMount: function (info) {
+            const event = info.event;
+
+            // Color coding
+            if (event.extendedProps.course === 'BSIS') {
+                info.el.style.backgroundColor = '#8A2BE2';
+                info.el.style.borderColor = '#8A2BE2';
+            } else if (event.extendedProps.course === 'All') {
+                info.el.style.backgroundColor = '#28a745';
+                info.el.style.borderColor = '#28a745';
+            } else {
+                info.el.style.backgroundColor = '#007bff';
+                info.el.style.borderColor = '#007bff';
+            }
+        },
+        eventClick: function (info) {
+            info.jsEvent.preventDefault();
+
+            const event = info.event;
+            const title = event.title;
+            const venue = event.extendedProps.venue || 'N/A';
+            const date = event.start.toLocaleDateString();
+            const times = event.extendedProps.times || [];
+            const description = event.extendedProps.description || '';
+            const guests = event.extendedProps.guests || [];
+
+            let timeDisplay = '';
+            if (times.length === 2) {
+                timeDisplay = `<strong>Time In:</strong> ${times[0]} <br><strong>Time Out:</strong> ${times[1]}`;
+            } else if (times.length === 4) {
+                timeDisplay = `
+                    <strong>Morning Time In:</strong> ${times[0]} <br>
+                    <strong>Morning Time Out:</strong> ${times[1]} <br>
+                    <strong>Afternoon Time In:</strong> ${times[2]} <br>
+                    <strong>Afternoon Time Out:</strong> ${times[3]}
+                `;
+            } else {
+                timeDisplay = times.map((t, i) => `<strong>Time ${i + 1}:</strong> ${t}`).join('<br>');
+            }
+
+            const guestBadges = guests.map(guest => `<span class="badge bg-primary me-1">${guest}</span>`).join(' ');
+
+            document.getElementById('viewEventName').innerText = title;
+            document.getElementById('viewEventVenue').innerText = venue;
+            document.getElementById('viewEventDate').innerText = date;
+            document.getElementById('viewEventTimes').innerHTML = timeDisplay;
+            document.getElementById('viewEventDescGuests').innerHTML = `
+                ${description ? `<p>${description}</p>` : ''}
+                ${guests.length ? `<div>${guestBadges}</div>` : '<span class="text-muted">No guests listed.</span>'}
+            `;
+
+            new bootstrap.Modal(document.getElementById('viewEventModal')).show();
+        },
+        eventTimeFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            meridiem: false
+        },
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek'
+        },
+        editable: false,
+        droppable: false,
+        eventDisplay: 'block',
+        eventsSet: function (events) {
+            if (!upcomingEventsList) return;
+
+            const list = upcomingEventsList;
+            list.innerHTML = ''; // Clear existing list
+
+            const today = new Date();
+            const upcoming = events.filter(event => {
+                const eventDate = new Date(event.start);
+                return eventDate >= today;
+            }).sort((a, b) => new Date(a.start) - new Date(b.start)).slice(0, 5); // Limit to next 5
+
+            upcoming.forEach(event => {
+                const date = new Date(event.start);
+                const formattedDate = date.toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+
+                let badgeClass = 'bg-primary';
+                if (event.extendedProps?.course === 'BSIT') {
+                    badgeClass = 'bg-info text-dark';
+                } else if (event.extendedProps?.course === 'BSIS') {
+                    badgeClass = 'bg-purple text-white';
+                } else if (event.extendedProps?.course === 'All') {
+                    badgeClass = 'bg-success text-white';
+                }
+
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center rounded-3 mb-2 shadow-sm';
+                li.innerHTML = `
+                    ${event.title}
+                    <span class="badge ${badgeClass} rounded-pill">${formattedDate}</span>
+                `;
+
+                list.appendChild(li);
+            });
         }
-      },
-      eventColor: '#378006' // Optional: custom color
     });
 
-    calendar.render(); // First render the calendar
+    calendar.render();
+});
 
-// Then populate sidebar with upcoming events
-fetch("{{ route('events.fetch') }}")
-  .then(response => response.json())
-  .then(events => {
-    const list = document.getElementById('upcomingEventsList');
-    list.innerHTML = ''; // Clear current content
 
-    const today = new Date();
-    const upcoming = events.filter(event => {
-      const eventDate = new Date(event.start);
-      return eventDate >= today;
-    }).sort((a, b) => new Date(a.start) - new Date(b.start));
-
-    upcoming.forEach(event => {
-      const date = new Date(event.start);
-      const formattedDate = date.toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
-
-      let badgeClass = 'bg-primary';
-      if (event.extendedProps?.course === 'BSIT') {
-        badgeClass = 'bg-info text-dark';
-      } else if (event.extendedProps?.course === 'BSIS') {
-        badgeClass = 'bg-purple text-white';
-      } else if (event.extendedProps?.course === 'All') {
-        badgeClass = 'bg-success text-white';
-      }
-
-      const li = document.createElement('li');
-      li.className = 'list-group-item d-flex justify-content-between align-items-center rounded-3 mb-2 shadow-sm';
-      li.innerHTML = `
-        ${event.title}
-        <span class="badge ${badgeClass} rounded-pill">${formattedDate}</span>
-      `;
-
-      list.appendChild(li);
-    });
-  })
-  .catch(error => {
-    console.error("Error fetching upcoming events:", error);
-  });
-  });
     window.onscroll = function() {
       changeNavbarColorOnScroll()
     };
@@ -684,7 +769,7 @@ toggleBtn.addEventListener('click', () => {
   logoSidebar.classList.toggle('show');
 });
 function loadUpcomingEventCards() {
-  fetch("{{ route('events.fetch') }}")
+  fetch("{{ route('events.public.fetch') }}")
     .then(response => response.json())
     .then(events => {
       const container = document.getElementById('eventCardContainer');
