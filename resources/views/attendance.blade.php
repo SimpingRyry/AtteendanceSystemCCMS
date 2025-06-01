@@ -41,8 +41,6 @@
             </div>
 
             <form method="GET" class="row g-3 mb-4">
-                
-
                 <div class="col-md-4">
                     <label for="program" class="form-label">Filter by Program</label>
                     <select name="program" id="program" class="form-select">
@@ -55,7 +53,7 @@
             </form>
 
             <div class="table-responsive">
-                <table class="table table-bordered table-hover">
+                <table class="table table-bordered table-hover" id="attendanceTable">
                     <thead class="table-light">
                         <tr>
                             <th>Student ID</th>
@@ -70,31 +68,60 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Sample Row -->
+                        <!-- Sample Row (more will be rendered dynamically or from controller) -->
                         <tr>
-                            <td>2023-00123</td>
-                            <td>Juan Dela Cruz</td>
-                            <td>BSIT</td>
-                            <td>Block 1</td>
+                            <td>22-0788</td>
+                            <td>Borje, Ver Andre A.</td>
+                            <td>MAIN-BSIT</td>
+                            <td>B</td>
                             <td>Orientation</td>
                             <td>2025-05-22</td>
                             <td>08:05 AM</td>
                             <td>12:00 PM</td>
-                            <td><span class="badge bg-success">Present</span></td>
+                            <td><span class="badge bg-warning text-dark">Late</span></td>
                         </tr>
                         <!-- Add more rows dynamically -->
                     </tbody>
                 </table>
             </div>
 
-            <div class="mb-3">
-                <a href="#" class="btn btn-sm btn-primary">
+            <!-- Record Attendance Form -->
+            <form method="POST" action="{{ route('record.attendance') }}" id="recordAttendanceForm">
+                @csrf
+                <input type="hidden" name="attendance_data" id="attendance_data">
+                <button type="submit" class="btn btn-sm btn-primary mt-3">
                     <i class="fas fa-file-pdf"></i> Record Attendance
-                </a>
-            </div>
+                </button>
+            </form>
         </div>
     </div>
 </main>
+<script>
+     document.getElementById('recordAttendanceForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const rows = document.querySelectorAll('#attendanceTable tbody tr');
+        const attendance = [];
+
+        rows.forEach(row => {
+            const cols = row.querySelectorAll('td');
+            attendance.push({
+                student_id: cols[0].innerText.trim(),
+                name: cols[1].innerText.trim(),
+                program: cols[2].innerText.trim(),
+                block: cols[3].innerText.trim(),
+                event: cols[4].innerText.trim(),
+                date: cols[5].innerText.trim(),
+                time_in: cols[6].innerText.trim(),
+                time_out: cols[7].innerText.trim(),
+                status: cols[8].innerText.trim().replace(/^\s+|\s+$/g, '') // Remove spaces
+            });
+        });
+
+        document.getElementById('attendance_data').value = JSON.stringify(attendance);
+        this.submit();
+    });
+</script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"

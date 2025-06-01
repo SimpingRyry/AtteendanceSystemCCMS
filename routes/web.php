@@ -7,15 +7,22 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\EventsController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdviserController;
 use App\Http\Controllers\OrgListController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
+use Illuminate\Console\Scheduling\Schedule;
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\ScheduleController;
+
 use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ClearanceController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\StudentEvaluationController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -76,7 +83,6 @@ Route::get('/events', [EventsController::class, 'index']);
 
 Route::get('/api/events', [EventsController::class, 'fetchEvents'])->name('events.fetch');
 
-Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->middleware('auth');
 
 
 Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
@@ -128,10 +134,12 @@ Route::get('/report/financial', [ReportController::class, 'generateFinancialRepo
 Route::get('/report/student-list', [ReportController::class, 'generateStudentListReport'])->name('report.student_list');
 Route::get('/report/student-roster', [ReportController::class, 'generateStudentRoster'])->name('report.studentRoster');
 
-use App\Http\Controllers\EvaluationController;
-use App\Http\Controllers\StudentEvaluationController;
-use Illuminate\Console\Scheduling\Schedule;
-use App\Http\Controllers\ClearanceController;
+
+
+Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->middleware('auth');
+
+Route::post('/record-attendance', [AttendanceController::class, 'store'])->name('record.attendance');
+
 
 Route::get('/clearance', [ClearanceController::class, 'showFinanceClearance'])->name('clearance');
 Route::get('/clearance/pdf', [ClearanceController::class, 'downloadPDF'])->name('clearance.pdf');
@@ -197,3 +205,4 @@ Route::get('/admin-users', function () {
 });
 Route::post('/notifications/mark-seen', [NotificationController::class, 'markAllAsSeen'])->name('notifications.markSeen');
 Route::get('/public-events', [EventsController::class, 'publicFetchEvents'])->name('events.public.fetch');
+Route::get('/student_payment', [PaymentController::class, 'showStatementOfAccount'])->name('statement.account')->middleware('auth');

@@ -71,9 +71,9 @@
 </div>
 
       <!-- Student Info -->
-      <p><strong>Student Name:</strong> <span id="studentName"></span></p>
-      <p><strong>Student ID:</strong> <span id="studentID"></span></p>
-      <p><strong>Course & Section:</strong> <span id="studentCourseSection"></span></p>
+      <p><strong>Student Name:</strong> <<span id="studentName">{{ $student->name }}</span></p>
+      <p><strong>Student ID:</strong> <span id="studentID">{{ $student->student_id }}</span></p>
+      <p><strong>Course & Section:</strong> <span id="studentCourseSection">{{ $studentSection }}</span></p>
 
       <!-- Statement of Account Table -->
       <div class="table-responsive">
@@ -81,21 +81,49 @@
           <thead class="table-light">
             <tr>
               <th>Date</th>
+              <th>Event</th>
               <th>Transaction</th>
               <th>Debit</th>
               <th>Credit</th>
               <th>Balance</th>
-              <th>Processed By</th>
             </tr>
           </thead>
           <tbody id="soaTableBody">
-            <!-- Dynamically filled -->
+          @php $grandTotal = 0; @endphp
+
+    @foreach ($transactionsGrouped as $acadCode => $transactions)
+        <tr>
+            <td colspan="6" class="table-primary fw-bold">
+                Academic Code: {{ $acadCode }}
+            </td>
+        </tr>
+
+        @php $balance = 0; @endphp
+
+        @foreach ($transactions as $transaction)
+            @php
+                $debit = $transaction->transaction_type === 'FINE' ? $transaction->fine_amount : 0;
+                $credit = $transaction->transaction_type === 'PAYMENT' ? $transaction->fine_amount : 0;
+                $balance += ($debit - $credit);
+                $grandTotal += ($debit - $credit);
+            @endphp
+            <tr>
+                <td>{{ \Carbon\Carbon::parse($transaction->date)->format('M d, Y') }}</td>
+                <td>{{ $transaction->event }}</td>
+
+                <td>{{ $transaction->transaction_type }}</td>
+                <td>{{ $debit > 0 ? number_format($debit, 2) : '-' }}</td>
+                <td>{{ $credit > 0 ? number_format($credit, 2) : '-' }}</td>
+                <td>{{ number_format($balance, 2) }}</td>
+            </tr>
+        @endforeach
+    @endforeach
           </tbody>
         </table>
       </div>
 
       <div class="mt-3 fw-bold">
-        Total Remaining Balance: <span id="totalBalance"></span>
+        Total Remaining Balance: <span id="totalBalance">{{ number_format($grandTotal, 2) }}</span>
       </div>
       <div class="mt-4">
   <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#onlinePaymentModal">
@@ -137,11 +165,11 @@
   const soaTableBody = document.getElementById("soaTableBody");
   const totalBalanceDisplay = document.getElementById("totalBalance");
 
-  let totalBalance = 5000.00; // Example starting balance
+  // let totalBalance = 5000.00; // Example starting balance
 
-  function updateBalanceDisplay() {
-    totalBalanceDisplay.textContent = `₱${totalBalance.toFixed(2)}`;
-  }
+  // function updateBalanceDisplay() {
+  //   totalBalanceDisplay.textContent = `₱${totalBalance.toFixed(2)}`;
+  // }
 
   document.getElementById("onlinePaymentForm").addEventListener("submit", function(e) {
     e.preventDefault();
@@ -174,84 +202,84 @@
   });
 
   // Initial display
-  updateBalanceDisplay();
+  // updateBalanceDisplay();
 </script>
 
 <script>
   // Sample student ID for demonstration; in real app, get this dynamically
-  const currentStudentID = "2023-001";
+  // const currentStudentID = "2023-001";
 
-  const studentData = {
-    "2023-001": {
-      name: "Jane Doe",
-      course: "BSIT",
-      section: "A",
-      transactions: {
-        "1st Semester SY 2024-2025 (Jan 2025)": [
-          { date: "1/1/2025", transaction: "Assessment", debit: 5000, credit: 0, balance: 5000, processedBy: "Admin" }
+  // const studentData = {
+  //   "2023-001": {
+  //     name: "Jane Doe",
+  //     course: "BSIT",
+  //     section: "A",
+  //     transactions: {
+  //       "1st Semester SY 2024-2025 (Jan 2025)": [
+  //         { date: "1/1/2025", transaction: "Assessment", debit: 5000, credit: 0, balance: 5000}
           
-        ]
-      }
-    },
-    "2023-002": {
-      name: "John Smith",
-      course: "BSCS",
-      section: "B",
-      transactions: {
-        "1st Semester SY 2024-2025 (Jan 2025)": [
-          { date: "1/5/2025", transaction: "Assessment", debit: 8000, credit: 0, balance: 8000, processedBy: "Registrar" },
-          { date: "1/20/2025", transaction: "Payment", debit: 0, credit: 3000, balance: 5000, processedBy: "Cashier" }
-        ]
-      }
-    }
-  };
+  //       ]
+  //     }
+  //   },
+  //   "2023-002": {
+  //     name: "John Smith",
+  //     course: "BSCS",
+  //     section: "B",
+  //     transactions: {
+  //       "1st Semester SY 2024-2025 (Jan 2025)": [
+  //         { date: "1/5/2025", transaction: "Assessment", debit: 8000, credit: 0, balance: 8000, processedBy: "Registrar" },
+  //         { date: "1/20/2025", transaction: "Payment", debit: 0, credit: 3000, balance: 5000, processedBy: "Cashier" }
+  //       ]
+  //     }
+  //   }
+  // };
 
-  function formatCurrency(value) {
-    return "₱" + value.toFixed(2);
-  }
+  // function formatCurrency(value) {
+  //   return "₱" + value.toFixed(2);
+  // }
 
-  function renderSOATable(studentID) {
-    const student = studentData[studentID];
-    if (!student) return;
+  // function renderSOATable(studentID) {
+  //   const student = studentData[studentID];
+  //   if (!student) return;
 
-    document.getElementById("studentName").textContent = student.name;
-    document.getElementById("studentID").textContent = studentID;
-    document.getElementById("studentCourseSection").textContent = `${student.course} - ${student.section}`;
+  //   document.getElementById("studentName").textContent = student.name;
+  //   document.getElementById("studentID").textContent = studentID;
+  //   document.getElementById("studentCourseSection").textContent = `${student.course} - ${student.section}`;
 
-    const tbody = document.getElementById("soaTableBody");
-    tbody.innerHTML = "";
+  //   const tbody = document.getElementById("soaTableBody");
+  //   tbody.innerHTML = "";
 
-    let lastBalance = 0;
-    for (const [semester, transactions] of Object.entries(student.transactions)) {
-      // Semester row as a header inside tbody
-      const semesterRow = document.createElement("tr");
-      semesterRow.classList.add("table-secondary", "fw-bold");
-      semesterRow.innerHTML = `<td colspan="6">${semester}</td>`;
-      tbody.appendChild(semesterRow);
+  //   let lastBalance = 0;
+  //   for (const [semester, transactions] of Object.entries(student.transactions)) {
+  //     // Semester row as a header inside tbody
+  //     const semesterRow = document.createElement("tr");
+  //     semesterRow.classList.add("table-secondary", "fw-bold");
+  //     semesterRow.innerHTML = `<td colspan="6">${semester}</td>`;
+  //     tbody.appendChild(semesterRow);
 
-      transactions.forEach(txn => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${txn.date}</td>
-          <td>${txn.transaction}</td>
-          <td>${txn.debit ? formatCurrency(txn.debit) : ""}</td>
-          <td>${txn.credit ? formatCurrency(txn.credit) : ""}</td>
-          <td>${formatCurrency(txn.balance)}</td>
-          <td>${txn.processedBy || ""}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+  //     transactions.forEach(txn => {
+  //       const tr = document.createElement("tr");
+  //       tr.innerHTML = `
+  //         <td>${txn.date}</td>
+  //         <td>${txn.transaction}</td>
+  //         <td>${txn.debit ? formatCurrency(txn.debit) : ""}</td>
+  //         <td>${txn.credit ? formatCurrency(txn.credit) : ""}</td>
+  //         <td>${formatCurrency(txn.balance)}</td>
+  //         <td>${txn.processedBy || ""}</td>
+  //       `;
+  //       tbody.appendChild(tr);
+  //     });
 
-      lastBalance = transactions[transactions.length - 1].balance;
-    }
+  //     lastBalance = transactions[transactions.length - 1].balance;
+  //   }
 
-    document.getElementById("totalBalance").textContent = formatCurrency(lastBalance);
-  }
+  //   document.getElementById("totalBalance").textContent = formatCurrency(lastBalance);
+  // }
 
-  // On page load, render SOA for the current student
-  document.addEventListener("DOMContentLoaded", () => {
-    renderSOATable(currentStudentID);
-  });
+  // // On page load, render SOA for the current student
+  // document.addEventListener("DOMContentLoaded", () => {
+  //   renderSOATable(currentStudentID);
+  // });
 </script>
 </body>
 
