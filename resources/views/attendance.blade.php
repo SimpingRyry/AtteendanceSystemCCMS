@@ -38,64 +38,83 @@
                 <h2 class="fw-bold" style="color: #232946;">Attendance</h2>
                 <small style="color: #989797;">Monitor /</small>
                 <small style="color: #444444;">Attendance Records</small>
+
+                @if($currentEvent)
+                    <div class="alert alert-info mt-3">
+                        <strong>Today's Event:</strong> {{ $currentEvent->name }} at {{ $currentEvent->venue }}
+                    </div>
+                @else
+                    <div class="alert alert-secondary mt-3">
+                        No event scheduled for today.
+                    </div>
+                @endif
             </div>
 
-            <form method="GET" class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <label for="program" class="form-label">Filter by Program</label>
-                    <select name="program" id="program" class="form-select">
-                        <option value="">All Programs</option>
-                        <option value="BSIT">BSIT</option>
-                        <option value="BSCS">BSCS</option>
-                        <!-- Add more as needed -->
-                    </select>
+            @if($currentEvent)
+                <!-- Filter Form -->
+                <form method="GET" class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label for="program" class="form-label">Filter by Program</label>
+                        <select name="program" id="program" class="form-select">
+                            <option value="">All Programs</option>
+                            <option value="BSIT">BSIT</option>
+                            <option value="BSCS">BSCS</option>
+                            <!-- Add more as needed -->
+                        </select>
+                    </div>
+                </form>
+
+                <!-- Attendance Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="attendanceTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Name</th>
+                                <th>Program</th>
+                                <th>Block</th>
+                                <th>Event</th>
+                                <th>Date</th>
+                                <th>Time-In</th>
+                                <th>Time-Out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Sample Row (replace with dynamic content) -->
+                            <tr>
+                                <td>22-0788</td>
+                                <td>Borje, Ver Andre A.</td>
+                                <td>MAIN-BSIT</td>
+                                <td>B</td>
+                                <td>Orientation</td>
+                                <td>2025-05-22</td>
+                                <td>08:05 AM</td>
+                                <td>12:00 PM</td>
+                                <td><span class="badge bg-warning text-dark">Late</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </form>
 
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="attendanceTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Student ID</th>
-                            <th>Name</th>
-                            <th>Program</th>
-                            <th>Block</th>
-                            <th>Event</th>
-                            <th>Date</th>
-                            <th>Time-In</th>
-                            <th>Time-Out</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Sample Row (more will be rendered dynamically or from controller) -->
-                        <tr>
-                            <td>22-0788</td>
-                            <td>Borje, Ver Andre A.</td>
-                            <td>MAIN-BSIT</td>
-                            <td>B</td>
-                            <td>Orientation</td>
-                            <td>2025-05-22</td>
-                            <td>08:05 AM</td>
-                            <td>12:00 PM</td>
-                            <td><span class="badge bg-warning text-dark">Late</span></td>
-                        </tr>
-                        <!-- Add more rows dynamically -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Record Attendance Form -->
-            <form method="POST" action="{{ route('record.attendance') }}" id="recordAttendanceForm">
-                @csrf
-                <input type="hidden" name="attendance_data" id="attendance_data">
-                <button type="submit" class="btn btn-sm btn-primary mt-3">
-                    <i class="fas fa-file-pdf"></i> Record Attendance
-                </button>
-            </form>
+                <!-- Record Attendance Form -->
+                <form method="POST" action="{{ route('record.attendance') }}" id="recordAttendanceForm">
+                    @csrf
+                    <input type="hidden" name="attendance_data" id="attendance_data">
+                    <button type="submit" class="btn btn-sm btn-primary mt-3">
+                        <i class="fas fa-file-pdf"></i> Record Attendance
+                    </button>
+                </form>
+            @else
+                <!-- Disabled Message -->
+                <div class="alert alert-warning mt-4">
+                    <strong>Notice:</strong> Attendance sheet is disabled because there's no event scheduled for today.
+                </div>
+            @endif
         </div>
     </div>
 </main>
+
 <script>
      document.getElementById('recordAttendanceForm').addEventListener('submit', function(e) {
         e.preventDefault();

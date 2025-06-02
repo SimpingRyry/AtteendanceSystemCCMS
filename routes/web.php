@@ -102,9 +102,8 @@ Route::get('/reports', function () {
 Route::get('/clearance', function () {
     return view('clearance');
 });
-Route::get('/attendance', function () {
-    return view('attendance');
-});
+Route::get('/attendance', [EventsController::class, 'CurrentEvent'])->name('attendance');
+
 Route::get('/config', [SettingsController::class, 'index'])->name('settings.index');
 Route::post('/config/fines', [SettingsController::class, 'updateFines'])->name('settings.updateFines');
 Route::post('/config/academic', [SettingsController::class, 'updateAcademic'])->name('settings.updateAcademicYear');

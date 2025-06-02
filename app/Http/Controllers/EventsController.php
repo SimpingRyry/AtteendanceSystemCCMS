@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Event;
 use Illuminate\Support\Str;
@@ -267,6 +268,18 @@ public function update(Request $request)
     }
 
     return response()->json($calendarEvents);
+}
+
+public function CurrentEvent()
+{
+    $today = Carbon::today()->toDateString(); // Gets today's date in 'Y-m-d'
+
+    $currentEvent = Event::whereDate('event_date', $today)->first(); // Assumes only one event per day
+
+    return view('attendance', [ // replace 'your_view_name' with actual Blade name
+        'currentEvent' => $currentEvent,
+       
+    ]);
 }
 
 }

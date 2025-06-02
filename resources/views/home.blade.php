@@ -437,7 +437,7 @@
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         events: {
-            url: "{{ route('events.fetch') }}",
+            url: "{{ route('events.public.fetch') }}",
             method: 'GET',
             failure: function () {
                 alert('There was an error while fetching events!');
