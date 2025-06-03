@@ -3,14 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
+use Illuminate\Auth\MustVerifyEmail;
+
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmailContract
 {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens, Notifiable, MustVerifyEmail;
+    
 
     protected $table = 'users';
 
@@ -19,7 +23,7 @@ class User extends Authenticatable
     public $timestamps = false; // ✅ no timestamps in your schema
 
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'picture','org'
+        'name', 'email', 'password', 'role', 'picture','org','email_verified_at'
     ];
 
     protected $hidden = [

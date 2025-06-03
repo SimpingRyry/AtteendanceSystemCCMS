@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\OrgList;
-use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\OrgList;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
 
 class OrgListController extends Controller
 {
@@ -58,6 +59,8 @@ class OrgListController extends Controller
         $user->org = $organization->org_name; // Save org name to 'org' column
         $user->role = 'Admin';
         $user->save();
+
+        event(new Registered($user));
     
         return redirect()->back()->with('success', 'Organization and Admin created successfully.');
     }

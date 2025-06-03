@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LogController;
@@ -13,15 +16,16 @@ use App\Http\Controllers\OrgListController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
+
 use Illuminate\Console\Scheduling\Schedule;
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\ScheduleController;
-
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\StudentEvaluationController;
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +37,25 @@ use App\Http\Controllers\StudentEvaluationController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+
+Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
+    $user = User::findOrFail($id);
+
+    if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+        abort(403, 'Invalid verification link.');
+    }
+
+    if ($user->hasVerifiedEmail()) {
+        return redirect('/login')->with('message', 'Email already verified.');
+    }
+
+    $user->markEmailAsVerified();
+    event(new Verified($user));
+
+    return redirect('/login')->with('message', 'Email verified successfully. Please log in.');
+})->middleware(['signed'])->name('verification.verify');
+
 Route::get('/', [HomeController::class, 'index']);
 
 Route::get('/student', function () {

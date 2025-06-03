@@ -18,6 +18,12 @@
             <p>Welcome back to CCMS Attendance System</p>
         </div>
 
+        @if (session('message'))
+    <div class="alert alert-success text-center">
+        {{ session('message') }}
+    </div>
+@endif
+
         @if(session('error'))
             <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
