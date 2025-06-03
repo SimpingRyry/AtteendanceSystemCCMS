@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Events\Registered;
 
 class StudentController extends Controller
 {
@@ -66,6 +67,8 @@ class StudentController extends Controller
         $user->org = (Auth::user()->role === 'Admin') ? Auth::user()->org : $request->organization;
     
         $user->save();
+
+        event(new Registered($user));
     
         // Update student record
         $student = Student::where('id_number', $request->student_id)->first();
