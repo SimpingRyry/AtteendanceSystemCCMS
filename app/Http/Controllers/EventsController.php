@@ -75,6 +75,18 @@ class EventsController extends Controller
         }
     
         foreach ($dates as $date) {
+
+            $existingEvent = Event::where('event_date', $date)
+            ->when($request->venue, function ($query) use ($request) {
+                return $query->where('venue', $request->venue);
+            })
+            ->first();
+    
+        if ($existingEvent) {
+            return redirect()->back()->withErrors([
+                'event_date' => "An event is already scheduled on $date at venue '{$request->venue}'."
+            ])->withInput();
+        }
             $event = Event::create([
                 'name' => $request->name,
                 'venue' => $request->venue,
