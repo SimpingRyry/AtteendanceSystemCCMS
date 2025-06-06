@@ -144,11 +144,15 @@
               <td>{{ $student->birth_date }}</td>
               <td>{{ $student->address }}</td>
               <td>
-                @if($student->status === 'Unregistered')
-                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
-                @else
-                <span class="badge bg-success">Registered</span>
-                @endif
+              @if($student->status === 'Unregistered')
+  @if(!(auth()->user()->role === 'Super Admin' || auth()->user()->organization === 'CCMS Student Government'))
+    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
+  @else
+    <span class="badge bg-warning">Unregistered</span>
+  @endif
+@else
+  <span class="badge bg-success">Registered</span>
+@endif
               </td>
             </tr>
             @endforeach
@@ -358,7 +362,22 @@
     </form>
   </div>
 </div>
-
+@if(session('success'))
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <div class="modal-body">
+        <div class="text-success mb-3">
+          <i class="bi bi-check-circle-fill" style="font-size: 60px;"></i>
+        </div>
+        <h5 class="text-success">Success!</h5>
+        <p>{{ session('success') }}</p>
+        <button type="button" class="btn btn-success mt-2" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
 
 
 
@@ -371,6 +390,15 @@
 
 
 </body>
+</script>
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+    });
+</script>
+@endif
 
 <script>
   let fingerprintPolling = null;

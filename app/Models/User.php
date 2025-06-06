@@ -23,7 +23,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public $timestamps = false; // ✅ no timestamps in your schema
 
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'picture','org','email_verified_at'
+        'name', 'email', 'password', 'role','student_id' ,'picture','org','email_verified_at'
     ];
 
     protected $hidden = [
@@ -45,5 +45,25 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public function organization()
 {
     return $this->belongsTo(OrgList::class, 'org', 'org_name');
+}
+
+
+public function studentList()
+{
+    return $this->hasOne(Student::class, 'id_number', 'student_id');
+}
+
+public function transactions()
+{
+    return $this->hasMany(Transaction::class, 'student_id', 'student_id');
+}
+
+public function getBalanceAttribute()
+{
+    return $this->transactions->reduce(function ($carry, $transaction) {
+        return $transaction->transaction_type === 'FINE'
+            ? $carry + $transaction->fine_amount
+            : ($transaction->type === 'PAYMENT' ? $carry - $transaction->fine_amount : $carry);
+    }, 0);
 }
 }

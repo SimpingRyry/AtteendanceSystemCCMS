@@ -49,12 +49,12 @@
 .nav-link {
   padding: 12px 20px;
   color: #272343;
-  font-family: 'Poppins', sans-serif; /* Make sure you're using Poppins */
-  font-size: 1.1rem; /* ✨ Bigger text */
-  font-weight: 600; /* Bolder */
-  letter-spacing: 0.5px; /* A little spacing for style */
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   transition: all 0.3s ease;
-  border-radius: 30px;
+  border-radius: 8px; /* Changed from 30px to 8px for modern feel */
 }
 
 .sidebar-icon {
@@ -67,7 +67,8 @@
 
 .nav-link:hover {
   background: linear-gradient(145deg, #ffd803, #ffeb90);
-  box-shadow: inset 0 0 8px #ffd80388, 0 4px 12px #ffd80388;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Softer modern shadow */
+  border-radius: 8px; /* Consistent modern hover radius */
   color: #272343;
 }
 

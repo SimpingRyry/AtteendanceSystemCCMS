@@ -111,34 +111,25 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>2023-001</td>
-                <td>Jane Doe</td>
-                <td>BSIT</td>
-                <td>A</td>
-                <td>Science Club</td>
-                <td>₱0.00</td>
-                <td>
-                  <button class="btn btn-success btn-sm"><i class="fas fa-money-bill-wave"></i> Pay</button>
-                  <button class="btn btn-primary btn-sm view-btn" data-bs-toggle="modal" data-bs-target="#soaModal">
-                    <i class="fas fa-eye"></i> View
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td>2023-002</td>
-                <td>John Smith</td>
-                <td>BSCS</td>
-                <td>B</td>
-                <td>Math Society</td>
-                <td>₱5000.00</td>
-                <td>
-                  <button class="btn btn-success btn-sm"><i class="fas fa-money-bill-wave"></i> Pay</button>
-                  <button class="btn btn-primary btn-sm view-btn"data-bs-toggle="modal" data-bs-target="#soaModal">
-                    <i class="fas fa-eye"></i> View
-                  </button>
-                </td>
-              </tr>
+            @foreach($students as $student)
+  <tr>
+    <td>{{ $student->student_id }}</td>
+    <td>{{ $student->name }}</td>
+    <td>{{ $student->studentList->course ?? 'N/A' }}</td>
+    <td>{{ $student->studentList->section ?? 'N/A' }}</td>
+    <td>{{ $student->org }}</td>
+    <td>₱{{ number_format($student->balance, 2) }}</td>
+    <td>
+      <button class="btn btn-success btn-sm"><i class="fas fa-money-bill-wave"></i> Pay</button>
+      <button class="btn btn-primary btn-sm view-btn"
+              data-student-id="{{ $student->student_id }}"
+              data-bs-toggle="modal"
+              data-bs-target="#soaModal">
+        <i class="fas fa-eye"></i> View
+      </button>
+    </td>
+  </tr>
+@endforeach
             </tbody>
           </table>
         </div>
@@ -153,37 +144,17 @@
     </div>
   </main>
   <div class="modal fade" id="soaModal" tabindex="-1" aria-labelledby="soaModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="soaModalLabel">Statement of Account</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="soaModalLabel">Statement of Account</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <p><strong>Student Name:</strong> <span id="modalStudentName"></span></p>
-        <p><strong>Student ID:</strong> <span id="modalStudentID"></span></p>
-        <p><strong>Course & Section:</strong> <span id="modalCourseSection"></span></p>
-
-        <div class="table-responsive">
-          <table class="table table-bordered mt-3">
-            <thead class="table-light">
-              <tr>
-                <th>Date</th>
-                <th>Transaction</th>
-                <th>Debit</th>
-                <th>Credit</th>
-                <th>Balance</th>
-                <th>Processed By</th>
-              </tr>
-            </thead>
-            <tbody id="modalTableBody">
-              <!-- Dynamic content here -->
-            </tbody>
-          </table>
-        </div>
-
-        <div class="mt-3 fw-bold">
-          Total Remaining Balance: <span id="modalTotalBalance"></span>
+      <div class="modal-body" id="soaModalBody">
+        <div class="text-center p-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
         </div>
       </div>
     </div>
@@ -193,6 +164,34 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
 
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.view-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      const studentId = button.getAttribute('data-student-id');
+      const modalBody = document.getElementById('soaModalBody');
+      
+      modalBody.innerHTML = `
+        <div class="text-center p-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      `;
+
+      fetch(`/admin/soa/${studentId}`)
+        .then(response => response.text())
+        .then(html => {
+          modalBody.innerHTML = html;
+        })
+        .catch(error => {
+          modalBody.innerHTML = `<p class="text-danger text-center">Error loading data.</p>`;
+          console.error('Error:', error);
+        });
+    });
+  });
+});
+</script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const viewButtons = document.querySelectorAll(".view-btn");

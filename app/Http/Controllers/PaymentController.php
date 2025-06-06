@@ -29,4 +29,39 @@ class PaymentController extends Controller
         'studentSection' => $studentSection,
     ]);
 }
+
+public function index()
+{
+    $students = User::whereHas('studentList') // only users that have a studentList
+    ->with(['studentList', 'transactions'])
+    ->limit(1)
+
+    ->get();
+
+    return view('payment_page2', compact('students'));
+}
+
+public function loadStudentSOA($studentId)
+{
+    $student = User::where('student_id', $studentId)->first();
+
+    if (!$student) {
+        return "<p class='text-danger text-center'>Student not found.</p>";
+    }
+    $studentSection = Student::where('id_number', $studentId)->value('section');
+
+    $transactionsGrouped = Transaction::where('student_id', $studentId)
+        ->orderBy('date')
+        ->get()
+        ->groupBy('acad_code');
+
+    
+
+    return view('layout.student_soa_modal_content', [
+        'student' => $student,
+        'transactionsGrouped' => $transactionsGrouped,
+        'studentSection' => $studentSection,
+        
+    ]);
+}
 }

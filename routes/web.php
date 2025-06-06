@@ -12,11 +12,12 @@ use App\Http\Controllers\EventsController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdviserController;
+use App\Http\Controllers\OfficerController;
 use App\Http\Controllers\OrgListController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\StudentController;
 
+use App\Http\Controllers\StudentController;
 use Illuminate\Console\Scheduling\Schedule;
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\ScheduleController;
@@ -83,9 +84,8 @@ Route::get('/template', function () {
 Route::get('/payment_page', function () {
     return view('payment_page');
 });
-Route::get('/payment', function () {
-    return view('payment_page2');
-});
+Route::get('/payment', [PaymentController::class, 'index'])->name('payments.index');
+
 
 Route::get('/accounts', [AccountsController::class, 'showAdmins']);
 
@@ -225,6 +225,15 @@ Route::post('/generate-biometrics-schedule', [ScheduleController::class, 'genera
 Route::get('/admin-users', function () {
     return \App\Models\User::where('role', 'Admin')->get(['name', 'email', 'picture']);
 });
+
+Route::get('/org-members', function () {
+    $user = auth()->user();
+    return \App\Models\User::where('org', $user->org)
+        ->where('role', 'Member') // optional: exclude existing officers/admins
+        ->get(['id', 'name', 'email', 'picture']);
+});
 Route::post('/notifications/mark-seen', [NotificationController::class, 'markAllAsSeen'])->name('notifications.markSeen');
 Route::get('/public-events', [EventsController::class, 'publicFetchEvents'])->name('events.public.fetch');
 Route::get('/student_payment', [PaymentController::class, 'showStatementOfAccount'])->name('statement.account')->middleware('auth');
+Route::post('/officers/add', [OfficerController::class, 'add'])->name('officers.add');
+Route::get('/admin/soa/{studentId}', [PaymentController::class, 'loadStudentSOA']);

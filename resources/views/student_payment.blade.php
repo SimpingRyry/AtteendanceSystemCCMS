@@ -71,7 +71,7 @@
 </div>
 
       <!-- Student Info -->
-      <p><strong>Student Name:</strong> <<span id="studentName">{{ $student->name }}</span></p>
+      <p><strong>Student Name:</strong> <span id="studentName">{{ $student->name }}</span></p>
       <p><strong>Student ID:</strong> <span id="studentID">{{ $student->student_id }}</span></p>
       <p><strong>Course & Section:</strong> <span id="studentCourseSection">{{ $studentSection }}</span></p>
 

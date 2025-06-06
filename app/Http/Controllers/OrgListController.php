@@ -62,7 +62,7 @@ class OrgListController extends Controller
 
         event(new Registered($user));
     
-        return redirect()->back()->with('success', 'Organization and Admin created successfully.');
+        return redirect()->back()->with('success', 'Organization and Admin created successfully. Please confirm the email for the account for activation');
     }
 
     // ✅ Update an existing organization

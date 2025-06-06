@@ -19,6 +19,11 @@
     <link rel="stylesheet" href="{{ asset('css/content.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_side.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+
+<!-- Bootstrap 5 JS Bundle (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     
 
@@ -34,10 +39,16 @@
     <div class="container-fluid" id="mainContainer">
         <!-- Heading -->
         <div class="mb-3">
-            <h2 class="fw-bold" style="color: #232946;">Accounts</h2>
+            <h2 class="fw-bold" style="color: #232946;">Officers</h2>
             <small style="color: #989797;">Manage /</small>
-            <small style="color: #444444;">Accounts</small>
+            <small style="color: #444444;">Officers</small>
         </div>
+
+        <div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addOfficerModal">
+        <i class="bi bi-person-plus-fill me-1"></i> Add Officer
+    </button>
+</div>
 
         <!-- Main Card -->
         <div class="card shadow-sm p-4">
@@ -135,7 +146,50 @@
 
         </div>
 
-        <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    
+    </div>
+</div>
+</main>
+
+<div class="modal fade" id="addOfficerModal" tabindex="-1" aria-labelledby="addOfficerModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="addOfficerForm" method="POST" action="{{ route('officers.add') }}">
+        @csrf
+        <div class="modal-header">
+          <h5 class="modal-title" id="addOfficerModalLabel">Add Officer</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Full Name Search Field -->
+          <div class="mb-3 position-relative">
+    <label for="officerName" class="form-label">Full Name</label>
+    <input type="text" class="form-control" id="officerInput" name="officerInput" autocomplete="off" placeholder="Type @ to search members...">
+    <div id="mentionDropdown" class="list-group position-absolute w-100" style="z-index: 999; display: none;"></div>
+    <input type="hidden" name="user_id" id="selectedUserId">
+</div>
+
+          <!-- Officer Position Dropdown -->
+          <div class="mb-3">
+            <label for="officerPosition" class="form-label">Officer Position</label>
+            <select class="form-select" id="officerPosition" name="officerPosition" required>
+              <option value="">Select Position</option>
+              <option value="President">President</option>
+              <option value="Vice President">Vice President</option>
+              <option value="Secretary">Secretary</option>
+              <option value="Treasurer">Treasurer</option>
+              <!-- Add more as needed -->
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Add Officer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="editUserForm" method="POST" action="{{ route('users.update') }}">
@@ -188,9 +242,23 @@
     </div>
   </div>
 </div>
+
+@if(session('success'))
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <div class="modal-body">
+        <div class="text-success mb-3">
+          <i class="bi bi-check-circle-fill" style="font-size: 60px;"></i>
+        </div>
+        <h5 class="text-success">Success!</h5>
+        <p>{{ session('success') }}</p>
+        <button type="button" class="btn btn-success mt-2" data-bs-dismiss="modal">OK</button>
+      </div>
     </div>
+  </div>
 </div>
-</main>
+@endif
 
 
 
@@ -203,6 +271,70 @@
     
     
 </body>
+
+<script>
+let orgMembers = [];
+
+document.addEventListener("DOMContentLoaded", () => {
+    const officerInput = document.getElementById("officerInput");
+    const mentionDropdown = document.getElementById("mentionDropdown");
+
+    // Load members of current user's org
+    fetch('/org-members') // Laravel route must return only members of the user's org
+        .then(res => res.json())
+        .then(data => orgMembers = data);
+
+    officerInput.addEventListener("input", (e) => {
+        const value = e.target.value;
+        const atIndex = value.lastIndexOf("@");
+
+        if (atIndex !== -1) {
+            const query = value.substring(atIndex + 1).toLowerCase();
+            const matches = orgMembers.filter(user =>
+                user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query)
+            );
+
+            if (matches.length) {
+                mentionDropdown.innerHTML = matches.map(user => `
+                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" data-id="${user.id}" data-name="${user.name}">
+                        <img src="${user.picture || '/default-avatar.png'}" class="rounded-circle me-2" width="30" height="30">
+                        <div>
+                            <strong>${user.name}</strong><br>
+                            <small>${user.email}</small>
+                        </div>
+                    </a>
+                `).join("");
+                mentionDropdown.style.display = "block";
+            } else {
+                mentionDropdown.style.display = "none";
+            }
+        } else {
+            mentionDropdown.style.display = "none";
+        }
+    });
+
+    mentionDropdown.addEventListener("click", function (e) {
+        e.preventDefault();
+        const item = e.target.closest("a");
+        if (item) {
+            const name = item.dataset.name;
+            const id = item.dataset.id;
+            const value = officerInput.value;
+            const atIndex = value.lastIndexOf("@");
+            officerInput.value = value.substring(0, atIndex) + name;
+            document.getElementById("selectedUserId").value = id;
+           
+            mentionDropdown.style.display = "none";
+        }
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!mentionDropdown.contains(e.target) && e.target !== officerInput) {
+            mentionDropdown.style.display = "none";
+        }
+    });
+});
+</script>
 
 
 
@@ -273,6 +405,14 @@ function deleteUser(userID) {
     }
 }
 </script>
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+    });
+</script>
+@endif
 
 
 

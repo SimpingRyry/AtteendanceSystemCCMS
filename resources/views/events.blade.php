@@ -309,15 +309,12 @@
 </div>
 
 @if(session('success'))
-<!-- Success Modal -->
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content text-center p-4">
       <div class="modal-body">
         <div class="text-success mb-3">
-          <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
-            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.5 11.5l-3-3L4 7l2.5 2.5L12 4l1.5 1.5-7 7z"/>
-          </svg>
+          <i class="bi bi-check-circle-fill" style="font-size: 60px;"></i>
         </div>
         <h5 class="text-success">Success!</h5>
         <p>{{ session('success') }}</p>
