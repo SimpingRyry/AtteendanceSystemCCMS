@@ -42,6 +42,7 @@
             <h2 class="fw-bold" style="color: #232946;">Officers</h2>
             <small style="color: #989797;">Manage /</small>
             <small style="color: #444444;">Officers</small>
+            <small style="color: #989797;">Service Year: {{ $yearOnly }}</small>
         </div>
 
         <div class="d-flex justify-content-end mb-3">

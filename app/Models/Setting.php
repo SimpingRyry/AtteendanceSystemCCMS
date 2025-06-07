@@ -9,7 +9,7 @@ class Setting extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['key', 'value','acad_code'];
+    protected $fillable = ['key', 'value','acad_code','org'];
 
     public $timestamps = true;
 }

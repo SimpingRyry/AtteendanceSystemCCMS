@@ -23,7 +23,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public $timestamps = false; // ✅ no timestamps in your schema
 
     protected $fillable = [
-        'name', 'email', 'password', 'role','student_id' ,'picture','org','email_verified_at'
+        'name', 'email', 'password', 'role','student_id' ,'picture','org','email_verified_at' ,'term'
     ];
 
     protected $hidden = [
@@ -65,5 +65,11 @@ public function getBalanceAttribute()
             ? $carry + $transaction->fine_amount
             : ($transaction->type === 'PAYMENT' ? $carry - $transaction->fine_amount : $carry);
     }, 0);
+}
+
+public function scopeActiveOfficers($query)
+{
+    $currentTerm = Setting::where('key', 'academic_term')->value('value');
+    return $query->where('role', 'like', '%- Officer%')->where('term', $currentTerm);
 }
 }

@@ -89,7 +89,7 @@ Route::get('/payment', [PaymentController::class, 'index'])->name('payments.inde
 
 Route::get('/accounts', [AccountsController::class, 'showAdmins']);
 
-Route::get('/officers', [AccountsController::class, 'showOfficers']);
+Route::get('/officers', [OfficerController::class, 'showOfficerPage']);
 
 
 Route::get('/profile', function () {

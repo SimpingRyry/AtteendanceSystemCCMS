@@ -96,6 +96,7 @@ class EventsController extends Controller
                 'course' => $course,
                 'guests' => json_encode($guestEmails),
                 'description' => $request->description,
+                'org' => auth()->user()->org,
             ]);
     
             // ✅ Notify users based on course

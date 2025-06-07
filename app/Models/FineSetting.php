@@ -18,6 +18,8 @@ class FineSetting extends Model
         'late,member',
         'absent_officer',
         'late_officer',
-        'grace_period_minutes'
+        'grace_period_minutes',
+        'org'
+
     ];
 }
