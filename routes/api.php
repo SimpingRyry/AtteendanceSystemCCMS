@@ -69,16 +69,26 @@ Route::post('/fingerprint-upload', function (Request $request) {
     $url = url('fingerprints/' . $filename);
 
     // Store temporarily in cache
-    Cache::put('latest_fingerprint_image', $url, now()->addMinutes(5));
+    Cache::put('latest_fingerprint_data', [
+        'user_id' => $id,
+        'url' => $url
+    ], now()->addMinutes(5));
 
     Log::info('Cached fingerprint image URL:', ['url' => $url]);
 
     return response()->json(['message' => 'Fingerprint received', 'url' => $url]);
 });
 Route::get('/fingerprint/latest', function () {
-    Log::info('Cached fingerprint image URL2:', ['url' => Cache::get('latest_fingerprint_image')]);
+    $data = Cache::get('latest_fingerprint_data');
+
+    if (!$data) {
+        return response()->json(['message' => 'No fingerprint data found in cache'], 404);
+    }
+
+    Log::info('Cached fingerprint data retrieved:', $data);
 
     return response()->json([
-        'url' => Cache::get('latest_fingerprint_image')
+        'user_id' => $data['user_id'],
+        'url' => $data['url']
     ]);
 });

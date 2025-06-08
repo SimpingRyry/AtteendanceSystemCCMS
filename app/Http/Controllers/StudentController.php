@@ -25,6 +25,8 @@ class StudentController extends Controller
             'captured_image' => 'nullable|string',
             'organization' => Auth::user()->role === 'admin' ? 'nullable' : 'required|string|max:255',
             'role' => 'required|string|max:255',
+            'fingerprint_user_id' => 'nullable|integer',
+
         ]);
     
         if (!$request->uploaded_picture && !$request->captured_image) {
@@ -78,10 +80,9 @@ class StudentController extends Controller
                 $student->f_id = $request->fingerprint;
             }
     
-            if ($student->status == 'Unregistered') {
-                $student->status = 'Registered';
+            if ($request->filled('fingerprint_user_id')) {
+                $student->f_id = $request->fingerprint_user_id;
             }
-    
             $student->save();
         } else {
             return redirect()->back()->with('error', 'Student record not found.');

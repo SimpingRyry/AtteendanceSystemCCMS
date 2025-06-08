@@ -249,6 +249,8 @@
                 <img id="fingerprintImage" src="" alt="Fingerprint will appear here" style="max-height: 100%; max-width: 100%; display: none;">
               </div>
               <input type="hidden" name="fingerprint_data" id="fingerprintData">
+              <input type="hidden" name="fingerprint_user_id" id="fingerprintUserId">
+
             </div>
           </div>
 
@@ -404,28 +406,32 @@
   let fingerprintPolling = null;
 
   function updateFingerprintImage() {
-    console.log('updateFingerprintImage function is called');
-    axios.get('/api/fingerprint/latest')
-      .then(response => {
-        if (response.data && response.data.url) {
-          const url = response.data.url;
-           console.log(url);
-          const modal = document.getElementById("registerStudentModal");
+  console.log('updateFingerprintImage function is called');
+  axios.get('/api/fingerprint/latest')
+    .then(response => {
+      if (response.data && response.data.url && response.data.user_id) {
+        const url = response.data.url;
+        const userId = response.data.user_id;
+        console.log("URL:", url);
+        console.log("User ID:", userId);
 
-          if (modal && modal.classList.contains("show")) {
-            const imgEl = document.getElementById("fingerprintImage");
-            imgEl.src = url; // Add timestamp to prevent caching
-            imgEl.style.display = 'block';
+        const modal = document.getElementById("registerStudentModal");
 
-            // Optionally store the URL or related data in a hidden field
-            document.getElementById('fingerprintData').value = url;
-          }
+        if (modal && modal.classList.contains("show")) {
+          const imgEl = document.getElementById("fingerprintImage");
+          imgEl.src = url + '?t=' + new Date().getTime(); // avoid browser cache
+          imgEl.style.display = 'block';
+
+          // Store values in hidden inputs
+          document.getElementById('fingerprintData').value = url;
+          document.getElementById('fingerprintUserId').value = userId;
         }
-      })
-      .catch(error => {
-        console.error("Error fetching fingerprint image:", error);
-      });
-  }
+      }
+    })
+    .catch(error => {
+      console.error("Error fetching fingerprint image:", error);
+    });
+}
 
   function startFingerprintPolling() {
     updateFingerprintImage(); // Run once immediately
