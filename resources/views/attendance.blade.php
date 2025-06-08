@@ -68,31 +68,63 @@
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover" id="attendanceTable">
                         <thead class="table-light">
-                            <tr>
-                                <th>Student ID</th>
-                                <th>Name</th>
-                                <th>Program</th>
-                                <th>Block</th>
-                                <th>Event</th>
-                                <th>Date</th>
-                                <th>Time-In</th>
-                                <th>Time-Out</th>
-                                <th>Status</th>
-                            </tr>
+                        <tr>
+                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Student ID</th>
+                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Name</th>
+                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Program</th>
+                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Block</th>
+                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Event</th>
+                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Date</th>
+
+                                    @if($currentEvent->timeouts == 4)
+                                        <th colspan="2" class="text-center">Morning</th>
+                                        <th colspan="2" class="text-center">Afternoon</th>
+                                    @else
+                                        <th rowspan="1">Time-In</th>
+                                        <th rowspan="1">Time-Out</th>
+                                    @endif
+
+                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Status</th>
+                                </tr>
+
+                                @if($currentEvent->timeouts == 4)
+                                <tr>
+                                    <th>Time-In</th>
+                                    <th>Time-Out</th>
+                                    <th>Time-In</th>
+                                    <th>Time-Out</th>
+                                </tr>
+                                @endif
                         </thead>
                         <tbody>
                             <!-- Sample Row (replace with dynamic content) -->
-                            <tr>
-                                <td>22-0788</td>
-                                <td>Borje, Ver Andre A.</td>
-                                <td>MAIN-BSIT</td>
-                                <td>B</td>
-                                <td>Orientation</td>
-                                <td>2025-05-22</td>
-                                <td>08:05 AM</td>
-                                <td>12:00 PM</td>
-                                <td><span class="badge bg-warning text-dark">Late</span></td>
-                            </tr>
+                            @if($currentEvent->timeouts == 4)
+                                <tr>
+                                    <td>22-0788</td>
+                                    <td>Borje, Ver Andre A.</td>
+                                    <td>MAIN-BSIT</td>
+                                    <td>B</td>
+                                    <td>Orientation</td>
+                                    <td>2025-05-22</td>
+                                    <td>08:05 AM</td> <!-- Time-In AM -->
+                                    <td>12:00 PM</td> <!-- Time-Out AM -->
+                                    <td>01:10 PM</td> <!-- Time-In PM -->
+                                    <td>04:55 PM</td> <!-- Time-Out PM -->
+                                    <td><span class="badge bg-warning text-dark">Late</span></td>
+                                </tr>
+                            @else
+                                <tr>
+                                    <td>22-0788</td>
+                                    <td>Borje, Ver Andre A.</td>
+                                    <td>MAIN-BSIT</td>
+                                    <td>B</td>
+                                    <td>Orientation</td>
+                                    <td>2025-05-22</td>
+                                    <td>08:05 AM</td>
+                                    <td>12:00 PM</td>
+                                    <td><span class="badge bg-warning text-dark">Late</span></td>
+                                </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>

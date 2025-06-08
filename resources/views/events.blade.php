@@ -130,6 +130,19 @@
                         </div>
                     </div>
 
+
+                    <div class="row">
+                        <div class="mb-3 col-md-6">
+                            <label for="involvedStudents" class="form-label">Involved Students</label>
+                            <select class="form-select" id="involvedStudents" name="involved_students" required>
+                                <option value="">-- Select --</option>
+                                <option value="All">All</option>
+                                <option value="Members">Members</option>
+                                <option value="Officers">Officers</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <!-- Time Pickers -->
                     <div id="timePickers" class="mb-3 d-none">
                         <div id="halfDayTimes" class="d-none row">
@@ -255,18 +268,22 @@
         </div>
         <div class="modal-body">
           <input type="hidden" id="editEventId" name="event_id">
+
           <div class="mb-3">
             <label class="form-label">Title</label>
             <input type="text" id="editEventTitle" name="title" class="form-control">
           </div>
+
           <div class="mb-3">
             <label class="form-label">Venue</label>
             <input type="text" id="editEventVenue" name="venue" class="form-control">
           </div>
+
           <div class="mb-3">
             <label class="form-label">Date</label>
             <input type="date" id="editEventDate" name="date" class="form-control">
           </div>
+
           <div class="mb-3">
             <label class="form-label">Day Type</label>
             <select id="editEventDayType" name="dayType" class="form-select">
@@ -274,15 +291,18 @@
               <option value="Whole Day">Whole Day</option>
             </select>
           </div>
+
           <div class="mb-3">
             <label class="form-label">Course</label>
             <input type="text" id="editEventCourse" name="course" class="form-control">
           </div>
+
           <div class="mb-3">
             <label class="form-label">Times</label>
             <div id="editEventTimesContainer"></div>
           </div>
         </div>
+
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary">Save Changes</button>
         </div>
@@ -551,6 +571,58 @@ document.addEventListener('DOMContentLoaded', function () {
     info.el.style.backgroundColor = '#007bff'; // blue
     info.el.style.borderColor = '#007bff';
 }
+const dayTypeSelect = document.getElementById('editEventDayType');
+  const timesContainer = document.getElementById('editEventTimesContainer');
+
+  function updateTimeFieldsBasedOnDayType(dayType, existingTimes = []) {
+    timesContainer.innerHTML = '';
+
+    if (dayType === 'Half Day') {
+      timesContainer.innerHTML = `
+        <label>Time In</label>
+        <input type="time" name="edit_times[]" class="form-control mb-2" value="${existingTimes[0] || ''}">
+        <label>Time Out</label>
+        <input type="time" name="edit_times[]" class="form-control mb-2" value="${existingTimes[1] || ''}">
+      `;
+    } else if (dayType === 'Whole Day') {
+      timesContainer.innerHTML = `
+        <label>Morning Time In</label>
+        <input type="time" name="edit_times[]" class="form-control mb-2" value="${existingTimes[0] || ''}">
+        <label>Morning Time Out</label>
+        <input type="time" name="edit_times[]" class="form-control mb-2" value="${existingTimes[1] || ''}">
+        <label>Afternoon Time In</label>
+        <input type="time" name="edit_times[]" class="form-control mb-2" value="${existingTimes[2] || ''}">
+        <label>Afternoon Time Out</label>
+        <input type="time" name="edit_times[]" class="form-control mb-2" value="${existingTimes[3] || ''}">
+      `;
+    }
+  }
+
+  // Listen for dropdown changes
+  dayTypeSelect.addEventListener('change', function () {
+    updateTimeFieldsBasedOnDayType(this.value);
+  });
+
+  // Example: how to trigger this modal and populate values
+  function openEditEventModal(event) {
+    document.getElementById('editEventId').value = event.extendedProps.id;
+    document.getElementById('editEventTitle').value = event.title;
+    document.getElementById('editEventVenue').value = event.extendedProps.venue || '';
+    document.getElementById('editEventDate').value = event.start.toISOString().slice(0, 10);
+    document.getElementById('editEventCourse').value = event.extendedProps.course || '';
+
+    const timeout = event.extendedProps.timeout;
+    const dayType = (timeout == 2) ? 'Half Day' : 'Whole Day';
+    document.getElementById('editEventDayType').value = dayType;
+
+    const times = event.extendedProps.times || [];
+    updateTimeFieldsBasedOnDayType(dayType, times);
+
+    // Show modal
+    new bootstrap.Modal(document.getElementById('editEventModal')).show();
+  }
+
+
 
             // Create icon container (cloud)
             const iconContainer = document.createElement('div');
@@ -598,48 +670,7 @@ document.addEventListener('DOMContentLoaded', function () {
     e.stopPropagation(); // Prevent calendar click
 
     // Populate basic fields
-    document.getElementById('editEventId').value = event.extendedProps.id;
-    document.getElementById('editEventTitle').value = event.title;
-    document.getElementById('editEventVenue').value = event.extendedProps.venue || '';
-    document.getElementById('editEventDate').value = event.start.toISOString().slice(0, 10);
-    document.getElementById('editEventCourse').value = event.extendedProps.course || '';
-
-    // Handle day type
-    const timeout = event.extendedProps.timeout;
-    const dayType = (timeout == 2) ? 'Half Day' : 'Whole Day';
-    document.getElementById('editEventDayType').value = dayType;
-
-    // Clear and populate time fields
-    const container = document.getElementById('editEventTimesContainer');
-    container.innerHTML = '';
-
-    const times = event.extendedProps.times || [];
-
-    if (times.length === 2) {
-        container.innerHTML = `
-            <label>Time In</label>
-            <input type="time" name="edit_times[]" class="form-control mb-2" value="${times[0]}">
-            <label>Time Out</label>
-            <input type="time" name="edit_times[]" class="form-control mb-2" value="${times[1]}">
-        `;
-    } else if (times.length === 4) {
-        container.innerHTML = `
-            <label>Morning Time In</label>
-            <input type="time" name="edit_times[]" class="form-control mb-2" value="${times[0]}">
-            <label>Morning Time Out</label>
-            <input type="time" name="edit_times[]" class="form-control mb-2" value="${times[1]}">
-            <label>Afternoon Time In</label>
-            <input type="time" name="edit_times[]" class="form-control mb-2" value="${times[2]}">
-            <label>Afternoon Time Out</label>
-            <input type="time" name="edit_times[]" class="form-control mb-2" value="${times[3]}">
-        `;
-    } else {
-        // fallback
-        times.forEach(time => addEditTimeInput(time));
-    }
-
-    // Show modal
-    new bootstrap.Modal(document.getElementById('editEventModal')).show();
+    openEditEventModal(event);
 });
 
             // (Optional) View icon

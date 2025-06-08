@@ -27,7 +27,8 @@ class EventsController extends Controller
             'timeouts' => 'required|in:2,4',
             'course' => 'nullable|string',
             'repeat_dates' => 'nullable|string',
-            'guests' => 'nullable|string'
+            'guests' => 'nullable|string',
+            'involved_students' => 'required|in:All,Members,Officers',
         ]);
     
         $times = [];
@@ -51,7 +52,6 @@ class EventsController extends Controller
             $dates = array_merge($dates, $extraDates);
         }
     
-        // ✅ Determine course based on user role or organization
         $user = auth()->user();
         $role = $user->role ?? null;
         $organization = $user->org ?? null;
@@ -67,7 +67,6 @@ class EventsController extends Controller
             $course = 'All';
         }
     
-        // ✅ Parse guest emails
         $guestEmails = [];
     
         if (!empty($request->guests)) {
@@ -75,18 +74,18 @@ class EventsController extends Controller
         }
     
         foreach ($dates as $date) {
-
             $existingEvent = Event::where('event_date', $date)
-            ->when($request->venue, function ($query) use ($request) {
-                return $query->where('venue', $request->venue);
-            })
-            ->first();
+                ->when($request->venue, function ($query) use ($request) {
+                    return $query->where('venue', $request->venue);
+                })
+                ->first();
     
-        if ($existingEvent) {
-            return redirect()->back()->withErrors([
-                'event_date' => "An event is already scheduled on $date at venue '{$request->venue}'."
-            ])->withInput();
-        }
+            if ($existingEvent) {
+                return redirect()->back()->withErrors([
+                    'event_date' => "An event is already scheduled on $date at venue '{$request->venue}'."
+                ])->withInput();
+            }
+    
             $event = Event::create([
                 'name' => $request->name,
                 'venue' => $request->venue,
@@ -96,10 +95,11 @@ class EventsController extends Controller
                 'course' => $course,
                 'guests' => json_encode($guestEmails),
                 'description' => $request->description,
-                'org' => auth()->user()->org,
+                'org' => $user->org,
+                'involved_students' => $request->involved_students
             ]);
     
-            // ✅ Notify users based on course
+            // Fetch users based on course/org
             $recipients = \App\Models\User::when($course && $course !== 'All', function ($query) use ($course) {
                 return $query->where(function ($q) use ($course) {
                     if ($course === 'MAIN-BSIT') {
@@ -110,6 +110,21 @@ class EventsController extends Controller
                 });
             })->get();
     
+            // Filter users based on involved_students selection
+            $involved = $request->involved_students;
+    
+            $recipients = $recipients->filter(function ($user) use ($involved) {
+                if ($involved === 'All') {
+                    return true;
+                } elseif ($involved === 'Members') {
+                    return strtolower($user->role) === 'member';
+                } elseif ($involved === 'Officers') {
+                    return stripos($user->role, 'officer') !== false;
+                }
+                return false;
+            });
+    
+            // Notify filtered users
             foreach ($recipients as $user) {
                 \App\Models\Notification::create([
                     'user_id' => $user->id,
@@ -118,7 +133,7 @@ class EventsController extends Controller
                 ]);
             }
     
-            // ✅ Notify tagged guests
+            // Notify guest users
             if (!empty($guestEmails)) {
                 $guestUsers = \App\Models\User::whereIn('email', $guestEmails)->get();
     
@@ -136,106 +151,108 @@ class EventsController extends Controller
     }
     
     
+    
     public function fetchEvents()
     {
-        $user = Auth::user(); // Get the logged-in user
+        $user = Auth::user(); // Logged-in user
         $userOrg = $user->org;
+        $userRole = strtolower($user->role);
     
-        // Get all events
         $events = Event::all();
         $calendarEvents = [];
     
         foreach ($events as $event) {
             $times = json_decode($event->times, true);
             $guests = json_decode($event->guests, true);
-    
-            // Clean the course name
+            $involved = strtolower($event->involved_students);
             $cleanCourse = Str::replaceFirst('MAIN-', '', $event->course);
     
-            // Filter based on user org
+            // ✅ Filter by org-course match
             if (
-                ($userOrg === 'Information Technology Society' || $userOrg === 'ITS') && $cleanCourse !== 'BSIT' &&
-                $cleanCourse !== 'All'
+                ($userOrg === 'Information Technology Society' || $userOrg === 'ITS') &&
+                $cleanCourse !== 'BSIT' && $cleanCourse !== 'All'
             ) {
                 continue;
             }
     
             if (
-                $userOrg === 'PRAXIS' && $cleanCourse !== 'BSIS' &&
-                $cleanCourse !== 'All'
+                $userOrg === 'PRAXIS' &&
+                $cleanCourse !== 'BSIS' && $cleanCourse !== 'All'
             ) {
                 continue;
             }
     
-            // Event with 2 timeouts
-            if ($event->timeouts == 2) {
-                $calendarEvents[] = [
-                    'title' => $event->name,
-                    'start' => $event->event_date . 'T' . $times[0],
-                    'end' => $event->event_date . 'T' . $times[1],
-                    'extendedProps' => [
-                        'id' => $event->id,
-                        'course' => $cleanCourse,
-                        'venue' => $event->venue,
-                        'timeout' => $event->timeouts,
-                        'times' => $times,
-                        'guests' => $guests,
-                        'description' => $event->description
-                    ],
-                    'color' => $cleanCourse === 'BSIS' ? 'violet' : ($cleanCourse === 'All' ? 'green' : 'blue'),
-                ];
+            // ✅ Filter by involvement
+            if ($involved === 'members' && $userRole !== 'member') {
+                continue;
             }
-            // Event with 4 timeouts
-            elseif ($event->timeouts == 4) {
-                $calendarEvents[] = [
-                    'title' => $event->name,
-                    'start' => $event->event_date . 'T' . $times[0],
-                    'end' => $event->event_date . 'T' . $times[3],
-                    'extendedProps' => [
-                        'id' => $event->id,
-                        'course' => $cleanCourse,
-                        'venue' => $event->venue,
-                        'timeout' => $event->timeouts,
-                        'times' => $times,
-                        'guests' => $guests
-                    ],
-                    'color' => $cleanCourse === 'BSIS' ? 'violet' : ($cleanCourse === 'All' ? 'green' : 'blue'),
-                ];
+    
+            if ($involved === 'officers' && stripos($user->role, 'officer') === false) {
+                continue;
             }
+    
+            if ($involved !== 'all' && $involved !== 'members' && $involved !== 'officers') {
+                // Optional: skip events with invalid involvement label
+                continue;
+            }
+    
+            // ✅ Build calendar entry
+            $calendarEvents[] = [
+                'title' => $event->name,
+                'start' => $event->event_date . 'T' . $times[0],
+                'end' => $event->timeouts == 4 ? $event->event_date . 'T' . $times[3] : $event->event_date . 'T' . $times[1],
+                'extendedProps' => [
+                    'id' => $event->id,
+                    'course' => $cleanCourse,
+                    'venue' => $event->venue,
+                    'timeout' => $event->timeouts,
+                    'times' => $times,
+                    'guests' => $guests,
+                    'description' => $event->description
+                ],
+                'color' => $cleanCourse === 'BSIS' ? 'violet' : ($cleanCourse === 'All' ? 'green' : 'blue'),
+            ];
         }
     
         return response()->json($calendarEvents);
     }
-public function update(Request $request)
-{
-    // dd($request->all());
-    $request->validate([
-        'event_id' => 'required|integer|exists:events,id',
-        'title' => 'required|string|max:255',
-        'venue' => 'nullable|string',
-        'date' => 'required|date',
-        'course' => 'nullable|string',
-        'dayType' => 'required|in:Half Day,Whole Day',
-        'edit_times' => 'required|array|min:2|max:4'
-    ]);
-
-    $event = Event::findOrFail($request->event_id);
-
-    $event->name = $request->title;
-    $event->venue = $request->venue;
-    $event->event_date = $request->date;
-    $event->course = $request->course;
-
-    // Convert dayType to timeouts
-    $event->timeouts = $request->dayType === 'Half Day' ? 2 : 4;
-
-    // Store times as JSON
-    $event->times = json_encode($request->edit_times);
-
-    $event->save();
-
-    return redirect()->back()->with('success', 'Events created successfully!');
-}
+    
+    public function update(Request $request)
+    {
+        // dd($request->all());
+    
+        $request->validate([
+            'event_id' => 'required|integer|exists:events,id',
+            'title' => 'required|string|max:255',
+            'venue' => 'nullable|string',
+            'date' => 'required|date',
+            'course' => 'nullable|string',
+            'dayType' => 'required|in:Half Day,Whole Day',
+            'edit_times' => 'required|array',
+            'edit_times.*' => 'required|date_format:H:i', // Validate each time value
+        ]);
+    
+        $expectedTimeCount = $request->dayType === 'Half Day' ? 2 : 4;
+    
+        if (count($request->edit_times) !== $expectedTimeCount) {
+            return redirect()->back()->withErrors([
+                'edit_times' => "The number of times must match the selected Day Type. Expected $expectedTimeCount time fields.",
+            ])->withInput();
+        }
+    
+        $event = Event::findOrFail($request->event_id);
+    
+        $event->name = $request->title;
+        $event->venue = $request->venue;
+        $event->event_date = $request->date;
+        $event->course = $request->course;
+        $event->timeouts = $expectedTimeCount;
+        $event->times = json_encode($request->edit_times); // Save times as JSON
+    
+        $event->save();
+    
+        return redirect()->back()->with('success', 'Event updated successfully!');
+    }
     public function publicFetchEvents()
 {
     $events = Event::all();
