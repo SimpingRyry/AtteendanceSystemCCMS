@@ -130,25 +130,45 @@
 </main>
 
 <script>
-     document.getElementById('recordAttendanceForm').addEventListener('submit', function(e) {
+    document.getElementById('recordAttendanceForm').addEventListener('submit', function(e) {
         e.preventDefault();
+
+        const timeoutCount = parseInt(document.getElementById('main_box').dataset.timeouts);
+        const hasFourTimeouts = timeoutCount === 4;
 
         const rows = document.querySelectorAll('#attendanceTable tbody tr');
         const attendance = [];
 
         rows.forEach(row => {
             const cols = row.querySelectorAll('td');
-            attendance.push({
-                student_id: cols[0].innerText.trim(),
-                name: cols[1].innerText.trim(),
-                program: cols[2].innerText.trim(),
-                block: cols[3].innerText.trim(),
-                event: cols[4].innerText.trim(),
-                date: cols[5].innerText.trim(),
-                time_in: cols[6].innerText.trim(),
-                time_out: cols[7].innerText.trim(),
-                status: cols[8].innerText.trim().replace(/^\s+|\s+$/g, '') // Remove spaces
-            });
+
+            if (hasFourTimeouts) {
+                attendance.push({
+                    student_id: cols[0].innerText.trim(),
+                    name: cols[1].innerText.trim(),
+                    program: cols[2].innerText.trim(),
+                    block: cols[3].innerText.trim(),
+                    event: cols[4].innerText.trim(),
+                    date: cols[5].innerText.trim(),
+                    time_in1: cols[6].innerText.trim(),
+                    time_out1: cols[7].innerText.trim(),
+                    time_in2: cols[8].innerText.trim(),
+                    time_out2: cols[9].innerText.trim(),
+                    status: cols[10].innerText.trim()
+                });
+            } else {
+                attendance.push({
+                    student_id: cols[0].innerText.trim(),
+                    name: cols[1].innerText.trim(),
+                    program: cols[2].innerText.trim(),
+                    block: cols[3].innerText.trim(),
+                    event: cols[4].innerText.trim(),
+                    date: cols[5].innerText.trim(),
+                    time_in1: cols[6].innerText.trim(),
+                    time_out1: cols[7].innerText.trim(),
+                    status: cols[8].innerText.trim()
+                });
+            }
         });
 
         document.getElementById('attendance_data').value = JSON.stringify(attendance);

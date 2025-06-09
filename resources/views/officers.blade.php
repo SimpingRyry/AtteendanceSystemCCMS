@@ -52,33 +52,31 @@
 </div>
 
         <!-- Main Card -->
-        <div class="card shadow-sm p-4">
-
-            <!-- Filters and Search -->
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <label for="roleFilter" class="form-label">Filter by Role</label>
-                    <select id="roleFilter" class="form-select" onchange="applyFilters()">
-                        <option value="">All Roles</option>
-                        <option value="Member">Member</option>
-                        <option value="Officer">Officer</option>
-                        <option value="Admin">Admin</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label for="deptFilter" class="form-label">Filter by Organization</label>
-                    <select id="deptFilter" class="form-select" onchange="applyFilters()">
-                        <option value="">All Organizations</option>
-                        <option value="ITS">ITS</option>
-                        <option value="PRAXIS">PRAXIS</option>
-                        <option value="CCMS-SG">CCMS-SG</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Search</label>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Enter search..." oninput="applyFilters()">
-                </div>
-            </div>
+        <div class="row mb-4">
+    @if (Auth::user()->role === 'Super Admin')
+        <div class="col-md-4">
+            <label for="roleFilter" class="form-label">Filter by Role</label>
+            <select id="roleFilter" class="form-select" onchange="applyFilters()">
+                <option value="">All Roles</option>
+                <option value="Member">Member</option>
+                <option value="Officer">Officer</option>
+                <option value="Admin">Admin</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="deptFilter" class="form-label">Filter by Organization</label>
+            <select id="deptFilter" class="form-select" onchange="applyFilters()">
+                <option value="">All Organizations</option>
+                <option value="Information Technology Society">ITS</option>
+                <option value="PRAXIS">PRAXIS</option>
+                <option value="CCMS-SG">CCMS-SG</option>
+            </select>
+        </div>
+    @endif
+    <div class="col-md-4 ms-auto">
+        <label class="form-label">Search</label>
+        <input type="text" id="searchInput" class="form-control" placeholder="Enter name..." oninput="applyFilters()">
+    </div>
 
             <!-- Student List -->
                 <h5 class="mb-3 fw-bold" style="color: #232946;">User List</h5>
@@ -172,16 +170,38 @@
 
           <!-- Officer Position Dropdown -->
           <div class="mb-3">
-            <label for="officerPosition" class="form-label">Officer Position</label>
-            <select class="form-select" id="officerPosition" name="officerPosition" required>
-              <option value="">Select Position</option>
-              <option value="President">President</option>
-              <option value="Vice President">Vice President</option>
-              <option value="Secretary">Secretary</option>
-              <option value="Treasurer">Treasurer</option>
-              <!-- Add more as needed -->
-            </select>
-          </div>
+    <label for="officerPosition" class="form-label">Officer Position</label>
+    <select class="form-select" id="officerPosition" name="officerPosition" required>
+        <option value="">Select Position</option>
+
+        @if (Auth::user()->role === 'Information Technology Society')
+            <option value="Vice President">Vice President</option>
+            <option value="Executive Secretary">Executive Secretary</option>
+            <option value="Administrative Secretary">Administrative Secretary</option>
+            <option value="Treasurer">Treasurer</option>
+            <option value="Auditor">Auditor</option>
+            <option value="Public Information Officer">Public Information Officer</option>
+            <option value="Business Manager 1">Business Manager 1</option>
+            <option value="Business Manager 2">Business Manager 2</option>
+            <option value="Sentinel 1">Sentinel 1</option>
+            <option value="Sentinel 2">Sentinel 2</option>
+            <option value="Multimedia Officer">Multimedia Officer</option>
+
+        @elseif (Auth::user()->role === 'PRAXIS')
+            <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
+            <option value="Vice President For External Affairs">Vice President For External Affairs</option>
+            <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
+            <option value="Auditing Officer">Auditing Officer</option>
+            <option value="Technical Officer">Technical Officer</option>
+            <option value="Sentinel Officer">Sentinel Officer</option>
+
+        @else
+            <option value="Position 1 (TBD)">Position 1 (TBD)</option>
+            <option value="Position 2 (TBD)">Position 2 (TBD)</option>
+            <option value="Position 3 (TBD)">Position 3 (TBD)</option>
+        @endif
+    </select>
+</div>
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-success">Add Officer</button>

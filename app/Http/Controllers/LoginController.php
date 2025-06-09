@@ -14,35 +14,38 @@ class LoginController extends Controller
     // }
 
     
- public function login(Request $request)
-{
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-    ]);
-
-    $user = User::where('email', $request->email)->first();
-
-    if ($user && Hash::check($request->password, $user->password)) {
-        Auth::login($user);
-
-        // Optional: session vars
-        session([
-            'user_name' => $user->name,
-            'user_role' => $user->role,
-            'user_img' => $user->image ?? 'default.png',
+    public function login(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
-
-        // Check role and redirect accordingly
-        if ($user->role === 'Member') {
-            return redirect()->intended('/student_dashboard');
-        } elseif ($user->role === 'Super Admin') {
-            return redirect()->intended(default: '/super_dashboard');
-        } else {
-            return redirect()->intended('/dashboard_page');
+    
+        // Get all users with this email
+        $users = User::where('email', $request->email)->get();
+    
+        // Loop through and find the first user where the password matches
+        foreach ($users as $user) {
+            if (Hash::check($request->password, $user->password)) {
+                Auth::login($user);
+    
+                session([
+                    'user_name' => $user->name,
+                    'user_role' => $user->role,
+                    'user_img' => $user->image ?? 'default.png',
+                ]);
+    
+                if ($user->role === 'Member') {
+                    return redirect()->intended('/student_dashboard');
+                } elseif ($user->role === 'Super Admin') {
+                    return redirect()->intended('/super_dashboard');
+                } else {
+                    return redirect()->intended('/dashboard_page');
+                }
+            }
         }
+    
+        // If none matched
+        return back()->with('error', 'Invalid credentials.');
     }
-
-    return back()->with('error', 'Invalid credentials.');
-}
 }

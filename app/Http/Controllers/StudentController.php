@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Student;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,8 @@ class StudentController extends Controller
             'uploaded_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'fingerprint' => 'nullable|int|max:255',
             'captured_image' => 'nullable|string',
-            'organization' => Auth::user()->role === 'admin' ? 'nullable' : 'required|string|max:255',
+            'organization' => (Str::lower(Auth::user()->role) === 'admin' || Str::contains(Str::lower(Auth::user()->role), 'officer')) ? 'nullable' : 'required|string|max:255',
+
             'role' => 'required|string|max:255',
             'fingerprint_user_id' => 'nullable|integer',
 
@@ -66,8 +68,8 @@ class StudentController extends Controller
         $user->role = $request->role;
         $user->student_id = $request->student_id;
         // Set organization based on user role
-        $user->org = (Auth::user()->role === 'Admin') ? Auth::user()->org : $request->organization;
-    
+        $role = Str::lower(Auth::user()->role);
+        $user->org = ($role === 'admin' || Str::contains($role, 'officer')) ? Auth::user()->org : $request->organization;
         $user->save();
 
         event(new Registered($user));

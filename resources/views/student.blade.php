@@ -283,7 +283,13 @@
               @elseif(auth()->user()->org == 'PRAXIS')
                 <option value="">-- Select Role --</option>
                 <option value="member">Member</option>
-                <option value="officer">Officer</option>
+                <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
+                <option value="Vice President For External Affairs">Vice President For External Affairs</option>
+                <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
+                <option value="Auditing Officer">Auditing Officer</option>
+                <option value="Technical Officer">Technical Officer</option>
+                <option value="Sentinel Officer">Sentinel Officer</option>
+              
               @elseif(auth()->user()->org == 'SG')
               <option value="">-- Select Role --</option>
                 <option value="member">Member</option>
@@ -291,7 +297,18 @@
               @else
                 <option value="">-- Select Role --</option>
                 <option value="Member">Member</option>
-                <option value="officer">Officer</option>
+                <option value="Vice President">Vice President</option>
+                <option value="Executive Secretary">Executive Secretary</option>
+                <option value="Administrative Secretary">Administrative Secretary</option>
+                <option value="Treasurer">Treasurer</option>
+                <option value=">Auditor">Auditor</option>
+                <option value="Public Information Officer">Public Information Officer</option>
+                <option value="Business Manager 1">Business Manager 1</option>
+                <option value="Business Manager 2">Business Manager 2</option>
+                <option value="Sentinel 1">Sentinel 1</option>
+                <option value="Sentinal 2">Sentinal 2</option>
+                <option value="Multimedia Officer">Multimedia Officer</option>
+                
               @endif
             </select>
           </div>
