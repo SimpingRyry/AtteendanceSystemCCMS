@@ -1,11 +1,15 @@
 <?php
 
+use Carbon\Carbon;
+use App\Models\Event;
+use App\Models\Student;
+use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
 
 
 /*
@@ -78,6 +82,8 @@ Route::post('/fingerprint-upload', function (Request $request) {
 
     return response()->json(['message' => 'Fingerprint received', 'url' => $url]);
 });
+
+
 Route::get('/fingerprint/latest', function () {
     $data = Cache::get('latest_fingerprint_data');
 
@@ -90,5 +96,69 @@ Route::get('/fingerprint/latest', function () {
     return response()->json([
         'user_id' => $data['user_id'],
         'url' => $data['url']
+    ]);
+});
+Route::post('/scan', function (Request $request) {
+    $finger_id = $request->input('scanned_id');
+
+    $student = Student::where('f_id', $finger_id)->first();
+    if (!$student) {
+        return response()->json(['message' => 'Student not found'], 404);
+    }
+
+    $now = Carbon::now('Asia/Manila');
+    $today = $now->format('Y-m-d');
+
+    $event = Event::whereDate('event_date', $today)->first();
+    if (!$event) {
+        return response()->json(['message' => 'No event today'], 404);
+    }
+
+    $times = json_decode($event->times); // Expecting array of time strings
+    $timeoutCount = count($times); // 2 = halfday, 4 = wholeday
+
+    $existing = Attendance::where('student_id', $student->id_number)
+                ->where('event_id', $event->id)
+                ->first();
+
+    // Determine time slot to update (time_in1, time_out1, time_in2, time_out2)
+    $timeFields = ['time_in1', 'time_out1', 'time_in2', 'time_out2'];
+    $fieldToUpdate = null;
+
+    if (!$existing) {
+        $existing = Attendance::create([
+            'student_id' => $student->id_number,
+            'event_id' => $event->id,
+            'date' => $today
+        ]);
+    }
+
+    foreach ($timeFields as $field) {
+        if ($timeoutCount == 2 && in_array($field, ['time_in2', 'time_out2'])) continue; // Skip PM fields if halfday
+
+        if (!$existing->$field) {
+            $existing->$field = $now->format('H:i');
+            break;
+        }
+    }
+
+    // Determine status based on grace period (15 + 15 mins)
+    $status = 'On Time';
+    if ($fieldToUpdate === 'time_in1' || $fieldToUpdate === 'time_in2') {
+        $index = $fieldToUpdate === 'time_in1' ? 0 : 2;
+        $refTime = Carbon::parse($times[$index])->addMinutes(30); // 15 mins + grace 15
+        if ($now->gt($refTime)) {
+            $status = 'Late';
+        }
+    }
+
+    $existing->status = $status;
+    $existing->save();
+
+    return response()->json([
+        'message' => 'Attendance recorded',
+        'student' => $student->name,
+        'time' => $now->toTimeString(),
+        'status' => $status
     ]);
 });

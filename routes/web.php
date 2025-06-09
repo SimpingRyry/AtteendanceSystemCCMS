@@ -237,3 +237,4 @@ Route::get('/public-events', [EventsController::class, 'publicFetchEvents'])->na
 Route::get('/student_payment', [PaymentController::class, 'showStatementOfAccount'])->name('statement.account')->middleware('auth');
 Route::post('/officers/add', [OfficerController::class, 'add'])->name('officers.add');
 Route::get('/admin/soa/{studentId}', [PaymentController::class, 'loadStudentSOA']);
+Route::get('/attendance/live-data', [AttendanceController::class, 'liveData']);

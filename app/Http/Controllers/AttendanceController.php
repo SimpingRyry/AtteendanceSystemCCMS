@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Event;
 use App\Models\OrgList;
 use App\Models\Setting;
+use App\Models\Attendance;
 use App\Models\FineSetting;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -57,5 +58,33 @@ class AttendanceController extends Controller
     
         return redirect()->back()->with('success', 'Attendance fines recorded successfully.');
     }
+
+    public function liveData()
+{
+    $event = Event::whereDate('event_date', now()->toDateString())->first();
+
+    if (!$event) return [];
+
+    $records = Attendance::with('student')
+        ->where('event_id', $event->id)
+        ->get()
+        ->map(function ($att) use ($event) {
+            return [
+                'student_id' => $att->student->id_number,
+                'name' => $att->student->name,
+                'program' => $att->student->course,
+                'block' => $att->student->section,
+                'event' => $event->name,
+                'date' => $att->date,
+                'time_in1' => $att->time_in1,
+                'time_out1' => $att->time_out1,
+                'time_in2' => $att->time_in2,
+                'time_out2' => $att->time_out2,
+                'status' => $att->status,
+            ];
+        });
+
+    return response()->json($records);
+}
     
 }

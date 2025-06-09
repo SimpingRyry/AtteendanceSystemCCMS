@@ -33,7 +33,7 @@
 
     <main>
     <div class="container outer-box mt-5 pt-5 pb-4">
-        <div class="container inner-glass shadow p-4" id="main_box">
+        <div class="container inner-glass shadow p-4" id="main_box" data-timeouts="{{ $currentEvent->timeouts }}">
             <div class="mb-4">
                 <h2 class="fw-bold" style="color: #232946;">Attendance</h2>
                 <small style="color: #989797;">Monitor /</small>
@@ -100,29 +100,11 @@
                             <!-- Sample Row (replace with dynamic content) -->
                             @if($currentEvent->timeouts == 4)
                                 <tr>
-                                    <td>22-0788</td>
-                                    <td>Borje, Ver Andre A.</td>
-                                    <td>MAIN-BSIT</td>
-                                    <td>B</td>
-                                    <td>Orientation</td>
-                                    <td>2025-05-22</td>
-                                    <td>08:05 AM</td> <!-- Time-In AM -->
-                                    <td>12:00 PM</td> <!-- Time-Out AM -->
-                                    <td>01:10 PM</td> <!-- Time-In PM -->
-                                    <td>04:55 PM</td> <!-- Time-Out PM -->
-                                    <td><span class="badge bg-warning text-dark">Late</span></td>
+                                    
                                 </tr>
                             @else
                                 <tr>
-                                    <td>22-0788</td>
-                                    <td>Borje, Ver Andre A.</td>
-                                    <td>MAIN-BSIT</td>
-                                    <td>B</td>
-                                    <td>Orientation</td>
-                                    <td>2025-05-22</td>
-                                    <td>08:05 AM</td>
-                                    <td>12:00 PM</td>
-                                    <td><span class="badge bg-warning text-dark">Late</span></td>
+                                   
                                 </tr>
                             @endif
                         </tbody>
@@ -172,6 +154,54 @@
         document.getElementById('attendance_data').value = JSON.stringify(attendance);
         this.submit();
     });
+</script>
+
+<script>
+  setInterval(() => {
+        fetch("/attendance/live-data")
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.querySelector('#attendanceTable tbody');
+                tbody.innerHTML = '';
+
+                const timeoutCount = parseInt(document.getElementById('main_box').dataset.timeouts);
+                const hasFourTimeouts = timeoutCount === 4;
+
+                data.forEach(row => {
+                    if (hasFourTimeouts) {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${row.student_id}</td>
+                                <td>${row.name}</td>
+                                <td>${row.program}</td>
+                                <td>${row.block}</td>
+                                <td>${row.event}</td>
+                                <td>${row.date}</td>
+                                ${row.time_in1 ? `<td>${row.time_in1}</td>` : '<td></td>'}
+                                ${row.time_out1 ? `<td>${row.time_out1}</td>` : '<td></td>'}
+                                ${row.time_in2 ? `<td>${row.time_in2}</td>` : '<td></td>'}
+                                ${row.time_out2 ? `<td>${row.time_out2}</td>` : '<td></td>'}
+                                <td>${row.status}</td>
+                            </tr>
+                        `;
+                    } else {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${row.student_id}</td>
+                                <td>${row.name}</td>
+                                <td>${row.program}</td>
+                                <td>${row.block}</td>
+                                <td>${row.event}</td>
+                                <td>${row.date}</td>
+                                ${row.time_in1 ? `<td>${row.time_in1}</td>` : '<td></td>'}
+                                ${row.time_out1 ? `<td>${row.time_out1}</td>` : '<td></td>'}
+                                <td>${row.status}</td>
+                            </tr>
+                        `;
+                    }
+                });
+            });
+    }, 1000);
 </script>
 
     <!-- Bootstrap JS -->
