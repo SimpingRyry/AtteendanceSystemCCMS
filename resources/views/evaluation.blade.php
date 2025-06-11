@@ -115,7 +115,7 @@
                         <tr>
                             <th>Title</th>
                             <th>Description</th>
-                            <th style="width:150px">Actions</th>
+                            <th style="width:200px">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -138,6 +138,13 @@
                                     <i class="fa fa-pen"></i>
                                 </button>
 
+                                <button class="btn btn-sm btn-success send-eval-btn"
+                                    data-id="{{ $evaluation->id }}"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#sendEvaluationModal">
+                                    <i class="fa fa-paper-plane"></i>
+                                </button>
+
                                 <form action="{{ route('evaluation.destroy',$evaluation) }}"
                                     method="POST" class="d-inline"
                                     onsubmit="return confirm('Delete this evaluation?')">
@@ -158,6 +165,36 @@
             </div>
         </div>
     </main>
+
+    <div class="modal fade" id="sendEvaluationModal" tabindex="-1" aria-labelledby="sendEvaluationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form action="{{ route('evaluation.send') }}" method="POST">
+        @csrf
+        <input type="hidden" name="evaluation_id" id="send_eval_id">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Evaluation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Select Event</label>
+                    <select class="form-select" name="event_id" required>
+                        <option value="">Choose event</option>
+                        @foreach($eventNames as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Send</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </form>
+  </div>
+</div>
     {{-- Success Modal (keep this where it already is) --}}
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -237,6 +274,16 @@
         });
     </script>
     @endif
+
+    <script>
+    document.querySelectorAll('.send-eval-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const evalId = this.getAttribute('data-id');
+            document.getElementById('send_eval_id').value = evalId;
+           
+        });
+    });
+</script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -370,9 +417,9 @@
                     const typeField = block.querySelector('.q-type-select').value;
                     const reqFlag = block.querySelector('input[type="checkbox"]').checked;
                     const optsBox = block.querySelector('.options-box');
-                    const options = optsBox && !optsBox.hidden ?
-                        optsBox.value.split(',').map(o => o.trim()).filter(Boolean) :
-                        null;
+                    const options = optsBox && !optsBox.hidden
+    ? optsBox.value.split(',').map(o => o.trim()).filter(Boolean)
+    : [];
 
                     questions.push({
                         id: idField || null,

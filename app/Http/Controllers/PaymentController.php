@@ -33,10 +33,9 @@ class PaymentController extends Controller
 public function index()
 {
     $students = User::whereHas('studentList') // only users that have a studentList
-    ->with(['studentList', 'transactions'])
-    ->limit(1)
-
-    ->get();
+        ->with(['studentList', 'transactions'])
+        ->get()
+        ->unique('student_id'); // Filter duplicates by student_id
 
     return view('payment_page2', compact('students'));
 }

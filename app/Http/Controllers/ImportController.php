@@ -98,4 +98,78 @@ class ImportController extends Controller
     $students = Student::where('status', 'Unregistered')->get(); // Get only Unregistered students
     return view('registration', compact('students')); // Pass the filtered students to the view
 }
+
+
+public function preview(Request $request)
+{
+    $request->validate([
+        'importFile' => 'required|mimes:csv,txt',
+    ]);
+
+    $file = $request->file('importFile');
+    $rows = array_map('str_getcsv', file($file->getRealPath()));
+    $rows = array_slice($rows, 7); // Skip headers or first lines
+
+    $previewData = [];
+
+    foreach ($rows as $row) {
+        $idNumber = $row[1] ?? null;
+        $existing = Student::where('id_number', $idNumber)->exists();
+
+        $previewData[] = [
+            'no' => $row[0] ?? '',
+            'id_number' => $idNumber,
+            'name' => $row[2] ?? '',
+            'gender' => $row[3] ?? '',
+            'course' => $row[4] ?? '',
+            'year' => $row[5] ?? '',
+            'units' => $row[6] ?? '',
+            'section' => $row[7] ?? '',
+            'contact_no' => $row[8] ?? '',
+            'birth_date' => $row[9] ?? '',
+            'address' => $row[10] ?? '',
+            'status' => $existing ? 'Duplicate' : 'New',
+        ];
+    }
+
+    // Store in session temporarily
+    session(['previewData' => $previewData]);
+
+    return redirect()->back()->with('showPreview', true);
+}
+
+public function confirmImport()
+{
+    $previewData = session('previewData', []);
+    $imported = 0;
+    $skipped = 0;
+
+    foreach ($previewData as $row) {
+        $student = Student::where('id_number', $row['id_number'])->first();
+
+        if (!$student) {
+            Student::create([
+                'no' => $row['no'],
+                'id_number' => $row['id_number'],
+                'name' => $row['name'],
+                'gender' => $row['gender'],
+                'course' => $row['course'],
+                'year' => $row['year'],
+                'units' => $row['units'],
+                'section' => $row['section'],
+                'contact_no' => $row['contact_no'],
+                'birth_date' => \Carbon\Carbon::createFromFormat('m/d/Y', $row['birth_date'])->format('Y-m-d'),
+                'address' => $row['address'],
+                'status' => 'Unregistered',
+            ]);
+            $imported++;
+        } else {
+            $skipped++;
+        }
+    }
+
+    session()->forget('previewData');
+
+    return redirect()->back()->with('success', "Students imported: $imported, Students skipped: $skipped");
+}
 }

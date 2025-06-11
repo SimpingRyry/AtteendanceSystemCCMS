@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Evaluation;
-use App\Models\EvaluationQuestion;
 use App\Models\EvalAnswer;
+use App\Models\Evaluation;
+use Illuminate\Http\Request;
+use App\Models\EvaluationQuestion;
+use Illuminate\Support\Facades\DB;
+use App\Models\EvaluationAssignment;
 use Illuminate\Support\Facades\Auth;
 
 class StudentEvaluationController extends Controller
@@ -14,10 +16,25 @@ class StudentEvaluationController extends Controller
      * Show evaluations available to student.
      */
     public function index()
-    {
-        $evaluations = Evaluation::latest()->get();
-        return view('evaluation_student', compact('evaluations'));
-    }
+{
+    $studentId = auth()->user()->student_id;
+
+    // Step 1: Get attended events
+    $attendedEventIds = DB::table('attendances')
+        ->where('student_id', $studentId)
+        ->pluck('event_id');
+
+    // Step 2: Get latest EvaluationAssignment per event (with evaluation + event)
+    $latestAssignments = \App\Models\EvaluationAssignment::with(['evaluation', 'event'])
+        ->whereIn('event_id', $attendedEventIds)
+        ->orderBy('created_at', 'desc')
+        ->get()
+        ->unique('event_id');
+
+    return view('evaluation_student', [
+        'assignments' => $latestAssignments // send full assignments, not just evaluations
+    ]);
+}
 
     /**
      * Return JSON data for a specific evaluation including its questions.

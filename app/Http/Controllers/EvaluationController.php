@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Evaluation;
-use App\Models\EvalAnswer;
-use App\Models\Event;
-use App\Models\UserProfile;
-use App\Models\EvaluationQuestion;
 use App\Models\User;
+use App\Models\Event;
+use App\Models\EvalAnswer;
+use App\Models\Evaluation;
+use App\Models\UserProfile;
+use Illuminate\Http\Request;
+use App\Models\EvaluationQuestion;
 use Illuminate\Support\Facades\DB;
+use App\Models\EvaluationAssignment;
 use Illuminate\Support\Facades\Auth;
 
 class EvaluationController extends Controller
@@ -34,6 +35,25 @@ class EvaluationController extends Controller
             'eventNames' => $eventNames
         ]);
     }
+
+
+    public function send(Request $request)
+{
+    
+    $request->validate([
+        'evaluation_id' => 'required|exists:evaluation,id',
+        'event_id' => 'required|exists:events,id',
+    ]);
+
+    // Attach evaluation to event (logic depends on your DB structure)
+    // Example if there's a pivot table or similar model:
+    EvaluationAssignment::create([
+        'evaluation_id' => $request->evaluation_id,
+        'event_id' => $request->event_id,
+    ]);
+
+    return back()->with('success', 'Evaluation sent to event successfully!');
+}
 
     public function getEvaluationJson($id)
 {

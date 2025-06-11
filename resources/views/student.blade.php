@@ -179,7 +179,8 @@
   <!-- Upload Modal -->
   <div class="modal fade" id="uploadCSVModal" tabindex="-1" aria-labelledby="uploadCSVModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <form class="modal-content" id="csvForm" action="{{ route('import') }}" method="post" enctype="multipart/form-data" onsubmit="return validateCSV();">
+    <form class="modal-content" id="csvForm" action="{{ route('students.preview') }}" method="post" enctype="multipart/form-data">
+
         @csrf
         <div class="modal-header">
           <h5 class="modal-title">Upload CSV File</h5>
@@ -198,6 +199,8 @@
   </div>
 
 </main>
+
+
 
 
 <div class="modal fade" id="registerStudentModal" tabindex="-1" aria-labelledby="registerStudentModalLabel" aria-hidden="true">
@@ -399,6 +402,54 @@
 @endif
 
 
+@if(session('showPreview'))
+<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+
+  <div class="modal-dialog modal-xl">
+    <form method="POST" action="{{ route('students.confirmImport') }}">
+      @csrf
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">CSV Preview</h5>
+          <a href="" class="btn-close"></a>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Name</th><th>Course</th><th>Section</th><th>Contact</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach(session('previewData') as $row)
+                <tr>
+                  <td>{{ $row['id_number'] }}</td>
+                  <td>{{ $row['name'] }}</td>
+                  <td>{{ $row['course'] }}</td>
+                  <td>{{ $row['section'] }}</td>
+                  <td>{{ $row['contact_no'] }}</td>
+                  <td>
+                    <span class="badge {{ $row['status'] == 'New' ? 'bg-success' : 'bg-warning' }}">
+                      {{ $row['status'] }}
+                    </span>
+                  </td>
+                </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" type="submit">Confirm Import</button>
+          <a href="" class="btn btn-secondary">Cancel</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+@endif
+
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
@@ -416,6 +467,15 @@
         var successModal = new bootstrap.Modal(document.getElementById('successModal'));
         successModal.show();
     });
+</script>
+@endif
+
+@if(session('showPreview'))
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    modal.show();
+  });
 </script>
 @endif
 

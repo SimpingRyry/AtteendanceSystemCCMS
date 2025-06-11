@@ -180,6 +180,9 @@ Route::get('/student/evaluation/{id}/json', [EvaluationController::class, 'getEv
 
 Route::post('/student/evaluation/submit', [EvaluationController::class, 'submitAnswers']);
 
+Route::post('/evaluation/send', [EvaluationController::class, 'send'])->name('evaluation.send');
+
+
 Route::middleware(['auth'])->group(function () {
     // GET list of evaluations for students
     Route::get('/evaluation_student', [StudentEvaluationController::class, 'index'])
@@ -238,3 +241,5 @@ Route::get('/student_payment', [PaymentController::class, 'showStatementOfAccoun
 Route::post('/officers/add', [OfficerController::class, 'add'])->name('officers.add');
 Route::get('/admin/soa/{studentId}', [PaymentController::class, 'loadStudentSOA']);
 Route::get('/attendance/live-data', [AttendanceController::class, 'liveData']);
+Route::post('/students/preview', [ImportController::class, 'preview'])->name('students.preview');
+Route::post('/students/confirm-import', [ImportController::class, 'confirmImport'])->name('students.confirmImport');

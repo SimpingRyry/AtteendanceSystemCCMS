@@ -43,23 +43,34 @@
           <div class="alert alert-success mt-3">{{ session('success') }}</div>
         @endif
 
-        <div class="row g-4 mt-4">
-          @forelse ($evaluations as $eval)
-            <div class="col-12 col-md-6 col-lg-4">
-              <div class="card h-100 shadow-sm evaluation-card" data-id="{{ $eval->id }}" style="cursor:pointer">
-                <div class="card-body d-flex flex-column">
-                  <h5 class="card-title">{{ $eval->title }}</h5>
-                  <p class="card-text text-muted flex-grow-1">
-                    {{ Str::limit($eval->description, 90) }}
-                  </p>
-                  <button class="btn btn-primary mt-auto w-100">Answer</button>
-                </div>
-              </div>
-            </div>
-          @empty
-            <p class="mt-3">No evaluations are currently available.</p>
-          @endforelse
-        </div>
+        <table class="table table-bordered mt-4">
+  <thead class="table-dark">
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Event Date</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+  @forelse ($assignments as $assign)
+<tr>
+  <td>{{ $assign->event->name ?? '—' }}</td>
+  <td>{{ $assign->evaluation->title }}</td>
+  <td>{{ Str::limit($assign->evaluation->description, 80) }}</td>
+  <td>
+    <button class="btn btn-sm btn-primary evaluation-card" data-id="{{ $assign->evaluation->id }}">
+      Answer
+    </button>
+  </td>
+</tr>
+@empty
+<tr>
+  <td colspan="4" class="text-center text-muted">No evaluations available.</td>
+</tr>
+@endforelse
+  </tbody>
+</table>
       </div>
     </div>
   </div>
