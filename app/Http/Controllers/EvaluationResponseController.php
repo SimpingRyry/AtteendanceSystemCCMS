@@ -71,13 +71,15 @@ public function summary($assignmentId)
         $data = [
             'question' => $question->order . '. ' . $question->type,
             'type' => $question->type,
-            'text' => $question->text ?? '',
+            'text' => $question->question ?? '',
             'responses' => [],
         ];
-
-        if ($question->type === 'radio' && $question->options) {
-            $options = explode(',', $question->options);
-
+        
+        if ($question->type === 'mcq' && $question->options) {
+            $options = is_array($question->options) ? $question->options : [];
+            Log::info('Options:', $question->options);
+            
+        
             foreach ($options as $opt) {
                 $count = EvaluationAnswer::where([
                         ['evaluation_id', $evaluationId],
@@ -86,7 +88,7 @@ public function summary($assignmentId)
                         ['answer', trim($opt)],
                     ])
                     ->count();
-
+        
                 $data['responses'][] = [
                     'option' => trim($opt),
                     'count' => $count,
@@ -100,7 +102,7 @@ public function summary($assignmentId)
                 ])
                 ->whereNotNull('answer')
                 ->count();
-
+        
             $data['responses'][] = [
                 'answered' => $count,
             ];

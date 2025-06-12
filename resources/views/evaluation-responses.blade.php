@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="{{ asset('css/dash_side.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
 
+
     <title>CCMS Attendance System</title>
 </head>
 
@@ -83,6 +84,7 @@
     </div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   
 
@@ -90,42 +92,85 @@
     document.querySelectorAll('.view-responses-btn').forEach(button => {
         button.addEventListener('click', function () {
             const assignmentId = this.getAttribute('data-assignment-id');
-           
             const modalBody = document.getElementById('responseModalBody');
             const modal = new bootstrap.Modal(document.getElementById('responseModal'));
 
-            // Show loader
             modalBody.innerHTML = `<p>Loading...</p>`;
             modal.show();
 
             fetch(`/evaluation-responses/${assignmentId}/summary`)
-    .then(response => response.json())
-    .then(data => {
-        let html = `
-            <h5 class="fw-bold">${data.evaluation_title} (Event: ${data.event_name})</h5>
-            <p><strong>Total Students Responded:</strong> ${data.respondent_count}</p>
-            <hr/>
-        `;
+                .then(response => response.json())
+                .then(data => {
+                    let html = `
+                        <h5 class="fw-bold">${data.evaluation_title} (Event: ${data.event_name})</h5>
+                        <p><strong>Total Students Responded:</strong> ${data.respondent_count}</p>
+                        <hr/>
+                    `;
 
-        data.summary.forEach(q => {
-            html += `<div class="mb-3"><strong>${q.text || q.question}</strong><ul class="ms-3">`;
+                    let chartIndex = 0;
 
-            if (q.type === 'radio') {
-                q.responses.forEach(opt => {
-                    html += `<li>${opt.option}: <strong>${opt.count}</strong> responses</li>`;
+                    data.summary.forEach(q => {
+                        html += `<div class="mb-4"><strong>${q.text || q.question}</strong>`;
+
+                        if (q.type === 'mcq') {
+                            const canvasId = `chart-${chartIndex}`;
+                            html += `<canvas id="${canvasId}" height="50px"></canvas>`;
+                            chartIndex++;
+                        } else {
+                            html += `<p><strong>${q.responses[0].answered}</strong> responses</p>`;
+                        }
+
+                        html += `</div>`;
+                    });
+
+                    modalBody.innerHTML = html;
+
+                    // Render the charts after the DOM is updated
+                    chartIndex = 0;
+                    data.summary.forEach(q => {
+                        if (q.type === 'mcq') {
+                            const labels = q.responses.map(r => r.option);
+                            const counts = q.responses.map(r => r.count);
+                            const ctx = document.getElementById(`chart-${chartIndex}`).getContext('2d');
+
+                            new Chart(ctx, {
+                                type: 'bar', // or 'pie'
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        label: 'Responses',
+                                        data: counts,
+                                        backgroundColor: [
+                                            '#4e73df',
+                                            '#1cc88a',
+                                            '#36b9cc',
+                                            '#f6c23e',
+                                            '#e74a3b',
+                                            '#858796',
+                                        ],
+                                        borderColor: '#000',
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            precision: 0
+                                        }
+                                    }
+                                }
+                            });
+
+                            chartIndex++;
+                        }
+                    });
                 });
-            } else {
-                html += `<li><strong>${q.responses[0].answered}</strong> responses</li>`;
-            }
-
-            html += `</ul></div>`;
-        });
-
-        document.getElementById('responseModalBody').innerHTML = html;
-    });
         });
     });
 </script>
+
 
     {{-- Auto-show if flash exists --}}
     @if (session('success'))
