@@ -28,6 +28,7 @@ use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\StudentEvaluationController;
+use App\Http\Controllers\EvaluationResponseController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -243,3 +244,6 @@ Route::get('/admin/soa/{studentId}', [PaymentController::class, 'loadStudentSOA'
 Route::get('/attendance/live-data', [AttendanceController::class, 'liveData']);
 Route::post('/students/preview', [ImportController::class, 'preview'])->name('students.preview');
 Route::post('/students/confirm-import', [ImportController::class, 'confirmImport'])->name('students.confirmImport');
+Route::get('/evaluation-responses', [EvaluationResponseController::class, 'index'])->name('evaluation.responses');
+Route::get('/evaluation-responses/{evaluation}', [EvaluationResponseController::class, 'show'])->name('evaluation.responses.view');
+Route::get('/evaluation-responses/{assignment}/summary', [EvaluationResponseController::class, 'summary'])->name('evaluation.responses.summary');

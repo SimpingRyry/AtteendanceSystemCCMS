@@ -15,6 +15,7 @@ class EvaluationAnswer extends Model
         'question_id',
         'student_id',
         'answer',
+        'event_id'
     ];
 
     // Relationships (optional but useful)
@@ -23,7 +24,10 @@ class EvaluationAnswer extends Model
     {
         return $this->belongsTo(Evaluation::class);
     }
-
+    public function events()
+    {
+        return $this->belongsTo(Event::class);
+    }
     public function question()
     {
         return $this->belongsTo(EvaluationQuestion::class, 'question_id');

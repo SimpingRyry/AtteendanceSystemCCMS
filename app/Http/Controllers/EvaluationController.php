@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\EvalAnswer;
@@ -167,8 +168,17 @@ public function submitAnswers(Request $request)
         'evaluation_id' => 'required|exists:evaluation,id',
         'responses' => 'required|array',
         'responses.*.question_id' => 'required|exists:evaluation_questions,id',
-        'responses.*.answer' => 'nullable', // can be array (checkbox), string (text), or null
+        'responses.*.answer' => 'nullable',
     ]);
+
+    // Fetch event_id based on today's date
+    $today = Carbon::today()->toDateString();
+
+    $event = \App\Models\Event::whereDate('event_date', $today)->first();
+
+    if (!$event) {
+        return response()->json(['error' => 'No event found for today.'], 404);
+    }
 
     foreach ($data['responses'] as $resp) {
         $answer = is_array($resp['answer']) ? json_encode($resp['answer']) : $resp['answer'];
@@ -176,8 +186,9 @@ public function submitAnswers(Request $request)
         \App\Models\EvaluationAnswer::create([
             'evaluation_id' => $data['evaluation_id'],
             'question_id' => $resp['question_id'],
-            'student_id' => Auth::user()->student_id, // Adjust based on your system
+            'student_id' => Auth::user()->student_id,
             'answer' => $answer,
+            'event_id' => $event->id, // Add the event_id here
         ]);
     }
 

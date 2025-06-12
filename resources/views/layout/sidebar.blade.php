@@ -95,7 +95,7 @@
                     <li>
                         <a class="nav-link px-3 text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#manageMenu" role="button" aria-expanded="false" aria-controls="manageMenu">
                             <span>
-                                <img src="{{ asset('images/config_ico.png') }}" class="sidebar-icon me-2">Manage
+                                <img src="{{ asset('images/manage.png') }}" class="sidebar-icon me-2">Manage
                             </span>
                             <i class="bi bi-chevron-down"></i>
                         </a>
@@ -143,7 +143,7 @@
                         <li>
                             <a class="nav-link px-3 text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#systemSettings" role="button" aria-expanded="false" aria-controls="systemSettings">
                                 <span>
-                                    <img src="{{ asset('images/device_ico.png') }}" class="sidebar-icon me-2">Settings
+                                    <img src="{{ asset('images/system.png') }}" class="sidebar-icon me-2">Settings
                                 </span>
                                 <i class="bi bi-chevron-down"></i>
                             </a>
@@ -169,6 +169,12 @@
                                             <img src="{{ asset('images/evaluation_ico.png') }}" class="sidebar-icon"> Evaluation
                                         </a>
                                     </li>
+                                    <li>
+                                        <a href="{{ url('evaluation-responses') }}" class="nav-link text-white {{ request()->is('evaluation-responses') ? 'active-link' : '' }}">
+                                            <img src="{{ asset('images/answers.png') }}" class="sidebar-icon"> Responses
+                                        </a>
+                                    </li>
+                                   
                                     @if (Auth::user()->role === 'Super Admin')
                                         <li>
                                             <a href="{{ url('accounts') }}" class="nav-link text-white {{ request()->is('accounts') ? 'active-link' : '' }}">
