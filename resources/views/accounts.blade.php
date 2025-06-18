@@ -29,57 +29,70 @@
 
     @include('layout.navbar')
     @include('layout.sidebar')
-    <main>
-<div class="container outer-box mt-5 pt-5 pb-4 shadow">
-    <div class="container-fluid" id="mainContainer">
-        <!-- Heading -->
-        <div class="mb-3">
-            <h2 class="fw-bold" style="color: #232946;">Accounts</h2>
-            <small style="color: #989797;">Manage /</small>
-            <small style="color: #444444;">Accounts</small>
-        </div>
+<main>
+    <div class="container outer-box mt-5 pt-5 pb-4 shadow">
+        <div class="container-fluid" id="mainContainer">
+            <!-- Heading -->
+            <div class="mb-3">
+                <h2 class="fw-bold" style="color: #232946;">Accounts</h2>
+                <small style="color: #989797;">Manage /</small>
+                <small style="color: #444444;">Accounts</small>
+            </div>
 
-        <!-- Main Card -->
-        <div class="card shadow-sm p-4">
+            <!-- Main Card -->
+            <div class="card shadow-sm p-4">
 
-            <!-- Filters and Search -->
-            <div class="row mb-4">
-                <div class="col-md-4">
+                <!-- Filters and Search -->
+              <div class="row mb-4">
+    <div class="col-12 d-flex justify-content-end align-items-end gap-2">
+        <div style="position: relative;">
+            <!-- Filter Icon Button -->
+            <button class="btn btn-outline-secondary" onclick="toggleFilterCloud()" style="border-radius: 6px;">
+                <i class="bi bi-funnel-fill"></i>
+            </button>
+
+            <!-- Cloud Popup -->
+            <div id="filterCloud" class="shadow p-3 rounded" style="position: absolute; top: 120%; right: 0; background-color: white; border: 1px solid #ddd; border-radius: 12px; display: none; min-width: 250px; z-index: 10;">
+                <div class="mb-2">
                     <label for="roleFilter" class="form-label">Filter by Role</label>
-                    <select id="roleFilter" class="form-select" onchange="applyFilters()">
+                    <select id="roleFilter" class="form-select form-select-sm" onchange="applyFilters()">
                         <option value="">All Roles</option>
                         <option value="Member">Member</option>
                         <option value="Officer">Officer</option>
                         <option value="Admin">Admin</option>
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div>
                     <label for="deptFilter" class="form-label">Filter by Organization</label>
-                    <select id="deptFilter" class="form-select" onchange="applyFilters()">
+                    <select id="deptFilter" class="form-select form-select-sm" onchange="applyFilters()">
                         <option value="">All Organization</option>
                         <option value="ITS">ITS</option>
                         <option value="PRAXIS">PRAXIS</option>
                         <option value="CCMS-SG">CCMS-SG</option>
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Search</label>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Enter search..." oninput="applyFilters()">
-                </div>
             </div>
+        </div>
 
-            <!-- Student List -->
+        <!-- Search Input -->
+        <div style="min-width: 250px;">
+            <label class="form-label">Search</label>
+            <input type="text" id="searchInput" class="form-control" placeholder="Enter search..." oninput="applyFilters()">
+        </div>
+    </div>
+</div>
+
+                <!-- Student List -->
                 <h5 class="mb-3 fw-bold" style="color: #232946;">User List</h5>
 
                 @if($users->isEmpty())
                     <p>No users found.</p>
                 @else
                     <div class="table-responsive">
-                        <table id="studentsTable" class="table table-bordered table-hover align-middle text-center">
-                            <thead class="table-light">
+                        <table id="studentsTable" class="table table-borderless align-middle text-center shadow-sm rounded" style="background-color: #f9f9f9;">
+                            <thead class="table-dark text-light">
                                 <tr>
                                     <th>No</th>
-                                
                                     <th>Name</th>
                                     <th>Email</th>
                                     <th>Role</th>
@@ -89,22 +102,21 @@
                             </thead>
                             <tbody>
                                 @foreach($users as $user)
-                                    <tr>
+                                    <tr style="border-bottom: 1px solid #dee2e6;">
                                         <td>{{ $user->user_ID }}</td>
                                         <td>{{ $user->name }}</td>
                                         <td>{{ $user->email }}</td>
                                         <td>{{ $user->role }}</td>
                                         <td>{{ $user->org }}</td>
-                                        
                                         <td>
-                                        <button type="button" class="btn btn-sm btn-warning me-1" 
-                        onclick="openEditModal('{{ $user->user_ID }}', '{{ $user->name }}', '{{ $user->email }}', '{{ $user->role }}', '{{ $user->org }}')">
-                        Edit
-                    </button>
-                    <button type="button" class="btn btn-sm btn-danger" >
-                        Delete
-                    </button>
-                </td>
+                                            <button type="button" class="btn btn-sm btn-warning me-1 border-0 shadow-none"
+                                                onclick="openEditModal('{{ $user->user_ID }}', '{{ $user->name }}', '{{ $user->email }}', '{{ $user->role }}', '{{ $user->org }}')">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger border-0 shadow-none">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -112,7 +124,7 @@
                     </div>
                 @endif
 
-                <!-- Pagination (optional, no change here) -->
+                <!-- Pagination -->
                 <div class="d-flex justify-content-end mt-3">
                     <nav>
                         <ul class="pagination">
@@ -132,10 +144,13 @@
                         </ul>
                     </nav>
                 </div>
-
+            </div>
         </div>
+    </div>
+</main>
 
-        <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+
+     <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="editUserForm" method="POST" action="{{ route('users.update') }}">
@@ -188,9 +203,6 @@
     </div>
   </div>
 </div>
-    </div>
-</div>
-</main>
 
 
 
@@ -201,11 +213,40 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
     </script>
     
-    
+    <script>
+    function toggleFilterCloud() {
+        const cloud = document.getElementById("filterCloud");
+        cloud.style.display = (cloud.style.display === "none" || cloud.style.display === "") ? "block" : "none";
+    }
+
+    // Optional: Close the filter popup if clicked outside
+    document.addEventListener("click", function(event) {
+        const cloud = document.getElementById("filterCloud");
+        const button = event.target.closest("button");
+        const insideCloud = event.target.closest("#filterCloud");
+        if (!insideCloud && (!button || button.innerHTML.indexOf("bi-funnel-fill") === -1)) {
+            cloud.style.display = "none";
+        }
+    });
+
+    function applyFilters() {
+        // Your filtering logic here
+        console.log("Filters applied");
+    }
+</script>
+
+
 </body>
 
 
+<style>
 
+    #filterCloud {
+    box-shadow: 0px 8px 20px rgba(0,0,0,0.1);
+    border-radius: 16px;
+    background: #fff;
+}
+</style>
 <script>
 function fillModalData(button) {
     // Find the row (`<tr>`) that contains the clicked button

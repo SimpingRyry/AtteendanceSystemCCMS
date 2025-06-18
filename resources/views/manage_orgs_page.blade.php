@@ -47,70 +47,72 @@
     {{-- Sidebar --}}
     @include('layout.sidebar')
 
-    <main>
-        <div class="container outer-box mt-5 pt-5 pb-4">
-            <div class="container inner-glass shadow p-4" id="main_box">
-                <!-- Heading -->
-        <div class="mb-3">
-          <h2 class="fw-bold" style="color: #232946;">Manage Orgs</h2>
-          <small style="color: #989797;">Manage /</small>
-          <small style="color: #444444;">Orgs</small>
-        </div>
-                {{-- Add Organization Button --}}
-                <div class="text-end mb-3">
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addOrgModal">
-                        Add Organization <i class="bi bi-plus-lg ms-1"></i>
-                    </button>
-                </div>
+<main>
+    <div class="container outer-box mt-5 pt-5 pb-4">
+        <div class="container bg-white rounded-4 shadow-sm p-4" id="main_box">
+            <!-- Heading -->
+            <div class="mb-3">
+                <h2 class="fw-bold text-dark">Manage Orgs</h2>
+                <small class="text-muted">Manage /</small>
+                <small class="text-secondary">Orgs</small>
+            </div>
 
-                {{-- Table: Organization List --}}
-                <div class="card p-4 shadow-sm">
-                    <h5 class="mb-3">Organization List</h5>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover align-middle text-center">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>No.</th>
-                                    <th>Organization Name</th>
-                                    <th>Logo</th>
-                                    <th>Description</th>
-                                    <th>Background</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php $i = 1; @endphp
-                                @forelse ($org_list as $org)
-                                <tr>
+            <!-- Add Organization Button -->
+            <div class="text-end mb-3">
+                <button class="btn btn-success px-3" data-bs-toggle="modal" data-bs-target="#addOrgModal" title="Add Organization">
+                    <i class="bi bi-plus-lg"></i> Add Organization
+                </button>
+            </div>
+
+            <!-- Organization Table -->
+            <div class="card border-0 shadow-sm p-4">
+                <h5 class="mb-3 text-dark">Organization List</h5>
+                <div class="table-responsive">
+                    <table class="table align-middle text-center table-borderless">
+                         <thead class="table-dark">
+                            <tr>
+                                <th>No.</th>
+                                <th>Organization Name</th>
+                                <th>Logo</th>
+                                <th>Description</th>
+                                <th>Background</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php $i = 1; @endphp
+                            @forelse ($org_list as $org)
+                                <tr class="border-bottom">
                                     <td>{{ $i++ }}</td>
                                     <td>{{ $org->org_name }}</td>
-                                    <td><img src="{{ asset('images/' . $org->org_logo) }}" alt="Logo" width="60"></td>
-                                    <td>{{ $org->description }}</td>
-                                    <td><img src="{{ asset('images/' . $org->bg_image) }}" alt="Background" width="60"></td>
                                     <td>
-                                        <!-- Edit Button with Icon -->
-                                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editOrgModal{{ $org->id }}">
-                                            <i class="bi bi-pencil-square"></i> Edit
+                                        <img src="{{ asset('images/' . $org->org_logo) }}" alt="Logo" width="50" class="rounded">
+                                    </td>
+                                    <td class="text-truncate" style="max-width: 200px;">{{ $org->description }}</td>
+                                    <td>
+                                        <img src="{{ asset('images/' . $org->bg_image) }}" alt="Background" width="50" class="rounded">
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#editOrgModal{{ $org->id }}" title="Edit">
+                                            <i class="bi bi-pencil-square"></i>
                                         </button>
-
-                                        <!-- Delete Button with Icon -->
-                                        <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteOrgModal{{ $org->id }}">
-                                            <i class="bi bi-trash"></i> Delete
+                                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteOrgModal{{ $org->id }}" title="Delete">
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
-                                @empty
+                            @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">No organizations found.</td>
+                                    <td colspan="6" class="text-center text-muted">No organizations found.</td>
                                 </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </main>
+    </div>
+</main>
 
     {{-- Modal: Add Organization --}}
     <div class="modal fade" id="addOrgModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
@@ -140,7 +142,7 @@
                         <input type="file" name="bg_image" class="form-control" accept="image/*" required>
                     </div>
                     <hr>
-                    <h5 class="mt-4">Org Admin Account</h5>
+                    <h5 class="mt-4">Organization Adviser Account</h5>
                     <div class="mb-3">
                         <label for="username" class="form-label">Full Name <span class="text-danger">*</span></label>
                         <input type="text" name="name" class="form-control" required>
@@ -191,6 +193,7 @@
         successModal.show();
     });
 </script>
+@endif
 
 
     <script>

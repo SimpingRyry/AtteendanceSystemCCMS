@@ -7,16 +7,18 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OSSDController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\EventsController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdviserController;
 use App\Http\Controllers\OfficerController;
 use App\Http\Controllers\OrgListController;
+
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
-
 use App\Http\Controllers\StudentController;
 use Illuminate\Console\Scheduling\Schedule;
 use App\Http\Controllers\AccountsController;
@@ -247,3 +249,6 @@ Route::post('/students/confirm-import', [ImportController::class, 'confirmImport
 Route::get('/evaluation-responses', [EvaluationResponseController::class, 'index'])->name('evaluation.responses');
 Route::get('/evaluation-responses/{evaluation}', [EvaluationResponseController::class, 'show'])->name('evaluation.responses.view');
 Route::get('/evaluation-responses/{assignment}/summary', [EvaluationResponseController::class, 'summary'])->name('evaluation.responses.summary');
+Route::post('/ossd/store', [OSSDController::class, 'store'])->name('ossd.store');
+Route::get('/OSSD', [OSSDController::class, 'index'])->name('ossd.index');
+Route::get('/members', [MemberController::class, 'showMembers'])->middleware('auth');

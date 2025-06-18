@@ -48,13 +48,11 @@
 
     <!-- Button Row -->
     <div class="d-flex justify-content-end gap-2 mb-4">
-      <button class="btn btn-outline-secondary rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#filterPanel" aria-expanded="false" aria-controls="filterPanel">
-        <i class="bi bi-funnel-fill me-1"></i> Filter
-      </button>
-      <button class="btn btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#uploadCSVModal">
+     
+      <button class="btn btn-outline-primary " data-bs-toggle="modal" data-bs-target="#uploadCSVModal">
         <i class="bi bi-upload me-1"></i> Import CSV
       </button>
-      <button class="btn btn-outline-success rounded-pill" data-bs-toggle="modal" data-bs-target="#scheduleModal">
+      <button class="btn btn-outline-success " data-bs-toggle="modal" data-bs-target="#scheduleModal">
         <i class="bi bi-calendar-check me-1"></i> Generate Schedule
       </button>
     </div>
@@ -98,13 +96,55 @@
     </div>
 
     <!-- Search -->
-    <div class="d-flex justify-content-end mb-4">
-      <div class="input-group" style="max-width: 350px;">
-        <input type="text" class="form-control form-control-sm rounded-start" placeholder="Search...">
-        <button class="btn btn-success btn-sm rounded-end">Search</button>
-      </div>
-    </div>
+   <!-- Search + Filter Cloud -->
+<div class="d-flex justify-content-end align-items-center gap-2 mb-4 position-relative">
+  <!-- Floating Filter Icon -->
+  <button class="btn btn-outline-secondary btn-sm" onclick="toggleFilterCloud()" title="Quick Filter">
+    <i class="bi bi-funnel-fill"></i>
+  </button>
 
+  <!-- Floating Filter Cloud -->
+   <div id="quickFilterCloud" class="shadow bg-white rounded-4 border p-3 position-absolute" style="top: 100%; right: 55px; width: 300px; display: none; z-index: 1055;">
+    <div class="row g-2">
+      @foreach (['Organization', 'Block', 'Year Level', 'Status'] as $label)
+      <div class="col-12">
+        <div class="border rounded-3 p-2 bg-light">
+          <label class="form-label small text-muted mb-1">{{ $label }}</label>
+          @if ($label == 'Organization')
+          <select class="form-select form-select-sm">
+            <option selected disabled>Select Organization</option>
+            <option>ITS</option>
+            <option>Praxis</option>
+          </select>
+          @else
+          <select class="form-select form-select-sm">
+            <option selected disabled>Select {{ $label }}</option>
+            @if ($label == 'Block')
+              @foreach (['A', 'B', 'C', 'D'] as $option)
+              <option>{{ $option }}</option>
+              @endforeach
+            @elseif ($label == 'Year Level')
+              @foreach (range(1, 4) as $year)
+              <option>{{ $year }}</option>
+              @endforeach
+            @else
+              <option>Registered</option>
+              <option>Unregistered</option>
+            @endif
+          </select>
+          @endif
+        </div>
+      </div>
+      @endforeach
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="input-group" style="max-width: 350px;">
+    <input type="text" class="form-control form-control-sm rounded-start" placeholder="Search...">
+    <button class="btn btn-success btn-sm rounded-end">Search</button>
+  </div>
+</div>
     <!-- Student List -->
     <div class="bg-white border rounded-4 p-4 shadow-sm">
       <h5 class="fw-bold text-dark mb-3">Student List</h5>
@@ -286,6 +326,7 @@
               @elseif(auth()->user()->org == 'PRAXIS')
                 <option value="">-- Select Role --</option>
                 <option value="member">Member</option>
+                 <option value="President">President</option>
                 <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
                 <option value="Vice President For External Affairs">Vice President For External Affairs</option>
                 <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
@@ -300,6 +341,7 @@
               @else
                 <option value="">-- Select Role --</option>
                 <option value="Member">Member</option>
+                <option value="President">President</option>
                 <option value="Vice President">Vice President</option>
                 <option value="Executive Secretary">Executive Secretary</option>
                 <option value="Administrative Secretary">Administrative Secretary</option>
@@ -633,6 +675,30 @@
     input.value = imageData;
   }
 </script>
+
+<script>
+  function toggleFilterCloud() {
+    const cloud = document.getElementById("quickFilterCloud");
+    cloud.style.display = (cloud.style.display === "none" || cloud.style.display === "") ? "block" : "none";
+  }
+
+  document.addEventListener("click", function (event) {
+    const cloud = document.getElementById("quickFilterCloud");
+    const toggleBtn = document.getElementById("filterToggleBtn");
+
+    if (!cloud.contains(event.target) && !toggleBtn.contains(event.target)) {
+      cloud.style.display = "none";
+    }
+  });
+</script>
+<style>
+
+    #quickFilterCloud {
+    box-shadow: 0px 8px 20px rgba(0,0,0,0.1);
+    border-radius: 16px;
+    background: #fff;
+}
+</style>
 
 <script>
 function fillModalData(button) {

@@ -111,11 +111,19 @@
                                         <img src="{{ asset('images/instruct_ico.png') }}" class="sidebar-icon"> Advisers
                                     </a>
                                 </li>
+                                 <li>
+                                    <a href="{{ url('members') }}" class="nav-link text-white {{ request()->is('members') ? 'active-link' : '' }}">
+                                        <img src="{{ asset('images/instruct_ico.png') }}" class="sidebar-icon"> Members
+                                    </a>
+                                </li>
+                                
                                 <li>
                                     <a href="{{ url('events') }}" class="nav-link text-white {{ request()->is('events') ? 'active-link' : '' }}">
                                         <img src="{{ asset('images/event_ico.png') }}" class="sidebar-icon"> Events
                                     </a>
                                 </li>
+
+                                 @if (Auth::user()->role !== 'OSSD')
                                 <li>
                                     <a href="{{ url('attendance') }}" class="nav-link text-white {{ request()->is('attendance') ? 'active-link' : '' }}">
                                         <img src="{{ asset('images/attendance.png') }}" class="sidebar-icon"> Attendance
@@ -131,6 +139,7 @@
                                         <img src="{{ asset('images/record_ico.png') }}" class="sidebar-icon"> Reports
                                     </a>
                                 </li>
+                                @endif
                             </ul>
                         </div>
                     </li>
@@ -148,58 +157,73 @@
                                 <i class="bi bi-chevron-down"></i>
                             </a>
                             <div class="collapse" id="systemSettings">
-                                <ul class="navbar-nav ps-3">
-                                    <li>
-                                        <a href="{{ url('device_page') }}" class="nav-link text-white {{ request()->is('device_page') ? 'active-link' : '' }}">
-                                            <img src="{{ asset('images/device_ico.png') }}" class="sidebar-icon"> Device
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ url('config') }}" class="nav-link text-white {{ request()->is('config') ? 'active-link' : '' }}">
-                                            <img src="{{ asset('images/config_ico.png') }}" class="sidebar-icon"> Configure
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ url('clearance') }}" class="nav-link text-white {{ request()->is('clearance') ? 'active-link' : '' }}">
-                                            <img src="{{ asset('images/evaluation_ico.png') }}" class="sidebar-icon"> Clearance
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ url('evaluation') }}" class="nav-link text-white {{ request()->is('evaluation') ? 'active-link' : '' }}">
-                                            <img src="{{ asset('images/evaluation_ico.png') }}" class="sidebar-icon"> Evaluation
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="{{ url('evaluation-responses') }}" class="nav-link text-white {{ request()->is('evaluation-responses') ? 'active-link' : '' }}">
-                                            <img src="{{ asset('images/answers.png') }}" class="sidebar-icon"> Responses
-                                        </a>
-                                    </li>
-                                   
-                                    @if (Auth::user()->role === 'Super Admin')
-                                        <li>
-                                            <a href="{{ url('accounts') }}" class="nav-link text-white {{ request()->is('accounts') ? 'active-link' : '' }}">
-                                                <img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Accounts
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="{{ url('manage_orgs_page') }}" class="nav-link text-white {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}">
-                                                <img src="{{ asset('images/org_ico.png') }}" class="sidebar-icon"> Organization
-                                            </a>
-                                        </li>
-                                    @elseif (Auth::user()->role === 'Admin')
-                                        <li>
-                                            <a href="{{ url('officers') }}" class="nav-link text-white {{ request()->is('officers') ? 'active-link' : '' }}">
-                                                <img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Officers
-                                            </a>
-                                        </li>
-                                    @endif
-                                    <li>
-                                        <a href="{{ url('logs') }}" class="nav-link text-white {{ request()->is('logs') ? 'active-link' : '' }}">
-                                            <img src="{{ asset('images/loggs_ico.png') }}" class="sidebar-icon"> Logs
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
+    <ul class="navbar-nav ps-3">
+        @if (Auth::user()->role === 'ossd')
+            <li>
+                <a href="{{ url('manage_orgs_page') }}" class="nav-link text-white {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}">
+                    <img src="{{ asset('images/org_ico.png') }}" class="sidebar-icon"> Organization
+                </a>
+            </li>
+        @else
+            <li>
+                <a href="{{ url('device_page') }}" class="nav-link text-white {{ request()->is('device_page') ? 'active-link' : '' }}">
+                    <img src="{{ asset('images/device_ico.png') }}" class="sidebar-icon"> Device
+                </a>
+            </li>
+            <li>
+                <a href="{{ url('config') }}" class="nav-link text-white {{ request()->is('config') ? 'active-link' : '' }}">
+                    <img src="{{ asset('images/config_ico.png') }}" class="sidebar-icon"> Configure
+                </a>
+            </li>
+            <li>
+                <a href="{{ url('clearance') }}" class="nav-link text-white {{ request()->is('clearance') ? 'active-link' : '' }}">
+                    <img src="{{ asset('images/evaluation_ico.png') }}" class="sidebar-icon"> Clearance
+                </a>
+            </li>
+            <li>
+                <a href="{{ url('evaluation') }}" class="nav-link text-white {{ request()->is('evaluation') ? 'active-link' : '' }}">
+                    <img src="{{ asset('images/evaluation_ico.png') }}" class="sidebar-icon"> Evaluation
+                </a>
+            </li>
+            <li>
+                <a href="{{ url('evaluation-responses') }}" class="nav-link text-white {{ request()->is('evaluation-responses') ? 'active-link' : '' }}">
+                    <img src="{{ asset('images/answers.png') }}" class="sidebar-icon"> Responses
+                </a>
+            </li>
+
+            @if (Auth::user()->role === 'Super Admin')
+                <li>
+                    <a href="{{ url('accounts') }}" class="nav-link text-white {{ request()->is('accounts') ? 'active-link' : '' }}">
+                        <img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Accounts
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('OSSD') }}" class="nav-link text-white {{ request()->is('OSSD') ? 'active-link' : '' }}">
+                        <img src="{{ asset('images/office.png') }}" class="sidebar-icon"> OSSD
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('manage_orgs_page') }}" class="nav-link text-white {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}">
+                        <img src="{{ asset('images/org_ico.png') }}" class="sidebar-icon"> Organization
+                    </a>
+                </li>
+            @elseif (Auth::user()->role === 'Adviser')
+                <li>
+                    <a href="{{ url('officers') }}" class="nav-link text-white {{ request()->is('officers') ? 'active-link' : '' }}">
+                        <img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Officers
+                    </a>
+                </li>
+            @endif
+
+            <li>
+                <a href="{{ url('logs') }}" class="nav-link text-white {{ request()->is('logs') ? 'active-link' : '' }}">
+                    <img src="{{ asset('images/loggs_ico.png') }}" class="sidebar-icon"> Logs
+                </a>
+            </li>
+        @endif
+    </ul>
+</div>
+
                         </li>
                     @endif
                 @endif

@@ -39,7 +39,7 @@
                 <small style="color: #989797;">Monitor /</small>
                 <small style="color: #444444;">Attendance Records</small>
 
-                @if($currentEvent)
+                @if($currentEvent && auth()->user()->org === $currentEvent->org)
                     <div class="alert alert-info mt-3">
                         <strong>Today's Event:</strong> {{ $currentEvent->name }} at {{ $currentEvent->venue }}
                     </div>
@@ -50,7 +50,7 @@
                 @endif
             </div>
 
-            @if($currentEvent)
+            @if($currentEvent && auth()->user()->org === $currentEvent->org)
                 <!-- Filter Form -->
                 <form method="GET" class="row g-3 mb-4">
                     <div class="col-md-4">
