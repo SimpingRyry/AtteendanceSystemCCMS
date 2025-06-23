@@ -68,7 +68,7 @@
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover" id="attendanceTable">
                         <thead class="table-light">
-                        <tr>
+                                <tr>
                                     <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Student ID</th>
                                     <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Name</th>
                                     <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Program</th>
@@ -79,12 +79,12 @@
                                     @if($currentEvent->timeouts == 4)
                                         <th colspan="2" class="text-center">Morning</th>
                                         <th colspan="2" class="text-center">Afternoon</th>
+                                        <th colspan="2" class="text-center">Status</th>
                                     @else
                                         <th rowspan="1">Time-In</th>
                                         <th rowspan="1">Time-Out</th>
+                                        <th rowspan="1">Status</th>
                                     @endif
-
-                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Status</th>
                                 </tr>
 
                                 @if($currentEvent->timeouts == 4)
@@ -93,9 +93,11 @@
                                     <th>Time-Out</th>
                                     <th>Time-In</th>
                                     <th>Time-Out</th>
+                                    <th>Morning</th>
+                                    <th>Afternoon</th>
                                 </tr>
                                 @endif
-                        </thead>
+                            </thead>
                         <tbody>
                             <!-- Sample Row (replace with dynamic content) -->
                             @if($currentEvent->timeouts == 4)
@@ -130,98 +132,100 @@
 </main>
 
 <script>
-    document.getElementById('recordAttendanceForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+document.getElementById('recordAttendanceForm').addEventListener('submit', function(e) {
+    e.preventDefault();
 
-        const timeoutCount = parseInt(document.getElementById('main_box').dataset.timeouts);
-        const hasFourTimeouts = timeoutCount === 4;
+    const timeoutCount = parseInt(document.getElementById('main_box').dataset.timeouts);
+    const hasFourTimeouts = timeoutCount === 4;
 
-        const rows = document.querySelectorAll('#attendanceTable tbody tr');
-        const attendance = [];
+    const rows = document.querySelectorAll('#attendanceTable tbody tr');
+    const attendance = [];
 
-        rows.forEach(row => {
-            const cols = row.querySelectorAll('td');
+    rows.forEach(row => {
+        const cols = row.querySelectorAll('td');
 
-            if (hasFourTimeouts) {
-                attendance.push({
-                    student_id: cols[0].innerText.trim(),
-                    name: cols[1].innerText.trim(),
-                    program: cols[2].innerText.trim(),
-                    block: cols[3].innerText.trim(),
-                    event: cols[4].innerText.trim(),
-                    date: cols[5].innerText.trim(),
-                    time_in1: cols[6].innerText.trim(),
-                    time_out1: cols[7].innerText.trim(),
-                    time_in2: cols[8].innerText.trim(),
-                    time_out2: cols[9].innerText.trim(),
-                    status: cols[10].innerText.trim()
-                });
-            } else {
-                attendance.push({
-                    student_id: cols[0].innerText.trim(),
-                    name: cols[1].innerText.trim(),
-                    program: cols[2].innerText.trim(),
-                    block: cols[3].innerText.trim(),
-                    event: cols[4].innerText.trim(),
-                    date: cols[5].innerText.trim(),
-                    time_in1: cols[6].innerText.trim(),
-                    time_out1: cols[7].innerText.trim(),
-                    status: cols[8].innerText.trim()
-                });
-            }
-        });
-
-        document.getElementById('attendance_data').value = JSON.stringify(attendance);
-        this.submit();
+        if (hasFourTimeouts) {
+            attendance.push({
+                student_id: cols[0].innerText.trim(),
+                name: cols[1].innerText.trim(),
+                program: cols[2].innerText.trim(),
+                block: cols[3].innerText.trim(),
+                event: cols[4].innerText.trim(),
+                date: cols[5].innerText.trim(),
+                time_in1: cols[6].innerText.trim(),
+                time_out1: cols[7].innerText.trim(),
+                time_in2: cols[8].innerText.trim(),
+                time_out2: cols[9].innerText.trim(),
+                status_morning: cols[10].innerText.trim(),
+                status_afternoon: cols[11].innerText.trim()
+            });
+        } else {
+            attendance.push({
+                student_id: cols[0].innerText.trim(),
+                name: cols[1].innerText.trim(),
+                program: cols[2].innerText.trim(),
+                block: cols[3].innerText.trim(),
+                event: cols[4].innerText.trim(),
+                date: cols[5].innerText.trim(),
+                time_in1: cols[6].innerText.trim(),
+                time_out1: cols[7].innerText.trim(),
+                status: cols[8].innerText.trim()
+            });
+        }
     });
+
+    document.getElementById('attendance_data').value = JSON.stringify(attendance);
+    this.submit();
+});
 </script>
 
 <script>
-  setInterval(() => {
-        fetch("/attendance/live-data")
-            .then(res => res.json())
-            .then(data => {
-                const tbody = document.querySelector('#attendanceTable tbody');
-                tbody.innerHTML = '';
+setInterval(() => {
+    fetch("/attendance/live-data")
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector('#attendanceTable tbody');
+            tbody.innerHTML = '';
 
-                const timeoutCount = parseInt(document.getElementById('main_box').dataset.timeouts);
-                const hasFourTimeouts = timeoutCount === 4;
+            const timeoutCount = parseInt(document.getElementById('main_box').dataset.timeouts);
+            const hasFourTimeouts = timeoutCount === 4;
 
-                data.forEach(row => {
-                    if (hasFourTimeouts) {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${row.student_id}</td>
-                                <td>${row.name}</td>
-                                <td>${row.program}</td>
-                                <td>${row.block}</td>
-                                <td>${row.event}</td>
-                                <td>${row.date}</td>
-                                ${row.time_in1 ? `<td>${row.time_in1}</td>` : '<td></td>'}
-                                ${row.time_out1 ? `<td>${row.time_out1}</td>` : '<td></td>'}
-                                ${row.time_in2 ? `<td>${row.time_in2}</td>` : '<td></td>'}
-                                ${row.time_out2 ? `<td>${row.time_out2}</td>` : '<td></td>'}
-                                <td>${row.status}</td>
-                            </tr>
-                        `;
-                    } else {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${row.student_id}</td>
-                                <td>${row.name}</td>
-                                <td>${row.program}</td>
-                                <td>${row.block}</td>
-                                <td>${row.event}</td>
-                                <td>${row.date}</td>
-                                ${row.time_in1 ? `<td>${row.time_in1}</td>` : '<td></td>'}
-                                ${row.time_out1 ? `<td>${row.time_out1}</td>` : '<td></td>'}
-                                <td>${row.status}</td>
-                            </tr>
-                        `;
-                    }
-                });
+            data.forEach(row => {
+                if (hasFourTimeouts) {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${row.student_id}</td>
+                            <td>${row.name}</td>
+                            <td>${row.program}</td>
+                            <td>${row.block}</td>
+                            <td>${row.event}</td>
+                            <td>${row.date}</td>
+                            <td>${row.time_in1 ?? ''}</td>
+                            <td>${row.time_out1 ?? ''}</td>
+                            <td>${row.time_in2 ?? ''}</td>
+                            <td>${row.time_out2 ?? ''}</td>
+                            <td>${row.status_morning ?? ''}</td>
+                            <td>${row.status_afternoon ?? ''}</td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${row.student_id}</td>
+                            <td>${row.name}</td>
+                            <td>${row.program}</td>
+                            <td>${row.block}</td>
+                            <td>${row.event}</td>
+                            <td>${row.date}</td>
+                            <td>${row.time_in1 ?? ''}</td>
+                            <td>${row.time_out1 ?? ''}</td>
+                            <td>${row.status ?? ''}</td>
+                        </tr>
+                    `;
+                }
             });
-    }, 1000);
+        });
+}, 1000);
 </script>
 
     <!-- Bootstrap JS -->

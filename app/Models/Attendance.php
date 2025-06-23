@@ -18,6 +18,9 @@ class Attendance extends Model
         'time_in2',
         'time_out2',
         'status',
+        'is_answered',
+        'morning_status',
+        'afternoon_status'
     ];
 
     public function student()

@@ -171,7 +171,6 @@ public function submitAnswers(Request $request)
         'responses.*.answer' => 'nullable',
     ]);
 
-    // Fetch event_id based on today's date
     $today = Carbon::today()->toDateString();
 
     $event = \App\Models\Event::whereDate('event_date', $today)->first();
@@ -180,17 +179,24 @@ public function submitAnswers(Request $request)
         return response()->json(['error' => 'No event found for today.'], 404);
     }
 
+    $studentId = Auth::user()->student_id;
+
     foreach ($data['responses'] as $resp) {
         $answer = is_array($resp['answer']) ? json_encode($resp['answer']) : $resp['answer'];
 
         \App\Models\EvaluationAnswer::create([
             'evaluation_id' => $data['evaluation_id'],
             'question_id' => $resp['question_id'],
-            'student_id' => Auth::user()->student_id,
+            'student_id' => $studentId,
             'answer' => $answer,
-            'event_id' => $event->id, // Add the event_id here
+            'event_id' => $event->id,
         ]);
     }
+
+    // ✅ Update is_answered = true in Attendance
+    \App\Models\Attendance::where('student_id', $studentId)
+        ->where('event_id', $event->id)
+        ->update(['is_answered' => true]);
 
     return response()->json(['message' => 'Answers submitted successfully.']);
 }

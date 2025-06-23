@@ -2,39 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\FinanceData;
 use App\Models\Student;
+use App\Models\FinanceData;
+use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 
 class ReportController extends Controller
 {
-    public function generateFinancialReport(Request $request)
-    {
-        // Start query
-        $query = FinanceData::query();
+public function generateFinancialReport(Request $request)
+{
+    $month = $request->month;
+    $year = $request->year;
+    $user = auth()->user();
 
-        // Apply filters
-        if ($request->filled('organization')) {
-            $query->where('org', $request->organization);
-        }
+    // Determine the organization based on role
+    $org = $user->role === 'Super Admin' ? $request->organization : $user->org;
 
-        if ($request->filled('program')) {
-            $query->where('program', $request->program);
-        }
+   $query = DB::table('transaction')
+    ->select('event', 'transaction_type', DB::raw('SUM(fine_amount) as total_amount'))
+    ->when($month !== 'All', fn($q) => $q->whereMonth('date', date('m', strtotime($month))))
+    ->when($year, fn($q) => $q->whereYear('date', $year))
+    ->when($org, fn($q) => $q->where('org', $org))
+    ->groupBy('event', 'transaction_type');
 
-        $financeReports = $query->get();
+    $rawData = $query->get();
 
-        // If user wants to export as PDF
-        if ($request->export === 'pdf') {
-            $pdf = PDF::loadView('report.financial_pdf', compact('financeReports'));
-            return $pdf->download('financial_report.pdf');
-        }
+    $grouped = collect($rawData)->groupBy('event')->map(function ($rows) {
+        $fines = $rows->firstWhere('transaction_type', 'FINE')->total_amount ?? 0;
+        $payments = $rows->firstWhere('transaction_type', 'PAYMENT')->total_amount ?? 0;
+        return [
+            'fines' => $fines,
+            'payments' => $payments,
+            'balance' => $fines - $payments
+        ];
+    });
 
-        // Otherwise, show normal view
-        return view('report.financial_results', compact('financeReports'));
+    $summary = [
+        'total_fines' => $grouped->sum('fines'),
+        'total_payments' => $grouped->sum('payments'),
+        'balance' => $grouped->sum('balance')
+    ];
+
+    // Set logo based on organization
+    $logo = public_path('images/ccms_logo.png');
+    if ($org === 'Information Technology Society') {
+        $logo = public_path('images/ITS_LOGO.png');
+    } elseif ($org === 'PRAXIS') {
+        $logo = public_path('images/praxis_logo.png');
     }
+
+    PDF::setOptions(['defaultFont' => 'DejaVu Sans']);
+    $pdf = Pdf::loadView('report.financial_pdf', compact('grouped', 'summary', 'month', 'year', 'org', 'logo'));
+
+    return $pdf->stream('financial-report.pdf');
+}
+
+
+
+
+
+
+
+
+
 
     public function generateStudentRoster(Request $request)
 {

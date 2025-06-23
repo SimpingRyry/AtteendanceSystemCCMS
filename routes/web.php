@@ -154,7 +154,7 @@ Route::post('/profile/{id}/photo', [ProfileController::class, 'uploadPhoto'])->n
 
 Route::resource('orgs', OrgListController::class);
 
-Route::get('/report/financial', [ReportController::class, 'generateFinancialReport'])->name('report.financial');
+Route::get('/reports/financial', [ReportController::class, 'generateFinancialReport'])->name('report.financial');
 
 Route::get('/report/student-list', [ReportController::class, 'generateStudentListReport'])->name('report.student_list');
 Route::get('/report/student-roster', [ReportController::class, 'generateStudentRoster'])->name('report.studentRoster');

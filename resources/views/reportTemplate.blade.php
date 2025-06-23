@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Memo</title>
+  <title>Financial Report</title>
   <!-- Bootstrap CSS (online) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
@@ -118,7 +118,7 @@
           <div class="org-details">
             <div class="school-name">CAMARINES NORTE STATE COLLEGE</div>
             <div class="college-name">COLLEGE OF COMPUTING AND MULTIMEDIA STUDIES</div>
-            <strong>STUDENT GOVERNMENT</strong><br>
+        
             <span class="org-address">F. PIMENTEL AVENUE, BARANGAY II, DAET, CAMARINES NORTE - 4600, PHILIPPINES</span>
           </div>
         </td>
@@ -148,53 +148,61 @@
     </table>
 
     <!-- Memo content -->
-    <div class="text-center mt-4">
-      <strong>OFFICE OF THE COLLEGE STUDENT GOVERNMENT PRESIDENT</strong><br>
-      Memorandum No. 12<br>
-      Series of 2025<br><br>
-    </div>
+    <div class="text-center mt-5 mb-4">
+  <h4 class="fw-bold">FINANCIAL REPORT</h4>
+</div>
+
+<div class="text-center mb-4" style="line-height: 2;">
+  @if($org)
+    <div style="font-size: 14px; font-weight: bold;">{{ $org }}</div>
+    <div style="text-decoration: underline;">Name of Organization</div>
+  @else
+    <div style="font-size: 14px; font-weight: bold;">ALL ORGANIZATIONS</div>
+    <div style="text-decoration: underline;">Name of Organization</div>
+  @endif
+</div>
+
+<div class="text-center mb-3">
+  <strong>Fines and Payment Report</strong><br>
+  <span>({{ $month ?? 'All Months' }}, {{ $year ?? 'All Years' }})</span>
+</div>
 
     <div class="content">
-      <p><strong>To/For:</strong> {{ $course . ' ' . $year . ' - ' . $block }}</p>
-      <p><strong>From:</strong> REIZO BHIENN CATAROJA<br>President, CCMS – Student Government</p>
+       <p><strong>Report Period:</strong> {{ $month ?? 'All Months' }} {{ $year ?? '' }}</p>
+  @if($org)
+  <p><strong>Organization:</strong> {{ $org }}</p>
+  @endif
 
-      <p><strong>Subject:</strong> Scheduled Registration and Biometric Data Collection</p>
-      <p><strong>Venue:</strong> {{ $venue }}</p>
-      <p><strong>Date:</strong> {{ $date }}</p>
-      <p><strong>Time:</strong> {{ $start_time }} to {{ $end_time }}</p>
+  <hr>
 
-      <hr>
+  <h5><strong>Summary</strong></h5>
+  <ul>
+    <li>Total Fines Issued: ₱{{ number_format($summary['total_fines'], 2) }}</li>
+    <li>Total Payments Made: ₱{{ number_format($summary['total_payments'], 2) }}</li>
+    <li>Outstanding Balance: ₱{{ number_format($summary['balance'], 2) }}</li>
+  </ul>
 
-      <p>Greetings!</p>
-
-      <p>
-        In compliance with the upcoming academic term and as part of the modernization of student services, 
-        all CCMS students are required to participate in the scheduled Registration and Biometric Data 
-        Collection from {{ $date }} at {{ $venue }}. This initiative is part of the student profiling and security 
-        enhancement protocols being implemented by the College in partnership with the CNSC Information 
-        Systems Office.
-      </p>
-
-      <p>This activity involves the following:</p>
-      <ul>
-        <li>Verification and update of personal student information</li>
-        <li>Capture of digital photograph</li>
-        <li>Collection of fingerprint data for biometric verification</li>
-        <li>Issuance of new digital student ID</li>
-      </ul>
-
-      <p>Students are advised to bring one (1) valid government ID, their student ID (if applicable), and 
-      ensure they are properly groomed for photo capture. All data collected will be treated in accordance 
-      with the Data Privacy Act of 2012 and the institution’s data management policy.</p>
-
-      <p>Your full cooperation is expected to ensure the smooth facilitation of this registration. Should you 
-      have further concerns, feel free to contact the CCMS-SG Office.</p>
-
-      <p>Thank you for your prompt attention and participation.</p>
-
-      <br><br>
-      <p><strong>Noted:</strong></p>
-      <p>SGD<br>MARC LESTER ACUNIN<br>Adviser, CCMS – Student Government</p>
+  <h5 class="mt-4"><strong>Breakdown by Event</strong></h5>
+  <table class="table table-bordered table-sm">
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Fines Issued</th>
+        <th>Payments Made</th>
+        <th>Balance</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach($grouped as $event => $data)
+      <tr>
+        <td>{{ $event }}</td>
+        <td>₱{{ number_format($data['fines'], 2) }}</td>
+        <td>₱{{ number_format($data['payments'], 2) }}</td>
+        <td>₱{{ number_format($data['balance'], 2) }}</td>
+      </tr>
+      @endforeach
+    </tbody>
+  </table>
     </div>
 
   </div>
