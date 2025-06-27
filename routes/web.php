@@ -114,8 +114,12 @@ Route::get('/api/events', [EventsController::class, 'fetchEvents'])->name('event
 
 Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
 
-Route::get('/device_page', [DeviceController::class, 'index']);
-
+Route::get('/device_page', function () {
+    return view('device_page');
+});
+Route::get('/home_page', function () {
+    return view('home_page');
+});
 Route::get('/student_payment', function () {
     return view('student_payment');
 });

@@ -185,7 +185,7 @@
                         <ul class="navbar-nav ps-3">
                             <li><a href="{{ url('device_page') }}" class="nav-link text-white {{ request()->is('device_page') ? 'active-link' : '' }}"><img src="{{ asset('images/device_ico.png') }}" class="sidebar-icon"> Device</a></li>
                             <li><a href="{{ url('config') }}" class="nav-link text-white {{ request()->is('config') ? 'active-link' : '' }}"><img src="{{ asset('images/config_ico.png') }}" class="sidebar-icon"> Configure</a></li>
-                            <li><a href="{{ url('logs') }}" class="nav-link text-white {{ request()->is('logs') ? 'active-link' : '' }}"><img src="{{ asset('images/loggs_ico.png') }}" class="sidebar-icon"> Logs</a></li>
+                            <li><a href="{{ url('home_page') }}" class="nav-link text-white {{ request()->is('home_page') ? 'active-link' : '' }}"><img src="{{ asset('images/loggs_ico.png') }}" class="sidebar-icon"> Logs</a></li>
                         </ul>
                     </div>
                 </li>
