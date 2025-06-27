@@ -26,6 +26,40 @@ use Illuminate\Support\Facades\Storage;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+
+Route::post('/device-auth', function (Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'name' => 'required|string',
+        'password' => 'required|string',
+    ]);
+
+    // Check device in DB or any array
+    $device = \App\Models\Device::where('name', $validated['name'])->first();
+
+    if ($device) {
+        if ($device->password === $validated['password']) {
+            $device->is_online = true;
+            $device->last_seen = now();
+            $device->save();
+
+            return response()->json(['message' => 'Device authenticated.'], 200);
+        } else {
+            return response()->json(['message' => 'Wrong password.'], 403);
+        }
+    } else {
+        // Auto-register if not exist
+        \App\Models\Device::create([
+            'name' => $validated['name'],
+            'password' => $validated['password'],
+            'is_online' => true,
+        ]);
+
+        return response()->json(['message' => 'Device registered and online.'], 200);
+    }
+});
+
 Route::post('/register', function (Request $request) {
     $id = $request->input('id');
     Cache::put('latest_fingerprint_id', $id, now()->addMinutes(5)); // store temporarily
@@ -105,7 +139,7 @@ Route::post('/scan', function (Request $request) {
     if (!$student) {
         return response()->json(['message' => 'Student not found'], 404);
     }
-
+    
     $now = Carbon::now('Asia/Manila');
     $today = $now->format('Y-m-d');
 

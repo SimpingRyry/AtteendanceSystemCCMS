@@ -22,6 +22,9 @@ class Attendance extends Model
         'morning_status',
         'afternoon_status'
     ];
+    protected $casts = [
+    'is_answered' => 'boolean',
+];
 
     public function student()
     {

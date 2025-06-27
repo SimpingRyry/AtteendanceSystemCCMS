@@ -9,14 +9,15 @@ use App\Http\Controllers\LogController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OSSDController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\EventsController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdviserController;
 use App\Http\Controllers\OfficerController;
-use App\Http\Controllers\OrgListController;
 
+use App\Http\Controllers\OrgListController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
@@ -113,9 +114,8 @@ Route::get('/api/events', [EventsController::class, 'fetchEvents'])->name('event
 
 Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
 
-Route::get('/device_page', function () {
-    return view('device_page');
-});
+Route::get('/device_page', [DeviceController::class, 'index']);
+
 Route::get('/student_payment', function () {
     return view('student_payment');
 });

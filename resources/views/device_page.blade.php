@@ -31,115 +31,77 @@
     {{-- Sidebar --}}
     @include('layout.sidebar')
 
-    <main>
+<main>
     <div class="container outer-box mt-5 pt-5 pb-4">
         <div class="container inner-glass shadow p-4" id="main_box">
             <!-- Heading -->
-        <div class="mb-3">
-          <h2 class="fw-bold" style="color: #232946;">Device Status</h2>
-          <small style="color: #989797;">Manage /</small>
-          <small style="color: #444444;">Device</small>
-        </div>
+            <div class="mb-3">
+                <h2 class="fw-bold" style="color: #232946;">Device Status</h2>
+                <small style="color: #989797;">Manage /</small>
+                <small style="color: #444444;">Device</small>
+            </div>
 
             <!-- Add Device Button -->
             <div class="d-flex justify-content-end mb-4">
-                <button id="addDeviceBtn" class="btn btn-primary">
+                <button id="addDeviceBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDeviceModal">
                     <i class="fas fa-plus me-2"></i> Add Device
                 </button>
             </div>
 
             <!-- Devices Container -->
             <div id="deviceContainer" class="row g-4">
-                @foreach (['DEVICE 1', 'DEVICE 2', 'DEVICE 3', 'DEVICE 4'] as $device)
-                <div class="col-md-3">
-                <div class="card p-3 rounded status-box glass-box shadow-sm">
-
-<h5 class="mb-3 text-center">
-    <i class="fas fa-microchip me-2"></i>{{ $device }}
-</h5>
-
-<div class="d-flex flex-column gap-3">
-
-    <div class="d-flex justify-content-between align-items-center">
-        <div><i class="fas fa-power-off me-2"></i>Power</div>
-        <label class="switch">
-            <input type="checkbox" checked>
-            <span class="slider round"></span>
-        </label>
-    </div>
-
-    <div class="d-flex justify-content-between align-items-center">
-        <div><i class="fas fa-wifi me-2"></i>Internet</div>
-        <div class="indicator-circle bg-success"></div>
-    </div>
-
-    <div class="d-flex justify-content-between align-items-center">
-        <div><i class="fas fa-user-check me-2"></i>Accepting Attendance</div>
-        <div class="indicator-circle bg-success blinking"></div>
-    </div>
-
-    <div class="d-flex justify-content-between align-items-center">
-        <div><i class="fas fa-volume-up me-2"></i>Speaker</div>
-        <div class="indicator-circle bg-success"></div>
-    </div>
-
-</div>
-
-</div>
-
+    @foreach ($devices as $device)
+    <div class="col-md-3">
+        <div class="card p-3 rounded status-box glass-box shadow-sm">
+            <h5 class="mb-3 text-center">
+                <i class="fas fa-microchip me-2"></i>{{ $device->name }}
+            </h5>
+            <div class="d-flex flex-column gap-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><i class="fas fa-wifi me-2"></i>Internet</div>
+                    <div class="indicator-circle {{ $device->is_online ? 'bg-success' : 'bg-danger' }}"></div>
                 </div>
-                @endforeach
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><i class="fas fa-user-check me-2"></i>Accepting Attendance</div>
+                   <div class="indicator-circle {{ $device->is_online ? 'bg-success' : 'bg-danger' }}"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div><i class="fas fa-volume-up me-2"></i>Speaker</div>
+                    <div class="indicator-circle {{ $device->is_online ? 'bg-success' : 'bg-danger' }}"></div>
+                </div>
             </div>
-
+        </div>
+    </div>
+    @endforeach
+</div>
         </div>
     </div>
 
-    <script>
-        let deviceCount = 5; // Since you already have DEVICE 1-4
-        const addDeviceBtn = document.getElementById('addDeviceBtn');
-        const deviceContainer = document.getElementById('deviceContainer');
-
-        addDeviceBtn.addEventListener('click', () => {
-            const newDevice = document.createElement('div');
-            newDevice.className = "col-md-3";
-            newDevice.innerHTML = `
-                <div class="card p-3 rounded status-box glass-box shadow-sm">
-
-                    <h5 class="mb-3 text-center">DEVICE ${deviceCount}</h5>
-
-                    <div class="d-flex flex-column gap-3">
-
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><i class="fas fa-power-off me-2"></i>Power</div>
-                            <label class="switch">
-                                <input type="checkbox" checked>
-                                <span class="slider round"></span>
-                            </label>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><i class="fas fa-wifi me-2"></i>Internet</div>
-                            <div class="indicator-circle bg-success"></div>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><i class="fas fa-user-check me-2"></i>Accepting Attendance</div>
-                            <div class="indicator-circle bg-success blinking"></div>
-                        </div>
-
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><i class="fas fa-volume-up me-2"></i>Speaker</div>
-                            <div class="indicator-circle bg-success"></div>
-                        </div>
-
-                    </div>
-
+    <!-- Modal -->
+    <div class="modal fade" id="addDeviceModal" tabindex="-1" aria-labelledby="addDeviceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addDeviceModalLabel">Add Device</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            `;
-            deviceContainer.appendChild(newDevice);
-            deviceCount++;
-        });
-    </script>
+                <div class="modal-body">
+                    <form id="deviceForm">
+                        <div class="mb-3">
+                            <label for="deviceName" class="form-label">Device Name</label>
+                            <input type="text" class="form-control" id="deviceName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="devicePassword" class="form-label">Device Password</label>
+                            <input type="password" class="form-control" id="devicePassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Connect Device</button>
+                    </form>
+                    <div class="mt-2 text-danger" id="deviceError" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <style>
         .indicator-circle {
@@ -151,9 +113,6 @@
         .bg-success {
             background-color: #28a745 !important;
         }
-        .bg-danger {
-            background-color: #dc3545 !important;
-        }
         .blinking {
             animation: blink 1s infinite;
         }
@@ -163,8 +122,67 @@
             100% { opacity: 1; }
         }
     </style>
-</main>
 
+    <script>
+        document.getElementById("deviceForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById("deviceName").value.trim();
+            const password = document.getElementById("devicePassword").value.trim();
+            const errorEl = document.getElementById("deviceError");
+
+            fetch("/api/device-auth", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json",
+                },
+                body: new URLSearchParams({ name, password })
+            })
+            .then(res => {
+                if (!res.ok) throw res;
+                return res.json();
+            })
+            .then(data => {
+                const card = `
+                <div class="col-md-3">
+                    <div class="card p-3 rounded status-box glass-box shadow-sm">
+                        <h5 class="mb-3 text-center">
+                            <i class="fas fa-microchip me-2"></i>${name}
+                        </h5>
+                        <div class="d-flex flex-column gap-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div><i class="fas fa-wifi me-2"></i>Internet</div>
+                                <div class="indicator-circle bg-success"></div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div><i class="fas fa-user-check me-2"></i>Accepting Attendance</div>
+                                <div class="indicator-circle bg-success blinking"></div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div><i class="fas fa-volume-up me-2"></i>Speaker</div>
+                                <div class="indicator-circle bg-success"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                document.getElementById("deviceContainer").insertAdjacentHTML("beforeend", card);
+                errorEl.style.display = "none";
+                document.getElementById("deviceForm").reset();
+                bootstrap.Modal.getInstance(document.getElementById("addDeviceModal")).hide();
+            })
+            .catch(async err => {
+                let msg = "An error occurred.";
+                try {
+                    const json = await err.json();
+                    msg = json.message || msg;
+                } catch (_) {}
+                errorEl.innerText = msg;
+                errorEl.style.display = "block";
+            });
+        });
+    </script>
+</main>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
