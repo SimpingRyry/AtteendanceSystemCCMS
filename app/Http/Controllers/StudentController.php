@@ -7,6 +7,7 @@ use App\Models\Student;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
@@ -15,6 +16,8 @@ class StudentController extends Controller
 {
     public function store(Request $request)
     {
+        Log::info('Starting user creation', ['request' => $request->all()]);
+        // dd($request->all());
         // Adjust validation for organization depending on user role
         $request->validate([
             'sname' => 'required|string|max:255',
@@ -24,7 +27,7 @@ class StudentController extends Controller
             'uploaded_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'fingerprint' => 'nullable|int|max:255',
             'captured_image' => 'nullable|string',
-            'organization' => (Str::lower(Auth::user()->role) === 'admin' || Str::contains(Str::lower(Auth::user()->role), 'officer')) ? 'nullable' : 'required|string|max:255',
+            'organization' => (Str::lower(Auth::user()->role) === 'adviser' || Str::contains(Str::lower(Auth::user()->role), 'officer')) ? 'nullable' : 'required|string|max:255',
 
             'role' => 'required|string|max:255',
             'fingerprint_user_id' => 'nullable|integer',
@@ -69,7 +72,12 @@ class StudentController extends Controller
         $user->student_id = $request->student_id;
         // Set organization based on user role
         $role = Str::lower(Auth::user()->role);
-        $user->org = ($role === 'admin' || Str::contains($role, 'officer')) ? Auth::user()->org : $request->organization;
+        Log::info('Determined role', ['role' => $role]);
+        $user->org = ($role === 'adviser' || Str::contains($role, 'officer')) ? Auth::user()->org : $request->organization;
+
+          Log::info('Final user data before save', $user->toArray());
+
+     
         $user->save();
 
         event(new Registered($user));
@@ -85,6 +93,7 @@ class StudentController extends Controller
             if ($request->filled('fingerprint_user_id')) {
                 $student->f_id = $request->fingerprint_user_id;
             }
+             $student->status = 'Registered';
             $student->save();
         } else {
             return redirect()->back()->with('error', 'Student record not found.');

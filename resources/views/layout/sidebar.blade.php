@@ -7,7 +7,7 @@
     <!-- Org Logo & Name -->
     <div class="text-center pt-4 pb-3">
         @if ($org && $org->org_logo)
-            <img src="{{ asset('images/' . $org->org_logo) }}" alt="{{ $org->org_name }} Logo"
+            <img src="{{ asset('images/org_list/' . $org->org_logo) }}" alt="{{ $org->org_name }} Logo"
                  class="rounded-circle mb-3 border border-secondary" width="100" height="100" style="object-fit: cover;">
         @else
             <img src="{{ asset('images/default_logo.png') }}" alt="Default Org Logo"

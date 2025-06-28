@@ -78,26 +78,26 @@
       <div class="row g-4 mb-4">
         <div class="col-md-3">
           <div class="card text-center shadow-sm p-3 rounded-4">
-            <h6 class="text-muted">Total Students</h6>
-            <h2>1,024</h2>
+            <h6 class="text-muted">Total Members</h6>
+            <h2>{{ number_format($totalMembers) }}</h2>
           </div>
         </div>
         <div class="col-md-3">
           <div class="card text-center shadow-sm p-3 rounded-4">
             <h6 class="text-muted">Registered</h6>
-            <h2>867</h2>
+            <h2>{{ number_format($registered) }}</h2>
           </div>
         </div>
         <div class="col-md-3">
           <div class="card text-center shadow-sm p-3 rounded-4">
-            <h6 class="text-muted">Unregistered</h6>
-            <h2>157</h2>
+            <h6 class="text-muted">Total Collected Fines</h6>
+            <h2>₱{{ number_format($totalCollectedFines) }}</h2>
           </div>
         </div>
         <div class="col-md-3">
           <div class="card text-center shadow-sm p-3 rounded-4">
-            <h6 class="text-muted">Total Fines</h6>
-            <h2 id="totalFines">₱0</h2>
+            <h6 class="text-muted">Total Issued Fines</h6>
+            <h2 id="totalFines">₱{{ number_format($totalFines) }}</h2>
           </div>
         </div>
       </div>
@@ -107,17 +107,23 @@
       <div class="col-lg-6">
   <div class="card shadow-sm p-3 rounded-4">
     <h6 class="mb-3 text-center">Fines Issued by Month</h6>
+    <div id="finesChartWrapper" data-fines='@json($finesByMonth)'></div>
     <canvas id="finesChart" style="height: 300px;"></canvas>
   </div>
 </div>
-        <div class="col-lg-6">
-          <div class="card shadow-sm p-3 rounded-4">
-            <h6 class="mb-3 text-center">Registration Status</h6>
-            <div style="height: 300px; width: 220px; margin: auto;">
-              <canvas id="registrationChart"></canvas>
-            </div>
-          </div>
-        </div>
+       <div class="col-lg-6">
+  <div class="card shadow-sm p-3 rounded-4">
+    <h6 class="mb-3 text-center">Registered Students by Program, Year and Block</h6>
+    <div id="registrationChartData"
+         data-labels='@json(array_keys($yearLevelData->toArray()))'
+         data-values='@json(array_values($yearLevelData->toArray()))'>
+    </div>
+
+    <div style="height: 300px; width: 400px; margin: auto;">
+      <canvas id="registrationChart"></canvas>
+    </div>
+  </div>
+</div>
       </div>
 
       <!-- Table & Events Row -->
@@ -159,25 +165,29 @@
             </div>
           </div>
         </div>
-        <div class="col-lg-6">
-          <div class="card shadow-sm p-3 rounded-4">
-            <h6 class="mb-3 text-center">Upcoming Events</h6>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                Praxis General Assembly
-                <span class="badge bg-primary rounded-pill">April 25, 2025</span>
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                ITS Hackathon
-                <span class="badge bg-success rounded-pill">April 30, 2025</span>
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                Leadership Seminar
-                <span class="badge bg-warning rounded-pill text-dark">May 5, 2025</span>
-              </li>
-            </ul>
-          </div>
-        </div>
+       <div class="col-lg-6">
+  <div class="card shadow-sm p-3 rounded-4" style="min-height: 200px">
+    <h6 class="mb-3 text-center">Upcoming Events</h6>
+    <ul class="list-group list-group-flush">
+      @forelse($upcomingEvents as $event)
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ $event->name }}
+          <span class="badge 
+              @if($loop->index == 0) bg-primary
+              @elseif($loop->index == 1) bg-success
+              @elseif($loop->index == 2) bg-warning text-dark
+              @else bg-secondary
+              @endif
+              rounded-pill">
+            {{ \Carbon\Carbon::parse($event->event_date)->format('F j, Y') }}
+          </span>
+        </li>
+      @empty
+        <li class="list-group-item text-center">No upcoming events.</li>
+      @endforelse
+    </ul>
+  </div>
+</div>
       </div>
 
     </div>
@@ -192,11 +202,11 @@
   };
 
   function filterFines() {
-    const year = document.getElementById('filterYear').value;
-    const month = document.getElementById('filterMonth').value;
-    const key = `${year}-${month}`;
-    const amount = finesData[key] || 0;
-    document.getElementById('totalFines').innerText = `₱${amount.toLocaleString()}`;
+    // const year = document.getElementById('filterYear').value;
+    // const month = document.getElementById('filterMonth').value;
+    // const key = `${year}-${month}`;
+    // const amount = finesData[key] || 0;
+    // document.getElementById('totalFines').innerText = `₱${amount.toLocaleString()}`;
   }
 
   // Set current month/year on load
@@ -206,55 +216,83 @@
     const year = today.getFullYear();
     const key = `${year}-${month}`;
     const amount = finesData[key] || 0;
-    document.getElementById('totalFines').innerText = `₱${amount.toLocaleString()}`;
+    // document.getElementById('totalFines').innerText = `₱${amount.toLocaleString()}`;
   });
 </script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-       const finesChartCtx = document.getElementById('finesChart').getContext('2d');
-new Chart(finesChartCtx, {
-    type: 'bar',
-    data: {
-        labels: ['Nov 2024', 'Dec 2024', 'Mar 2025', 'Apr 2025'],
-        datasets: [{
-            label: 'Fines Issued (₱)',
-            data: [9400, 10800, 8650, 12450],
-            backgroundColor: '#ff6f61',
-            borderRadius: 6
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: { display: true }
-        },
-        scales: {
-            y: {
-                beginAtZero: true
-            }
-        }
-    }
-});
+ document.addEventListener('DOMContentLoaded', function () {
+      const finesRawData = document.getElementById('finesChartWrapper').dataset.fines;
+    const finesData = JSON.parse(finesRawData);
 
-        const ctx = document.getElementById('registrationChart').getContext('2d');
-    const registrationChart = new Chart(ctx, {
-        type: 'pie',
+    // Generate labels like "Jan 2024", etc.
+    const finesChartLabels = Object.keys(finesData).map(month => {
+        const [year, m] = month.split("-");
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        return `${monthNames[parseInt(m) - 1]} ${year}`;
+    });
+
+    const finesChartValues = Object.values(finesData);
+
+    // Draw chart
+    new Chart(document.getElementById('finesChart').getContext('2d'), {
+        type: 'bar',
         data: {
-            labels: ['Registered', 'Unregistered'],
+            labels: finesChartLabels,
             datasets: [{
-                data: [120, 30],
-                backgroundColor: ['#4CAF50', '#F44336'],
-                borderWidth: 1
+                label: 'Fines Issued (₱)',
+                data: finesChartValues,
+                backgroundColor: '#ff6f61',
+                borderRadius: 6
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    });
+
+      const chartDataDiv = document.getElementById('registrationChartData');
+
+    const labels = JSON.parse(chartDataDiv.dataset.labels);
+    const data = JSON.parse(chartDataDiv.dataset.values);
+
+    const colors = labels.map((_, i) => {
+        const hue = Math.floor((360 / labels.length) * i);
+        return `hsl(${hue}, 70%, 60%)`;
+    });
+
+    const ctx = document.getElementById('registrationChart').getContext('2d');
+
+    const registrationChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // allows height to apply
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 20,
+                        padding: 15,
+                        font: {
+                            size: 12
+                        }
+                    }
                 }
             }
         }

@@ -29,6 +29,7 @@ use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrgDashboardController;
 use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\StudentEvaluationController;
 use App\Http\Controllers\EvaluationResponseController;
@@ -66,9 +67,7 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/student', function () {
     return view('student');
 });
-Route::get('/dashboard_page', function () {
-    return view('dashboard_page');
-});
+Route::get('/dashboard_page', [OrgDashboardController::class, 'dashboard']);
 
 Route::get('/student_dashboard', function () {
     return view('student_dashboard');
