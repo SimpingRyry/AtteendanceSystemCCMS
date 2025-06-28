@@ -44,8 +44,8 @@
                         <label for="org" class="form-label">Filter by Organization</label>
                         <select name="org" id="org" class="form-select" onchange="this.form.submit()">
                             <option value="">All Organizations</option>
-                            @foreach($orgs as $org)
-                            <option value="{{ $org }}" {{ $selectedOrg == $org ? 'selected' : '' }}>
+                            @foreach($organizations as $org)
+                            <option value="{{ $org }}" >
                                 {{ $org }}
                             </option>
                             @endforeach
@@ -56,8 +56,8 @@
                         <label for="program" class="form-label">Filter by Program</label>
                         <select name="program" id="program" class="form-select" onchange="this.form.submit()">
                             <option value="">All Programs</option>
-                            @foreach($programs as $program)
-                            <option value="{{ $program }}" {{ $selectedProgram == $program ? 'selected' : '' }}>
+                            @foreach($courses as $program)
+                            <option value="{{ $program }}" >
                                 {{ $program }}
                             </option>
                             @endforeach
@@ -69,43 +69,47 @@
     <table class="table table-bordered table-hover">
         <thead class="table-light">
             <tr>
+                <thead class="table-dark">
+              <tr>
                 <th>Student ID</th>
+                <th>Name</th>
+                <th>Course</th>
+                <th>Section</th>
                 <th>Organization</th>
-                <th>Program</th>
-                <th>Fine Amount (₱)</th>
+                <th>Balance</th>
                 <th>Status</th>
-                <th>Action</th> <!-- NEW: Action Column -->
+                <th>Actions</th>
+              </tr>
+            </thead>
             </tr>
         </thead>
         <tbody>
-            @foreach($financeSummary as $record)
+            @foreach($students as $student)
             <tr>
-                <td>{{ $record->student_id }}</td>
-                <td>{{ $record->org }}</td>
-                <td>{{ $record->program }}</td>
-                <td>₱{{ number_format($record->total_fines, 2) }}</td>
+                <td>{{ $student->student_id }}</td>
+                <td>{{ $student->name }}</td>
+                <td>{{ $student->studentList->course ?? 'N/A' }}</td>
+                 <td>{{ $student->studentList->section ?? 'N/A' }}</td>
+                <td>{{ $student->org }}</td>
+                <td>{{ number_format($student->balance, 2) }}</td>
                 <td>
-                    @if($record->total_fines > 0)
+                    @if ($student->balance != 0)
                         <span class="badge bg-danger">Not Eligible</span>
                     @else
                         <span class="badge bg-success">Eligible</span>
                     @endif
                 </td>
                 <td>
-                    <a href="" class="btn btn-sm btn-primary">
-                        <i class="fas fa-file-pdf"></i> Generate Clearance
-                    </a>
+                   <a href="{{ route('clearance.show', ['id' => $student->student_id]) }}" class="btn btn-sm btn-primary" target="_blank">
+    Generate Clearance
+</a>
                 </td>
             </tr>
             @endforeach
         </tbody>
     </table>
 </div>
-                <!-- <div class="mb-3">
-    <a href="{{ route('clearance.pdf', ['org' => request('org'), 'program' => request('program')]) }}" class="btn btn-sm btn-primary">
-        <i class="fas fa-file-pdf"></i> Generate PDF
-    </a>
-</div> -->
+               
             </div>
         </div>
     </main>

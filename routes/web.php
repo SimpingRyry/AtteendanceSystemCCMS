@@ -170,8 +170,9 @@ Route::post('/notifications/mark-all-read', [NotificationController::class, 'mar
 Route::post('/record-attendance', [AttendanceController::class, 'store'])->name('record.attendance');
 
 
-Route::get('/clearance', [ClearanceController::class, 'showFinanceClearance'])->name('clearance');
-Route::get('/clearance/pdf', [ClearanceController::class, 'downloadPDF'])->name('clearance.pdf');
+
+Route::get('/clearance', [ClearanceController::class, 'index'])->name('clearance.index');
+Route::get('/clearance/{id}', [ClearanceController::class, 'generate'])->name('clearance.show');
 
 
 Route::post('/evaluation/store', [EvaluationController::class, 'store'])->name('evaluation.store');

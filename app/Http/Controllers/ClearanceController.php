@@ -2,12 +2,94 @@
 
 namespace App\Http\Controllers;
 
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\User;
+use App\Models\OrgList;
+use App\Models\Setting;
+use App\Models\Student;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 
 class ClearanceController extends Controller
 {
+
+public function index()
+{
+    // Get all users with studentList and transactions
+    $students = User::whereHas('studentList')
+        ->with(['studentList', 'transactions'])
+        ->get()
+        ->unique('student_id');
+
+    // Get all organization names from org_list table
+    $organizations = OrgList::pluck('org_name'); // adjust column name if it's not 'name'
+
+    // Get all distinct courses from student_list table
+    $courses = Student::distinct()->pluck('course');
+
+    return view('clearance', compact('students', 'organizations', 'courses'));
+}
+
+public function generate($id)
+{
+    // Get current academic term from settings
+    $term = Setting::where('key', 'academic_term')->value('value');
+
+    // Fetch the student with org and transactions
+    $student = User::whereHas('studentList')
+        ->with(['studentList', 'transactions'])
+        ->where('student_id', $id)
+        ->firstOrFail();
+
+    // Access balance
+    $balance = $student->studentList->balance ?? 0;
+
+    // Only allow if eligible
+    if ($balance > 0) {
+        return back()->with('error', 'Student is not eligible for clearance.');
+    }
+
+    // Get the student's organization
+  $orgName = $student->org ?? null;
+
+// Query the Organization table (orglist) by name
+$organization = OrgList::where('org_name', $orgName)->first();
+$orgLogo = $organization?->org_logo ?? null;
+
+    // Get President for the same organization and term
+    $president = User::where('role', 'like', '%President%')
+    ->where('term', $term)
+    ->where('org', $orgName)
+    ->select('name', 'role')
+    ->first();
+
+$vicePresident = User::where('role', 'like', '%Vice President%')
+    ->where('term', $term)
+    ->where('org', $orgName)
+    ->select('name', 'role')
+    ->first();
+
+// Capitalize names if found
+if ($president) {
+    $president->name = Str::upper($president->name);
+}
+
+if ($vicePresident) {
+    $vicePresident->name = Str::upper($vicePresident->name);
+}
+
+    // Generate and return the PDF
+    $pdf = Pdf::loadView('clearance.certificate', compact(
+        'student',
+        'orgLogo',
+        'president',
+        'vicePresident'
+    ));
+
+    return $pdf->stream('clearance_certificate.pdf');
+}
+
     public function showFinanceClearance(Request $request)
 {
     // Get filter values from request
