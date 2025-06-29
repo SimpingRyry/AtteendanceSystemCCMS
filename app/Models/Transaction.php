@@ -12,6 +12,6 @@ class Transaction extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'student_id', 'event', 'transaction_type', 'fine_amount', 'org', 'date','acad_term','acad_code'
+        'student_id', 'event', 'transaction_type', 'fine_amount', 'org', 'date','acad_term','acad_code','processed_by'
     ];
 }

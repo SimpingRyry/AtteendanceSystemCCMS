@@ -118,7 +118,8 @@
     <td>{{ $student->studentList->course ?? 'N/A' }}</td>
     <td>{{ $student->studentList->section ?? 'N/A' }}</td>
     <td>{{ $student->org }}</td>
-    <td>₱{{ number_format($student->balance, 2) }}</td>
+    <td>  ₱{{ number_format($balances[$student->student_id] ?? 0, 2) }}
+</td>
     <td>
       <button class="btn btn-success btn-sm"><i class="fas fa-money-bill-wave"></i> Pay</button>
       <button class="btn btn-primary btn-sm view-btn"
@@ -161,10 +162,51 @@
   </div>
 </div>
 
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ route('transactions.pay') }}">
+      @csrf
+      <input type="hidden" name="student_id" id="paymentStudentId">
+      <input type="hidden" name="org" id="paymentOrg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="paymentModalLabel">Enter Payment Amount</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <input type="number" step="0.01" min="1" class="form-control" id="amount" name="amount" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Submit Payment</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.btn-success').forEach(button => {
+      button.addEventListener('click', function () {
+        const row = this.closest('tr');
+        const studentId = row.querySelector('td:nth-child(1)').innerText.trim();
+        const org = row.querySelector('td:nth-child(5)').innerText.trim();
+
+        document.getElementById('paymentStudentId').value = studentId;
+        document.getElementById('paymentOrg').value = org;
+
+        const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+        paymentModal.show();
+      });
+    });
+  });
+  
   document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.view-btn').forEach(button => {
     button.addEventListener('click', () => {

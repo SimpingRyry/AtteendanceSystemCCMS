@@ -47,7 +47,7 @@
           <small class="profile-role">
             @php
               $org = $user->org ?? '';
-              $role = $user->role ?? 'No Role';
+              $role = str_replace(' - Officer', '', $user->role) ?? 'No Role';
               $orgAbbrev = match($org) {
                 'Information Technology Society' => 'ITS',
                 'CCMS Student Government' => 'CCMS SG',

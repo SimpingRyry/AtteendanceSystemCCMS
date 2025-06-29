@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Setting;
 use App\Models\Student;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -32,13 +33,31 @@ class PaymentController extends Controller
 
 public function index()
 {
-    $students = User::whereHas('studentList') // only users that have a studentList
+    $students = User::whereHas('studentList')
         ->with(['studentList', 'transactions'])
         ->get()
-        ->unique('student_id'); // Filter duplicates by student_id
+        ->unique('student_id');
 
-    return view('payment_page2', compact('students'));
+    // Separate balance array
+    $balances = [];
+
+    foreach ($students as $student) {
+        $balance = 0;
+
+        foreach ($student->transactions as $transaction) {
+            if ($transaction->transaction_type === 'FINE') {
+                $balance += $transaction->fine_amount;
+            } elseif ($transaction->transaction_type === 'PAYMENT') {
+                $balance -= $transaction->fine_amount;
+            }
+        }
+
+        $balances[$student->student_id] = $balance;
+    }
+
+    return view('payment_page2', compact('students', 'balances'));
 }
+
 
 public function loadStudentSOA($studentId)
 {
@@ -62,5 +81,33 @@ public function loadStudentSOA($studentId)
         'studentSection' => $studentSection,
         
     ]);
+}
+public function storePayment(Request $request)
+{
+    $request->validate([
+        'student_id' => 'required|string',
+        'amount' => 'required|numeric|min:0.01',
+        'org' => 'required|string',
+    ]);
+
+    $setting = Setting::where('key', 'academic_term')->first();
+    $acadTerm = $setting->value ?? 'Unknown Term';
+    $acadCode = $setting->acad_code ?? 'Unknown Code';
+
+    $user = Auth::user();
+    $processedBy = $user->name . ' - ' . strtoupper($user->role); // e.g., "Jane Doe - ADMIN"
+
+    Transaction::create([
+        'student_id'     => $request->student_id,
+        'transaction_type' => 'PAYMENT',
+        'org'            => $request->org,
+        'date'           => now(),
+        'acad_code'      => $acadCode,
+        'acad_term'      => $acadTerm,
+        'processed_by'   => $processedBy,
+        'fine_amount'    => $request->amount,
+    ]);
+
+    return back()->with('success', 'Payment recorded successfully.');
 }
 }

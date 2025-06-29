@@ -34,62 +34,74 @@
 
     @include('layout.navbar')
     @include('layout.sidebar')
- <main>
+<main>
     <div class="container outer-box mt-5 pt-5 pb-4 shadow">
         <div class="container-fluid" id="mainContainer">
             <!-- Heading -->
             <div class="mb-3">
-                <h2 class="fw-bold" style="color: #232946;">Accounts</h2>
+                <h2 class="fw-bold" style="color: #232946;">Officers</h2>
                 <small style="color: #989797;">Manage /</small>
-                <small style="color: #444444;">Accounts</small>
+                <small style="color: #444444;">Officers</small>
             </div>
 
             <!-- Main Card -->
             <div class="card shadow-sm p-4">
 
-                <!-- Filters and Search -->
-              <div class="row mb-4">
-    <div class="col-12 d-flex justify-content-end align-items-end gap-2">
-        <div style="position: relative;">
-            <!-- Filter Icon Button -->
-            <button class="btn btn-outline-secondary" onclick="toggleFilterCloud()" style="border-radius: 6px;">
-                <i class="bi bi-funnel-fill"></i>
-            </button>
+                <!-- Header Section with Filters and Search -->
+                <div class="row align-items-center mb-3">
+                    <!-- Left: Officer List + Service Year + Term Search -->
+                    <div class="col-md-6">
+                        <h5 class="mb-1 fw-bold" style="color: #232946;">Officer List</h5>
+                        <p class="mb-2 text-muted">Service Year: <strong>{{ $yearOnly }}</strong></p>
 
-            <!-- Cloud Popup -->
-            <div id="filterCloud" class="shadow p-3 rounded" style="position: absolute; top: 120%; right: 0; background-color: white; border: 1px solid #ddd; border-radius: 12px; display: none; min-width: 250px; z-index: 10;">
-                <div class="mb-2">
-                    <label for="roleFilter" class="form-label">Filter by Role</label>
-                    <select id="roleFilter" class="form-select form-select-sm" onchange="applyFilters()">
-                        <option value="">All Roles</option>
-                        <option value="Member">Member</option>
-                        <option value="Officer">Officer</option>
-                        <option value="Admin">Admin</option>
-                    </select>
+                        <!-- Service Year Search Input -->
+                        <div style="max-width: 250px;">
+                            <label for="termSearch" class="form-label mb-1">Service Year</label>
+                            <input type="text" id="termSearch" class="form-control form-control-sm"
+                                   placeholder="e.g. 2025-2026" oninput="applyFilters()">
+                        </div>
+                    </div>
+
+                    <!-- Right: Filter + Search -->
+                    <div class="col-md-6 d-flex justify-content-end align-items-end gap-2">
+                        <!-- Filter Button -->
+                        <div style="position: relative;">
+                            <button class="btn btn-outline-secondary" onclick="toggleFilterCloud()" style="border-radius: 6px;">
+                                <i class="bi bi-funnel-fill"></i>
+                            </button>
+
+                            <!-- Cloud Popup -->
+                            <div id="filterCloud" class="shadow p-3 rounded" style="position: absolute; top: 120%; right: 0; background-color: white; border: 1px solid #ddd; border-radius: 12px; display: none; min-width: 250px; z-index: 10;">
+                                <div class="mb-2">
+                                    <label for="roleFilter" class="form-label">Filter by Role</label>
+                                    <select id="roleFilter" class="form-select form-select-sm" onchange="applyFilters()">
+                                        <option value="">All Roles</option>
+                                        <option value="Member">Member</option>
+                                        <option value="Officer">Officer</option>
+                                        <option value="Admin">Admin</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="deptFilter" class="form-label">Filter by Organization</label>
+                                    <select id="deptFilter" class="form-select form-select-sm" onchange="applyFilters()">
+                                        <option value="">All Organization</option>
+                                        <option value="ITS">ITS</option>
+                                        <option value="PRAXIS">PRAXIS</option>
+                                        <option value="CCMS-SG">CCMS-SG</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Search Input -->
+                        <div style="min-width: 250px;">
+                            <label class="form-label mb-1">Search</label>
+                            <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Enter search..." oninput="applyFilters()">
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label for="deptFilter" class="form-label">Filter by Organization</label>
-                    <select id="deptFilter" class="form-select form-select-sm" onchange="applyFilters()">
-                        <option value="">All Organization</option>
-                        <option value="ITS">ITS</option>
-                        <option value="PRAXIS">PRAXIS</option>
-                        <option value="CCMS-SG">CCMS-SG</option>
-                    </select>
-                </div>
-            </div>
-        </div>
 
-        <!-- Search Input -->
-        <div style="min-width: 250px;">
-            <label class="form-label">Search</label>
-            <input type="text" id="searchInput" class="form-control" placeholder="Enter search..." oninput="applyFilters()">
-        </div>
-    </div>
-</div>
-
-                <!-- Student List -->
-                <h5 class="mb-3 fw-bold" style="color: #232946;">User List</h5>
-
+                <!-- Officer Table -->
                 @if($users->isEmpty())
                     <p>No users found.</p>
                 @else
@@ -111,7 +123,7 @@
                                         <td>{{ $user->user_ID }}</td>
                                         <td>{{ $user->name }}</td>
                                         <td>{{ $user->email }}</td>
-                                        <td>{{ $user->role }}</td>
+                                        <td>{{ str_replace(' - Officer', '', $user->role) }}</td>
                                         <td>{{ $user->org }}</td>
                                         <td>
                                             <button type="button" class="btn btn-sm btn-warning me-1 border-0 shadow-none"
@@ -153,6 +165,10 @@
         </div>
     </div>
 </main>
+
+
+
+</div>
 
 <div class="modal fade" id="addOfficerModal" tabindex="-1" aria-labelledby="addOfficerModalLabel" aria-hidden="true">
   <div class="modal-dialog">

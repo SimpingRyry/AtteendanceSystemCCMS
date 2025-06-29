@@ -112,9 +112,7 @@ Route::get('/api/events', [EventsController::class, 'fetchEvents'])->name('event
 
 Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
 
-Route::get('/device_page', function () {
-    return view('device_page');
-});
+Route::get('/device_page', [DeviceController::class, 'index']);
 Route::get('/home_page', function () {
     return view('home_page');
 });
@@ -255,3 +253,4 @@ Route::get('/evaluation-responses/{assignment}/summary', [EvaluationResponseCont
 Route::post('/ossd/store', [OSSDController::class, 'store'])->name('ossd.store');
 Route::get('/OSSD', [OSSDController::class, 'index'])->name('ossd.index');
 Route::get('/members', [MemberController::class, 'showMembers'])->middleware('auth');
+Route::post('/transactions/pay', [PaymentController::class, 'storePayment'])->name('transactions.pay');
