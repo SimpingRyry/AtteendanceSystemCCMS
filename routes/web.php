@@ -26,6 +26,7 @@ use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ClearanceController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\NotificationController;
@@ -78,9 +79,7 @@ Route::get('/evaluation', function () {
 });
 
 
-Route::get('/super_dashboard', function () {
-    return view('super_dashboard');
-});
+Route::get('/super_dashboard', [DashboardController::class, 'index']);
 Route::get('/template', function () {
     return view('schedTemplate');
 });

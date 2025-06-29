@@ -224,17 +224,37 @@
 
     <script>
  document.addEventListener('DOMContentLoaded', function () {
-      const finesRawData = document.getElementById('finesChartWrapper').dataset.fines;
+    const finesRawData = document.getElementById('finesChartWrapper').dataset.fines;
     const finesData = JSON.parse(finesRawData);
 
-    // Generate labels like "Jan 2024", etc.
-    const finesChartLabels = Object.keys(finesData).map(month => {
+    // Get current date
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1; // JS month is 0-based
+
+    // Calculate target months: current month and 3 before
+    const targetMonths = [];
+    for (let i = 3; i >= 0; i--) {
+        const date = new Date(currentYear, currentMonth - 1 - i);
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        targetMonths.push(`${y}-${m}`);
+    }
+
+    // Filter data
+    const filteredData = {};
+    targetMonths.forEach(monthKey => {
+        filteredData[monthKey] = finesData[monthKey] ?? 0;
+    });
+
+    // Generate labels like "Jan 2024"
+    const finesChartLabels = Object.keys(filteredData).map(month => {
         const [year, m] = month.split("-");
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         return `${monthNames[parseInt(m) - 1]} ${year}`;
     });
 
-    const finesChartValues = Object.values(finesData);
+    const finesChartValues = Object.values(filteredData);
 
     // Draw chart
     new Chart(document.getElementById('finesChart').getContext('2d'), {
@@ -257,7 +277,7 @@
             }
         }
     });
-    });
+});
 
       const chartDataDiv = document.getElementById('registrationChartData');
 

@@ -47,25 +47,25 @@
                 <div class="col-md-3">
                     <div class="card text-center shadow-sm p-3 rounded-4">
                         <h6 class="text-muted">Total Organizations</h6>
-                        <h2>35</h2>
+                        <h2>{{ $totalOrganizations }}</h2>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card text-center shadow-sm p-3 rounded-4">
                         <h6 class="text-muted">Events Created</h6>
-                        <h2>128</h2>
+                        <h2>{{ $totalEvents }}</h2>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="card text-center shadow-sm p-3 rounded-4">
                         <h6 class="text-muted">Users</h6>
-                        <h2>2,415</h2>
+                        <h2>{{ $totalUsers }}</h2>
                     </div>
                 </div>
                 <div class="col-md-3">
     <div class="card text-center shadow-sm p-3 rounded-4">
         <h6 class="text-muted">Total Students</h6>
-        <h2>1,234</h2>
+        <h2>{{ $totalStudents }}</h2>
     </div>
 </div>
             </div>
@@ -75,7 +75,11 @@
                 <!-- Organization Activity Chart -->
                 <div class="col-lg-6">
                     <div class="card shadow-sm p-3 rounded-4">
-                        <h6 class="mb-3 text-center">Organization Activity Overview</h6>
+                        <h6 class="mb-3 text-center">Events created per Organization</h6>
+                        <div id="eventsChartData"
+     data-labels='@json(array_keys($eventsPerOrg))'
+     data-values='@json(array_values($eventsPerOrg))'>
+</div>
                         <canvas id="absenteesChart" style="height: 300px;"></canvas>
                     </div>
                 </div>
@@ -85,6 +89,11 @@
   <div class="card shadow-sm p-3 rounded-4">
     <h6 class="mb-3 text-center">Student Distribution by Program</h6>
     <div class="chart-container" style="max-width: 350px; margin: auto;">
+
+    <div id="studentProgramData"
+     data-labels='@json($studentDistribution->keys())'
+     data-values='@json($studentDistribution->values())'>
+</div>
       <canvas id="studentProgramPieChart" width="300" height="290"></canvas>
     </div>
   </div>
@@ -129,25 +138,29 @@
                 </div>
 
                 <!-- Upcoming Events -->
-                <div class="col-lg-6">
-                    <div class="card shadow-sm p-3 rounded-4">
-                        <h6 class="mb-3 text-center">Upcoming Events</h6>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Tech Conference 2025
-                                <span class="badge bg-primary rounded-pill">May 20, 2025</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Admin Training Workshop
-                                <span class="badge bg-success rounded-pill">May 28, 2025</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Mid-Year Assembly
-                                <span class="badge bg-warning rounded-pill text-dark">June 15, 2025</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                   <div class="col-lg-6">
+  <div class="card shadow-sm p-3 rounded-4" style="min-height: 200px">
+    <h6 class="mb-3 text-center">Upcoming Events</h6>
+    <ul class="list-group list-group-flush">
+      @forelse($upcomingEvents as $event)
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ $event->name }}
+          <span class="badge 
+              @if($loop->index == 0) bg-primary
+              @elseif($loop->index == 1) bg-success
+              @elseif($loop->index == 2) bg-warning text-dark
+              @else bg-secondary
+              @endif
+              rounded-pill">
+            {{ \Carbon\Carbon::parse($event->event_date)->format('F j, Y') }}
+          </span>
+        </li>
+      @empty
+        <li class="list-group-item text-center">No upcoming events.</li>
+      @endforelse
+    </ul>
+  </div>
+</div>
             </div>
 
         </div>
@@ -157,14 +170,45 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        const ctx = document.getElementById('studentProgramPieChart').getContext('2d');
-new Chart(ctx, {
+    const eventsChartData = document.getElementById('eventsChartData');
+const orgLabels = JSON.parse(eventsChartData.dataset.labels);
+const orgEvents = JSON.parse(eventsChartData.dataset.values);
+
+new Chart(document.getElementById('absenteesChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: orgLabels,
+        datasets: [{
+            label: 'Events Created',
+            data: orgEvents,
+            backgroundColor: orgLabels.map((_, i) => `hsl(${i * 40 % 360}, 70%, 60%)`),
+            borderRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+const programChartData = document.getElementById('studentProgramData');
+const programLabels = JSON.parse(programChartData.dataset.labels);
+const programValues = JSON.parse(programChartData.dataset.values);
+
+new Chart(document.getElementById('studentProgramPieChart').getContext('2d'), {
     type: 'pie',
     data: {
-        labels: ['BSIT', 'BSIS'],
+        labels: programLabels,
         datasets: [{
-            data: [750, 484],  // Example data counts for BSIT and BSIS
-            backgroundColor: ['#3498db', '#9b59b6'],  // Blue and Purple
+            data: programValues,
+            backgroundColor: programLabels.map((_, i) => `hsl(${i * 60 % 360}, 70%, 60%)`),
             hoverOffset: 30
         }]
     },
@@ -181,76 +225,6 @@ new Chart(ctx, {
         }
     }
 });
-        const absenteeCtx = document.getElementById('absenteesChart').getContext('2d');
-        new Chart(absenteeCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Praxis', 'ITS'],
-                datasets: [{
-                    label: 'Total Absentees',
-                    data: [14, 23],
-                    backgroundColor: ['#1976d2', '#2e7d32'], 
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        const registrationCtx = document.getElementById('registrationChart').getContext('2d');
-        new Chart(registrationCtx, {
-            type: 'line', // Changed to line chart
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'], // Example months for trend
-                datasets: [{
-                    label: 'BSIT Registered',
-                    data: [200, 300, 350, 400, 450],
-                    borderColor: '#42a5f5', // Blue
-                    fill: false,
-                    tension: 0.4
-                }, {
-                    label: 'BSIT Unregistered',
-                    data: [50, 60, 75, 50, 45],
-                    borderColor: '#ef5350', // Red
-                    fill: false,
-                    tension: 0.4
-                }, {
-                    label: 'BSIS Registered',
-                    data: [300, 330, 350, 400, 450],
-                    borderColor: '#66bb6a', // Green
-                    fill: false,
-                    tension: 0.4
-                }, {
-                    label: 'BSIS Unregistered',
-                    data: [100, 120, 100, 80, 75],
-                    borderColor: '#ffca28', // Yellow
-                    fill: false,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
     </script>
 
     <!-- Bootstrap JS -->

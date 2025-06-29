@@ -2,51 +2,52 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Event;
+use App\Models\OrgList;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function index()
+public function index()
 {
-    // 1. Total Students
-    $totalStudents = DB::table('student_list')->count();
+    // Basic Counts
+    $totalOrganizations = OrgList::count();
+    $totalEvents = Event::count();
+    $totalUsers = User::count();
+    $totalStudents = Student::count();
 
-    // 2. Registered Students
-    $registeredCount = DB::table('student_list')->where('status', 'Registered')->count();
+    // Events per Organization
+    $orgs = OrgList::pluck('org_name'); // get all org names
+    $eventsPerOrg = [];
 
-    // 3. Unregistered Students
-    $unregisteredCount = DB::table('student_list')->where('status', 'Unregistered')->count();
+    foreach ($orgs as $orgName) {
+        $eventCount = Event::where('org', $orgName)->count();
+        $eventsPerOrg[$orgName] = $eventCount;
+    }
 
-    // 4. Total Fines
-    $totalFines = DB::table('finance_data')->sum('amount');
+    // Student distribution by program/course
+    $studentDistribution = Student::select('course', DB::raw('count(*) as total'))
+        ->groupBy('course')
+        ->pluck('total', 'course'); // returns ['BSIT' => 750, 'BSIS' => 484]
 
-    // 5. Fines by Month (last 6 months)
-    $finesByMonth = DB::table('finance_data')
-        ->select(
-            DB::raw("DATE_FORMAT(date_issued, '%Y-%m') as month"),
-            DB::raw("SUM(amount) as total")
-        )
-        ->groupBy('month')
-        ->orderBy('month', 'desc')
-        ->limit(6)
-        ->get();
-
-    // 6. Upcoming Events
-    $upcomingEvents = DB::table('events')
+        $upcomingEvents = DB::table('events')
         ->select('name', 'event_date')
         ->whereDate('event_date', '>=', Carbon::now())
         ->orderBy('event_date')
-        ->limit(5)
+        ->limit(3)
         ->get();
 
-    return view('dashboard_page', compact(
+    return view('super_dashboard', compact(
+        'totalOrganizations',
+        'totalEvents',
+        'totalUsers',
         'totalStudents',
-        'registeredCount',
-        'unregisteredCount',
-        'totalFines',
-        'finesByMonth',
+        'eventsPerOrg',
+        'studentDistribution',
         'upcomingEvents'
     ));
 }
