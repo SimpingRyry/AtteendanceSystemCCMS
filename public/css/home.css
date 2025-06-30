@@ -1,5 +1,5 @@
 body {
-    font-family: 'Roboto Slab', serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .navbar {
@@ -10,4 +10,44 @@ body {
 .navbar-brand,
 .navbar-nav .nav-link {
     color: white !important;
+}
+.navbar-nav .nav-item {
+    margin: 0 10px;
+}
+.navbar-toggler {
+  border: 1px solid white;
+}
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='white' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+/* Ensure navbar is sticky */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+/* Adjust carousel height to fill remaining viewport below navbar */
+.carousel-slide {
+  min-height: calc(100vh - 56px); /* 56px is default Bootstrap navbar height */
+}
+
+.custom-login-btn {
+  background-color: #4A90E2;
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 2.5rem;
+  border: none;
+  border-radius: 50px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  margin-right: 1rem;
+}
+
+.custom-login-btn:hover {
+  background-color: #3b7bc1;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
 }
