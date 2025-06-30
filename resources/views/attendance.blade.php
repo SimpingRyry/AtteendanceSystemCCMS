@@ -33,7 +33,9 @@
 
     <main>
     <div class="container outer-box mt-5 pt-5 pb-4">
+        @if($currentEvent && auth()->user()->org === $currentEvent->org)
         <div class="container inner-glass shadow p-4" id="main_box" data-timeouts="{{ $currentEvent->timeouts }}">
+        @endif
             <div class="mb-4">
                 <h2 class="fw-bold" style="color: #232946;">Attendance</h2>
                 <small style="color: #989797;">Monitor /</small>

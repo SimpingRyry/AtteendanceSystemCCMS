@@ -28,7 +28,7 @@
         </thead>
         <tbody>
           @foreach($previewData as $row)
-          <tr class="{{ $row['status'] === 'Duplicate' ? 'table-warning' : 'table-success' }}">
+          <tr class="{{ $row['status'] === 'Duplicate' ? 'table-warning' : ($row['status'] === 'Updated' ? 'table-info' : 'table-success') }}">
             @foreach($row as $value)
             <td>{{ $value }}</td>
             @endforeach

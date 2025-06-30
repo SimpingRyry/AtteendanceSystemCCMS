@@ -23,12 +23,13 @@ public function index()
         ->unique('student_id');
 
     // Get all organization names from org_list table
-    $organizations = OrgList::pluck('org_name'); // adjust column name if it's not 'name'
+    $organizations = OrgList::pluck('org_name');
 
-    // Get all distinct courses from student_list table
+    // Get all distinct courses and sections from student_list table
     $courses = Student::distinct()->pluck('course');
+    $sections = Student::distinct()->pluck('section');
 
-    return view('clearance', compact('students', 'organizations', 'courses'));
+    return view('clearance', compact('students', 'organizations', 'courses', 'sections'));
 }
 
 public function generate($id)

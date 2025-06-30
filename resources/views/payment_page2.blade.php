@@ -6,22 +6,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" 
+    integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
 
-  <!-- Font Awesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
 
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="{{ asset('css/payment.css') }}">
-  <link rel="stylesheet" href="{{ asset('css/dash_side.css') }}">
-  <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ asset('css/content.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dash_side.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+
+<!-- Bootstrap 5 JS Bundle (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 
   <title>CCMS Attendance System</title>
 
   <style>
+
+  #filterCloud {
+    box-shadow: 0px 8px 20px rgba(0,0,0,0.1);
+    border-radius: 16px;
+    background: #fff;
+}
+
+
     body {
       font-family: 'Poppins', sans-serif;
     }
@@ -50,100 +66,122 @@
   {{-- Sidebar --}}
   @include('layout.sidebar')
 
-  <main>
-    <div class="container outer-box mt-5 pt-5 pb-4">
-      <div class="container inner-glass shadow p-4" id="main_box">
-        <!-- Heading -->
-        <div class="mb-4">
-          <h2 class="fw-bold" style="color: #232946;">Payment</h2>
-          <small style="color: #989797;">Manage /</small>
-          <small style="color: #444444;">Payment</small>
-        </div>
-
-        <!-- Filter Form -->
-        <div class="mb-4">
-          <form class="row g-3">
-            <div class="col-md-3">
-              <label for="filterYear" class="form-label fw-semibold">Year Level</label>
-              <select class="form-select" id="filterYear">
-                <option selected>All</option>
-                <option>1st Year</option>
-                <option>2nd Year</option>
-                <option>3rd Year</option>
-                <option>4th Year</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label for="filterCourseSection" class="form-label fw-semibold">Course & Section</label>
-              <select class="form-select" id="filterCourseSection">
-                <option selected>All</option>
-                <option>BSIT - A</option>
-                <option>BSCS - B</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label for="filterOrg" class="form-label fw-semibold">Organization</label>
-              <select class="form-select" id="filterOrg">
-                <option selected>All</option>
-                <option>Science Club</option>
-                <option>Math Society</option>
-                <option>Debate Team</option>
-              </select>
-            </div>
-            <div class="col-md-3 d-flex align-items-end">
-              <button type="submit" class="btn btn-dark w-100"><i class="fas fa-filter me-1"></i>Apply Filters</button>
-            </div>
-          </form>
-        </div>
-
-        <!-- Student Table -->
-        <div class="table-responsive">
-          <table class="table table-hover align-middle">
-            <thead class="table-dark">
-              <tr>
-                <th>Student ID</th>
-                <th>Name</th>
-                <th>Course</th>
-                <th>Section</th>
-                <th>Organization</th>
-                <th>Balance</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-            @foreach($students as $student)
-  <tr>
-    <td>{{ $student->student_id }}</td>
-    <td>{{ $student->name }}</td>
-    <td>{{ $student->studentList->course ?? 'N/A' }}</td>
-    <td>{{ $student->studentList->section ?? 'N/A' }}</td>
-    <td>{{ $student->org }}</td>
-    <td>  ₱{{ number_format($balances[$student->student_id] ?? 0, 2) }}
-</td>
-    <td>
-      <button class="btn btn-success btn-sm"><i class="fas fa-money-bill-wave"></i> Pay</button>
-      <button class="btn btn-primary btn-sm view-btn"
-              data-student-id="{{ $student->student_id }}"
-              data-bs-toggle="modal"
-              data-bs-target="#soaModal">
-        <i class="fas fa-eye"></i> View
-      </button>
-    </td>
-  </tr>
-@endforeach
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Statement of Account Modal 1 -->
+<main>
+  <div class="container outer-box mt-5 pt-5 pb-4">
+    <div class="container inner-glass shadow p-4" id="main_box">
       
-
-        <!-- Modal 2 (Optional, repeat for others as needed) -->
-       
-
+      <!-- Heading -->
+      <div class="mb-4">
+        <h2 class="fw-bold" style="color: #232946;">Payment</h2>
+        <small style="color: #989797;">Manage /</small>
+        <small style="color: #444444;">Payment</small>
       </div>
+
+      <!-- Filter Toggle Button -->
+
+      <!-- Filter Cloud -->
+      <div class="row align-items-center mb-3">
+  <div class="col-md-12 d-flex justify-content-end align-items-end gap-2">
+
+    <!-- Filter Button + Cloud -->
+    <div style="position: relative;">
+      <button class="btn btn-outline-secondary" onclick="toggleFilterCloud()" style="border-radius: 6px;">
+        <i class="bi bi-funnel-fill"></i>
+      </button>
+
+      <!-- Filter Cloud -->
+    <div id="filterCloud" class="shadow p-3 rounded" style="position: absolute; top: 120%; right: 0; background-color: white; border: 1px solid #ddd; border-radius: 12px; display: none; min-width: 270px; z-index: 10;">
+  
+  <!-- Year Level -->
+  <div class="mb-2">
+    <label for="filterYear" class="form-label">Filter by Year Level</label>
+    <select id="filterYear" class="form-select form-select-sm">
+      <option value="">All</option>
+      @foreach($years as $year)
+        <option>{{ $year }}</option>
+      @endforeach
+    </select>
+  </div>
+
+  <!-- Section -->
+  <div class="mb-2">
+    <label for="filterCourseSection" class="form-label">Filter by Section</label>
+    <select id="filterCourseSection" class="form-select form-select-sm">
+      <option value="">All</option>
+      @foreach($sections as $section)
+        <option>{{ $section }}</option>
+      @endforeach
+    </select>
+  </div>
+
+  <!-- Organization (Only if Super Admin) -->
+  @if(auth()->user()->role === 'Super Admin')
+  <div>
+    <label for="filterOrg" class="form-label">Filter by Organization</label>
+    <select id="filterOrg" class="form-select form-select-sm">
+      <option value="">All</option>
+      @foreach($orgs as $org)
+        <option>{{ $org }}</option>
+      @endforeach
+    </select>
+  </div>
+  @endif
+</div>
     </div>
-  </main>
+
+    <!-- Search Input -->
+    <div style="min-width: 250px;">
+      <label class="form-label mb-1">Search</label>
+      <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Enter name or ID...">
+    </div>
+  </div>
+</div>
+
+      <!-- Student Table -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Course</th>
+              <th>Section</th>
+              <th>Organization</th>
+              <th>Balance</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($students as $student)
+              <tr>
+                <td>{{ $student->student_id }}</td>
+                <td>{{ $student->name }}</td>
+                <td>{{ $student->studentList->course ?? 'N/A' }}</td>
+                <td>{{ $student->studentList->section ?? 'N/A' }}</td>
+                <td>{{ $student->org }}</td>
+                <td>₱{{ number_format($balances[$student->student_id] ?? 0, 2) }}</td>
+                <td>
+                  <button class="btn btn-success btn-sm">
+                    <i class="fas fa-money-bill-wave"></i> Pay
+                  </button>
+                  <button class="btn btn-primary btn-sm view-btn"
+                          data-student-id="{{ $student->student_id }}"
+                          data-bs-toggle="modal"
+                          data-bs-target="#soaModal">
+                    <i class="fas fa-eye"></i> View
+                  </button>
+                </td>
+              </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Statement of Account Modal (if applicable) -->
+
+    </div>
+  </div>
+</main>
   <div class="modal fade" id="soaModal" tabindex="-1" aria-labelledby="soaModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
@@ -187,7 +225,9 @@
   </div>
 
 <!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
 
 <script>
 
@@ -387,6 +427,15 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
-</body>
 
+<script>
+  function toggleFilterCloud() {
+    const cloud = document.getElementById('filterCloud');
+    cloud.style.display = cloud.style.display === 'none' ? 'block' : 'none';
+  }
+</script>
+</body>
+<style>
+
+</style>
 </html>

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\OrgList;
 use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ImportController extends Controller
 {
@@ -85,13 +87,17 @@ class ImportController extends Controller
     // Redirect back with success message
     return redirect()->back()->with('success', "Data imported successfully! Students added: {$studentsAdded}, Students updated: {$studentsUpdated}");
 }
-    public function show()
-    {
-        $students = Student::all();  // Get all students from the database
-        $org_list = OrgList::where('org_name', '!=', 'CCMS Student Government')->get(); 
-    
-        return view('student',compact('students','org_list'));  // Pass the students to the view
-    }
+ public function show()
+{
+    $students = Student::all();  
+    $org_list = OrgList::all();
+
+    // Get distinct sections and years from the students table
+    $sections = Student::select('section')->distinct()->pluck('section')->filter()->sort()->values();
+    $years = Student::select('year')->distinct()->pluck('year')->filter()->sort()->values();
+
+    return view('student', compact('students', 'org_list', 'sections', 'years'));
+}
 
     public function showUnregistered()
 {
@@ -113,36 +119,70 @@ public function preview(Request $request)
     $previewData = [];
 
     foreach ($rows as $row) {
-        $idNumber = $row[1] ?? null;
-        $existing = Student::where('id_number', $idNumber)->exists();
+        $idNumber = trim($row[1] ?? '');
+        $existingStudent = Student::where('id_number', $idNumber)->first();
 
-        $previewData[] = [
-            'no' => $row[0] ?? '',
+        $birthDateFormatted = isset($row[9]) ? Carbon::createFromFormat('m/d/Y', trim($row[9]))->format('Y-m-d') : '';
+
+        $rowData = [
+            'no' => trim($row[0] ?? ''),
             'id_number' => $idNumber,
-            'name' => $row[2] ?? '',
-            'gender' => $row[3] ?? '',
-            'course' => $row[4] ?? '',
-            'year' => $row[5] ?? '',
-            'units' => $row[6] ?? '',
-            'section' => $row[7] ?? '',
-            'contact_no' => $row[8] ?? '',
-            'birth_date' => $row[9] ?? '',
-            'address' => $row[10] ?? '',
-            'status' => $existing ? 'Duplicate' : 'New',
+            'name' => trim($row[2] ?? ''),
+            'gender' => trim($row[3] ?? ''),
+            'course' => trim($row[4] ?? ''),
+            'year' => trim($row[5] ?? ''),
+            'units' => trim($row[6] ?? ''),
+            'section' => trim($row[7] ?? ''),
+            'contact_no' => trim($row[8] ?? ''),
+            'birth_date' => $birthDateFormatted,
+            'address' => trim($row[10] ?? ''),
         ];
+
+        if (!$existingStudent) {
+            $rowData['status'] = 'New';
+        } else {
+            $differences = [];
+
+            foreach ($rowData as $key => $value) {
+                if ($key === 'no' || $key === 'id_number') continue; // Skip these in comparison
+
+                // Normalize comparison for numbers
+                $oldValue = trim((string) $existingStudent->$key);
+                $newValue = trim((string) $value);
+
+                if ($oldValue !== $newValue) {
+                    $differences[$key] = [
+                        'old' => $oldValue,
+                        'new' => $newValue,
+                    ];
+                }
+            }
+
+            if (!empty($differences)) {
+                $rowData['status'] = 'Updated';
+
+                // Log the differences
+                Log::info("Student {$idNumber} has updates:", $differences);
+            } else {
+                $rowData['status'] = 'Duplicate';
+            }
+        }
+
+        $previewData[] = $rowData;
     }
 
-    // Store in session temporarily
     session(['previewData' => $previewData]);
 
     return redirect()->back()->with('showPreview', true);
 }
+
 
 public function confirmImport()
 {
     $previewData = session('previewData', []);
     $imported = 0;
     $skipped = 0;
+    $updated = 0;
 
     foreach ($previewData as $row) {
         $student = Student::where('id_number', $row['id_number'])->first();
@@ -158,11 +198,24 @@ public function confirmImport()
                 'units' => $row['units'],
                 'section' => $row['section'],
                 'contact_no' => $row['contact_no'],
-                'birth_date' => \Carbon\Carbon::createFromFormat('m/d/Y', $row['birth_date'])->format('Y-m-d'),
+                'birth_date' => $row['birth_date'], // Already formatted
                 'address' => $row['address'],
                 'status' => 'Unregistered',
             ]);
             $imported++;
+        } elseif ($row['status'] === 'Updated') {
+            $student->update([
+                'name' => $row['name'],
+                'gender' => $row['gender'],
+                'course' => $row['course'],
+                'year' => $row['year'],
+                'units' => $row['units'],
+                'section' => $row['section'],
+                'contact_no' => $row['contact_no'],
+                'birth_date' => $row['birth_date'], // Already formatted
+                'address' => $row['address'],
+            ]);
+            $updated++;
         } else {
             $skipped++;
         }
@@ -170,6 +223,8 @@ public function confirmImport()
 
     session()->forget('previewData');
 
-    return redirect()->back()->with('success', "Students imported: $imported, Students skipped: $skipped");
+    return redirect()->back()->with('success', "Students imported: $imported, updated: $updated, skipped: $skipped");
 }
+
+
 }

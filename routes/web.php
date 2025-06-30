@@ -68,6 +68,7 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/student', function () {
     return view('student');
 });
+
 Route::get('/dashboard_page', [OrgDashboardController::class, 'dashboard']);
 
 Route::get('/student_dashboard', [DashboardController::class, 'studentindex']);

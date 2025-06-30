@@ -36,7 +36,7 @@
   @include('layout.sidebar')
 
   <!------------------------------------------------------ MAIN_BOX -------------------------------------------------------->
-  <main class="pt-5">
+ <main class="pt-5">
   <div class="container bg-white rounded-4 p-4 shadow-sm">
 
     <!-- Heading -->
@@ -48,111 +48,92 @@
 
     <!-- Button Row -->
     <div class="d-flex justify-content-end gap-2 mb-4">
-     
-      <button class="btn btn-outline-primary " data-bs-toggle="modal" data-bs-target="#uploadCSVModal">
+      <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#uploadCSVModal">
         <i class="bi bi-upload me-1"></i> Import CSV
       </button>
-      <button class="btn btn-outline-success " data-bs-toggle="modal" data-bs-target="#scheduleModal">
+      <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#scheduleModal">
         <i class="bi bi-calendar-check me-1"></i> Generate Schedule
       </button>
     </div>
 
-    <!-- Collapsible Filter Panel -->
-    <div class="collapse mb-4" id="filterPanel">
-      <div class="p-4 rounded-4 shadow-sm bg-light border">
-        <div class="row g-3">
-          @foreach (['Organization', 'Block', 'Year Level', 'Status'] as $label)
-          <div class="col-md">
-            <div class="border rounded-3 p-3 bg-white">
-              <label class="form-label small text-muted">{{ $label }}</label>
-              @if ($label == 'Organization')
-              <select class="form-select form-select-sm">
-                <option selected disabled>Select Organization</option>
-                <option>ITS</option>
-                <option>Praxis</option>
-              </select>
-              @else
-              <select class="form-select form-select-sm">
-                <option selected disabled>Select {{ $label }}</option>
-                @if ($label == 'Block')
-                  @foreach (['A', 'B', 'C', 'D'] as $option)
-                  <option>{{ $option }}</option>
-                  @endforeach
-                @elseif ($label == 'Year Level')
-                  @foreach (range(1, 4) as $year)
-                  <option>{{ $year }}</option>
-                  @endforeach
-                @else
-                  <option>Registered</option>
-                  <option>Unregistered</option>
-                @endif
-              </select>
-              @endif
-            </div>
-          </div>
-          @endforeach
-        </div>
-      </div>
-    </div>
+    <!-- Filter Cloud + Search -->
+    <div class="d-flex justify-content-end align-items-center gap-2 mb-4 position-relative">
+      <!-- Filter Button -->
+      <button class="btn btn-outline-secondary btn-sm" onclick="toggleFilterCloud()" title="Quick Filter">
+        <i class="bi bi-funnel-fill"></i>
+      </button>
 
-    <!-- Search -->
-   <!-- Search + Filter Cloud -->
-<div class="d-flex justify-content-end align-items-center gap-2 mb-4 position-relative">
-  <!-- Floating Filter Icon -->
-  <button class="btn btn-outline-secondary btn-sm" onclick="toggleFilterCloud()" title="Quick Filter">
-    <i class="bi bi-funnel-fill"></i>
-  </button>
-
-  <!-- Floating Filter Cloud -->
-   <div id="quickFilterCloud" class="shadow bg-white rounded-4 border p-3 position-absolute" style="top: 100%; right: 55px; width: 300px; display: none; z-index: 1055;">
+      <!-- Floating Filter Cloud (MATCHED STYLE) -->
+     <div id="quickFilterCloud" class="shadow bg-white rounded-4 border p-3 position-absolute" style="top: 100%; right: 55px; width: 300px; display: none; z-index: 1055;">
+  <form method="GET">
     <div class="row g-2">
-      @foreach (['Organization', 'Block', 'Year Level', 'Status'] as $label)
-      <div class="col-12">
-        <div class="border rounded-3 p-2 bg-light">
-          <label class="form-label small text-muted mb-1">{{ $label }}</label>
-          @if ($label == 'Organization')
-          <select class="form-select form-select-sm">
-            <option selected disabled>Select Organization</option>
-            <option>ITS</option>
-            <option>Praxis</option>
-          </select>
-          @else
-          <select class="form-select form-select-sm">
-            <option selected disabled>Select {{ $label }}</option>
-            @if ($label == 'Block')
-              @foreach (['A', 'B', 'C', 'D'] as $option)
-              <option>{{ $option }}</option>
-              @endforeach
-            @elseif ($label == 'Year Level')
-              @foreach (range(1, 4) as $year)
-              <option>{{ $year }}</option>
-              @endforeach
-            @else
-              <option>Registered</option>
-              <option>Unregistered</option>
-            @endif
-          </select>
-          @endif
-        </div>
-      </div>
-      @endforeach
-    </div>
-  </div>
 
-  <!-- Search Bar -->
-  <div class="input-group" style="max-width: 350px;">
-    <input type="text" class="form-control form-control-sm rounded-start" placeholder="Search...">
-    <button class="btn btn-success btn-sm rounded-end">Search</button>
-  </div>
+      @if(auth()->user()->role === 'Super Admin')
+      <div class="col-12">
+        <label class="form-label small text-muted mb-1">Organization</label>
+        <select class="form-select form-select-sm" name="organization" onchange="this.form.submit()">
+          <option value="">Select Organization</option>
+          @foreach($org_list as $org)
+          <option value="{{ $org->name }}" {{ request('organization') == $org->name ? 'selected' : '' }}>
+            {{ $org->name }}
+          </option>
+          @endforeach
+        </select>
+      </div>
+      @endif
+
+      <div class="col-12">
+        <label class="form-label small text-muted mb-1">Block</label>
+        <select class="form-select form-select-sm" name="section" onchange="this.form.submit()">
+          <option value="">Select Section</option>
+          @foreach($sections as $section)
+          <option value="{{ $section }}" {{ request('section') == $section ? 'selected' : '' }}>
+            {{ $section }}
+          </option>
+          @endforeach
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label small text-muted mb-1">Year Level</label>
+        <select class="form-select form-select-sm" name="year" onchange="this.form.submit()">
+          <option value="">Select Year</option>
+          @foreach($years as $year)
+          <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>
+            {{ $year }}
+          </option>
+          @endforeach
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label small text-muted mb-1">Status</label>
+        <select class="form-select form-select-sm" name="status" onchange="this.form.submit()">
+          <option value="">Select Status</option>
+          <option value="Registered" {{ request('status') == 'Registered' ? 'selected' : '' }}>Registered</option>
+          <option value="Unregistered" {{ request('status') == 'Unregistered' ? 'selected' : '' }}>Unregistered</option>
+        </select>
+      </div>
+
+    </div>
+  </form>
 </div>
+
+      <!-- Search Input -->
+      <div class="input-group" style="max-width: 350px;">
+        <input type="text" class="form-control form-control-sm rounded-start" placeholder="Search..." id="searchInput" oninput="applySearchFilter()">
+      </div>
+    </div>
+
     <!-- Student List -->
     <div class="bg-white border rounded-4 p-4 shadow-sm">
       <h5 class="fw-bold text-dark mb-3">Student List</h5>
+
       @if($students->isEmpty())
       <p class="text-muted">No students found.</p>
       @else
       <div class="table-responsive">
-        <table class="table table-hover align-middle">
+        <table class="table table-hover align-middle" id="studentTable">
           <thead class="table-light">
             <tr>
               <th>No</th>
@@ -184,15 +165,15 @@
               <td>{{ $student->birth_date }}</td>
               <td>{{ $student->address }}</td>
               <td>
-              @if($student->status === 'Unregistered')
-  @if(!(auth()->user()->role === 'Super Admin' || auth()->user()->organization === 'CCMS Student Government'))
-    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
-  @else
-    <span class="badge bg-warning">Unregistered</span>
-  @endif
-@else
-  <span class="badge bg-success">Registered</span>
-@endif
+                @if($student->status === 'Unregistered')
+                  @if(!(auth()->user()->role === 'OSSD' || auth()->user()->organization === 'CCMS Student Government'))
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
+                  @else
+                    <span class="badge bg-warning">Unregistered</span>
+                  @endif
+                @else
+                  <span class="badge bg-success">Registered</span>
+                @endif
               </td>
             </tr>
             @endforeach
@@ -214,31 +195,31 @@
         </nav>
       </div>
     </div>
-  </div>
 
-  <!-- Upload Modal -->
-  <div class="modal fade" id="uploadCSVModal" tabindex="-1" aria-labelledby="uploadCSVModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-    <form class="modal-content" id="csvForm" action="{{ route('students.preview') }}" method="post" enctype="multipart/form-data">
-
-        @csrf
-        <div class="modal-header">
-          <h5 class="modal-title">Upload CSV File</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <small class="text-muted d-block mb-2">Only .csv files are supported</small>
-          <input type="file" class="form-control form-control-sm" name="importFile" accept=".csv" required>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Upload</button>
-        </div>
-      </form>
+    <!-- Upload Modal -->
+    <div class="modal fade" id="uploadCSVModal" tabindex="-1" aria-labelledby="uploadCSVModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <form class="modal-content" id="csvForm" action="{{ route('students.preview') }}" method="post" enctype="multipart/form-data">
+          @csrf
+          <div class="modal-header">
+            <h5 class="modal-title">Upload CSV File</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <small class="text-muted d-block mb-2">Only .csv files are supported</small>
+            <input type="file" class="form-control form-control-sm" name="importFile" accept=".csv" required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Upload</button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
 
+  </div>
 </main>
+
 
 
 
@@ -460,7 +441,7 @@
             <table class="table table-bordered">
               <thead>
                 <tr>
-                  <th>ID</th><th>Name</th><th>Course</th><th>Section</th><th>Contact</th><th>Status</th>
+                  <th>ID</th><th>Name</th><th>Course</th><th>Year</th><th>Units</th><th>Section</th><th>Contact</th><th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -469,13 +450,18 @@
                   <td>{{ $row['id_number'] }}</td>
                   <td>{{ $row['name'] }}</td>
                   <td>{{ $row['course'] }}</td>
+                  <td>{{ $row['year'] }}</td>
+                  <td>{{ $row['units'] }}</td>
                   <td>{{ $row['section'] }}</td>
                   <td>{{ $row['contact_no'] }}</td>
                   <td>
-                    <span class="badge {{ $row['status'] == 'New' ? 'bg-success' : 'bg-warning' }}">
-                      {{ $row['status'] }}
-                    </span>
-                  </td>
+      <span class="badge 
+        {{ $row['status'] == 'New' ? 'bg-success' : 
+           ($row['status'] == 'Updated' ? 'bg-info text-dark' : 
+           'bg-warning text-dark') }}">
+        {{ $row['status'] }}
+      </span>
+    </td>
                 </tr>
                 @endforeach
               </tbody>

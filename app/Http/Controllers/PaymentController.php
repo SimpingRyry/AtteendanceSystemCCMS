@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\OrgList;
 use App\Models\Setting;
 use App\Models\Student;
 use App\Models\Transaction;
@@ -38,12 +39,10 @@ public function index()
         ->get()
         ->unique('student_id');
 
-    // Separate balance array
+    // Compute balances
     $balances = [];
-
     foreach ($students as $student) {
         $balance = 0;
-
         foreach ($student->transactions as $transaction) {
             if ($transaction->transaction_type === 'FINE') {
                 $balance += $transaction->fine_amount;
@@ -51,11 +50,17 @@ public function index()
                 $balance -= $transaction->fine_amount;
             }
         }
-
         $balances[$student->student_id] = $balance;
     }
 
-    return view('payment_page2', compact('students', 'balances'));
+    // Get distinct year levels and sections from the related studentList
+    $years = Student::select('year')->distinct()->pluck('year')->filter()->sort()->values();
+    $sections = Student::select('section')->distinct()->pluck('section')->filter()->sort()->values();
+
+    // Get organization names from OrgList
+    $orgs = OrgList::select('org_name')->distinct()->pluck('org_name');
+
+    return view('payment_page2', compact('students', 'balances', 'years', 'sections', 'orgs'));
 }
 
 
