@@ -139,7 +139,7 @@ Route::post('/scan', function (Request $request) {
     if (!$student) {
         return response()->json(['message' => 'Student not found'], 404);
     }
-    
+
     $now = Carbon::now('Asia/Manila');
     $today = $now->format('Y-m-d');
 
@@ -148,85 +148,143 @@ Route::post('/scan', function (Request $request) {
         return response()->json(['message' => 'No event today'], 404);
     }
 
-    $times = json_decode($event->times); // Expecting array of time strings
-    $timeoutCount = count($times); // 2 = halfday, 4 = wholeday
+    $times = json_decode($event->times);
+    $timeoutCount = count($times);
     $isWholeDay = $timeoutCount === 4;
 
-    $existing = Attendance::where('student_id', $student->id_number)
-        ->where('event_id', $event->id)
-        ->first();
+    $existing = Attendance::firstOrCreate([
+        'student_id' => $student->id_number,
+        'event_id' => $event->id,
+    ], [
+        'date' => $today,
+        'is_answered' => false
+    ]);
 
     $timeFields = ['time_in1', 'time_out1', 'time_in2', 'time_out2'];
-    $fieldToUpdate = null;
-
-    if (!$existing) {
-        $existing = Attendance::create([
-            'student_id' => $student->id_number,
-            'event_id' => $event->id,
-            'date' => $today,
-            'is_answered' => false
-        ]);
-    }
-
-    // Initialize separate statuses
     $statusMorning = $existing->status_morning ?? null;
     $statusAfternoon = $existing->status_afternoon ?? null;
 
-    foreach ($timeFields as $field) {
-        if ($timeoutCount == 2 && in_array($field, ['time_in2', 'time_out2'])) continue;
+    // Determine current session (morning or afternoon)
+    $session = null;
 
-        if (!$existing->$field) {
-            // Check if it's the last timeout field
-            $isLastTimeout = (
-                ($timeoutCount == 2 && $field === 'time_out1') ||
-                ($timeoutCount == 4 && $field === 'time_out2')
-            );
+    if ($isWholeDay) {
+        $timeout1Grace = isset($times[1]) ? Carbon::parse($times[1])->addMinutes(30) : null;
+        $timeout2Grace = isset($times[3]) ? Carbon::parse($times[3])->addMinutes(30) : null;
 
-            if ($isLastTimeout && !$existing->is_answered) {
-                return response()->json([
-                    'message' => 'You must answer the evaluation before checking out.'
-                ], 403);
-            }
-
-            $existing->$field = $now->format('H:i');
-            $fieldToUpdate = $field;
-
-            // Determine reference time and check for lateness
-            $index = $field === 'time_in1' ? 0 : ($field === 'time_in2' ? 2 : null);
-            if ($index !== null && isset($times[$index])) {
-                $refTime = Carbon::parse($times[$index])->addMinutes(30);
-                $status = $now->gt($refTime) ? 'Late' : 'On Time';
-
-                if ($isWholeDay) {
-                    if ($field === 'time_in1') {
-                        $statusMorning = $status;
-                    } elseif ($field === 'time_in2') {
-                        $statusAfternoon = $status;
-                    }
-                } else {
-                    $existing->status = $status;
-                }
-            }
-
-            break;
+        // If morning missed and it's already past timeout1 + grace, mark morning absent
+        if (is_null($existing->time_in1) && is_null($existing->time_out1) && $timeout1Grace && $now->gt($timeout1Grace)) {
+            $existing->time_in1 = null;
+            $existing->time_out1 = null;
+            $statusMorning = 'Absent';
         }
+
+        // If afternoon missed and it's past timeout2 + grace, mark afternoon absent and prevent scan
+        if (is_null($existing->time_in2) && is_null($existing->time_out2) && $timeout2Grace && $now->gt($timeout2Grace)) {
+            $existing->time_in2 = null;
+            $existing->time_out2 = null;
+            $statusAfternoon = 'Absent';
+            $existing->status_morning = $statusMorning;
+            $existing->status_afternoon = $statusAfternoon;
+            $existing->save();
+
+            return response()->json([
+                'message' => 'You missed both time-in and time-out for both sessions.',
+                'status' => 'Absent'
+            ], 403);
+        }
+
+        // Decide which session to process
+        if (is_null($existing->time_in1) || is_null($existing->time_out1)) {
+            $session = 'morning';
+        } elseif (is_null($existing->time_in2) || is_null($existing->time_out2)) {
+            $session = 'afternoon';
+        } else {
+            return response()->json([
+                'message' => 'Attendance already complete for the day.'
+            ], 200);
+        }
+    } else {
+        $session = 'halfday';
     }
 
-    // Save statuses
-    if ($isWholeDay) {
+    // Select relevant fields and time index based on session
+    $fieldMap = [
+        'morning' => ['time_in1', 'time_out1', 0],
+        'afternoon' => ['time_in2', 'time_out2', 2],
+        'halfday' => ['time_in1', 'time_out1', 0],
+    ];
+    [$timeInField, $timeOutField, $timeIndex] = $fieldMap[$session];
+
+    // Handle scan for time in
+    if (is_null($existing->$timeInField)) {
+        $refTime = isset($times[$timeIndex]) ? Carbon::parse($times[$timeIndex]) : null;
+        $graceTime = $refTime?->copy()->addMinutes(30);
+
+        if ($now->gt($graceTime)) {
+            return response()->json([
+                'message' => 'You are late. Please wait until time-out.',
+                'status' => 'Too Late'
+            ], 403);
+        }
+
+        $existing->$timeInField = $now->format('H:i');
+        $status = $now->gt($refTime) ? 'Late' : 'On Time';
+
+        if ($isWholeDay) {
+            if ($session === 'morning') $statusMorning = $status;
+            if ($session === 'afternoon') $statusAfternoon = $status;
+        } else {
+            $existing->status = $status;
+        }
+
         $existing->status_morning = $statusMorning;
         $existing->status_afternoon = $statusAfternoon;
+        $existing->save();
+
+        return response()->json([
+            'message' => 'Time-in recorded',
+            'time' => $now->toTimeString(),
+            'status' => $status
+        ]);
     }
 
-    $existing->save();
+    // Handle scan for time out
+    if (is_null($existing->$timeOutField)) {
+        if (!$existing->is_answered && $timeOutField === ($isWholeDay ? 'time_out2' : 'time_out1')) {
+            return response()->json([
+                'message' => 'You must answer the evaluation before checking out.'
+            ], 403);
+        }
+
+        // If time in is missing, auto-fill both with late
+        if (is_null($existing->$timeInField)) {
+            $existing->$timeInField = $now->format('H:i');
+        }
+
+        $existing->$timeOutField = $now->format('H:i');
+
+        if ($isWholeDay) {
+            if ($session === 'morning' && $statusMorning === null) $statusMorning = 'Late';
+            if ($session === 'afternoon' && $statusAfternoon === null) $statusAfternoon = 'Late';
+        } else {
+            if ($existing->status === null) $existing->status = 'Late';
+        }
+
+        $existing->status_morning = $statusMorning;
+        $existing->status_afternoon = $statusAfternoon;
+        $existing->save();
+
+        return response()->json([
+            'message' => 'Time-out recorded',
+            'time' => $now->toTimeString(),
+            'status' => $isWholeDay ? [
+                'morning' => $statusMorning,
+                'afternoon' => $statusAfternoon
+            ] : ($existing->status ?? 'Late')
+        ]);
+    }
 
     return response()->json([
-        'message' => 'Attendance recorded',
-        'student' => $student->name,
-        'time' => $now->toTimeString(),
-        'status' => $isWholeDay ? [
-            'morning' => $statusMorning,
-            'afternoon' => $statusAfternoon
-        ] : ($existing->status ?? 'On Time')
+        'message' => 'Already recorded for this session.'
     ]);
 });
