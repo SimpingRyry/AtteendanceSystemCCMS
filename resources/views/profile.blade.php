@@ -31,123 +31,164 @@
     @include('layout.sidebar')
 
     <!------------------------------------------------------ MAIN_BOX -------------------------------------------------------->
-    <main>
-  <div class="container outer-box mt-5 pt-5 pb-4 shadow">
-    <div class="container inner-glass shadow p-4" id="main_box">
-      <div class="row mb-4 g-4 align-items-stretch">
-        <div class="col-md-4 d-flex">
-          <div class="card text-center shadow-sm w-100 h-100 border-0 rounded-4">
-            <div class="card-body d-flex flex-column align-items-center justify-content-center">
-              <div class="mb-3" style="width: 150px; height: 150px;">
-                <img src="{{ asset('images/' . $profile->photo) }}" class="rounded-circle w-100 h-100" style="object-fit: cover;" alt="Profile Picture">
-              </div>
-              <h5 class="card-title mb-1">{{ $profile->name }}</h5>
-              <p class="text-muted">{{ $profile->position }}</p>
+<main>
+  <div class="container mt-5 pt-5 pb-4">
+    <div class="row mb-4 g-4 align-items-stretch">
+      <!-- Profile Card -->
+      <div class="col-md-4 d-flex">
+        <div class="card text-center shadow-sm w-100 h-100 border-0 rounded-4">
+          <div class="card-body d-flex flex-column align-items-center justify-content-center">
+            <div class="mb-3" style="width: 150px; height: 150px;">
+              <img src="{{ asset('images/' . $profile->photo) }}" class="rounded-circle w-100 h-100" style="object-fit: cover;" alt="Profile Picture">
             </div>
-          </div>
-        </div>
-
-        <div class="col-md-8">
-          <div class="card shadow-sm h-100 border-0 rounded-4">
-            <div class="card-body">
-              <form>
-                @foreach (['Name' => 'name', 'Program' => 'program', 'Position' => 'position', 'Email' => 'email', 'Mobile No.' => 'mobile', 'Address' => 'address'] as $label => $field)
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label fw-semibold">{{ $label }}:</label>
-                  <div class="col-sm-9">
-                    <input type="text" readonly class="form-control-plaintext border rounded px-3" value="{{ $profile->$field }}">
-                  </div>
-                </div>
-                <hr>
-                @endforeach
-              </form>
-            </div>
+            <h5 class="card-title mb-1">{{ $profile->name }}</h5>
+            <p class="text-muted">{{ $profile->position }}</p>
           </div>
         </div>
       </div>
 
-                <!-- Row 2: Stats and Charts -->
-                <div class="row g-4">
-                    <!-- Box 1: Total Tax & Absences -->
-                    <div class="col-md-4">
-                        <div class="card shadow-sm h-100 border-0 rounded-4">
-                            <div class="card-body">
-                                <h6 class="fw-bold mb-3">Total Tax</h6>
-                                <p class="fs-5 mb-4">₱0</p>
-                                <canvas id="absenceChart" height="150"></canvas>
-                            </div>
-                        </div>
-                    </div>
+      <!-- Profile Details -->
+      <div class="col-md-8">
+        <div class="card shadow-sm h-100 border-0 rounded-4">
+          <div class="card-body">
+            <form method="POST" action="{{ route('profile.update') }}">
+  @csrf
 
-                    <!-- Box 2: Attendance Breakdown -->
-                    <div class="col-md-4">
-                        <div class="card shadow-sm h-100 border-0 rounded-4">
-                            <div class="card-body">
-                                <h6 class="fw-bold mb-3">Attendance Breakdown</h6>
-                                <canvas id="barChart" height="150"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Box 3: General Attendance Pie -->
-                    <div class="col-md-4">
-                        <div class="card shadow-sm h-100 border-0 rounded-4">
-                            <div class="card-body">
-                                <h6 class="fw-bold mb-3">General Attendance</h6>
-                                <canvas id="pieChart" height="150"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <!-- Name (readonly) -->
+  <div class="row mb-3">
+    <label class="col-sm-3 col-form-label fw-semibold">Name:</label>
+    <div class="col-sm-9">
+      <input type="text" name="name" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->name }}" readonly>
     </div>
+  </div>
+  <hr>
+
+  <!-- Program (readonly) -->
+  <div class="row mb-3">
+    <label class="col-sm-3 col-form-label fw-semibold">Program:</label>
+    <div class="col-sm-9">
+      <input type="text" name="program" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->program }}" readonly>
+    </div>
+  </div>
+  <hr>
+
+  <!-- Position (readonly) -->
+  <div class="row mb-3">
+    <label class="col-sm-3 col-form-label fw-semibold">Position:</label>
+    <div class="col-sm-9">
+      <input type="text" name="position" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->position }}" readonly>
+    </div>
+  </div>
+  <hr>
+
+  <!-- Email (readonly) -->
+  <div class="row mb-3">
+    <label class="col-sm-3 col-form-label fw-semibold">Email:</label>
+    <div class="col-sm-9">
+      <input type="email" name="email" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->email }}" readonly>
+    </div>
+  </div>
+  <hr>
+
+  <!-- Mobile No. (editable) -->
+  <div class="row mb-3">
+    <label class="col-sm-3 col-form-label fw-semibold">Mobile No.:</label>
+    <div class="col-sm-9">
+      <input type="text" name="mobile" class="form-control border rounded px-3" value="{{ $profile->mobile }}">
+    </div>
+  </div>
+  <hr>
+
+  <!-- Address (readonly) -->
+  <div class="row mb-3">
+    <label class="col-sm-3 col-form-label fw-semibold">Address:</label>
+    <div class="col-sm-9">
+      <input type="text" name="address" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->address }}" readonly>
+    </div>
+  </div>
+  <hr>
+
+  <!-- Password (editable) -->
+  <div class="row mb-3">
+    <label class="col-sm-3 col-form-label fw-semibold">Password:</label>
+    <div class="col-sm-9">
+      <input type="password" name="password" class="form-control border rounded px-3" placeholder="••••••••">
+      <small class="text-muted">Leave blank to keep current password.</small>
+    </div>
+  </div>
+
+  <!-- Save Button -->
+  <div class="text-end">
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+  </div>
+</form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden Attendance Stats -->
+    <div id="attendance-data" hidden>
+      <div id="attended">{{ $attended }}</div>
+      <div id="late">{{ $late }}</div>
+      <div id="absent">{{ $absent }}</div>
+    </div>
+
+    <!-- Charts Row -->
+   <div class="row g-4">
+  <!-- Attendance Breakdown (Full Width) -->
+  <div class="col-md-12">
+    <div class="card shadow-sm h-100 border-0 rounded-4">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3">Attendance Breakdown</h6>
+        <canvas id="barChart" height="100" style="max-height: 200px;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
   </div>
 </main>
 
-    <!-- Chart Initialization Script -->
-    <script>
-        const ctxAbsence = document.getElementById('absenceChart');
-        const absenceChart = new Chart(ctxAbsence, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-                datasets: [{
-                    label: 'Absents',
-                    data: [0, 0, 0, 0],
-                    borderColor: '#f87171',
-                    backgroundColor: 'rgba(248,113,113,0.2)',
-                    fill: true
-                }]
-            }
-        });
+<!-- Chart Initialization Script -->
+<script>
+  const attended = parseInt(document.getElementById('attended').textContent);
+  const late = parseInt(document.getElementById('late').textContent);
+  const absent = parseInt(document.getElementById('absent').textContent);
 
-        const ctxBar = document.getElementById('barChart');
-        const barChart = new Chart(ctxBar, {
-            type: 'bar',
-            data: {
-                labels: ['Events Attended', 'Late Attendance', 'Did not attend'],
-                datasets: [{
-                    label: 'Count',
-                    data: [0, 0, 0],
-                    backgroundColor: ['#4ade80', '#facc15', '#f87171']
-                }]
-            },
-            options: {
-                indexAxis: 'y'
-            }
-        });
+  const ctxBar = document.getElementById('barChart');
+  const barChart = new Chart(ctxBar, {
+  type: 'bar',
+  data: {
+    labels: ['Events Attended', 'Late Attendance', 'Did not attend'],
+    datasets: [{
+      label: 'Count',
+      data: [attended, late, absent],
+      backgroundColor: ['#4ade80', '#facc15', '#f87171']
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    layout: {
+      padding: 10
+    },
+    plugins: {
+      legend: {
+        display: false
+      }
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1
+        }
+      }
+    }
+  }
+});
+</script>
 
-        const ctxPie = document.getElementById('pieChart');
-        const pieChart = new Chart(ctxPie, {
-            type: 'pie',
-            data: {
-                labels: ['Attended', 'Absent', 'Late'],
-                datasets: [{
-                    data: [0, 0, 0],
-                    backgroundColor: ['#60a5fa', '#f87171', '#facc15']
-                }]
-            }
-        });
-    </script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
 

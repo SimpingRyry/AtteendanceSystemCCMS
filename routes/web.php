@@ -70,9 +70,7 @@ Route::get('/student', function () {
 });
 Route::get('/dashboard_page', [OrgDashboardController::class, 'dashboard']);
 
-Route::get('/student_dashboard', function () {
-    return view('student_dashboard');
-});
+Route::get('/student_dashboard', [DashboardController::class, 'studentindex']);
 
 Route::get('/evaluation', function () {
     return view('evaluation');
@@ -147,9 +145,8 @@ Route::get('/advisers', [AdviserController::class, 'index'])->name('advisers.ind
 
 Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
 
-Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
-Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
-Route::post('/profile/{id}', [ProfileController::class, 'update'])->name('profile.update');
+
+
 Route::post('/profile/{id}/photo', [ProfileController::class, 'uploadPhoto'])->name('profile.uploadPhoto');
 
 Route::resource('orgs', OrgListController::class);
@@ -254,3 +251,4 @@ Route::post('/ossd/store', [OSSDController::class, 'store'])->name('ossd.store')
 Route::get('/OSSD', [OSSDController::class, 'index'])->name('ossd.index');
 Route::get('/members', [MemberController::class, 'showMembers'])->middleware('auth');
 Route::post('/transactions/pay', [PaymentController::class, 'storePayment'])->name('transactions.pay');
+Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
