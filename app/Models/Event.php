@@ -27,7 +27,8 @@ class Event extends Model
         'guests',
         'description',
         'org',
-        'involved_students'
+        'involved_students',
+        'attached_memo'
     ];
 
     // If you're storing the times as a JSON column, you can cast it

@@ -69,7 +69,7 @@
 
         <div id="upcomingEventsJson">{!! json_encode($upcomingEvents->map(function($e){
           return [
-            'title' => $e->title,
+            'title' => $e->name,
             'date' => \Carbon\Carbon::parse($e->date)->format('F d, Y')
           ];
         })) !!}</div>
@@ -195,8 +195,7 @@ if (upcomingEvents.length === 0) {
   eventsList.innerHTML = `<li class="list-group-item text-center text-muted">No upcoming events.</li>`;
 } else {
   upcomingEvents.forEach(event => {
-    const badgeColor = event.title.includes("Hackathon") ? "success" :
-      event.title.includes("Leadership") ? "warning text-dark" : "primary";
+    const badgeColor = "primary"; // default color for all events
 
     const listItem = `<li class="list-group-item d-flex justify-content-between align-items-center">
       ${event.title}

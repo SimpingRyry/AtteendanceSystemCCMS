@@ -54,7 +54,7 @@ $finesByMonth = Transaction::where('org', $orgId)
     // Recent payments
 
 
-    $upcomingEvents = Event::where('name', $orgId)
+    $upcomingEvents = Event::where('org', $orgId)
     ->whereDate('event_date', '>=', Carbon::today())
     ->orderBy('event_date')
     ->select('name', 'event_date') // Assuming these are the correct column names

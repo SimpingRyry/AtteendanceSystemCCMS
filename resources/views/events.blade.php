@@ -46,6 +46,8 @@
     {{-- Sidebar --}}
     @include('layout.sidebar')
     <main>
+        <div id="userRole" data-role="{{ strtolower(auth()->user()->role) }}"></div>
+
     <div class="container-fluid mt-5 px-4">
         <div class="row g-4">
             <!-- Sidebar -->
@@ -88,7 +90,7 @@
     </div>
 </main>
 <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl"> <!-- Wider modal -->
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="fw-bold text-primary">Create Event</h2>
@@ -130,17 +132,28 @@
                         </div>
                     </div>
 
-
                     <div class="row">
                         <div class="mb-3 col-md-6">
                             <label for="involvedStudents" class="form-label">Involved Students</label>
                             <select class="form-select" id="involvedStudents" name="involved_students" required>
                                 <option value="">-- Select --</option>
                                 <option value="All">All</option>
-                                <option value="Members">Members</option>
+                               
                                 <option value="Officers">Officers</option>
                             </select>
                         </div>
+
+                        @if(auth()->user()->role === 'Super Admin')
+                        <div class="mb-3 col-md-6">
+                            <label for="organization" class="form-label">Organization</label>
+                            <select class="form-select" id="organization" name="organization" required>
+                                <option value="">-- Select Organization --</option>
+                                @foreach($orgs as $org)
+                                    <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @endif
                     </div>
 
                     <!-- Time Pickers -->
@@ -182,39 +195,13 @@
                         <input type="text" id="repeatDates" class="form-control" placeholder="Select one or more dates">
                         <input type="hidden" id="repeatDatesHidden" name="repeat_dates">
                     </div>
-                    
 
-                    <div class="row">
-
-                    @php
-            $userRole = auth()->user()->role ?? '';
-
-          @endphp
-                        @if($userRole === 'Super Admin')
-                        <div class="mb-3 col-md-6">
-                            <label for="course" class="form-label">Tag Course</label>
-                            <select class="form-select" id="course" name="course" onchange="appendCourseTag()">
-                                <option value="">-- Select Course --</option>
-                                <option value="BSIS">BSIS</option>
-                                <option value="BSIT">BSIT</option>
-                                <option value="All">All</option>
-                            </select>
-                        </div>
-                        @endif
-                        <div class="mb-3 col-md-6 position-relative">
-    <label for="guests" class="form-label">Add Guests (Optional)</label>
-    <input type="text" class="form-control" id="guests" name="guests" placeholder="Type @ to tag officers">
-    <div id="mentionDropdown" class="list-group position-absolute w-100 z-3" style="display: none; max-height: 200px; overflow-y: auto;"></div>
-</div>
+                    <div class="mb-3 col-md-6 position-relative">
+                        <label for="guests" class="form-label">Add Guests (Optional)</label>
+                        <input type="text" class="form-control" id="guests" name="guests" placeholder="Type @ to tag officers">
+                        <div id="mentionDropdown" class="list-group position-absolute w-100 z-3" style="display: none; max-height: 200px; overflow-y: auto;"></div>
                     </div>
-                    @if($userRole === 'Super Admin')
-                    <div class="mb-3">
-                        <label class="form-label">Tagged Courses</label>
-                        <div id="courseTags" class="d-flex flex-wrap"></div>
-                    </div>
-                    @endif
 
-                    <!-- Attached Memo Image Upload -->
                     <div class="mb-3">
                         <label for="attachedMemo" class="form-label">Attached Memo</label>
                         <input type="file" class="form-control" id="attachedMemo" name="attached_memo" accept="image/*">
@@ -229,6 +216,7 @@
         </div>
     </div>
 </div>
+
 
 
 <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventDetailsLabel" aria-hidden="true">
@@ -292,10 +280,7 @@
             </select>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">Course</label>
-            <input type="text" id="editEventCourse" name="course" class="form-control">
-          </div>
+          
 
           <div class="mb-3">
             <label class="form-label">Times</label>
@@ -312,21 +297,63 @@
 </div>
 
 <div class="modal fade" id="viewEventModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="viewEventName"></h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title fw-bold d-flex align-items-center">
+          <i class="bi bi-calendar-event me-2"></i> <span id="viewEventName"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <p><strong>Venue:</strong> <span id="viewEventVenue"></span></p>
-        <p><strong>Date:</strong> <span id="viewEventDate"></span></p>
-        <p><strong>Time:</strong> <span id="viewEventTimes"></span></p>
-        <p><strong>Description & Guests:</strong><br><span id="viewEventDescGuests"></span></p>
+
+      <div class="modal-body px-4 py-4 bg-light">
+
+        <!-- Venue -->
+        <div class="mb-4 p-3 border-start border-4 border-primary bg-white rounded shadow-sm">
+          <h6 class="fw-semibold mb-1"><i class="bi bi-geo-alt-fill me-2 text-primary"></i>Venue</h6>
+          <div id="viewEventVenue" class="text-secondary"></div>
+        </div>
+
+        <!-- Date and Time -->
+        <div class="mb-4 p-3 border-start border-4 border-info bg-white rounded shadow-sm">
+          <h6 class="fw-semibold mb-2"><i class="bi bi-clock-history me-2 text-info"></i>Date & Time</h6>
+          <div class="row">
+            <div class="col-md-6 mb-2">
+              <strong>Date:</strong>
+              <div id="viewEventDate" class="text-secondary"></div>
+            </div>
+            <div class="col-md-6">
+              <strong>Time:</strong>
+              <div id="viewEventTimes" class="text-secondary"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description & Guests -->
+        <div class="mb-4 p-3 border-start border-4 border-success bg-white rounded shadow-sm">
+          <h6 class="fw-semibold mb-2"><i class="bi bi-chat-dots-fill me-2 text-success"></i>Description & Guests</h6>
+          <div id="viewEventDescGuests" class="text-secondary"></div>
+        </div>
+
+        <!-- Attached Memo -->
+        <div class="mb-3">
+          <h6 class="fw-semibold mb-2"><i class="bi bi-paperclip me-2 text-dark"></i>Attached Memo</h6>
+          <div id="viewEventMemo" class="border p-3 rounded bg-white text-center shadow-sm">
+            <img id="memoImage" src="" alt="Memo Image" class="img-fluid rounded mb-2" style="max-height: 300px; object-fit: contain;">
+            <br>
+            <a href="#" id="memoDownloadLink" download class="btn btn-outline-secondary btn-sm mt-2">
+              <i class="bi bi-download"></i> Download Memo
+            </a>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
+
+
+
 
 @if(session('success'))
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
@@ -622,10 +649,12 @@ const dayTypeSelect = document.getElementById('editEventDayType');
     new bootstrap.Modal(document.getElementById('editEventModal')).show();
   }
 
+  const userRole = document.getElementById('userRole').dataset.role;
 
 
             // Create icon container (cloud)
-            const iconContainer = document.createElement('div');
+            if (userRole !== 'member') {
+ const iconContainer = document.createElement('div');
             iconContainer.className = 'event-icons';
             iconContainer.style.position = 'absolute';
             iconContainer.style.top = '0';
@@ -704,6 +733,23 @@ const dayTypeSelect = document.getElementById('editEventDayType');
     // Highlight guests
     const guestBadges = guests.map(guest => `<span class="badge bg-primary me-1">${guest}</span>`).join(' ');
 
+    const memoImage = document.getElementById('memoImage');
+const memoDownloadLink = document.getElementById('memoDownloadLink');
+const memoUrl = event.extendedProps.attached_memo_url;
+
+if (memoUrl) {
+    memoImage.src = memoUrl;
+    memoImage.alt = "Memo Image";
+    memoDownloadLink.href = memoUrl;
+    memoDownloadLink.classList.remove('d-none');
+    memoImage.classList.remove('d-none');
+} else {
+    memoImage.src = "";
+    memoImage.alt = "No memo attached.";
+    memoImage.classList.add('d-none');
+    memoDownloadLink.classList.add('d-none');
+}
+
     // Populate modal
     document.getElementById('viewEventName').innerText = title;
     document.getElementById('viewEventVenue').innerText = venue;
@@ -715,7 +761,7 @@ const dayTypeSelect = document.getElementById('editEventDayType');
     `;
 
     // Show modal
-    new bootstrap.Modal(document.getElementById('viewEventModal')).show();
+            new bootstrap.Modal(document.getElementById('viewEventModal')).show();
                 // You can trigger the same logic used in eventClick here if needed
             });
 
@@ -727,6 +773,8 @@ const dayTypeSelect = document.getElementById('editEventDayType');
                     // Add delete logic here
                 }
             });
+            }
+           
         },
         eventClick: function (info) {
             info.jsEvent.preventDefault();
@@ -737,6 +785,8 @@ const dayTypeSelect = document.getElementById('editEventDayType');
     const times = info.event.extendedProps.times || [];
     const description = info.event.extendedProps.description || '';
     const guests = info.event.extendedProps.guests || [];
+    
+    
 
     // Format time labels
     let timeDisplay = '';
@@ -752,11 +802,14 @@ const dayTypeSelect = document.getElementById('editEventDayType');
     } else {
         timeDisplay = times.map((t, i) => `<strong>Time ${i + 1}:</strong> ${t}`).join('<br>');
     }
+    
 
     // Highlight guests
     const guestBadges = guests.map(guest => `<span class="badge bg-primary me-1">${guest}</span>`).join(' ');
+    
 
     // Populate modal
+    
     document.getElementById('viewEventName').innerText = title;
     document.getElementById('viewEventVenue').innerText = venue;
     document.getElementById('viewEventDate').innerText = date;
@@ -765,6 +818,22 @@ const dayTypeSelect = document.getElementById('editEventDayType');
         ${description ? `<p>${description}</p>` : ''}
         ${guests.length ? `<div>${guestBadges}</div>` : '<span class="text-muted">No guests listed.</span>'}
     `;
+       const memoImage = document.getElementById('memoImage');
+const memoDownloadLink = document.getElementById('memoDownloadLink');
+const memoUrl = info.event.extendedProps.attached_memo_url;
+
+if (memoUrl) {
+    memoImage.src = memoUrl;
+    memoImage.alt = "Memo Image";
+    memoDownloadLink.href = memoUrl;
+    memoDownloadLink.classList.remove('d-none');
+    memoImage.classList.remove('d-none');
+} else {
+    memoImage.src = "";
+    memoImage.alt = "No memo attached.";
+    memoImage.classList.add('d-none');
+    memoDownloadLink.classList.add('d-none');
+}
 
     // Show modal
     new bootstrap.Modal(document.getElementById('viewEventModal')).show();

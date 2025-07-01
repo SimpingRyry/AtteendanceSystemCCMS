@@ -33,7 +33,7 @@ class OSSDController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'ossd', // Make sure this column exists in your `users` table
+            'role' => 'OSSD', // Make sure this column exists in your `users` table
         ]);
 
         return redirect()->back()->with('success', 'OSSD user created successfully.');

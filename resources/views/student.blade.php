@@ -225,10 +225,10 @@
 
 
 <div class="modal fade" id="registerStudentModal" tabindex="-1" aria-labelledby="registerStudentModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-scrollable" style="max-width: 70%;">
+  <div class="modal-dialog modal-dialog-scrollable modal-xl">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="registerStudentModalLabel" style="color: #5CE1E6;">Student Registration</h5>
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold text-info" id="registerStudentModalLabel">Student Registration</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
@@ -237,112 +237,103 @@
           @csrf
 
           <!-- Student Details -->
-          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Student Details</h4>
+          <h5 class="fw-bold text-info mb-3">Student Details</h5>
           <div class="row g-3 mb-4">
             <div class="col-md-6">
-              <label>Student ID</label>
+              <label class="form-label">Student ID</label>
               <input type="text" name="student_id" id="modalStudentId" class="form-control" value="${data.id_number}" readonly>
             </div>
             <div class="col-md-6">
-              <label>Name</label>
+              <label class="form-label">Name</label>
               <input type="text" name="sname" id="modalStudentName" class="form-control" value="${data.name}" readonly>
             </div>
             <div class="col-md-6">
-              <label>Gender</label>
+              <label class="form-label">Gender</label>
               <input type="text" class="form-control" id="modalGender" value="${data.gender}" readonly>
             </div>
             <div class="col-md-6">
-              <label>Course</label>
-              <input type="text" class="form-control" id="modalCourse" name="course" value="${data.course}" readonly>
+              <label class="form-label">Course</label>
+              <input type="text" class="form-control" name="course" id="modalCourse" value="${data.course}" readonly>
             </div>
             <div class="col-md-6">
-              <label>Year</label>
+              <label class="form-label">Year</label>
               <input type="text" class="form-control" id="modalYear" value="${data.year}" readonly>
             </div>
             <div class="col-md-6">
-              <label>Section</label>
+              <label class="form-label">Section</label>
               <input type="text" class="form-control" id="modalSection" value="${data.section}" readonly>
             </div>
             <div class="col-md-6">
-              <label>Birth Date</label>
+              <label class="form-label">Birth Date</label>
               <input type="text" class="form-control" id="modalBirthDate" value="${data.birth_date}" readonly>
             </div>
             <div class="col-md-6">
-              <label>Fingerprint Scan</label>
-              <div style="border: 1px solid #ccc; border-radius: 8px; width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; background-color: #f9f9f9;">
-                <img id="fingerprintImage" src="" alt="Fingerprint will appear here" style="max-height: 100%; max-width: 100%; display: none;">
+              <label class="form-label">Fingerprint Scan</label>
+              <div class="border rounded d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
+                <img id="fingerprintImage" src="" alt="Fingerprint will appear here" style="max-height: 100%; display: none;">
               </div>
               <input type="hidden" name="fingerprint_data" id="fingerprintData">
               <input type="hidden" name="fingerprint_user_id" id="fingerprintUserId">
-
             </div>
           </div>
 
           <!-- Contact Details -->
-          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Contact Details</h4>
+          <h5 class="fw-bold text-info mb-3">Contact Details</h5>
           <div class="row g-3 mb-4">
             <div class="col-md-6">
-              <label>Contact Number</label>
+              <label class="form-label">Contact Number</label>
               <input type="text" class="form-control" id="modalContactNumber" value="${data.contact_no}" readonly>
             </div>
             <div class="col-12">
-              <label>Address</label>
+              <label class="form-label">Address</label>
               <input type="text" class="form-control" id="modalAddress" value="${data.address}" readonly>
             </div>
             <div class="col-12">
-              <label>Email <span class="text-danger">*</span></label>
+              <label class="form-label">Email <span class="text-danger">*</span></label>
               <input type="email" name="email" class="form-control" placeholder="Enter Email" required>
             </div>
           </div>
 
-          <!-- Role/Position -->
-          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Role / Position</h4>
+          <!-- Role / Position -->
+          <h5 class="fw-bold text-info mb-3">Role / Position</h5>
           <div class="mb-4">
-            <label for="roleSelect">Select Role <span class="text-danger">*</span></label>
+            <label class="form-label" for="roleSelect">Select Role <span class="text-danger">*</span></label>
             <select name="role" id="roleSelect" class="form-select" required>
-              @if(auth()->user()->org == 'ITS')
               <option value="">-- Select Role --</option>
+              @if(auth()->user()->org == 'ITS' || auth()->user()->org == 'SG')
                 <option value="member">Member</option>
                 <option value="officer">Officer</option>
               @elseif(auth()->user()->org == 'PRAXIS')
-                <option value="">-- Select Role --</option>
                 <option value="member">Member</option>
-                 <option value="President">President</option>
-                <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
-                <option value="Vice President For External Affairs">Vice President For External Affairs</option>
-                <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
+                <option value="President">President</option>
+                <option value="Vice President For Internal Affairs">VP Internal Affairs</option>
+                <option value="Vice President For External Affairs">VP External Affairs</option>
+                <option value="Vice President For Financial Affairs">VP Financial Affairs</option>
                 <option value="Auditing Officer">Auditing Officer</option>
                 <option value="Technical Officer">Technical Officer</option>
                 <option value="Sentinel Officer">Sentinel Officer</option>
-              
-              @elseif(auth()->user()->org == 'SG')
-              <option value="">-- Select Role --</option>
-                <option value="member">Member</option>
-                <option value="officer">Officer</option>
               @else
-                <option value="">-- Select Role --</option>
                 <option value="Member">Member</option>
                 <option value="President">President</option>
                 <option value="Vice President">Vice President</option>
                 <option value="Executive Secretary">Executive Secretary</option>
                 <option value="Administrative Secretary">Administrative Secretary</option>
                 <option value="Treasurer">Treasurer</option>
-                <option value=">Auditor">Auditor</option>
-                <option value="Public Information Officer">Public Information Officer</option>
+                <option value="Auditor">Auditor</option>
+                <option value="Public Information Officer">Public Info Officer</option>
                 <option value="Business Manager 1">Business Manager 1</option>
                 <option value="Business Manager 2">Business Manager 2</option>
                 <option value="Sentinel 1">Sentinel 1</option>
                 <option value="Sentinal 2">Sentinal 2</option>
                 <option value="Multimedia Officer">Multimedia Officer</option>
-                
               @endif
             </select>
           </div>
 
-          <!-- Organization Dropdown for Super Admin -->
+          <!-- Organization for Super Admin -->
           @if(auth()->user()->role == 'Super Admin')
             <div class="mb-4">
-              <label for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
+              <label class="form-label" for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
               <select name="organization" id="organizationSelect" class="form-select" required>
                 <option value="">-- Select Organization --</option>
                 @foreach ($org_list as $org)
@@ -353,17 +344,17 @@
           @endif
 
           <!-- Profile Picture -->
-          <h4 class="fw-bold mb-3" style="color: #5CE1E6;">Profile Picture</h4>
+          <h5 class="fw-bold text-info mb-3">Profile Picture</h5>
           <div class="mb-4">
-            <div class="d-flex gap-2 mb-3">
+            <div class="d-flex gap-3 mb-3">
               <button type="button" class="btn btn-outline-primary" onclick="showUpload()">Upload Image</button>
               <button type="button" class="btn btn-outline-secondary" onclick="showCamera()">Capture Image</button>
             </div>
 
             <input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
 
-            <div id="cameraContainer" style="display: none; text-align: center;">
-              <video id="cameraStream" width="100%" height="300" autoplay playsinline style="border-radius: 8px; border: 1px solid #ccc;"></video>
+            <div id="cameraContainer" class="text-center" style="display: none;">
+              <video id="cameraStream" class="rounded border" width="100%" height="300" autoplay playsinline></video>
               <button type="button" class="btn btn-success mt-2" onclick="capturePhoto()">Take Picture</button>
             </div>
 
@@ -380,6 +371,7 @@
     </div>
   </div>
 </div>
+
 
 
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
