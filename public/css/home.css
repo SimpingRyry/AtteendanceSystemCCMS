@@ -1,45 +1,69 @@
 body {
-    font-family: 'Poppins', sans-serif;
+  font-family: 'Poppins', sans-serif;
+  background: #121212;
+  margin: 0;
+  padding: 0;
 }
 
-.navbar {
-    color: white;
-}
-
-.navbar a,
-.navbar-brand,
-.navbar-nav .nav-link {
-    color: white !important;
-}
-.navbar-nav .nav-item {
-    margin: 0 10px;
-}
-.navbar-toggler {
-  border: 1px solid white;
-}
-.navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='white' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
-}
-/* Ensure navbar is sticky */
-.navbar {
+/* 3D Navbar Style */
+.navbar-3d {
+  background: linear-gradient(145deg, #2e2e48, #1c1c30);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: white;
+  backdrop-filter: blur(10px);
   position: sticky;
   top: 0;
   z-index: 1030;
+  padding: 0.75rem 1rem;
+  border-radius: 0 0 15px 15px;
 }
 
-/* Adjust carousel height to fill remaining viewport below navbar */
-.carousel-slide {
-  min-height: calc(100vh - 56px); /* 56px is default Bootstrap navbar height */
+.navbar-brand img {
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
 }
 
+/* Nav Links */
+.navbar a,
+.navbar-brand,
+.navbar-nav .nav-link {
+  color: #ffffff !important;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #7aaaff !important;
+  transform: translateY(-2px);
+}
+
+/* Nav Items Spacing */
+.navbar-nav .nav-item {
+  margin: 0 15px;
+}
+
+/* Toggler Button */
+.navbar-toggler {
+  border: 1px solid white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 30 30'%3E%3Cpath stroke='white' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+/* Login Button */
 .custom-login-btn {
-  background-color: #4A90E2;
+  background: linear-gradient(135deg, #4a90e2, #1d69d4);
   color: white;
   font-weight: 600;
   padding: 0.75rem 2.5rem;
   border: none;
   border-radius: 50px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
   transition: all 0.3s ease;
   font-size: 1.1rem;
   letter-spacing: 0.5px;
@@ -47,7 +71,8 @@ body {
 }
 
 .custom-login-btn:hover {
-  background-color: #3b7bc1;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #3b7bc1, #1554a5);
+  box-shadow: 0 7px 18px rgba(59, 123, 193, 0.5);
+  transform: translateY(-2px) scale(1.02);
 }
+

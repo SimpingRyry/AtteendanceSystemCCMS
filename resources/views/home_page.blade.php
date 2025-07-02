@@ -31,7 +31,7 @@
         integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
 
     <!------------------------------------------------ NAVBAR_HOME ----------------------------v---------------->
-    <nav class="navbar navbar-expand-lg" style="background-color:#232946;">
+    <nav class="navbar navbar-expand-lg navbar-3d" style="background-color:#232946;">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="{{ asset('images/ticktaxx_logO.png') }}" alt="TickTax Logo" height="40" class="d-inline-block align-text-top" />
