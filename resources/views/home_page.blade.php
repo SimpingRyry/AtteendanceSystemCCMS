@@ -65,8 +65,51 @@
 
     <main>
         <!------------------------------------------------ Dash_HOME ----------------------------v---------------->
-        
+        <section class="carousel-wrapper">
+            <div id="orgCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <div class="carousel-slide-content" onmouseenter="pauseCarousel()" onmouseleave="playCarousel()">
+    <img src="{{ asset('images/ticktaxx_logO.png') }}" alt="Logo" class="carousel-logo">
+                            <h2>Student Council</h2>
+                            <p>The backbone of student governance, organizing events and leading initiatives for campus unity.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <div class="carousel-slide-content" onmouseenter="pauseCarousel()" onmouseleave="playCarousel()">
+    <img src="{{ asset('images/ticktaxx_logO.png') }}" alt="Logo" class="carousel-logo">
+                            <h2>Tech Innovators Club</h2>
+                            <p>Fostering the next generation of developers and engineers through hands-on projects and coding bootcamps.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <div class="carousel-slide-content" onmouseenter="pauseCarousel()" onmouseleave="playCarousel()">
+    <img src="{{ asset('images/ticktaxx_logO.png') }}" alt="Logo" class="carousel-logo">
+                            <h2>CCMS Volunteers</h2>
+                            <p>A passionate group committed to community outreach, disaster response, and social programs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
+    <script>
+    const carousel = document.querySelector('#orgCarousel');
+    const carouselInstance = new bootstrap.Carousel(carousel, {
+        interval: 3000,
+        pause: false,
+        ride: 'carousel'
+    });
+
+    function pauseCarousel() {
+        carouselInstance.pause();
+    }
+
+    function playCarousel() {
+        carouselInstance.cycle();
+    }
+</script>
+
 
 </body>
 
