@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OSSDController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\EventsController;
@@ -15,8 +16,8 @@ use App\Http\Controllers\ImportController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdviserController;
-use App\Http\Controllers\OfficerController;
 
+use App\Http\Controllers\OfficerController;
 use App\Http\Controllers\OrgListController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -231,12 +232,7 @@ Route::get('/admin-users', function () {
     return \App\Models\User::where('role', 'Admin')->get(['name', 'email', 'picture']);
 });
 
-Route::get('/org-members', function () {
-    $user = auth()->user();
-    return \App\Models\User::where('org', $user->org)
-        ->where('role', 'Member') // optional: exclude existing officers/admins
-        ->get(['id', 'name', 'email', 'picture']);
-});
+Route::get('/org-members', [UserController::class, 'getEligibleMembers']);
 Route::post('/notifications/mark-seen', [NotificationController::class, 'markAllAsSeen'])->name('notifications.markSeen');
 Route::get('/public-events', [EventsController::class, 'publicFetchEvents'])->name('events.public.fetch');
 Route::get('/student_payment', [PaymentController::class, 'showStatementOfAccount'])->name('statement.account')->middleware('auth');

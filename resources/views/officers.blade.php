@@ -46,7 +46,6 @@
 
             <!-- Main Card -->
             <div class="card shadow-sm p-4">
-
                 <!-- Header Section with Filters and Search -->
                 <div class="row align-items-center mb-3">
                     <!-- Left: Officer List + Service Year + Term Search -->
@@ -62,8 +61,15 @@
                         </div>
                     </div>
 
-                    <!-- Right: Filter + Search -->
+                    <!-- Right: Filter + Search + Add Officer -->
                     <div class="col-md-6 d-flex justify-content-end align-items-end gap-2">
+                        <!-- Add Officer Button (only for CCMS Student Government) -->
+                        @if (Auth::user()->org === 'CCMS Student Government')
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addOfficerModal">
+                                <i class="bi bi-plus-circle me-1"></i> Add Officer
+                            </button>
+                        @endif
+
                         <!-- Filter Button -->
                         <div style="position: relative;">
                             <button class="btn btn-outline-secondary" onclick="toggleFilterCloud()" style="border-radius: 6px;">
@@ -168,6 +174,7 @@
 
 
 
+
 </div>
 
 <div class="modal fade" id="addOfficerModal" tabindex="-1" aria-labelledby="addOfficerModalLabel" aria-hidden="true">
@@ -194,18 +201,20 @@
     <select class="form-select" id="officerPosition" name="officerPosition" required>
         <option value="">Select Position</option>
 
-        @if (Auth::user()->role === 'Information Technology Society')
-            <option value="Vice President">Vice President</option>
+        @if (Auth::user()->org === 'CCMS Student Government')
+        <option value="President">President</option>
+            <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
+            <option value="Vice President For External Affairs">Vice President For External Affairs</option>
+            <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
             <option value="Executive Secretary">Executive Secretary</option>
-            <option value="Administrative Secretary">Administrative Secretary</option>
-            <option value="Treasurer">Treasurer</option>
-            <option value="Auditor">Auditor</option>
-            <option value="Public Information Officer">Public Information Officer</option>
-            <option value="Business Manager 1">Business Manager 1</option>
-            <option value="Business Manager 2">Business Manager 2</option>
-            <option value="Sentinel 1">Sentinel 1</option>
-            <option value="Sentinel 2">Sentinel 2</option>
-            <option value="Multimedia Officer">Multimedia Officer</option>
+            <option value="Internal Secretary">Internal Secretary</option>
+            <option value="Parliamentary Officer">Parliamentary Officer</option>
+            <option value="Auditing Officer I">Auditing Officer I</option>
+            <option value="Auditing Officer II">Auditing Officer II</option>
+            <option value="Managing Officer I">Managing Officer I</option>
+            <option value="Managing Officer II">Managing Officer II</option>
+           <option value="Multimedia Officer">Multimedia Officer</option>
+           <option value="Information Communications Officer">Information Communications Officer</option>
 
         @elseif (Auth::user()->role === 'PRAXIS')
             <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>

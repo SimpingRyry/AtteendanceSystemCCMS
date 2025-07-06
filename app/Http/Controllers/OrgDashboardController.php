@@ -12,19 +12,34 @@ use Illuminate\Support\Facades\Auth;
 
 class OrgDashboardController extends Controller
 {
-   public function dashboard()
+public function dashboard()
 {
-    $orgId = Auth::user()->org;
+    $user = Auth::user();
+    $orgId = $user->org;
 
-    // Total members = users in same org with role 'member'
-    $totalMembers = User::where('org', $orgId)
-        ->where('role', 'Member')
-        ->count();
+    $isCCMS = $orgId === 'CCMS Student Government';
 
-    // Since members are registered, registered = totalMembers
+    // Registered students (all orgs if CCMS)
+    $totalMembersQuery = User::where('role', 'Member');
+    if (!$isCCMS) {
+        $totalMembersQuery->where('org', $orgId);
+    }
+    $totalMembers = $totalMembersQuery->count();
     $registered = $totalMembers;
 
-    // Transactions from same org
+    // Year level distribution (all orgs if CCMS)
+    $yearLevelQuery = DB::table('users')
+        ->join('student_list', 'users.student_id', '=', 'student_list.id_number')
+        ->where('users.role', 'member');
+    if (!$isCCMS) {
+        $yearLevelQuery->where('users.org', $orgId);
+    }
+    $yearLevelData = $yearLevelQuery
+        ->selectRaw('student_list.section as label, COUNT(*) as count')
+        ->groupBy('student_list.section')
+        ->pluck('count', 'label');
+
+    // These stay scoped by org
     $totalFines = Transaction::where('org', $orgId)
         ->where('transaction_type', 'FINE')
         ->sum('fine_amount');
@@ -33,38 +48,26 @@ class OrgDashboardController extends Controller
         ->where('transaction_type', 'PAYMENT')
         ->sum('fine_amount');
 
-    // Fines by month for charts
-$finesByMonth = Transaction::where('org', $orgId)
-    ->where('transaction_type', 'FINE')
-    ->selectRaw('DATE_FORMAT(`date`, "%Y-%m") as month, SUM(fine_amount) as total')
-    ->groupBy('month')
-    ->orderBy('month')
-    ->get()
-    ->pluck('total', 'month');
-
-    // Year level distribution from users table (if applicable)
- $yearLevelData = DB::table('users')
-    ->join('student_list', 'users.student_id', '=', 'student_list.id_number')
-    ->where('users.org', $orgId)
-    ->where('users.role', 'member')
-    ->selectRaw('student_list.section as label, COUNT(*) as count')
-    ->groupBy('student_list.section')
-    ->pluck('count', 'label');
-
-    // Recent payments
-
+    $finesByMonth = Transaction::where('org', $orgId)
+        ->where('transaction_type', 'FINE')
+        ->selectRaw('DATE_FORMAT(`date`, "%Y-%m") as month, SUM(fine_amount) as total')
+        ->groupBy('month')
+        ->orderBy('month')
+        ->get()
+        ->pluck('total', 'month');
 
     $upcomingEvents = Event::where('org', $orgId)
-    ->whereDate('event_date', '>=', Carbon::today())
-    ->orderBy('event_date')
-    ->select('name', 'event_date') // Assuming these are the correct column names
-    ->take(3)
-    ->get();
- 
+        ->whereDate('event_date', '>=', Carbon::today())
+        ->orderBy('event_date')
+        ->select('name', 'event_date')
+        ->take(3)
+        ->get();
 
     return view('dashboard_page', compact(
         'totalMembers', 'registered', 'totalCollectedFines', 'totalFines',
-        'finesByMonth', 'yearLevelData','upcomingEvents'
+        'finesByMonth', 'yearLevelData', 'upcomingEvents'
     ));
 }
+
+
 }
