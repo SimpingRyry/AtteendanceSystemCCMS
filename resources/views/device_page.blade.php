@@ -58,17 +58,24 @@
             </h5>
             <div class="d-flex flex-column gap-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <div><i class="fas fa-wifi me-2"></i>Internet</div>
-                    <div class="indicator-circle {{ $device->is_online ? 'bg-success' : 'bg-danger' }}"></div>
+                    <div><i class="fas fa-wifi me-2"></i>Connected to Device</div>
+                    <div class="indicator-circle {{ $device->is_online ? 'bg-success blinking' : 'bg-danger' }}"></div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div><i class="fas fa-user-check me-2"></i>Accepting Attendance</div>
-                   <div class="indicator-circle {{ $device->is_online ? 'bg-success' : 'bg-danger' }}"></div>
+                   <div class="indicator-circle {{ $device->is_online ? 'bg-success blinking' : 'bg-danger' }}"></div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <div><i class="fas fa-volume-up me-2"></i>Speaker</div>
-                    <div class="indicator-circle {{ $device->is_online ? 'bg-success' : 'bg-danger' }}"></div>
-                </div>
+    <div><i class="fas fa-volume-up me-2"></i>Speaker</div>
+    <div class="form-check form-switch">
+       <input class="form-check-input speaker-toggle"
+       type="checkbox"
+       role="switch"
+       data-device-name="{{ $device->name }}"
+       {{ $device->is_online ? '' : 'disabled' }}
+       {{ $device->is_muted ? '' : 'checked' }}>
+    </div>
+</div>
             </div>
         </div>
     </div>
@@ -122,6 +129,28 @@
             100% { opacity: 1; }
         }
     </style>
+
+<script>
+document.querySelectorAll('.speaker-toggle').forEach(toggle => {
+    toggle.addEventListener('change', function () {
+        const deviceName = this.dataset.deviceName;
+        const isMuted = !this.checked;
+
+        fetch(`/api/device/name/${deviceName}/mute`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ is_muted: isMuted })
+        })
+        .then(res => res.json())
+        .then(data => console.log("Mute updated:", data));
+    });
+});
+</script>
+
 
     <script>
         document.getElementById("deviceForm").addEventListener("submit", function (e) {

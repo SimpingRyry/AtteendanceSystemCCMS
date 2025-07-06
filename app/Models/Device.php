@@ -15,10 +15,12 @@ class Device extends Model
         'password',
         'is_online',
         'last_seen',
+        'is_muted',
     ];
      protected $casts = [
     'is_online' => 'boolean',
     'last_seen' => 'datetime',
+    'is_muted' => 'boolean',
 ];
 
 }

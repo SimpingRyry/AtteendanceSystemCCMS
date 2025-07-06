@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\DeviceController;
 
 
 /*
@@ -26,6 +27,10 @@ use Illuminate\Support\Facades\Storage;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+Route::post('/device/name/{name}/mute', [DeviceController::class, 'toggleMuteByName']);
+Route::get('/device/name/{name}/mute', [DeviceController::class, 'getMuteStatusByName']);
 
 
 
