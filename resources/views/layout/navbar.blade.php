@@ -40,7 +40,7 @@
     <div class="d-flex align-items-center gap-3 ms-auto">
       <!-- Profile -->
       <a class="nav-link d-flex align-items-center gap-2 text-white profile-button" href="#">
-        <img src="{{ asset('images/' . ($user->picture ?? 'default.png')) }}" 
+        <img src="{{ asset('uploads/' . ($user->picture ?? 'default.png')) }}" 
              alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
         <div class="d-flex flex-column lh-sm text-start">
           <span class="profile-name">{{ $user->name ?? 'No Name' }}</span>

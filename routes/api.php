@@ -249,7 +249,8 @@ Route::post('/scan', function (Request $request) {
         return response()->json([
             'message' => 'Time-in recorded',
             'time' => $now->toTimeString(),
-            'status' => $status
+            'status' => $status,
+            'student' => $student->name
         ]);
     }
 
@@ -285,11 +286,14 @@ Route::post('/scan', function (Request $request) {
             'status' => $isWholeDay ? [
                 'morning' => $statusMorning,
                 'afternoon' => $statusAfternoon
-            ] : ($existing->status ?? 'Late')
+            ] : ($existing->status ?? 'Late'),
+            'student' => $student->name
+
         ]);
     }
 
     return response()->json([
-        'message' => 'Already recorded for this session.'
+        'message' => 'Already recorded for this session.',
+        'student' => $student->name
     ]);
 });

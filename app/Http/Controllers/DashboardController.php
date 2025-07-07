@@ -67,9 +67,9 @@ public function studentindex()
     // Attendance Breakdown
     $attended = Attendance::where('student_id', $user->student_id)
         ->where(function ($q) {
-            $q->where('status', 'On Time')
-              ->orWhere('status_morning', 'On Time')
-              ->orWhere('status_afternoon', 'On Time');
+            $q->whereIn('status', ['On Time', 'Late'])
+              ->orWhereIn('status_morning', ['On Time', 'Late'])
+              ->orWhereIn('status_afternoon', ['On Time', 'Late']);
         })->count();
 
     $absent = Attendance::where('student_id', $user->student_id)
@@ -100,16 +100,16 @@ public function studentindex()
         ->get();
 
     $now = Carbon::now();
-$studentId = auth()->user()->student_id;
+    $studentId = $user->student_id;
 
-$monthlyFines = collect(range(0, 3))->mapWithKeys(function ($i) use ($now, $studentId) {
-    $month = $now->copy()->subMonths($i)->format('Y-m');
-    $fines = \App\Models\Transaction::where('student_id', $studentId)
-        ->where('transaction_type', 'FINE')
-        ->where('date', 'like', "$month%")
-        ->sum('fine_amount');
-    return [$month => $fines];
-})->reverse(); // from oldest to latest
+    $monthlyFines = collect(range(0, 3))->mapWithKeys(function ($i) use ($now, $studentId) {
+        $month = $now->copy()->subMonths($i)->format('Y-m');
+        $fines = \App\Models\Transaction::where('student_id', $studentId)
+            ->where('transaction_type', 'FINE')
+            ->where('date', 'like', "$month%")
+            ->sum('fine_amount');
+        return [$month => $fines];
+    })->reverse(); // from oldest to latest
 
     // Upcoming Events
     $upcomingEvents = Event::where('event_date', '>', now())
@@ -129,4 +129,5 @@ $monthlyFines = collect(range(0, 3))->mapWithKeys(function ($i) use ($now, $stud
         'monthlyFines'
     ));
 }
+
 }

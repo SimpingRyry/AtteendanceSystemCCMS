@@ -39,7 +39,7 @@
         <div class="card text-center shadow-sm w-100 h-100 border-0 rounded-4">
           <div class="card-body d-flex flex-column align-items-center justify-content-center">
             <div class="mb-3" style="width: 150px; height: 150px;">
-              <img src="{{ asset('images/' . $profile->photo) }}" class="rounded-circle w-100 h-100" style="object-fit: cover;" alt="Profile Picture">
+              <img src="{{ asset('uploads/' . $profile->photo) }}" class="rounded-circle w-100 h-100" style="object-fit: cover;" alt="Profile Picture">
             </div>
             <h5 class="card-title mb-1">{{ $profile->name }}</h5>
             <p class="text-muted">{{ $profile->position }}</p>

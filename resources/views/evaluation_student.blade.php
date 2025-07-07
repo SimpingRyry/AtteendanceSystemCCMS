@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
           case 'textarea':
             html += `<textarea class="form-control" name="${base}[answer]" rows="3" required></textarea>`;
             break;
-          case 'radio':
+          case 'mcq':
             q.options.forEach(opt => {
               html += `
                 <div class="form-check">

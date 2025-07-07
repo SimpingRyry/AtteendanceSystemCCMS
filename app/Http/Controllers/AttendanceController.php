@@ -8,6 +8,7 @@ use App\Models\OrgList;
 use App\Models\Setting;
 use App\Models\Attendance;
 use App\Models\FineSetting;
+use Illuminate\Support\Facades\Log;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 
@@ -25,6 +26,7 @@ public function store(Request $request)
 
     foreach ($attendanceData as $record) {
         $existingIds[] = $record['student_id'];
+        Log::info('Processing attendance record for student ID: ' . $record['student_id']);
         $hasSeparateSessions = isset($record['status_morning']) && isset($record['status_afternoon']);
 
         // Get event org for today
