@@ -101,7 +101,7 @@ public function store(Request $request)
         }
     }
 
-    // 🔁 Now handle students who were NOT in the attendance_data (not scanned)
+    // 🔁 Handle students not scanned at all
     if (count($attendanceData) > 0) {
         $eventName = $attendanceData[0]['event'];
         $eventDate = $attendanceData[0]['date'];
@@ -128,8 +128,6 @@ public function store(Request $request)
 
                 $fineAmountMorning = $getFineAmount('Absent');
                 $fineAmountAfternoon = $getFineAmount('Absent');
-
-                // Assume event is wholeday if the original record has separate sessions
                 $isWholeDay = isset($attendanceData[0]['status_morning']);
 
                 if ($isWholeDay) {
@@ -150,7 +148,7 @@ public function store(Request $request)
                         'student_id' => $user->student_id,
                         'event' => $eventName,
                         'transaction_type' => 'FINE',
-                        'fine_amount' => $fineAmountMorning, // single session
+                        'fine_amount' => $fineAmountMorning,
                         'org' => $user->org,
                         'date' => $eventDate,
                         'acad_term' => $acadTerm,
@@ -161,9 +159,100 @@ public function store(Request $request)
         }
     }
 
+    // ✅ Mark afternoon Absent if only morning is filled
+    foreach ($attendanceData as $record) {
+        if (!isset($record['status_morning']) || !isset($record['status_afternoon'])) continue;
+
+        $attendance = Attendance::where('student_id', $record['student_id'])
+            ->whereDate('created_at', $record['date'])
+            ->first();
+
+        if (
+            $attendance &&
+            !is_null($attendance->time_in1) &&
+            !is_null($attendance->time_out1) &&
+            is_null($attendance->time_in2) &&
+            is_null($attendance->time_out2) &&
+            is_null($attendance->status_afternoon)
+        ) {
+            $attendance->status_afternoon = 'Absent';
+            $attendance->save();
+
+            $eventOrg = Event::where('name', $record['event'])
+                ->whereDate('event_date', $record['date'])
+                ->value('org');
+
+            $fineSettings = FineSetting::where('org', $eventOrg)->first();
+            $officer = User::where('student_id', $record['student_id'])
+                ->where('term', $acadTerm)
+                ->where('org', $eventOrg)
+                ->where('role', 'like', '%- Officer')
+                ->first();
+            $isOfficer = $officer !== null;
+            $studentOrg = $officer->org ?? User::where('student_id', $record['student_id'])->value('org');
+
+            $fineAmount = $isOfficer ? $fineSettings->absent_officer : $fineSettings->absent_member;
+
+            Transaction::create([
+                'student_id' => $record['student_id'],
+                'event' => $record['event'] . ' - Afternoon',
+                'transaction_type' => 'FINE',
+                'fine_amount' => $fineAmount,
+                'org' => $studentOrg ?? 'N/A',
+                'date' => $record['date'],
+                'acad_term' => $acadTerm,
+                'acad_code' => $acadCode,
+            ]);
+        }
+    }
+
+    // ✅ Mark half-day as Absent if time-in exists but no time-out
+    foreach ($attendanceData as $record) {
+        if (isset($record['status_morning']) || isset($record['status_afternoon'])) continue;
+
+        $attendance = Attendance::where('student_id', $record['student_id'])
+            ->whereDate('created_at', $record['date'])
+            ->first();
+
+        if (
+            $attendance &&
+            !is_null($attendance->time_in1) &&
+            is_null($attendance->time_out1) &&
+            strtolower($attendance->status) !== 'absent'
+        ) {
+            $attendance->status = 'Absent';
+            $attendance->save();
+
+            $eventOrg = Event::where('name', $record['event'])
+                ->whereDate('event_date', $record['date'])
+                ->value('org');
+
+            $fineSettings = FineSetting::where('org', $eventOrg)->first();
+            $officer = User::where('student_id', $record['student_id'])
+                ->where('term', $acadTerm)
+                ->where('org', $eventOrg)
+                ->where('role', 'like', '%- Officer')
+                ->first();
+            $isOfficer = $officer !== null;
+            $studentOrg = $officer->org ?? User::where('student_id', $record['student_id'])->value('org');
+
+            $fineAmount = $isOfficer ? $fineSettings->absent_officer : $fineSettings->absent_member;
+
+            Transaction::create([
+                'student_id' => $record['student_id'],
+                'event' => $record['event'],
+                'transaction_type' => 'FINE',
+                'fine_amount' => $fineAmount,
+                'org' => $studentOrg ?? 'N/A',
+                'date' => $record['date'],
+                'acad_term' => $acadTerm,
+                'acad_code' => $acadCode,
+            ]);
+        }
+    }
+
     return redirect()->back()->with('success', 'Attendance fines recorded successfully, including absentees.');
 }
-
 
 
 public function liveData()
