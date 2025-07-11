@@ -3,6 +3,8 @@
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Event;
+use App\Models\Device;
+use App\Models\Setting;
 use App\Models\Student;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
@@ -281,5 +283,66 @@ Route::get('/event', function () {
 
     return response()->json([
         'event_name' => $event?->name ?? 'Untitled Event'
+    ]);
+});
+
+Route::post('/update', function (Request $request) {
+    $device = Device::find($request->device_id);  // 🔄 Use device_id from request
+
+    if ($device) {
+        $device->name = $request->device_name;
+        $device->password = $request->device_password;
+        $device->clock_format = $request->clock_format;
+        $device->save();
+
+        return response()->json(['message' => 'Settings updated.']);
+    }
+
+    return response()->json(['message' => 'Device not found.'], 404);
+});
+
+Route::get('/device-settings/{device_id}', function ($device_id) {
+    $device = \App\Models\Device::find($device_id);
+
+    if ($device) {
+        return response()->json([
+            'device_name' => $device->name,
+            'device_password' => $device->password,
+            'clock_format' => $device->clock_format,
+        ]);
+    }
+
+    return response()->json(['message' => 'Device not found.'], 404);
+});
+
+Route::post('/check-role', function (Request $request) {
+    $student = Student::where('f_id', $request->finger_id)->first();
+
+    if (!$student) {
+        return response()->json(['message' => 'Student not found'], 404);
+    }
+
+    $users = User::where('student_id', $student->id_number)
+                 ->whereNotNull('term')  // skip "Member" role (no term)
+                 ->get();
+
+    if ($users->isEmpty()) {
+        return response()->json(['message' => 'No valid roles found'], 404);
+    }
+
+    $currentTerm = Setting::where('key', 'academic_term')->value('value');
+
+    // Find valid officer for current term
+    $validUser = $users->first(function ($user) use ($currentTerm) {
+        return str_ends_with($user->role, 'Officer') && $user->term === $currentTerm;
+    });
+
+    if (!$validUser) {
+        return response()->json(['message' => 'No officer role found for current term'], 403);
+    }
+
+    return response()->json([
+        'role' => $validUser->role,
+        'term' => 'current',
     ]);
 });

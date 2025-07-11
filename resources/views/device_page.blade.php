@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="{{ asset('css/dash_device.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_side.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>CCMS Attendance System</title>
 </head>
@@ -52,7 +53,7 @@
             <div id="deviceContainer" class="row g-4">
     @foreach ($devices as $device)
     <div class="col-md-3">
-        <div class="card p-3 rounded status-box glass-box shadow-sm">
+        <div class="card p-3 rounded status-box glass-box shadow-sm position-relative">
             <h5 class="mb-3 text-center">
                 <i class="fas fa-microchip me-2"></i>{{ $device->name }}
             </h5>
@@ -75,9 +76,17 @@
        {{ $device->is_online ? '' : 'disabled' }}
        {{ $device->is_muted ? '' : 'checked' }}>
     </div>
+    <button class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 m-2 open-settings-btn"
+    data-device-id="{{ $device->id }}"
+    data-device-name="{{ $device->name }}"
+    data-device-password="{{ $device->password }}"
+    data-clock-format="{{ $device->clock_format }}">
+    <i class="fas fa-cog"></i>
+</button>
 </div>
             </div>
         </div>
+        
     </div>
     @endforeach
 </div>
@@ -110,6 +119,38 @@
         </div>
     </div>
 
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded">
+      <div class="modal-header">
+        <h5 class="modal-title" id="settingsModalLabel">Device Settings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="deviceSettingsForm">
+          <input type="hidden" id="modalDeviceId">
+          <div class="mb-3">
+            <label for="modalDeviceName" class="form-label">Device Name</label>
+            <input type="text" class="form-control" id="modalDeviceName" required>
+          </div>
+          <div class="mb-3">
+            <label for="modalDevicePassword" class="form-label">Device Password</label>
+            <input type="password" class="form-control" id="modalDevicePassword" required>
+          </div>
+          <div class="mb-3">
+            <label for="modalClockFormat" class="form-label">Clock Format</label>
+            <select class="form-select" id="modalClockFormat">
+              <option value="12-hour">12-hour</option>
+              <option value="24-hour">24-hour</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Save Settings</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
     <style>
         .indicator-circle {
             width: 15px;
@@ -129,7 +170,60 @@
             100% { opacity: 1; }
         }
     </style>
+<script>
+document.querySelectorAll('.open-settings-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const id = button.dataset.deviceId;
+        const name = button.dataset.deviceName;
+        const password = button.dataset.devicePassword;
+        const format = button.dataset.clockFormat;
 
+        document.getElementById('modalDeviceId').value = id;
+        document.getElementById('modalDeviceName').value = name;
+        document.getElementById('modalDevicePassword').value = password;
+        document.getElementById('modalClockFormat').value = format;
+
+        new bootstrap.Modal(document.getElementById('settingsModal')).show();
+    });
+});
+
+document.getElementById('deviceSettingsForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const deviceId = document.getElementById('modalDeviceId').value;
+    const name = document.getElementById('modalDeviceName').value;
+    const password = document.getElementById('modalDevicePassword').value;
+    const clockFormat = document.getElementById('modalClockFormat').value;
+
+    try {
+        const response = await fetch('/api/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                device_id: deviceId,
+                device_name: name,
+                device_password: password,
+                clock_format: clockFormat
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            alert('✅ Settings saved and synced to Python.');
+            window.location.reload(); // Refresh to update display
+        } else {
+            alert('❌ Failed: ' + data.message);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('❌ Error syncing to device.');
+    }
+});
+</script>
 <script>
 document.querySelectorAll('.speaker-toggle').forEach(toggle => {
     toggle.addEventListener('change', function () {
