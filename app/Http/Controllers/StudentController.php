@@ -27,11 +27,22 @@ public function store(Request $request)
         'uploaded_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         'fingerprint' => 'nullable|int|max:255',
         'captured_image' => 'nullable|string',
-        'organization' => (Str::lower(Auth::user()->role) === 'adviser' || Str::contains(Str::lower(Auth::user()->role), 'officer')) ? 'nullable' : 'required|string|max:255',
+        'organization' => 'nullable|string|max:255',
         'role' => 'required|string|max:255',
         'fingerprint_user_id' => 'nullable|integer',
     ]);
 
+    // ❌ Prevent being officer in both main org and SG
+    if (
+        Str::lower($request->role) !== 'member' &&
+        $request->filled('sg_officer_role')
+    ) {
+        return back()->withErrors([
+            'sg_officer_role' => 'You cannot be an officer in both the main organization and the Student Government.',
+        ])->withInput();
+    }
+
+    // ✅ Handle image requirements
     if (!$request->uploaded_picture && !$request->captured_image) {
         return back()->withErrors(['image' => 'Please upload or capture a picture.']);
     }
@@ -42,14 +53,14 @@ public function store(Request $request)
 
     $filename = null;
 
-    // Save uploaded picture
+    // ✅ Save uploaded picture
     if ($request->hasFile('uploaded_picture')) {
         $image = $request->file('uploaded_picture');
         $filename = uniqid() . '.' . $image->getClientOriginalExtension();
         $image->move(public_path('uploads'), $filename);
     }
 
-    // Save captured image
+    // ✅ Save captured image
     if ($request->captured_image) {
         $image = $request->captured_image;
         $image = str_replace('data:image/png;base64,', '', $image);
@@ -60,13 +71,23 @@ public function store(Request $request)
         file_put_contents(public_path('uploads/' . $filename), $imageData);
     }
 
+    // ✅ Determine organization logic
     $currentUserRole = Str::lower(Auth::user()->role);
-    $organization = ($currentUserRole === 'adviser' || Str::contains($currentUserRole, 'officer')) ? Auth::user()->org : $request->organization;
+    $userOrg = Auth::user()->org;
 
-    // Create MEMBER account
+    if (
+        ($currentUserRole === 'adviser' || Str::contains($currentUserRole, 'officer')) &&
+        $userOrg !== 'CCMS Student Government'
+    ) {
+        $organization = $userOrg;
+    } else {
+        $organization = $request->organization;
+    }
+
+    // ✅ Create main MEMBER account
     $memberUser = new User();
     $memberUser->name = $request->sname;
-    $memberUser->email = $request->email ;
+    $memberUser->email = $request->email;
     $memberUser->password = Hash::make($request->student_id);
     $memberUser->picture = $filename;
     $memberUser->role = 'Member';
@@ -78,26 +99,46 @@ public function store(Request $request)
 
     event(new Registered($memberUser));
 
-    // If selected role is not Member, create second Officer account
-    if (Str::lower($request->role) !== 'member') {
-        $term = Setting::where('key', 'academic_term')->value('value'); // Get current term
+    $term = Setting::where('key', 'academic_term')->value('value'); // current term
 
+    // ✅ If role is not member → create officer account (main org)
+    if (Str::lower($request->role) !== 'member') {
         $officerUser = new User();
         $officerUser->name = $request->sname;
         $officerUser->email = $request->email;
         $officerUser->password = Hash::make($request->email);
         $officerUser->picture = $filename;
-        $officerUser->role = $request->role. ' -Officer';
+        $officerUser->role = $request->role . ' - Officer';
         $officerUser->student_id = $request->student_id;
         $officerUser->org = $organization;
         $officerUser->email_verified_at = now();
-        $officerUser->term = $term; // assign the academic term
+        $officerUser->term = $term;
 
         Log::info('Saving Officer account with term', $officerUser->toArray());
         $officerUser->save();
     }
 
-    // Update student record
+    // ✅ If role is member AND SG role is selected → create SG officer account
+    if (
+        Str::lower($request->role) === 'member' &&
+        $request->filled('sg_officer_role')
+    ) {
+        $sgOfficer = new User();
+        $sgOfficer->name = $request->sname;
+        $sgOfficer->email = $request->email;
+        $sgOfficer->password = Hash::make($request->email);
+        $sgOfficer->picture = $filename;
+        $sgOfficer->role = $request->sg_officer_role . ' - Officer';
+        $sgOfficer->student_id = $request->student_id;
+        $sgOfficer->org = 'CCMS Student Government';
+        $sgOfficer->email_verified_at = now();
+        $sgOfficer->term = $term;
+
+        Log::info('Saving SG Officer account', $sgOfficer->toArray());
+        $sgOfficer->save();
+    }
+
+    // ✅ Update student record
     $student = Student::where('id_number', $request->student_id)->first();
 
     if ($student) {
@@ -117,7 +158,6 @@ public function store(Request $request)
 
     return redirect()->back()->with('success', 'Student registered successfully!');
 }
-
 
     
     

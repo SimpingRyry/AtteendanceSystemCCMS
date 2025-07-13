@@ -274,7 +274,11 @@
               </div>
               <input type="hidden" name="fingerprint_data" id="fingerprintData">
               <input type="hidden" name="fingerprint_user_id" id="fingerprintUserId">
+              <div class="mt-2 text-center">
+              <span id="enrollmentStatusBadge" class="badge bg-secondary">Checking status...</span>
             </div>
+            </div>
+            
           </div>
 
           <!-- Contact Details -->
@@ -294,44 +298,7 @@
             </div>
           </div>
 
-          <!-- Role / Position -->
-          <h5 class="fw-bold text-info mb-3">Role / Position</h5>
-          <div class="mb-4">
-            <label class="form-label" for="roleSelect">Select Role <span class="text-danger">*</span></label>
-            <select name="role" id="roleSelect" class="form-select" required>
-              <option value="">-- Select Role --</option>
-              @if(auth()->user()->org == 'ITS' || auth()->user()->org == 'SG')
-                <option value="member">Member</option>
-                <option value="officer">Officer</option>
-              @elseif(auth()->user()->org == 'PRAXIS')
-                <option value="member">Member</option>
-                <option value="President">President</option>
-                <option value="Vice President For Internal Affairs">VP Internal Affairs</option>
-                <option value="Vice President For External Affairs">VP External Affairs</option>
-                <option value="Vice President For Financial Affairs">VP Financial Affairs</option>
-                <option value="Auditing Officer">Auditing Officer</option>
-                <option value="Technical Officer">Technical Officer</option>
-                <option value="Sentinel Officer">Sentinel Officer</option>
-              @else
-                <option value="Member">Member</option>
-                <option value="President">President</option>
-                <option value="Vice President">Vice President</option>
-                <option value="Executive Secretary">Executive Secretary</option>
-                <option value="Administrative Secretary">Administrative Secretary</option>
-                <option value="Treasurer">Treasurer</option>
-                <option value="Auditor">Auditor</option>
-                <option value="Public Information Officer">Public Info Officer</option>
-                <option value="Business Manager 1">Business Manager 1</option>
-                <option value="Business Manager 2">Business Manager 2</option>
-                <option value="Sentinel 1">Sentinel 1</option>
-                <option value="Sentinal 2">Sentinal 2</option>
-                <option value="Multimedia Officer">Multimedia Officer</option>
-              @endif
-            </select>
-          </div>
-
-          <!-- Organization for Super Admin -->
-          @if(auth()->user()->role == 'Super Admin')
+          @if(auth()->user()->role == 'Super Admin' || auth()->user()->org == 'CCMS Student Government')
             <div class="mb-4">
               <label class="form-label" for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
               <select name="organization" id="organizationSelect" class="form-select" required>
@@ -342,6 +309,81 @@
               </select>
             </div>
           @endif
+
+          <!-- Role / Position -->
+          <h5 class="fw-bold text-info mb-3">Role / Position</h5>
+<div class="mb-4">
+  <label class="form-label" for="roleSelect">Select Role <span class="text-danger">*</span></label>
+  <select name="role" id="roleSelect" class="form-select" required>
+    <option value="">-- Select Role --</option>
+    @if(auth()->user()->org == 'Information Technology Society' || auth()->user()->org == 'SG')
+      <option value="Member">Member</option>
+      <option value="President">President</option>
+      <option value="Vice President">Vice President</option>
+      <option value="Executive Secretary">Executive Secretary</option>
+      <option value="Administrative Secretary">Administrative Secretary</option>
+      <option value="Treasurer">Treasurer</option>
+      <option value="Auditor">Auditor</option>
+      <option value="Public Information Officer">Public Info Officer</option>
+      <option value="Business Manager 1">Business Manager 1</option>
+      <option value="Business Manager 2">Business Manager 2</option>
+      <option value="Sentinel 1">Sentinel 1</option>
+      <option value="Sentinal 2">Sentinal 2</option>
+      <option value="Multimedia Officer">Multimedia Officer</option>
+    @elseif(auth()->user()->org == 'PRAXIS')
+      <option value="member">Member</option>
+      <option value="President">President</option>
+      <option value="Vice President For Internal Affairs">VP Internal Affairs</option>
+      <option value="Vice President For External Affairs">VP External Affairs</option>
+      <option value="Vice President For Financial Affairs">VP Financial Affairs</option>
+      <option value="Auditing Officer">Auditing Officer</option>
+      <option value="Technical Officer">Technical Officer</option>
+      <option value="Sentinel Officer">Sentinel Officer</option>
+     @elseif(auth()->user()->org == 'CCMS Student Government')
+   
+    @else
+      <option value="Member">Member</option>
+      <option value="President">President</option>
+      <option value="Vice President">Vice President</option>
+      <option value="Executive Secretary">Executive Secretary</option>
+      <option value="Administrative Secretary">Administrative Secretary</option>
+      <option value="Treasurer">Treasurer</option>
+      <option value="Auditor">Auditor</option>
+      <option value="Public Information Officer">Public Info Officer</option>
+      <option value="Business Manager 1">Business Manager 1</option>
+      <option value="Business Manager 2">Business Manager 2</option>
+      <option value="Sentinel 1">Sentinel 1</option>
+      <option value="Sentinal 2">Sentinal 2</option>
+      <option value="Multimedia Officer">Multimedia Officer</option>
+    @endif
+  </select>
+</div>
+
+<!-- SG Officer Role Dropdown -->
+@if(auth()->user()->org == 'CCMS Student Government')
+  <div class="mb-4">
+    <label class="form-label" for="sgOfficerRole">SG Officer Role <span class="text-danger">*</span></label>
+    <select name="sg_officer_role" id="sgOfficerRole" class="form-select">
+      <option value="">-- Select SG Officer Role --</option>
+      <option value="President">President</option>
+      <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
+      <option value="Vice President For External Affairs">Vice President For External Affairs</option>
+      <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
+      <option value="Executive Secretary">Executive Secretary</option>
+      <option value="Internal Secretary">Internal Secretary</option>
+      <option value="Parliamentary Officer">Parliamentary Officer</option>
+      <option value="Auditing Officer I">Auditing Officer I</option>
+      <option value="Auditing Officer II">Auditing Officer II</option>
+      <option value="Managing Officer I">Managing Officer I</option>
+      <option value="Managing Officer II">Managing Officer II</option>
+      <option value="Multimedia Officer">Multimedia Officer</option>
+      <option value="Information Communications Officer">Information Communications Officer</option>
+    </select>
+  </div>
+@endif
+
+          <!-- Organization for Super Admin -->
+          
 
           <!-- Profile Picture -->
           <h5 class="fw-bold text-info mb-3">Profile Picture</h5>
@@ -373,7 +415,58 @@
 </div>
 
 
+@if(auth()->user()->role == 'Super Admin' || auth()->user()->org == 'CCMS Student Government')
+<script>
+  const roleSelect = document.getElementById('roleSelect');
+  const orgSelect = document.getElementById('organizationSelect');
 
+  const roleOptionsMap = {
+    "Information Technology Society": [
+      "Member", "President", "Vice President", "Executive Secretary",
+      "Administrative Secretary", "Treasurer", "Auditor", "Public Information Officer",
+      "Business Manager 1", "Business Manager 2", "Sentinel 1", "Sentinal 2", "Multimedia Officer"
+    ],
+    "PRAXIS": [
+      "Member", "President", "Vice President For Internal Affairs",
+      "Vice President For External Affairs", "Vice President For Financial Affairs",
+      "Auditing Officer", "Technical Officer", "Sentinel Officer"
+    ]
+  };
+
+  orgSelect?.addEventListener('change', function () {
+    const selectedOrg = this.value;
+
+    // Clear only if org is in predefined list
+    if (roleOptionsMap[selectedOrg]) {
+      roleSelect.innerHTML = '<option value="">-- Select Role --</option>';
+      roleOptionsMap[selectedOrg].forEach(role => {
+        const option = document.createElement('option');
+        option.value = role;
+        option.textContent = role;
+        roleSelect.appendChild(option);
+      });
+    } else {
+      // fallback to default roles if needed
+      roleSelect.innerHTML = `
+        <option value="">-- Select Role --</option>
+        <option value="Member">Member</option>
+        <option value="President">President</option>
+        <option value="Vice President">Vice President</option>
+        <option value="Executive Secretary">Executive Secretary</option>
+        <option value="Administrative Secretary">Administrative Secretary</option>
+        <option value="Treasurer">Treasurer</option>
+        <option value="Auditor">Auditor</option>
+        <option value="Public Information Officer">Public Information Officer</option>
+        <option value="Business Manager 1">Business Manager 1</option>
+        <option value="Business Manager 2">Business Manager 2</option>
+        <option value="Sentinel 1">Sentinel 1</option>
+        <option value="Sentinal 2">Sentinal 2</option>
+        <option value="Multimedia Officer">Multimedia Officer1</option>
+      `;
+    }
+  });
+</script>
+@endif
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="POST" action="{{ url('/generate-biometrics-schedule') }}">
@@ -480,6 +573,44 @@
 
 
 </body>
+
+<script>
+  async function checkEnrollmentStatus(deviceId) {
+    try {
+      const response = await fetch(`/api/device-settings/${deviceId}`);
+      const data = await response.json();
+
+      const badge = document.getElementById('enrollmentStatusBadge');
+
+      if (data.enrollment_on) {
+        badge.textContent = 'Enrollment ON';
+        badge.className = 'badge bg-success';
+      } else {
+        badge.textContent = 'Enrollment OFF';
+        badge.className = 'badge bg-danger';
+      }
+    } catch (error) {
+      console.error('Error fetching enrollment status:', error);
+      const badge = document.getElementById('enrollmentStatusBadge');
+      badge.textContent = 'Error';
+      badge.className = 'badge bg-dark';
+    }
+  }
+
+  // Call this when the modal opens or fingerprint loads
+  document.addEventListener('DOMContentLoaded', function () {
+    // Replace with actual device ID you want to check
+    const DEVICE_ID = 4;
+    checkEnrollmentStatus(DEVICE_ID);
+  });
+
+  // Optional: run again when modal is shown
+  const modal = document.getElementById('registerStudentModal');
+  modal.addEventListener('shown.bs.modal', function () {
+    const DEVICE_ID = 4; // or dynamically passed
+    checkEnrollmentStatus(DEVICE_ID);
+  });
+</script>
 </script>
 @if(session('success'))
 <script>

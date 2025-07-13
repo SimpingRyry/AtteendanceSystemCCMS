@@ -34,5 +34,21 @@ public function getMuteStatusByName($name)
     $device = Device::where('name', $name)->firstOrFail();
     return response()->json(['is_muted' => $device->is_muted]);
 }
+public function updateEnrollmentStatus(Request $request)
+    {
+        $validated = $request->validate([
+            'device_id' => 'required|exists:devices,id',
+            'enrollment_on' => 'required|boolean',
+        ]);
 
+        $device = Device::find($validated['device_id']);
+        $device->enrollment_on = $validated['enrollment_on'];
+        $device->save();
+
+        return response()->json([
+            'message' => 'Enrollment status updated successfully.',
+            'device_id' => $device->id,
+            'enrollment_on' => $device->enrollment_on,
+        ]);
+    }
 }

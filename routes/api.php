@@ -309,6 +309,7 @@ Route::get('/device-settings/{device_id}', function ($device_id) {
             'device_name' => $device->name,
             'device_password' => $device->password,
             'clock_format' => $device->clock_format,
+             'enrollment_on' => $device->enrollment_on, // Add this
         ]);
     }
 
@@ -346,3 +347,5 @@ Route::post('/check-role', function (Request $request) {
         'term' => 'current',
     ]);
 });
+
+Route::post('/device-enrollment-status', [DeviceController::class, 'updateEnrollmentStatus']);
