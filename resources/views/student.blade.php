@@ -231,172 +231,181 @@
         <form id="registerStudentForm" action="{{ route('register') }}" method="POST" enctype="multipart/form-data">
           @csrf
 
-          <!-- Student Details -->
-          <h5 class="fw-bold text-info mb-3">Student Details</h5>
-          <div class="row g-3 mb-4">
-            <div class="col-md-6">
-              <label class="form-label">Student ID</label>
-              <input type="text" name="student_id" id="modalStudentId" class="form-control" value="${data.id_number}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Name</label>
-              <input type="text" name="sname" id="modalStudentName" class="form-control" value="${data.name}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Gender</label>
-              <input type="text" class="form-control" id="modalGender" value="${data.gender}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Course</label>
-              <input type="text" class="form-control" name="course" id="modalCourse" value="${data.course}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Year</label>
-              <input type="text" class="form-control" id="modalYear" value="${data.year}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Section</label>
-              <input type="text" class="form-control" id="modalSection" value="${data.section}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Birth Date</label>
-              <input type="text" class="form-control" id="modalBirthDate" value="${data.birth_date}" readonly>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Fingerprint Scan</label>
+          <div class="row">
+            <!-- Left: Profile Picture + Fingerprint -->
+            <div class="col-md-4 text-center">
+             
+<div class="border rounded d-flex align-items-center justify-content-center bg-light mb-3" style="height: 250px;" >
+  <img id="capturedImage" class="img-fluid d-block mx-auto" style="max-height: 100%; max-width: 100%; display: none;" alt="Profile Picture" />
+</div>
+
+              <div class="d-flex flex-column gap-2 mb-3">
+                <button type="button" class="btn btn-outline-primary btn-sm" onclick="showUpload()">Upload Image</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showCamera()">Capture Image</button>
+              </div>
+
+              <input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
+              
+              <div id="cameraContainer" class="text-center" style="display: none;">
+                <video id="cameraStream" class="rounded border" width="100%" height="200" autoplay playsinline></video>
+                <button type="button" class="btn btn-success btn-sm mt-2" onclick="capturePhoto()">Take Picture</button>
+              </div>
+
+              <input type="hidden" name="captured_image" id="capturedImageInput">
+
+              <!-- Fingerprint Scan -->
+              <h6 class="text-muted mt-4 mb-2">Fingerprint Scan</h6>
               <div class="border rounded d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
                 <img id="fingerprintImage" src="" alt="Fingerprint will appear here" style="max-height: 100%; display: none;">
               </div>
               <input type="hidden" name="fingerprint_data" id="fingerprintData">
               <input type="hidden" name="fingerprint_user_id" id="fingerprintUserId">
               <div class="mt-2 text-center">
-              <span id="enrollmentStatusBadge" class="badge bg-secondary">Checking status...</span>
-            </div>
-            </div>
-            
-          </div>
-
-          <!-- Contact Details -->
-          <h5 class="fw-bold text-info mb-3">Contact Details</h5>
-          <div class="row g-3 mb-4">
-            <div class="col-md-6">
-              <label class="form-label">Contact Number</label>
-              <input type="text" class="form-control" id="modalContactNumber" value="${data.contact_no}" readonly>
-            </div>
-            <div class="col-12">
-              <label class="form-label">Address</label>
-              <input type="text" class="form-control" id="modalAddress" value="${data.address}" readonly>
-            </div>
-            <div class="col-12">
-              <label class="form-label">Email <span class="text-danger">*</span></label>
-              <input type="email" name="email" class="form-control" placeholder="Enter Email" required>
-            </div>
-          </div>
-
-          @if(auth()->user()->role == 'Super Admin' || auth()->user()->org == 'CCMS Student Government')
-            <div class="mb-4">
-              <label class="form-label" for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
-              <select name="organization" id="organizationSelect" class="form-select" required>
-                <option value="">-- Select Organization --</option>
-                @foreach ($org_list as $org)
-                  <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
-                @endforeach
-              </select>
-            </div>
-          @endif
-
-          <!-- Role / Position -->
-          <h5 class="fw-bold text-info mb-3">Role / Position</h5>
-<div class="mb-4">
-  <label class="form-label" for="roleSelect">Select Role <span class="text-danger">*</span></label>
-  <select name="role" id="roleSelect" class="form-select" required>
-    <option value="">-- Select Role --</option>
-    @if(auth()->user()->org == 'Information Technology Society' || auth()->user()->org == 'SG')
-      <option value="Member">Member</option>
-      <option value="President">President</option>
-      <option value="Vice President">Vice President</option>
-      <option value="Executive Secretary">Executive Secretary</option>
-      <option value="Administrative Secretary">Administrative Secretary</option>
-      <option value="Treasurer">Treasurer</option>
-      <option value="Auditor">Auditor</option>
-      <option value="Public Information Officer">Public Info Officer</option>
-      <option value="Business Manager 1">Business Manager 1</option>
-      <option value="Business Manager 2">Business Manager 2</option>
-      <option value="Sentinel 1">Sentinel 1</option>
-      <option value="Sentinal 2">Sentinal 2</option>
-      <option value="Multimedia Officer">Multimedia Officer</option>
-    @elseif(auth()->user()->org == 'PRAXIS')
-      <option value="member">Member</option>
-      <option value="President">President</option>
-      <option value="Vice President For Internal Affairs">VP Internal Affairs</option>
-      <option value="Vice President For External Affairs">VP External Affairs</option>
-      <option value="Vice President For Financial Affairs">VP Financial Affairs</option>
-      <option value="Auditing Officer">Auditing Officer</option>
-      <option value="Technical Officer">Technical Officer</option>
-      <option value="Sentinel Officer">Sentinel Officer</option>
-     @elseif(auth()->user()->org == 'CCMS Student Government')
-   
-    @else
-      <option value="Member">Member</option>
-      <option value="President">President</option>
-      <option value="Vice President">Vice President</option>
-      <option value="Executive Secretary">Executive Secretary</option>
-      <option value="Administrative Secretary">Administrative Secretary</option>
-      <option value="Treasurer">Treasurer</option>
-      <option value="Auditor">Auditor</option>
-      <option value="Public Information Officer">Public Info Officer</option>
-      <option value="Business Manager 1">Business Manager 1</option>
-      <option value="Business Manager 2">Business Manager 2</option>
-      <option value="Sentinel 1">Sentinel 1</option>
-      <option value="Sentinal 2">Sentinal 2</option>
-      <option value="Multimedia Officer">Multimedia Officer</option>
-    @endif
-  </select>
-</div>
-
-<!-- SG Officer Role Dropdown -->
-@if(auth()->user()->org == 'CCMS Student Government')
-  <div class="mb-4">
-    <label class="form-label" for="sgOfficerRole">SG Officer Role <span class="text-danger">*</span></label>
-    <select name="sg_officer_role" id="sgOfficerRole" class="form-select">
-      <option value="">-- Select SG Officer Role --</option>
-      <option value="President">President</option>
-      <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
-      <option value="Vice President For External Affairs">Vice President For External Affairs</option>
-      <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
-      <option value="Executive Secretary">Executive Secretary</option>
-      <option value="Internal Secretary">Internal Secretary</option>
-      <option value="Parliamentary Officer">Parliamentary Officer</option>
-      <option value="Auditing Officer I">Auditing Officer I</option>
-      <option value="Auditing Officer II">Auditing Officer II</option>
-      <option value="Managing Officer I">Managing Officer I</option>
-      <option value="Managing Officer II">Managing Officer II</option>
-      <option value="Multimedia Officer">Multimedia Officer</option>
-      <option value="Information Communications Officer">Information Communications Officer</option>
-    </select>
-  </div>
-@endif
-
-          <!-- Organization for Super Admin -->
-          
-
-          <!-- Profile Picture -->
-          <h5 class="fw-bold text-info mb-3">Profile Picture</h5>
-          <div class="mb-4">
-            <div class="d-flex gap-3 mb-3">
-              <button type="button" class="btn btn-outline-primary" onclick="showUpload()">Upload Image</button>
-              <button type="button" class="btn btn-outline-secondary" onclick="showCamera()">Capture Image</button>
+                <span id="enrollmentStatusBadge" class="badge bg-secondary">Checking status...</span>
+              </div>
             </div>
 
-            <input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
+            <!-- Right: Student Info -->
+            <div class="col-md-8">
+              <!-- Student Details -->
+              <div class="border rounded p-3 mb-3">
+                <h6 class="fw-bold text-info">Student Details</h6>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Student ID</label>
+                    <input type="text" name="student_id" id="modalStudentId" class="form-control" value="${data.id_number}" readonly>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Name</label>
+                    <input type="text" name="sname" id="modalStudentName" class="form-control" value="${data.name}" readonly>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Gender</label>
+                    <input type="text" class="form-control" id="modalGender" value="${data.gender}" readonly>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Course</label>
+                    <input type="text" class="form-control" name="course" id="modalCourse" value="${data.course}" readonly>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Year</label>
+                    <input type="text" class="form-control" id="modalYear" value="${data.year}" readonly>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Section</label>
+                    <input type="text" class="form-control" id="modalSection" value="${data.section}" readonly>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Birth Date</label>
+                    <input type="text" class="form-control" id="modalBirthDate" value="${data.birth_date}" readonly>
+                  </div>
+                </div>
+              </div>
 
-            <div id="cameraContainer" class="text-center" style="display: none;">
-              <video id="cameraStream" class="rounded border" width="100%" height="300" autoplay playsinline></video>
-              <button type="button" class="btn btn-success mt-2" onclick="capturePhoto()">Take Picture</button>
+              <!-- Contact Info -->
+              <div class="border rounded p-3 mb-3">
+                <h6 class="fw-bold text-info">Contact Details</h6>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Contact Number</label>
+                    <input type="text" class="form-control" id="modalContactNumber" value="${data.contact_no}" readonly>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">Address</label>
+                    <input type="text" class="form-control" id="modalAddress" value="${data.address}" readonly>
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                    <input type="email" name="email" class="form-control" placeholder="Enter Email" required>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Organization Selection -->
+              @if(auth()->user()->role == 'Super Admin' || auth()->user()->org == 'CCMS Student Government')
+              <div class="mb-4">
+                <label class="form-label" for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
+                <select name="organization" id="organizationSelect" class="form-select" required>
+                  <option value="">-- Select Organization --</option>
+                  @foreach ($org_list as $org)
+                    <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
+                  @endforeach
+                </select>
+              </div>
+              @endif
+
+              <!-- Role / Position -->
+              <div class="mb-4">
+                <h6 class="fw-bold text-info">Role / Position</h6>
+                <label class="form-label" for="roleSelect">Select Role <span class="text-danger">*</span></label>
+                <select name="role" id="roleSelect" class="form-select" required>
+                  <option value="">-- Select Role --</option>
+                  @if(auth()->user()->org == 'Information Technology Society' || auth()->user()->org == 'SG')
+                    <option value="Member">Member</option>
+                    <option value="President">President</option>
+                    <option value="Vice President">Vice President</option>
+                    <option value="Executive Secretary">Executive Secretary</option>
+                    <option value="Administrative Secretary">Administrative Secretary</option>
+                    <option value="Treasurer">Treasurer</option>
+                    <option value="Auditor">Auditor</option>
+                    <option value="Public Information Officer">Public Info Officer</option>
+                    <option value="Business Manager 1">Business Manager 1</option>
+                    <option value="Business Manager 2">Business Manager 2</option>
+                    <option value="Sentinel 1">Sentinel 1</option>
+                    <option value="Sentinal 2">Sentinal 2</option>
+                    <option value="Multimedia Officer">Multimedia Officer</option>
+                  @elseif(auth()->user()->org == 'PRAXIS')
+                    <option value="member">Member</option>
+                    <option value="President">President</option>
+                    <option value="Vice President For Internal Affairs">VP Internal Affairs</option>
+                    <option value="Vice President For External Affairs">VP External Affairs</option>
+                    <option value="Vice President For Financial Affairs">VP Financial Affairs</option>
+                    <option value="Auditing Officer">Auditing Officer</option>
+                    <option value="Technical Officer">Technical Officer</option>
+                    <option value="Sentinel Officer">Sentinel Officer</option>
+                  @elseif(auth()->user()->org == 'CCMS Student Government')
+                    <!-- No default roles here, handled below -->
+                  @else
+                    <option value="Member">Member</option>
+                    <option value="President">President</option>
+                    <option value="Vice President">Vice President</option>
+                    <option value="Executive Secretary">Executive Secretary</option>
+                    <option value="Administrative Secretary">Administrative Secretary</option>
+                    <option value="Treasurer">Treasurer</option>
+                    <option value="Auditor">Auditor</option>
+                    <option value="Public Information Officer">Public Info Officer</option>
+                    <option value="Business Manager 1">Business Manager 1</option>
+                    <option value="Business Manager 2">Business Manager 2</option>
+                    <option value="Sentinel 1">Sentinel 1</option>
+                    <option value="Sentinal 2">Sentinal 2</option>
+                    <option value="Multimedia Officer">Multimedia Officer</option>
+                  @endif
+                </select>
+              </div>
+
+              <!-- SG Role Dropdown -->
+              @if(auth()->user()->org == 'CCMS Student Government')
+              <div class="mb-4">
+                <label class="form-label" for="sgOfficerRole">SG Officer Role <span class="text-danger">*</span></label>
+                <select name="sg_officer_role" id="sgOfficerRole" class="form-select">
+                  <option value="">-- Select SG Officer Role --</option>
+                  <option value="President">President</option>
+                  <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
+                  <option value="Vice President For External Affairs">Vice President For External Affairs</option>
+                  <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
+                  <option value="Executive Secretary">Executive Secretary</option>
+                  <option value="Internal Secretary">Internal Secretary</option>
+                  <option value="Parliamentary Officer">Parliamentary Officer</option>
+                  <option value="Auditing Officer I">Auditing Officer I</option>
+                  <option value="Auditing Officer II">Auditing Officer II</option>
+                  <option value="Managing Officer I">Managing Officer I</option>
+                  <option value="Managing Officer II">Managing Officer II</option>
+                  <option value="Multimedia Officer">Multimedia Officer</option>
+                  <option value="Information Communications Officer">Information Communications Officer</option>
+                </select>
+              </div>
+              @endif
             </div>
-
-            <img id="capturedImage" class="img-fluid mt-3" style="display: none; max-height: 300px;" />
-            <input type="hidden" name="captured_image" id="capturedImageInput">
           </div>
         </form>
       </div>
@@ -503,7 +512,22 @@
   </div>
 </div>
 @endif
-
+@if(session('error'))
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <div class="modal-body">
+        <div class="text-danger mb-3">
+          <i class="bi bi-x-circle-fill" style="font-size: 60px;"></i>
+        </div>
+        <h5 class="text-danger">Error!</h5>
+        <p>{{ session('error') }}</p>
+        <button type="button" class="btn btn-danger mt-2" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
 
 @if(session('showPreview'))
 <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
@@ -626,7 +650,14 @@ function applySearchFilter() {
     });
 </script>
 @endif
-
+@if(session('error'))
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+    });
+</script>
+@endif
 @if(session('showPreview'))
 <script>
   document.addEventListener('DOMContentLoaded', function () {

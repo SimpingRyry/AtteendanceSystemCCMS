@@ -30,25 +30,24 @@ public function store(Request $request)
         'organization' => 'nullable|string|max:255',
         'role' => 'required|string|max:255',
         'fingerprint_user_id' => 'nullable|integer',
+        'sg_officer_role' => 'nullable|string|max:255',
     ]);
 
-    // ❌ Prevent being officer in both main org and SG
-    if (
-        Str::lower($request->role) !== 'member' &&
-        $request->filled('sg_officer_role')
-    ) {
-        return back()->withErrors([
-            'sg_officer_role' => 'You cannot be an officer in both the main organization and the Student Government.',
-        ])->withInput();
-    }
+    // ❌ Prevent being officer in both main org and Student Government
+if (
+    Str::lower($request->role) !== 'member' &&
+    $request->filled('sg_officer_role')
+) {
+    return redirect()->back()->with('error', 'You cannot be an officer in both your local organization and the Student Government.');
+}
 
     // ✅ Handle image requirements
     if (!$request->uploaded_picture && !$request->captured_image) {
-        return back()->withErrors(['image' => 'Please upload or capture a picture.']);
+        return back()->withErrors(['error' => 'Please upload or capture a picture.']);
     }
 
     if ($request->uploaded_picture && $request->captured_image) {
-        return back()->withErrors(['image' => 'Only one image should be provided.']);
+        return back()->withErrors(['error' => 'Only one image should be provided.']);
     }
 
     $filename = null;
@@ -158,6 +157,7 @@ public function store(Request $request)
 
     return redirect()->back()->with('success', 'Student registered successfully!');
 }
+
 
     
     
