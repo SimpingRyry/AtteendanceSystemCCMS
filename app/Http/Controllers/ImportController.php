@@ -87,24 +87,28 @@ class ImportController extends Controller
     // Redirect back with success message
     return redirect()->back()->with('success', "Data imported successfully! Students added: {$studentsAdded}, Students updated: {$studentsUpdated}");
 }
- public function show()
+public function show(Request $request)
 {
-    $students = Student::all();  
-    $org_list = OrgList::all();
+    $query = Student::query();
 
-    // Get distinct sections and years from the students table
+   
+    if ($request->filled('section')) {
+        $query->where('section', $request->section);
+    }
+    if ($request->filled('year')) {
+        $query->where('year', $request->year);
+    }
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    $students = $query->paginate(10); // enable pagination
+    $org_list = OrgList::all();
     $sections = Student::select('section')->distinct()->pluck('section')->filter()->sort()->values();
     $years = Student::select('year')->distinct()->pluck('year')->filter()->sort()->values();
 
     return view('student', compact('students', 'org_list', 'sections', 'years'));
 }
-
-    public function showUnregistered()
-{
-    $students = Student::where('status', 'Unregistered')->get(); // Get only Unregistered students
-    return view('registration', compact('students')); // Pass the filtered students to the view
-}
-
 
 public function preview(Request $request)
 {

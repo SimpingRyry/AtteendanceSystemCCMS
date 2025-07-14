@@ -68,24 +68,25 @@
   <form method="GET">
     <div class="row g-2">
 
-      @if(auth()->user()->role === 'Super Admin')
+      <!-- @if(auth()->user()->role === 'Super Admin')
       <div class="col-12">
         <label class="form-label small text-muted mb-1">Organization</label>
         <select class="form-select form-select-sm" name="organization" onchange="this.form.submit()">
           <option value="">Select Organization</option>
           @foreach($org_list as $org)
-          <option value="{{ $org->name }}" {{ request('organization') == $org->name ? 'selected' : '' }}>
-            {{ $org->name }}
+          <option value="{{ $org->org_name }}" {{ request('organization') == $org->org_name ? 'selected' : '' }}>
+            {{ $org->org_name }}
           </option>
           @endforeach
         </select>
       </div>
-      @endif
+      @endif -->
 
       <div class="col-12">
-        <label class="form-label small text-muted mb-1">Block</label>
+        <label class="form-label small text-muted mb-1">Sections</label>
         <select class="form-select form-select-sm" name="section" onchange="this.form.submit()">
           <option value="">Select Section</option>
+          <option value="">All Sections</option> {{-- Changed label --}}
           @foreach($sections as $section)
           <option value="{{ $section }}" {{ request('section') == $section ? 'selected' : '' }}>
             {{ $section }}
@@ -97,7 +98,9 @@
       <div class="col-12">
         <label class="form-label small text-muted mb-1">Year Level</label>
         <select class="form-select form-select-sm" name="year" onchange="this.form.submit()">
+        {{-- Changed label --}}
           <option value="">Select Year</option>
+            <option value="">All Year</option> 
           @foreach($years as $year)
           <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>
             {{ $year }}
@@ -110,6 +113,7 @@
         <label class="form-label small text-muted mb-1">Status</label>
         <select class="form-select form-select-sm" name="status" onchange="this.form.submit()">
           <option value="">Select Status</option>
+          <option value="">All</option> {{-- Changed label --}}
           <option value="Registered" {{ request('status') == 'Registered' ? 'selected' : '' }}>Registered</option>
           <option value="Unregistered" {{ request('status') == 'Unregistered' ? 'selected' : '' }}>Unregistered</option>
         </select>
@@ -182,18 +186,9 @@
       </div>
       @endif
 
-      <!-- Pagination -->
-      <div class="d-flex justify-content-end mt-3">
-        <nav>
-          <ul class="pagination pagination-sm">
-            <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
-            <li class="page-item"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">3</a></li>
-            <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
-          </ul>
-        </nav>
-      </div>
+     <div class="d-flex justify-content-end mt-3">
+  {{ $students->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
+</div>
     </div>
 
     <!-- Upload Modal -->
@@ -573,7 +568,18 @@
 
 
 </body>
+<script>
+function applySearchFilter() {
+  const input = document.getElementById('searchInput');
+  const filter = input.value.toLowerCase();
+  const rows = document.querySelectorAll('#studentTable tbody tr');
 
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(filter) ? '' : 'none';
+  });
+}
+</script>
 <script>
   async function checkEnrollmentStatus(deviceId) {
     try {

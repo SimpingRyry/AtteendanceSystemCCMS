@@ -39,53 +39,48 @@
         <div class="container-fluid" id="mainContainer">
             <!-- Heading -->
             <div class="mb-3">
-                <h2 class="fw-bold" style="color: #232946;">Accounts</h2>
+                <h2 class="fw-bold" style="color: #232946;">Members</h2>
                 <small style="color: #989797;">Manage /</small>
-                <small style="color: #444444;">Accounts</small>
+                <small style="color: #444444;">Members</small>
             </div>
 
             <!-- Main Card -->
             <div class="card shadow-sm p-4">
 
                 <!-- Filters and Search -->
-              <div class="row mb-4">
-    <div class="col-12 d-flex justify-content-end align-items-end gap-2">
-        <div style="position: relative;">
-            <!-- Filter Icon Button -->
-            <button class="btn btn-outline-secondary" onclick="toggleFilterCloud()" style="border-radius: 6px;">
-                <i class="bi bi-funnel-fill"></i>
-            </button>
+                <form method="GET" id="filterForm">
+                    <div class="row mb-4">
+                        <div class="col-12 d-flex justify-content-end align-items-end gap-2">
+                            <!-- Filter Button -->
+                            <div style="position: relative;">
+                                <button class="btn btn-outline-secondary" type="button" onclick="toggleFilterCloud()" style="border-radius: 6px;">
+                                    <i class="bi bi-funnel-fill"></i>
+                                </button>
 
-            <!-- Cloud Popup -->
-            <div id="filterCloud" class="shadow p-3 rounded" style="position: absolute; top: 120%; right: 0; background-color: white; border: 1px solid #ddd; border-radius: 12px; display: none; min-width: 250px; z-index: 10;">
-                <div class="mb-2">
-                    <label for="roleFilter" class="form-label">Filter by Role</label>
-                    <select id="roleFilter" class="form-select form-select-sm" onchange="applyFilters()">
-                        <option value="">All Roles</option>
-                        <option value="Member">Member</option>
-                        <option value="Officer">Officer</option>
-                        <option value="Admin">Admin</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="deptFilter" class="form-label">Filter by Organization</label>
-                    <select id="deptFilter" class="form-select form-select-sm" onchange="applyFilters()">
-                        <option value="">All Organization</option>
-                        <option value="ITS">ITS</option>
-                        <option value="PRAXIS">PRAXIS</option>
-                        <option value="CCMS-SG">CCMS-SG</option>
-                    </select>
-                </div>
-            </div>
-        </div>
+                                <!-- Filter Dropdown -->
+                                <div id="filterCloud" class="shadow p-3 rounded" style="position: absolute; top: 120%; right: 0; background-color: white; border: 1px solid #ddd; border-radius: 12px; display: none; min-width: 250px; z-index: 10;">
+                                    <div>
+                                        <label for="deptFilter" class="form-label">Filter by Organization</label>
+                                        <select id="deptFilter" name="org" class="form-select form-select-sm" onchange="document.getElementById('filterForm').submit()">
+                                            <option value="">All Organizations</option>
+                                            @foreach($org_list as $org)
+                                                <option value="{{ $org->org_name }}" {{ request('org') == $org->org_name ? 'selected' : '' }}>
+                                                    {{ $org->org_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
 
-        <!-- Search Input -->
-        <div style="min-width: 250px;">
-            <label class="form-label">Search</label>
-            <input type="text" id="searchInput" class="form-control" placeholder="Enter search..." oninput="applyFilters()">
-        </div>
-    </div>
-</div>
+                            <!-- Search Input (on-type) -->
+                            <div style="min-width: 250px;">
+                                <label class="form-label">Search</label>
+                                <input type="text" id="searchInput" class="form-control" placeholder="Search name...">
+                            </div>
+                        </div>
+                    </div>
+                </form>
 
                 <!-- Student List -->
                 <h5 class="mb-3 fw-bold" style="color: #232946;">User List</h5>
@@ -105,12 +100,12 @@
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="tableBody">
                                 @foreach($users as $user)
-                                    <tr style="border-bottom: 1px solid #dee2e6;">
+                                    <tr>
                                         <td>{{ $user->user_ID }}</td>
-                                        <td>{{ $user->name }}</td>
-                                        <td>{{ $user->email }}</td>
+                                        <td class="name-cell">{{ $user->name }}</td>
+                                        <td class="email-cell">{{ $user->email }}</td>
                                         <td>{{ $user->role }}</td>
                                         <td>{{ $user->org }}</td>
                                         <td>
@@ -131,23 +126,7 @@
 
                 <!-- Pagination -->
                 <div class="d-flex justify-content-end mt-3">
-                    <nav>
-                        <ul class="pagination">
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                            <li class="page-item"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+                    {{ $users->appends(request()->query())->links() }}
                 </div>
             </div>
         </div>
@@ -361,10 +340,29 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+<script>
+    document.getElementById('searchInput').addEventListener('input', function () {
+    const keyword = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#studentsTable tbody tr');
+
+    rows.forEach(row => {
+        const name = row.querySelector('.name-cell').textContent.toLowerCase();
+        const email = row.querySelector('.email-cell').textContent.toLowerCase();
+
+        if (name.includes(keyword) || email.includes(keyword)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+</script>
     <script>
     function toggleFilterCloud() {
         const cloud = document.getElementById("filterCloud");
         cloud.style.display = (cloud.style.display === "none" || cloud.style.display === "") ? "block" : "none";
+
+
     }
 
     // Optional: Close the filter popup if clicked outside

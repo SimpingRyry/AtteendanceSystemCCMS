@@ -46,66 +46,42 @@
 
             <!-- Main Card -->
             <div class="card shadow-sm p-4">
-                <!-- Header Section with Filters and Search -->
-                <div class="row align-items-center mb-3">
-                    <!-- Left: Officer List + Service Year + Term Search -->
-                    <div class="col-md-6">
-                        <h5 class="mb-1 fw-bold" style="color: #232946;">Officer List</h5>
-                        <p class="mb-2 text-muted">Service Year: <strong>{{ $yearOnly }}</strong></p>
+                <!-- Filter and Search -->
+<!-- Filter and Search -->
+<!-- Filter and Search -->
+<div class="row align-items-start mb-3">
+    <!-- Left: Officer List + Service Year -->
+    <div class="col-12 col-md-6 order-2 order-md-1">
+        <h5 class="mb-1 fw-bold" style="color: #232946;">Officer List</h5>
+        <p class="mb-2 text-muted">Service Year: <strong>{{ $yearOnly }}</strong></p>
 
-                        <!-- Service Year Search Input -->
-                        <div style="max-width: 250px;">
-                            <label for="termSearch" class="form-label mb-1">Service Year</label>
-                            <input type="text" id="termSearch" class="form-control form-control-sm"
-                                   placeholder="e.g. 2025-2026" oninput="applyFilters()">
-                        </div>
-                    </div>
+        <!-- Service Year Filter -->
+        <form method="GET" id="filterForm" onsubmit="return false;">
+            <div style="max-width: 250px;">
+                <label for="termSearch" class="form-label mb-1">Service Year</label>
+                <input type="text" name="term" id="termSearch" class="form-control form-control-sm"
+                       placeholder="e.g. 2025-2026" value="{{ request('term') }}"
+                       onchange="document.getElementById('filterForm').submit()">
+            </div>
+        </form>
+    </div>
 
-                    <!-- Right: Filter + Search + Add Officer -->
-                    <div class="col-md-6 d-flex justify-content-end align-items-end gap-2">
-                        <!-- Add Officer Button (only for CCMS Student Government) -->
-                        @if (Auth::user()->org === 'CCMS Student Government')
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addOfficerModal">
-                                <i class="bi bi-plus-circle me-1"></i> Add Officer
-                            </button>
-                        @endif
+    <!-- Right: Add Officer Button and Search Input -->
+    <div class="col-12 col-md-6 d-flex flex-column align-items-stretch align-items-md-end gap-2 order-1 order-md-2 mb-2 mb-md-0">
+        @if (Auth::user()->org === 'CCMS Student Government')
+            <button type="button" class="btn btn-primary "
+                    data-bs-toggle="modal" data-bs-target="#addOfficerModal">
+                <i class="bi bi-plus-circle me-1"></i> Add Officer
+            </button>
+        @endif
 
-                        <!-- Filter Button -->
-                        <div style="position: relative;">
-                            <button class="btn btn-outline-secondary" onclick="toggleFilterCloud()" style="border-radius: 6px;">
-                                <i class="bi bi-funnel-fill"></i>
-                            </button>
-
-                            <!-- Cloud Popup -->
-                            <div id="filterCloud" class="shadow p-3 rounded" style="position: absolute; top: 120%; right: 0; background-color: white; border: 1px solid #ddd; border-radius: 12px; display: none; min-width: 250px; z-index: 10;">
-                                <div class="mb-2">
-                                    <label for="roleFilter" class="form-label">Filter by Role</label>
-                                    <select id="roleFilter" class="form-select form-select-sm" onchange="applyFilters()">
-                                        <option value="">All Roles</option>
-                                        <option value="Member">Member</option>
-                                        <option value="Officer">Officer</option>
-                                        <option value="Admin">Admin</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="deptFilter" class="form-label">Filter by Organization</label>
-                                    <select id="deptFilter" class="form-select form-select-sm" onchange="applyFilters()">
-                                        <option value="">All Organization</option>
-                                        <option value="ITS">ITS</option>
-                                        <option value="PRAXIS">PRAXIS</option>
-                                        <option value="CCMS-SG">CCMS-SG</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Search Input -->
-                        <div style="min-width: 250px;">
-                            <label class="form-label mb-1">Search</label>
-                            <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Enter search..." oninput="applyFilters()">
-                        </div>
-                    </div>
-                </div>
+        <div style="min-width: 250px; max-width: 300px;">
+            <label class="form-label mb-1">Search</label>
+            <input type="text" id="searchInput" class="form-control form-control-sm"
+                   placeholder="Search name...">
+        </div>
+    </div>
+</div>
 
                 <!-- Officer Table -->
                 @if($users->isEmpty())
@@ -127,7 +103,7 @@
                                 @foreach($users as $user)
                                     <tr style="border-bottom: 1px solid #dee2e6;">
                                         <td>{{ $user->user_ID }}</td>
-                                        <td>{{ $user->name }}</td>
+                                        <td class="name-cell">{{ $user->name }}</td>
                                         <td>{{ $user->email }}</td>
                                         <td>{{ str_replace(' - Officer', '', $user->role) }}</td>
                                         <td>{{ $user->org }}</td>
@@ -149,29 +125,12 @@
 
                 <!-- Pagination -->
                 <div class="d-flex justify-content-end mt-3">
-                    <nav>
-                        <ul class="pagination">
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                            <li class="page-item"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
+                    {{ $users->appends(request()->query())->links() }}
                 </div>
             </div>
         </div>
     </div>
 </main>
-
 
 
 

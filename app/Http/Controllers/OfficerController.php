@@ -9,23 +9,30 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class OfficerController extends Controller
-{
-public function showOfficerPage()
+{public function showOfficerPage(Request $request)
 {
     $currentUser = Auth::user();
     $orgId = $currentUser->org;
 
-    // Get current academic year from settings
+    // Get academic term from settings
     $term = Setting::where('key', 'academic_term')->value('value');
-
-    // Extract year range (e.g., "2025-2026")
     preg_match('/\d{4}-\d{4}/', $term, $matches);
     $yearOnly = $matches[0] ?? 'N/A';
 
-    // Get active officers from the same organization
-    $users = User::activeOfficers()
-        ->where('org', $orgId)
-        ->get();
+    $query = User::activeOfficers()->where('org', $orgId);
+
+    // Filter by year or full text if applicable
+    if ($request->filled('term')) {
+        preg_match('/\d{4}-\d{4}/', $request->term, $searchMatch);
+
+        if (!empty($searchMatch)) {
+            $query->where('term', 'LIKE', '%' . $searchMatch[0] . '%');
+        } else {
+            $query->where('term', 'LIKE', '%' . $request->term . '%');
+        }
+    }
+
+    $users = $query->paginate(10);
 
     return view('officers', compact('users', 'yearOnly'));
 }
