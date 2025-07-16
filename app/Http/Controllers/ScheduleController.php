@@ -39,23 +39,35 @@ class ScheduleController extends Controller
         return $pdf->download('Schedule.pdf'); 
     }
 
-    public function generateBiometricsSchedule(Request $request)
-    {
-        $date = $request->input('date', now()->format('F d, Y'));
-    
-        $students = Student::where('status', 'Unregistered')
-            ->orderBy('name')
-            ->get();
-    
-        $chunks = $students->chunk(10);
-    
-        $pdf = Pdf::loadView('biometrics_schedule', [
-            'title' => 'Biometric Registration Schedule',
-            'scheduleDate' => \Carbon\Carbon::parse($date)->format('F d, Y'),
-            'batch' => null,
-            'chunks' => $chunks
-        ]);
-    
-        return $pdf->stream('biometrics_schedule.pdf'); // <-- changed from download() to stream()
+public function generateBiometricsSchedule(Request $request)
+{
+    $startDate = \Carbon\Carbon::parse($request->input('start_date'));
+    $endDate = \Carbon\Carbon::parse($request->input('end_date'));
+
+    $students = Student::where('status', 'Unregistered')
+        ->orderBy('name')
+        ->get();
+
+    $dateRange = [];
+    for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+        $dateRange[] = $date->copy();
     }
+
+    $chunks = $students->chunk(10); // 10 students per day
+    $pagedChunks = [];
+
+    foreach ($dateRange as $index => $date) {
+        $pagedChunks[] = [
+            'date' => $date->format('F d, Y'),
+            'students' => $chunks[$index] ?? collect(), // fallback to empty if not enough students
+        ];
+    }
+
+    $pdf = Pdf::loadView('biometrics_schedule', [
+        'title' => 'Biometric Registration Schedule',
+        'pagedChunks' => $pagedChunks,
+    ]);
+
+    return $pdf->stream('biometrics_schedule.pdf');
+}
 }

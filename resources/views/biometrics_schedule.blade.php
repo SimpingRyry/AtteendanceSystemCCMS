@@ -11,12 +11,9 @@
 </head>
 <body>
 
-@foreach ($chunks as $index => $students)
+@foreach ($pagedChunks as $index => $chunk)
     <h2>{{ $title }}</h2>
-    <p>Date: <strong>{{ $scheduleDate }}</strong></p>
-    @if($batch)
-        <p>Batch: <strong>{{ $batch }}</strong></p>
-    @endif
+    <p>Date: <strong>{{ $chunk['date'] }}</strong></p>
     <p>Page {{ $index + 1 }}</p>
 
     <table>
@@ -28,12 +25,11 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($students as $i => $student)
+            @foreach ($chunk['students'] as $i => $student)
                 <tr>
-                    <td>{{ ($index * 45) + $i + 1 }}</td>
+                    <td>{{ $i + 1 }}</td>
                     <td>{{ $student->name }}</td>
-                    <td>{{ $student->section}}</td>
-
+                    <td>{{ $student->section }}</td>
                 </tr>
             @endforeach
         </tbody>

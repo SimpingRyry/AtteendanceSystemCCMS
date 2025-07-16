@@ -473,7 +473,7 @@
 @endif
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <form method="POST" action="{{ url('/generate-biometrics-schedule') }}">
+    <form method="POST" action="{{ url('/generate-biometrics-schedule') }}" target="_blank">
         @csrf
         <div class="modal-content">
             <div class="modal-header">
@@ -483,8 +483,13 @@
 
             <div class="modal-body">
                 <div class="mb-3">
-                    <label for="scheduleDate" class="form-label">Schedule Date</label>
-                    <input type="date" class="form-control" id="scheduleDate" name="date" required>
+                    <label for="startDate" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" id="startDate" name="start_date" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="endDate" class="form-label">End Date</label>
+                    <input type="date" class="form-control" id="endDate" name="end_date" required>
                 </div>
             </div>
 
