@@ -5,7 +5,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CCMS Attendance System - One Page</title>
-
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Emerland+Serif&family=Roboto+Slab&family=Poppins&display=swap" rel="stylesheet" />
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <!-- FontAwesome -->
@@ -23,7 +28,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="{{ asset('css/home_page.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/home.css') }}">
 </head>
 <style>
     .bg-purple {
@@ -109,124 +114,69 @@
     margin-top: 0.5rem;
 }
 </style>
-<body>
-
-  <!-- Navbar -->
-  <button id="sidebarToggleBtn" class="sidebar-toggle-btn">
-  ☰
-</button>
-  <section id="home" class="position-relative">
-    <nav class="navbar navbar-expand-lg fixed-top">
-      <div class="container-fluid">
-        <a class="navbar-brand me-auto" href="#">TickTax</a>
-
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-          <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasNavbarLabel">LOGO DITO</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-          </div>
-          <div class="offcanvas-body">
-            <li class="nav-item dropdown d-block d-md-none">
-              <a class="nav-link dropdown-toggle" href="#" id="orgDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Organizations
-              </a>
-              <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="orgDropdown">
-                <li><a class="dropdown-item" href="#">CCMS Student Government</a></li>
-                <li><a class="dropdown-item" href="{{ url('orgs/its_page') }}">ITS</a></li>
-                <li><a class="dropdown-item" href="{{ url('orgs/praxis_page') }}">Praxis</a></li>
-              </ul>
-            </li>
-            <ul class="navbar-nav justify-content-center flex-grow-1 pe-3 d-none d-lg-flex" id="mainNav">
-              <li class="nav-item"><a class="nav-link mx-lg-2 active" aria-current="page" href="#">Home</a></li>
-              <li class="nav-item"><a class="nav-link mx-lg-2" href="#about">About</a></li>
-              <li class="nav-item"><a class="nav-link mx-lg-2" href="#events">Events</a></li>
-              <li class="nav-item"><a class="nav-link mx-lg-2" href="#contact">Contact Us</a></li>
-            </ul>
-          </div>
-        </div>
-        <a href="{{ route('login') }}" class="login-button">LOGIN</a>
-        <button class="navbar-toggler" type="button" id="menuButton">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-      </div>
-      <!-- DESKTOP LOGO SIDEBAR -->
-      <div id="logoSidebar" class="logo-sidebar d-none d-lg-flex flex-column">
-        <div class="organization-title">Organizations</div>
-        <hr class="sidebar-divider" />
-        <ul id="logoSidebarList" class="sidebar-orgs"></ul>
-      </div>
-
-      <!-- Mobile sidebar (offcanvas menu) -->
-      <div id="customSidebar" class="glass-sidebar shadow-lg d-lg-none">
-        <div class="sidebar-header d-flex justify-content-between align-items-center">
-          <h5 class="text-white mb-0 fw-bold">TickTax</h5>
-          <button id="closeSidebarBtn" class="btn-close-white">&times;</button>
-        </div>
-
-        <ul class="sidebar-nav mt-4">
-          <li><a href="#home">Home</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#events">Events</a></li>
+<body style="background-color: #fffffe;">
+  <!-- Your Current Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-3d" style="background-color:#232946;">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <img src="{{ asset('images/ticktaxx_logO.png') }}" alt="TickTax Logo" height="40" class="d-inline-block align-text-top" />
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto me-auto">
+          <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#features">Events</a></li>
+          <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="#contact">Contact Us</a></li>
         </ul>
-
-        <h6 class="text-white-50 text-uppercase mb-3 mt-3">Organizations</h6>
-        <ul id="organizationList" class="sidebar-orgs"></ul>
-      </div>
-
-    </nav>
-
-    <!-- Carousel -->
-    <div id="home" class="carousel-container position-relative">
-      <div id="mainCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
-
-        <!-- Indicators -->
-        <div class="carousel-indicators">
-          @foreach ($carouselSlides as $index => $slide)
-          <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="{{ $index }}" class="{{ $index === 0 ? 'active' : '' }}"></button>
-          @endforeach
-        </div>
-
-        <!-- Slides -->
-        <div class="carousel-inner">
-          @foreach ($carouselSlides as $index => $slide)
-          <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-            <img src="{{ asset('images/' . $slide['image']) }}" class="d-block w-100" alt="Slide {{ $index + 1 }}">
-
-            <!-- Overlay -->
-            <div class="overlay-content text-center text-white position-absolute top-50 start-50 translate-middle">
-              <div class="logo-container mb-3">
-                @foreach ($slide['logos'] as $logo)
-                <img src="{{ asset('images/' . $logo) }}" alt="Logo" height="60" class="me-2">
-                @endforeach
-              </div>
-              <h1 class="fw-bold">{{ $slide['title'] }}</h1>
-              <h2 class="fw-semibold">{{ $slide['subtitle'] }}</h2>
-            </div>
-          </div>
-          @endforeach
-        </div>
+        <a href="{{ route('login') }}" class="btn custom-login-btn">
+    Login
+</a>
       </div>
     </div>
+  </nav>
 
-
-    <!-- Controls -->
-    <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
-      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    </button>
+  <!-- Your Current Carousel -->
+  <main>
+    <section class="carousel-wrapper">
+      <div id="orgCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
+<div class="carousel-inner">
+  @foreach ($carouselSlides as $index => $slide)
+    <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+      <div class="carousel-slide-content">
+        @foreach ($slide['logos'] as $logo)
+          <img src="{{ asset('images/' . $logo) }}" alt="Logo" class="carousel-logo">
+        @endforeach
+        <h2>{{ $slide['title'] }}</h2>
+        <p>{{ $slide['subtitle'] }}</p>
+      </div>
     </div>
-    </div>
-    <!-- Card Grid -->
-    <section class="container py-5">
-      <div class="row" id="eventCardContainer">
-  <!-- Cards will be inserted here -->
+  @endforeach
 </div>
       </div>
+
+    
     </section>
-  </section>
+    <section class="container py-5" id="organizationList">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Our Student Organizations</h2>
+        <p class="text-muted">Empowering students through vibrant communities.</p>
+    </div>
+
+    <div class="row g-4">
+        @foreach ($carouselSlides as $slide)
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="org-card p-3 text-center h-100 shadow-sm rounded bg-white">
+                <img src="{{ asset('images/' . $slide['logos'][0]) }}" alt="{{ $slide['title'] }} Logo" class="img-fluid mb-3 org-logo">
+                <h5 class="fw-bold mb-2">{{ $slide['title'] }}</h5>
+                <p class="text-muted small">{{ Str::limit($slide['subtitle'], 80) }}</p>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</section>
 
   <!-- About Section -->
   <section id="about" class="position-relative">
