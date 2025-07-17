@@ -67,7 +67,7 @@
 
                         {{-- === Builder Mode === --}}
                         <div id="builder_mode">
-                            <div class="mb-3">
+                            <!-- <div class="mb-3">
                                 <label class="form-label fw-semibold">Filter by Event</label>
                                 <select class="form-select" name="event_id" id="event_id" required>
                                     <option value="">Select event</option>
@@ -75,7 +75,7 @@
                                     <option value="{{ $id }}">{{ $name }}</option>
                                     @endforeach
                                 </select>
-                            </div>
+                            </div> -->
 
 
                             <div class="mb-3">
@@ -145,10 +145,10 @@
                                     <i class="fa fa-paper-plane"></i>
                                 </button>
 
-                                <form action="{{ route('evaluation.destroy',$evaluation) }}"
-                                    method="POST" class="d-inline"
+                                <form action=""
+                                    class="d-inline"
                                     onsubmit="return confirm('Delete this evaluation?')">
-                                    @csrf @method('DELETE')
+                                  
                                     <button class="btn btn-sm btn-danger">
                                         <i class="fa fa-trash"></i>
                                     </button>
@@ -526,7 +526,7 @@
                         onchange="toggleOptions(this, ${i})">
                     <option value="text">Short answer</option>
                     <option value="textarea">Paragraph</option>
-                    <option value="radio">Multiple choice</option>
+                    <option value="mcq">Multiple choice</option>
                     <option value="checkbox">Checkboxes</option>
                 </select>
             </div>
@@ -551,7 +551,7 @@
 
         function toggleOptions(select, idx) {
             document.getElementById(`opts_${idx}`).classList
-                .toggle('d-none', !(select.value === 'radio' || select.value === 'checkbox'));
+                .toggle('d-none', !(select.value === 'mcq' || select.value === 'checkbox'));
         }
 
         function previewForm() {
@@ -606,7 +606,7 @@
                     case 'textarea':
                         field = `<textarea class="form-control" disabled></textarea>`;
                         break;
-                    case 'radio':
+                    case 'mcq':
                     case 'checkbox':
                         field = q.options.length ? q.options : ['Option 1'];
                         field = field.map(opt => `

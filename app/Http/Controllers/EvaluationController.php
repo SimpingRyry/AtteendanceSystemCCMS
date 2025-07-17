@@ -85,7 +85,7 @@ class EvaluationController extends Controller
     public function store(Request $request)
 {
     $request->validate([
-        'event_id'       => 'required|exists:events,id',
+        'event_id'       => 'nullable|exists:events,id',
         'title'          => 'required|string|max:255',
         'description'    => 'nullable|string',
         'questions_json' => 'required|json'
@@ -95,13 +95,12 @@ class EvaluationController extends Controller
 
     try {
         // Fetch the event to get 'name' and 'course'
-        $event = Event::findOrFail($request->event_id);
-
+      
         // Save evaluation with event name and course
         $evaluation = Evaluation::create([
-            'event_id'    => $event->id,
-            'event'       => $event->name,   // store event name as string
-            'course'      => $event->course, // store course as string
+           
+              // store event name as string
+            // store course as string
             'title'       => $request->title,
             'description' => $request->description,
         ]);

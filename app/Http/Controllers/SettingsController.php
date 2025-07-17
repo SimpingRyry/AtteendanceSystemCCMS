@@ -2,25 +2,32 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
+use App\Models\FineHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\FineHistory;
-use App\Models\Setting;
+use Illuminate\Support\Facades\Auth;
+
 class SettingsController extends Controller
 {
     // Display the settings page with current values
 public function index()
 {
-    $fines = DB::table('fine_settings')->first();
-    $history = FineHistory::orderBy('changed_at', 'desc')->get();
+    $authOrg = Auth::user()->org;
+
+    // Get fine settings for the authenticated user's org
+    $fines = DB::table('fine_settings')
+        ->where('org', $authOrg)
+        ->first();
+
+    // Get fine history for the authenticated user's org
+    $history = FineHistory::where('org', $authOrg)
+        ->orderBy('changed_at', 'desc')
+        ->get();
+
     $academicTerm = Setting::where('key', 'academic_term')->value('value');
 
     return view('config', compact('fines', 'history', 'academicTerm'));
-
-    $settings = new \stdClass();
-    $settings->academic_term = $academicTerm;
-
-    return view('settings.index', ['academic_term' => $academicTerm]);
 }
 
     

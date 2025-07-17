@@ -154,34 +154,34 @@
               <th>Status</th>
             </tr>
           </thead>
-          <tbody>
-            @foreach($students as $student)
-            <tr>
-              <td>{{ $student->no }}</td>
-              <td>{{ $student->id_number }}</td>
-              <td>{{ $student->name }}</td>
-              <td>{{ $student->gender }}</td>
-              <td>{{ $student->course }}</td>
-              <td>{{ $student->year }}</td>
-              <td>{{ $student->units }}</td>
-              <td>{{ $student->section }}</td>
-              <td>{{ $student->contact_no }}</td>
-              <td>{{ $student->birth_date }}</td>
-              <td>{{ $student->address }}</td>
-              <td>
-                @if($student->status === 'Unregistered')
-                  @if(!(auth()->user()->role === 'OSSD' || auth()->user()->organization === 'CCMS Student Government'))
+         <tbody>
+    @foreach($students as $student)
+    <tr>
+        <td>{{ $loop->iteration }}</td>
+        <td>{{ $student->id_number }}</td>
+        <td>{{ $student->name }}</td>
+        <td>{{ $student->gender }}</td>
+        <td>{{ $student->course }}</td>
+        <td>{{ $student->year }}</td>
+        <td>{{ $student->units }}</td>
+        <td>{{ $student->section }}</td>
+        <td>{{ $student->contact_no }}</td>
+        <td>{{ $student->birth_date }}</td>
+        <td>{{ $student->address }}</td>
+        <td>
+            @if($student->status === 'Unregistered')
+                @if(!(auth()->user()->role === 'OSSD' || auth()->user()->organization === 'CCMS Student Government'))
                     <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
-                  @else
-                    <span class="badge bg-warning">Unregistered</span>
-                  @endif
                 @else
-                  <span class="badge bg-success">Registered</span>
+                    <span class="badge bg-warning">Unregistered</span>
                 @endif
-              </td>
-            </tr>
-            @endforeach
-          </tbody>
+            @else
+                <span class="badge bg-success">Registered</span>
+            @endif
+        </td>
+    </tr>
+    @endforeach
+</tbody>
         </table>
       </div>
       @endif

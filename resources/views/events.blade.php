@@ -157,38 +157,45 @@
                     </div>
 
                     <!-- Time Pickers -->
-                    <div id="timePickers" class="mb-3 d-none">
-                        <div id="halfDayTimes" class="d-none row">
-                            <label class="form-label">Half Day</label>
-                            <div class="col-md-6 mb-2">
-                                <input type="time" class="form-control" name="half_start" placeholder="Start Time">
-                            </div>
-                            <div class="col-md-6">
-                                <input type="time" class="form-control" name="half_end" placeholder="End Time">
-                            </div>
-                        </div>
+                   <div id="timePickers" class="mb-3 d-none">
+    <!-- Half Day Fields -->
+    <div id="halfDayTimes" class="d-none row">
+        <label class="form-label">Half Day Schedule</label>
+        <div class="col-md-6 mb-2">
+            <label for="half_start" class="form-label">Time In</label>
+            <input type="time" class="form-control" name="half_start" id="half_start">
+        </div>
+        <div class="col-md-6 mb-2">
+            <label for="half_end" class="form-label">Time Out</label>
+            <input type="time" class="form-control" name="half_end" id="half_end">
+        </div>
+    </div>
 
-                        <div id="wholeDayTimes" class="d-none">
-                            <label class="form-label">Morning</label>
-                            <div class="row">
-                                <div class="col-md-6 mb-2">
-                                    <input type="time" class="form-control" name="morning_start" placeholder="Morning Start">
-                                </div>
-                                <div class="col-md-6 mb-2">
-                                    <input type="time" class="form-control" name="morning_end" placeholder="Morning End">
-                                </div>
-                            </div>
-                            <label class="form-label mt-3">Afternoon</label>
-                            <div class="row">
-                                <div class="col-md-6 mb-2">
-                                    <input type="time" class="form-control" name="afternoon_start" placeholder="Afternoon Start">
-                                </div>
-                                <div class="col-md-6 mb-2">
-                                    <input type="time" class="form-control" name="afternoon_end" placeholder="Afternoon End">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Whole Day Fields -->
+    <div id="wholeDayTimes" class="d-none">
+        <label class="form-label">Whole Day Schedule</label>
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <label for="morning_start" class="form-label">Morning Time In</label>
+                <input type="time" class="form-control" name="morning_start" id="morning_start">
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="morning_end" class="form-label">Morning Time Out</label>
+                <input type="time" class="form-control" name="morning_end" id="morning_end">
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-6 mb-2">
+                <label for="afternoon_start" class="form-label">Afternoon Time In</label>
+                <input type="time" class="form-control" name="afternoon_start" id="afternoon_start">
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="afternoon_end" class="form-label">Afternoon Time Out</label>
+                <input type="time" class="form-control" name="afternoon_end" id="afternoon_end">
+            </div>
+        </div>
+    </div>
+</div>
 
                     <div class="mb-3">
                         <label for="repeatDates" class="form-label">Repeat On</label>
