@@ -146,11 +146,13 @@
   @foreach ($carouselSlides as $index => $slide)
     <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
       <div class="carousel-slide-content">
-        @foreach ($slide['logos'] as $logo)
-          <img src="{{ asset('images/' . $logo) }}" alt="Logo" class="carousel-logo">
-        @endforeach
-        <h2>{{ $slide['title'] }}</h2>
-        <p>{{ $slide['subtitle'] }}</p>
+        <div class="carousel-logo-container">
+          @foreach ($slide['logos'] as $logo)
+            <img src="{{ asset('images/' . $logo) }}" alt="Logo" class="carousel-logo">
+          @endforeach
+        </div>
+        <h2 class="carousel-title">{{ $slide['title'] }}</h2>
+        <p class="carousel-subtitle">{{ $slide['subtitle'] }}</p>
       </div>
     </div>
   @endforeach
