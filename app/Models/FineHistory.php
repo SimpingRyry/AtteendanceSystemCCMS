@@ -14,5 +14,6 @@ class FineHistory extends Model
         'amount',
         'updated_by',
         'changed_at',
+        'org',
     ];
 }

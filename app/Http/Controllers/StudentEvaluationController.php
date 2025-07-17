@@ -15,7 +15,7 @@ class StudentEvaluationController extends Controller
     /**
      * Show evaluations available to student.
      */
-    public function index()
+public function index()
 {
     $studentId = auth()->user()->student_id;
 
@@ -24,15 +24,16 @@ class StudentEvaluationController extends Controller
         ->where('student_id', $studentId)
         ->pluck('event_id');
 
-    // Step 2: Get latest EvaluationAssignment per event (with evaluation + event)
-    $latestAssignments = \App\Models\EvaluationAssignment::with(['evaluation', 'event'])
+    // Step 2: Get latest EvaluationAssignment based on event_date
+    $latestAssignment = \App\Models\EvaluationAssignment::with(['evaluation', 'event'])
         ->whereIn('event_id', $attendedEventIds)
-        ->orderBy('created_at', 'desc')
+        ->whereHas('event') // Ensure event relationship exists
         ->get()
-        ->unique('event_id');
+        ->sortByDesc(fn ($assignment) => $assignment->event->event_date) // Sort by event_date DESC
+        ->first(); // Get only the latest one
 
     return view('evaluation_student', [
-        'assignments' => $latestAssignments // send full assignments, not just evaluations
+        'assignments' => $latestAssignment ? [$latestAssignment] : []
     ]);
 }
 

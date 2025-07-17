@@ -75,15 +75,22 @@
 
 <div class="content-section">
 
-    <p style="text-align: justify;">This certifies that <span class="underline" style="font-weight: bold; text-align:center">{{ $student->name }} - {{ $student->studentList->section }}</span> 
-    has no outstanding obligations or debts to <strong>{{ $student->org }} </strong> 
-    as of <u>{{ \Carbon\Carbon::now()->format('F d, Y') }}</u>.</p>
+   <p style="text-align: justify;">
+    This certifies that 
+    <span class="underline" style="font-weight: bold; text-align:center">
+        {{ $student->name }} - {{ $student->studentList->section }}
+    </span> 
+    has no outstanding obligations or debts to 
+    <strong>{{ Auth::user()->org }}</strong> 
+    as of 
+    <u>{{ \Carbon\Carbon::now()->format('F d, Y') }}</u>.
+</p>
 
     <div class="section">
         <p>This clearance covers the following:</p>
         <ul>
             <li>Financial Obligations (<em>Fines, Debts, and etc.</em>)</li>
-            <li>Inventory (<em>Lost, Damaged, Unreturned, and etc.</em>)</li>
+            
             <li>Disciplinary Records</li>
         </ul>
     </div>

@@ -46,7 +46,7 @@ public function generateFinancialReport(Request $request)
     ];
 
     // Set logo based on organization
-    $logo = public_path('images/ccms_logo.png');
+    $logo = public_path('images/org_ccms_logo.png');
     if ($org === 'Information Technology Society') {
         $logo = public_path('images/ITS_LOGO.png');
     } elseif ($org === 'PRAXIS') {

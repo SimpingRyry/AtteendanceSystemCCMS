@@ -97,26 +97,18 @@
                                     <th>Email</th>
                                     <th>Role</th>
                                     <th>Org</th>
-                                    <th>Action</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody id="tableBody">
                                 @foreach($users as $user)
                                     <tr>
-                                        <td>{{ $user->user_ID }}</td>
+                                        <td>{{ $loop->iteration }}</td>
                                         <td class="name-cell">{{ $user->name }}</td>
                                         <td class="email-cell">{{ $user->email }}</td>
                                         <td>{{ $user->role }}</td>
                                         <td>{{ $user->org }}</td>
-                                        <td>
-                                            <button type="button" class="btn btn-sm btn-warning me-1 border-0 shadow-none"
-                                                onclick="openEditModal('{{ $user->user_ID }}', '{{ $user->name }}', '{{ $user->email }}', '{{ $user->role }}', '{{ $user->org }}')">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-danger border-0 shadow-none">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </td>
+                                        
                                     </tr>
                                 @endforeach
                             </tbody>

@@ -10,15 +10,23 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ClearanceController extends Controller
 {
 
 public function index()
 {
-    // Get all users with studentList and transactions
+    $authOrg = Auth::user()->org;
+
+    // Get all users with studentList and transactions belonging to the user's org
     $students = User::whereHas('studentList')
-        ->with(['studentList', 'transactions'])
+        ->with([
+            'studentList',
+            'transactions' => function ($query) use ($authOrg) {
+                $query->where('org', $authOrg); // Filter transactions by auth org
+            }
+        ])
         ->get()
         ->unique('student_id');
 
@@ -31,7 +39,6 @@ public function index()
 
     return view('clearance', compact('students', 'organizations', 'courses', 'sections'));
 }
-
 public function generate($id)
 {
     // Get current academic term from settings
@@ -51,34 +58,34 @@ public function generate($id)
         return back()->with('error', 'Student is not eligible for clearance.');
     }
 
-    // Get the student's organization
-  $orgName = $student->org ?? null;
+    // Use the authenticated user's org instead of the student's org
+    $authOrg = Auth::user()->org;
 
-// Query the Organization table (orglist) by name
-$organization = OrgList::where('org_name', $orgName)->first();
-$orgLogo = $organization?->org_logo ?? null;
+    // Query the Organization table (orglist) by name
+    $organization = OrgList::where('org_name', $authOrg)->first();
+    $orgLogo = $organization?->org_logo ?? null;
 
     // Get President for the same organization and term
     $president = User::where('role', 'like', '%President%')
-    ->where('term', $term)
-    ->where('org', $orgName)
-    ->select('name', 'role')
-    ->first();
+        ->where('term', $term)
+        ->where('org', $authOrg)
+        ->select('name', 'role')
+        ->first();
 
-$vicePresident = User::where('role', 'like', '%Vice President%')
-    ->where('term', $term)
-    ->where('org', $orgName)
-    ->select('name', 'role')
-    ->first();
+    $vicePresident = User::where('role', 'like', '%Vice President%')
+        ->where('term', $term)
+        ->where('org', $authOrg)
+        ->select('name', 'role')
+        ->first();
 
-// Capitalize names if found
-if ($president) {
-    $president->name = Str::upper($president->name);
-}
+    // Capitalize names if found
+    if ($president) {
+        $president->name = Str::upper($president->name);
+    }
 
-if ($vicePresident) {
-    $vicePresident->name = Str::upper($vicePresident->name);
-}
+    if ($vicePresident) {
+        $vicePresident->name = Str::upper($vicePresident->name);
+    }
 
     // Generate and return the PDF
     $pdf = Pdf::loadView('clearance.certificate', compact(

@@ -34,8 +34,12 @@ class PaymentController extends Controller
 
 public function index()
 {
+    $authOrg = Auth::user()->org;
+
     $students = User::whereHas('studentList')
-        ->with(['studentList', 'transactions'])
+        ->with(['studentList', 'transactions' => function ($query) use ($authOrg) {
+            $query->where('org', $authOrg); // Only include transactions matching user's org
+        }])
         ->get()
         ->unique('student_id');
 
@@ -71,20 +75,21 @@ public function loadStudentSOA($studentId)
     if (!$student) {
         return "<p class='text-danger text-center'>Student not found.</p>";
     }
+
     $studentSection = Student::where('id_number', $studentId)->value('section');
 
+    $authOrg = Auth::user()->org;
+
     $transactionsGrouped = Transaction::where('student_id', $studentId)
+        ->where('org', $authOrg) // Added condition here
         ->orderBy('date')
         ->get()
         ->groupBy('acad_code');
-
-    
 
     return view('layout.student_soa_modal_content', [
         'student' => $student,
         'transactionsGrouped' => $transactionsGrouped,
         'studentSection' => $studentSection,
-        
     ]);
 }
 public function storePayment(Request $request)
