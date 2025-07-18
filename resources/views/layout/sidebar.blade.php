@@ -97,11 +97,8 @@
                                     <img src="{{ asset('images/instruct_ico.png') }}" class="sidebar-icon"> Advisers
                                 </a>
                             </li>
-                            <li>
-                                <a href="{{ url('events') }}" class="nav-link text-white {{ request()->is('events') ? 'active-link' : '' }}">
-                                    <img src="{{ asset('images/event_ico.png') }}" class="sidebar-icon"> Events
-                                </a>
-                            </li>
+                           
+                            
                             <li>
                                 <a href="{{ url('manage_orgs_page') }}" class="nav-link text-white {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}">
                                     <img src="{{ asset('images/org_ico.png') }}" class="sidebar-icon"> Organization
@@ -146,7 +143,6 @@
                     <div class="collapse" id="manageMenu">
                         <ul class="navbar-nav ps-3">
                             <li><a href="{{ url('student') }}" class="nav-link text-white {{ request()->is('student') ? 'active-link' : '' }}"><img src="{{ asset('images/user_prof.png') }}" class="sidebar-icon"> Students</a></li>
-                            <li><a href="{{ url('advisers') }}" class="nav-link text-white {{ request()->is('advisers') ? 'active-link' : '' }}"><img src="{{ asset('images/instruct_ico.png') }}" class="sidebar-icon"> Advisers</a></li>
                             <li><a href="{{ url('members') }}" class="nav-link text-white {{ request()->is('members') ? 'active-link' : '' }}"><img src="{{ asset('images/instruct_ico.png') }}" class="sidebar-icon"> Members</a></li>
                             <li><a href="{{ url('events') }}" class="nav-link text-white {{ request()->is('events') ? 'active-link' : '' }}"><img src="{{ asset('images/event_ico.png') }}" class="sidebar-icon"> Events</a></li>
 
