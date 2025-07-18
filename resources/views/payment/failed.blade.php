@@ -1,4 +1,4 @@
-@extends('layouts.app') <!-- Optional: use your layout file -->
+
 
 @section('content')
 <div class="container text-center mt-5">
