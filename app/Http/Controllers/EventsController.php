@@ -333,7 +333,7 @@ public function fetchEvents()
 
 public function CurrentEvent()
 {
-    $today = Carbon::today()->toDateString(); // Gets today's date in 'Y-m-d'
+    $today = Carbon::today('Asia/Manila')->toDateString(); // Gets today's date in 'Y-m-d'
 
     $currentEvent = Event::whereDate('event_date', $today)->first(); // Assumes only one event per day
 

@@ -202,7 +202,7 @@ Route::post('/scan', function (Request $request) {
     // ✅ Time-In Logic
     if (is_null($existing->$timeInField)) {
         $refTime = isset($times[$timeIndex]) ? Carbon::parse($times[$timeIndex], 'Asia/Manila') : null;
-        $onTimeCutoff = $refTime?->copy()->addMinutes(5); // 5-minute "On Time" window
+        $onTimeCutoff = $refTime?->copy()->addMinutes(15); // 5-minute "On Time" window
 
         if ($refTime && $onTimeCutoff) {
             $existing->$timeInField = $now->format('H:i');
