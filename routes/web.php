@@ -108,7 +108,18 @@ Route::get('/events', [EventsController::class, 'index']);
 
 Route::get('/api/events', [EventsController::class, 'fetchEvents'])->name('events.fetch');
 
+use App\Http\Controllers\GCashPaymentController;
 
+// Route that receives the POST form when user enters payment amount
+Route::post('/pay-with-gcash', [GCashPaymentController::class, 'createSource'])->name('gcash.pay');
+// Optional: Return URLs after payment (from PayMongo)
+Route::get('/payment-success', function () {
+    return view('payment.success');
+})->name('gcash.success');
+
+Route::get('/payment-failed', function () {
+    return view('payment.failed');
+})->name('gcash.failed');
 
 Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
 

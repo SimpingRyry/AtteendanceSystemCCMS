@@ -2,28 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class GCashPaymentController extends Controller
 {
-    public function createSource()
-    {
-        $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
-            ->post('https://api.paymongo.com/v1/sources', [
-                'data' => [
-                    'attributes' => [
-                        'amount' => 10000, // PHP 100.00 in centavos
-                        'redirect' => [
-                            'success' => route('gcash.success'),
-                            'failed' => route('gcash.failed'),
-                        ],
-                        'type' => 'gcash',
-                        'currency' => 'PHP'
-                    ]
-                ]
-            ]);
+    public function createSource(Request $request)
+{
+    $request->validate([
+        'amount' => 'required|numeric|min:1'
+    ]);
 
-        $source = $response->json();
-        return redirect($source['data']['attributes']['redirect']['checkout_url']);
+    $amountInCentavos = $request->amount * 100;
+
+    $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
+        ->post('https://api.paymongo.com/v1/sources', [
+            'data' => [
+                'attributes' => [
+                    'amount' => (int)$amountInCentavos,
+                    'redirect' => [
+                        'success' => route('gcash.success'),
+                        'failed' => route('gcash.failed'),
+                    ],
+                    'type' => 'gcash',
+                    'currency' => 'PHP'
+                ]
+            ]
+        ]);
+
+    if ($response->failed()) {
+        return back()->with('error', 'Failed to initiate GCash payment.');
     }
+
+    $source = $response->json();
+
+    return redirect($source['data']['attributes']['redirect']['checkout_url']);
+}
 }

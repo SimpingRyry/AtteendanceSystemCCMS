@@ -140,20 +140,21 @@
         <h5 class="modal-title" id="onlinePaymentModalLabel">Online Payment</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form id="onlinePaymentForm">
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="paymentAmount" class="form-label">Enter Amount to Pay</label>
-            <input type="number" class="form-control" id="paymentAmount" placeholder="₱0.00" required min="1">
-          </div>
-          <div class="text-muted small">Note: This simulates an online payment transaction. In future, it can be linked to a payment gateway.</div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">
-            <i class="fas fa-paper-plane me-1"></i> Proceed Payment
-          </button>
-        </div>
-      </form>
+      <form id="onlinePaymentForm" method="POST" action="{{ route('gcash.pay') }}">
+  @csrf
+  <div class="modal-body">
+    <div class="mb-3">
+      <label for="paymentAmount" class="form-label">Enter Amount to Pay</label>
+      <input type="number" class="form-control" id="paymentAmount" name="amount" placeholder="₱0.00" required min="1">
+    </div>
+    <div class="text-muted small">You will be redirected to GCash to complete your payment.</div>
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary">
+      <i class="fas fa-paper-plane me-1"></i> Proceed Payment
+    </button>
+  </div>
+</form>
     </div>
   </div>
 </div>
@@ -171,35 +172,7 @@
   //   totalBalanceDisplay.textContent = `₱${totalBalance.toFixed(2)}`;
   // }
 
-  document.getElementById("onlinePaymentForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const amount = parseFloat(document.getElementById("paymentAmount").value);
-    if (isNaN(amount) || amount <= 0 || amount > totalBalance) {
-      alert("Invalid amount. Please enter a valid payment.");
-      return;
-    }
-
-    // Simulate transaction
-    const today = new Date().toLocaleDateString();
-    totalBalance -= amount;
-
-    const newRow = document.createElement("tr");
-    newRow.innerHTML = `
-      <td>${today}</td>
-      <td>Online Payment</td>
-      <td></td>
-      <td>₱${amount.toFixed(2)}</td>
-      <td>₱${totalBalance.toFixed(2)}</td>
-      <td>Online System</td>
-    `;
-    soaTableBody.appendChild(newRow);
-    updateBalanceDisplay();
-
-    // Reset and close modal
-    document.getElementById("paymentAmount").value = '';
-    const paymentModal = bootstrap.Modal.getInstance(document.getElementById('onlinePaymentModal'));
-    paymentModal.hide();
-  });
+  
 
   // Initial display
   // updateBalanceDisplay();
