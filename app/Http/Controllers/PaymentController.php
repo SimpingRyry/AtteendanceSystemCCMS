@@ -9,6 +9,7 @@ use App\Models\Student;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -94,10 +95,12 @@ public function loadStudentSOA($studentId)
 }
 public function storePayment(Request $request)
 {
+    Log::info('storePayment request received:', $request->all());
+
     $request->validate([
         'student_id' => 'required|string',
         'amount' => 'required|numeric|min:0.01',
-        'org' => 'required|string',
+        // remove 'org' from validation
     ]);
 
     $setting = Setting::where('key', 'academic_term')->first();
@@ -105,12 +108,24 @@ public function storePayment(Request $request)
     $acadCode = $setting->acad_code ?? 'Unknown Code';
 
     $user = Auth::user();
-    $processedBy = $user->name . ' - ' . strtoupper($user->role); // e.g., "Jane Doe - ADMIN"
+    $org = $user->org; // Use authenticated user's org
+    $processedBy = $user->name . ' - ' . strtoupper($user->role);
+
+    Log::info('Storing payment with data:', [
+        'student_id'     => $request->student_id,
+        'transaction_type' => 'PAYMENT',
+        'org'            => $org,
+        'date'           => now()->toDateTimeString(),
+        'acad_code'      => $acadCode,
+        'acad_term'      => $acadTerm,
+        'processed_by'   => $processedBy,
+        'fine_amount'    => $request->amount,
+    ]);
 
     Transaction::create([
         'student_id'     => $request->student_id,
         'transaction_type' => 'PAYMENT',
-        'org'            => $request->org,
+        'org'            => $org,
         'date'           => now(),
         'acad_code'      => $acadCode,
         'acad_term'      => $acadTerm,
@@ -120,4 +135,5 @@ public function storePayment(Request $request)
 
     return back()->with('success', 'Payment recorded successfully.');
 }
+
 }

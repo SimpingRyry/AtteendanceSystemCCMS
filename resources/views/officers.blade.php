@@ -159,13 +159,14 @@
             <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
             <option value="Executive Secretary">Executive Secretary</option>
             <option value="Internal Secretary">Internal Secretary</option>
-            <option value="Parliamentary Officer">Parliamentary Officer</option>
+         
             <option value="Auditing Officer I">Auditing Officer I</option>
             <option value="Auditing Officer II">Auditing Officer II</option>
             <option value="Managing Officer I">Managing Officer I</option>
             <option value="Managing Officer II">Managing Officer II</option>
            <option value="Multimedia Officer">Multimedia Officer</option>
-           <option value="Information Communications Officer">Information Communications Officer</option>
+              <option value="Parliamentary Officer">Parliamentary Officer</option>
+          
 
         @elseif (Auth::user()->role === 'PRAXIS')
             <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>

@@ -641,10 +641,11 @@ const dayTypeSelect = document.getElementById('editEventDayType');
   // Example: how to trigger this modal and populate values
   function openEditEventModal(event) {
     document.getElementById('editEventId').value = event.extendedProps.id;
+    alert(event.extendedProps.id);
     document.getElementById('editEventTitle').value = event.title;
     document.getElementById('editEventVenue').value = event.extendedProps.venue || '';
     document.getElementById('editEventDate').value = event.start.toISOString().slice(0, 10);
-    document.getElementById('editEventCourse').value = event.extendedProps.course || '';
+    // document.getElementById('editEventCourse').value = event.extendedProps.course || '';
 
     const timeout = event.extendedProps.timeout;
     const dayType = (timeout == 2) ? 'Half Day' : 'Whole Day';

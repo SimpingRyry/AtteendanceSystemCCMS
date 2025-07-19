@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\Setting;
 use App\Models\Student;
 use App\Models\FinanceData;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 
 class ReportController extends Controller
@@ -61,6 +65,36 @@ public function generateFinancialReport(Request $request)
 
 
 
+public function exportFinancialReport(Request $request)
+{
+    // Extract data from request
+    $tableData = json_decode($request->input('table_data'), true);
+    $event = $request->input('event');
+    $cashOnHand = floatval($request->input('cash_on_hand'));
+    
+    $org = auth()->user()->org ?? 'default'; // fallback to 'default' if org is null
+    $logo = public_path("images/org_list/{$org}_logo.png");
+
+    // ✅ Log the raw table data
+    Log::debug('Export Financial Report - Table Data:', $tableData);
+
+    // Compute expenses
+    $expenses = collect($tableData)->sum('total');
+    $balance = $cashOnHand - $expenses;
+
+    // Generate PDF
+    $pdf = Pdf::loadView('report.financial_pdf2', [
+        'tableData' => $tableData,
+        'event' => $event,
+        'cashOnHand' => number_format($cashOnHand, 2),
+        'expenses' => number_format($expenses, 2),
+        'balance' => number_format($balance, 2),
+        'logo' => $logo,
+        'org' => $org,
+    ]);
+
+    return $pdf->stream('financial_report.pdf');
+}
 
 
 
@@ -92,4 +126,88 @@ public function generateFinancialReport(Request $request)
 
     return $pdf->download('student_roster.pdf');
 }
+
+public function generatePdf()
+{
+    $org = Auth::user()->org;
+    $term = Setting::where('key', 'academic_term')->first()->value ?? 'Unknown Term';
+
+    $baseRoles = [
+        'President',
+        'Vice President For Internal Affairs',
+        'Vice President For External Affairs',
+        'Vice President For Financial Affairs',
+        'Executive Secretary',
+        'Internal Secretary',
+        'Auditing Officer I',
+        'Auditing Officer II',
+        'Managing Officer I',
+        'Managing Officer II',
+        'Multimedia Officer',
+        'Parliamentary Officer',
+
+        // Added roles
+        '3rd Year Senator',
+        'JC - Project Management and Development Committee',
+        'JC - Project Management and Development Committee',
+        'JC - Secretariat Committee',
+        'JC - Secretariat Committee',
+        'JC - Secretariat Committee',
+        'JC - Resource Management Committee',
+        'JC - Resource Management Committee',
+        'JC - Resource Management Committee',
+        'JC - Creative Development Committee',
+        'JC - Creative Development Committee',
+        'JC - Creative Development Committee',
+        'JC - Technical Committee',
+        'JC - Technical Committee',
+        'JC - Technical Committee',
+    ];
+
+    $officers = [];
+
+    foreach ($baseRoles as $baseRole) {
+        $fullRole = $baseRole . ' - Officer';
+
+        $user = User::whereRaw("TRIM(role) = ?", [$fullRole])
+            ->where('org', $org)
+            ->where('term', $term)
+            ->first();
+
+        if ($user) {
+            $student = Student::where('id_number', $user->student_id)->first();
+            $photoPath = public_path("uploads/{$user->picture}");
+            $photo = file_exists($photoPath) ? $photoPath : public_path("images/default.png");
+
+            $officers[] = [
+                'position' => $baseRole,
+                'name' => $user->name,
+                'photo' => $photo,
+                'birth_date' => $student->birth_date ?? 'Not Set',
+                'address' => $student->address ?? 'Not Set',
+                'course' => $student->course ?? 'N/A',
+                'year' => $student->year ?? null,
+            ];
+        } else {
+            $officers[] = [
+                'position' => $baseRole,
+                'name' => 'Not Appointed',
+                'photo' => public_path("images/default.png"),
+                'birth_date' => '-',
+                'address' => '-',
+                'course' => '-',
+                'year' => '-',
+            ];
+        }
+    }
+
+    $pdf = Pdf::loadView('report.roster', compact('officers','org'))
+        ->setPaper('A4', 'portrait')
+        ->setOption('isHtml5ParserEnabled', true)
+        ->setOption('isPhpEnabled', true);
+
+    return $pdf->stream('officer_roster.pdf');
+}
+
+
 }

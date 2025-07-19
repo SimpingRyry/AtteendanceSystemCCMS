@@ -141,27 +141,54 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form id="onlinePaymentForm" method="POST" action="{{ route('gcash.pay') }}">
-  @csrf
-  <div class="modal-body">
-    <div class="mb-3">
-      <label for="paymentAmount" class="form-label">Enter Amount to Pay</label>
-      <input type="number" class="form-control" id="paymentAmount" name="amount" placeholder="₱0.00" required min="1">
-    </div>
-    <div class="text-muted small">You will be redirected to GCash to complete your payment.</div>
-  </div>
-  <div class="modal-footer">
-    <button type="submit" class="btn btn-primary">
-      <i class="fas fa-paper-plane me-1"></i> Proceed Payment
-    </button>
-  </div>
-</form>
+        @csrf
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="paymentAmount" class="form-label">Enter Amount to Pay</label>
+            <input type="number" class="form-control" id="paymentAmount" name="amount" placeholder="₱0.00" required min="20">
+            <small class="form-text text-danger mt-1">
+              Please pay either the exact amount or any amount <strong>not less than ₱20.00</strong>.
+            </small>
+          </div>
+          <div class="text-muted small">
+            You will be redirected to GCash to complete your payment.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane me-1"></i> Proceed Payment
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
 
+@if(session('error'))
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <div class="modal-body">
+        <div class="text-danger mb-3">
+          <i class="bi bi-x-circle-fill" style="font-size: 60px;"></i>
+        </div>
+        <h5 class="text-danger">Error!</h5>
+        <p>{{ session('error') }}</p>
+        <button type="button" class="btn btn-danger mt-2" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
+
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
-
+@if(session('error'))
+<script>
+  const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+  errorModal.show();
+</script>
+@endif
 <script>
   const soaTableBody = document.getElementById("soaTableBody");
   const totalBalanceDisplay = document.getElementById("totalBalance");
