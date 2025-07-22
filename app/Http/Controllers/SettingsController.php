@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
 use App\Models\Setting;
 use App\Models\FineHistory;
+use App\Models\OfficerRole;
+use App\Models\DeliveryUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 class SettingsController extends Controller
 {
     // Display the settings page with current values
+// Make sure to import this at the top
+
 public function index()
 {
     $authOrg = Auth::user()->org;
@@ -26,12 +31,28 @@ public function index()
         ->get();
 
     $academicTerm = Setting::where('key', 'academic_term')->value('value');
+    $deliveryUnits = DeliveryUnit::with('courses')->get();
 
-    return view('config', compact('fines', 'history', 'academicTerm'));
+    // Get officer roles for this org
+    $officerRoles = OfficerRole::where('org', $authOrg)->get();
+
+    return view('config', compact('fines', 'history', 'academicTerm', 'deliveryUnits', 'officerRoles'));
 }
 
     
+public function destroy($id)
+{
+    $role = OfficerRole::findOrFail($id);
 
+    // Optional: ensure the adviser can only delete roles from their own org
+    if ($role->org_id !== Auth::user()->org) {
+        return redirect()->back()->with('error', 'Unauthorized to delete this role.');
+    }
+
+    $role->delete();
+
+    return redirect()->back()->with('success', 'Officer role deleted successfully.');
+}
 public function updateFines(Request $request)
 {
     $request->validate([
@@ -104,5 +125,53 @@ public function updateAcademic(Request $request)
     );
 
     return redirect()->back()->with('success', 'Academic term updated successfully!');
+}
+
+ public function storeUnit(Request $request)
+    {
+        $request->validate([
+            'unit_name' => 'required|string|max:255',
+            'unit_description' => 'nullable|string',
+        ]);
+
+        DeliveryUnit::create([
+            'name' => $request->unit_name,
+            'description' => $request->unit_description,
+        ]);
+
+        return back()->with('success', 'Delivery unit added successfully.');
+    }
+
+    public function storeCourse(Request $request)
+    {
+        $request->validate([
+            'unit_id' => 'required|exists:delivery_units,id',
+            'course_name' => 'required|string|max:255',
+            'course_code' => 'required|string|max:20|unique:courses,code',
+        ]);
+
+        Course::create([
+            'delivery_unit_id' => $request->unit_id,
+            'name' => $request->course_name,
+            'code' => $request->course_code,
+        ]);
+
+        return back()->with('success', 'Course added successfully.');
+    }
+
+    public function store(Request $request)
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'nullable|string',
+    ]);
+
+    OfficerRole::create([
+        'org' => Auth::user()->org,
+        'title' => $request->title,
+        'description' => $request->description,
+    ]);
+
+    return back()->with('success', 'Officer role added successfully.');
 }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Auth;
@@ -15,8 +16,8 @@ use App\Http\Controllers\EventsController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\AdviserController;
 
+use App\Http\Controllers\AdviserController;
 use App\Http\Controllers\OfficerController;
 use App\Http\Controllers\OrgListController;
 use App\Http\Controllers\PaymentController;
@@ -30,11 +31,10 @@ use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\GCashPaymentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrgDashboardController;
 use App\Http\Controllers\Auth\VerificationController;
-use App\Http\Controllers\StudentEvaluationController;
-use App\Http\Controllers\EvaluationResponseController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -108,7 +108,8 @@ Route::get('/events', [EventsController::class, 'index']);
 
 Route::get('/api/events', [EventsController::class, 'fetchEvents'])->name('events.fetch');
 
-use App\Http\Controllers\GCashPaymentController;
+use App\Http\Controllers\StudentEvaluationController;
+use App\Http\Controllers\EvaluationResponseController;
 
 // Route that receives the POST form when user enters payment amount
 Route::post('/pay-with-gcash', [GCashPaymentController::class, 'createSource'])->name('gcash.pay');
@@ -238,9 +239,14 @@ Route::post('/logout', function () {
 })->name('logout');
 
 Route::post('/generate-biometrics-schedule', [ScheduleController::class, 'generateBiometricsSchedule']);
+Route::get('/officer-users', function () {
+    $authUser = Auth::user();
+    $currentTerm = Setting::where('key', 'academic_term')->value('value');
 
-Route::get('/admin-users', function () {
-    return \App\Models\User::where('role', 'Admin')->get(['name', 'email', 'picture']);
+    return User::where('role', 'LIKE', '%Officer')
+        ->where('org', $authUser->org)
+        ->where('term', $currentTerm)
+        ->get(['name', 'email', 'picture']);
 });
 
 Route::get('/org-members', [UserController::class, 'getEligibleMembers']);
@@ -260,3 +266,10 @@ Route::get('/OSSD', [OSSDController::class, 'index'])->name('ossd.index');
 Route::get('/members', [MemberController::class, 'showMembers'])->middleware('auth');
 Route::post('/transactions/pay', [PaymentController::class, 'storePayment'])->name('transactions.pay');
 Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+Route::get('/student/statement', [PaymentController::class, 'showStatementOfAccount'])
+    ->name('student.statement'); // optional if route is protected
+
+Route::post('/settings/delivery-units', [SettingsController::class, 'storeUnit'])->name('delivery-units.store');
+Route::post('/settings/courses', [SettingsController::class, 'storeCourse'])->name('courses.store');
+    Route::post('/officer-roles', [SettingsController::class, 'store'])->name('officer-roles.store');
+    Route::delete('/officer-roles/{id}', [SettingsController::class, 'destroy'])->name('officer-roles.destroy');

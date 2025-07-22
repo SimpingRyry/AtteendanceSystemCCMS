@@ -18,5 +18,8 @@ class OrgList extends Model
         'description',
         'org_logo',
         'bg_image',
+        'delivery_unit_id',
+        'course_id',
+        'scope'
     ];
 }

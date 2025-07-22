@@ -18,27 +18,47 @@ class ClearanceController extends Controller
 public function index()
 {
     $authOrg = Auth::user()->org;
+    $userRole = Auth::user()->role;
 
-    // Get all users with studentList and transactions belonging to the user's org
-    $students = User::whereHas('studentList')
+    $ccmsOrg = 'CCMS Student Government';
+
+    // Determine if user is privileged to view all students
+    $viewAllStudents = ($authOrg === $ccmsOrg || $userRole === 'Super Admin');
+
+    $studentsQuery = User::query();
+
+    if (!$viewAllStudents) {
+        // Limit students to only those with transactions under their org
+        $studentsQuery->whereHas('transactions', function ($query) use ($authOrg) {
+            $query->where('org', $authOrg);
+        });
+    } else {
+        // Show all students (still ensure they have a studentList entry)
+        $studentsQuery->whereHas('studentList');
+    }
+
+    // Determine which org's fines to show based on current user's org
+    $finesOrg = $authOrg;
+
+    $students = $studentsQuery
         ->with([
             'studentList',
-            'transactions' => function ($query) use ($authOrg) {
-                $query->where('org', $authOrg); // Filter transactions by auth org
+            'transactions' => function ($query) use ($finesOrg) {
+                $query->where('org', $finesOrg); // Filter fines to match current user's org
             }
         ])
         ->get()
         ->unique('student_id');
 
-    // Get all organization names from org_list table
+    // Get organization names, courses, and sections
     $organizations = OrgList::pluck('org_name');
-
-    // Get all distinct courses and sections from student_list table
     $courses = Student::distinct()->pluck('course');
     $sections = Student::distinct()->pluck('section');
 
     return view('clearance', compact('students', 'organizations', 'courses', 'sections'));
 }
+
+
 public function generate($id)
 {
     // Get current academic term from settings

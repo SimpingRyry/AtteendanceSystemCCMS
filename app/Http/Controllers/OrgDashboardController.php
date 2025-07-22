@@ -57,7 +57,7 @@ public function dashboard()
         ->pluck('total', 'month');
 
     $upcomingEvents = Event::where('org', $orgId)
-        ->whereDate('event_date', '>=', Carbon::today())
+        ->whereDate('event_date', '>=', Carbon::today('Asia/Manila'))
         ->orderBy('event_date')
         ->select('name', 'event_date')
         ->take(3)

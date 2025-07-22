@@ -28,136 +28,302 @@
     @include('layout.navbar')
     @include('layout.sidebar')
 
-    <main class="d-flex justify-content-center align-items-start py-5" style="min-height: 100vh; background-color: #f8f9fa;">
+<main class="d-flex justify-content-center align-items-start py-5" style="min-height: 100vh; background-color: #f8f9fa;">
     <div class="container" style="max-width: 960px; width: 100%;">
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+
         <div class="mb-4">
             <h2 class="fw-bold" style="color: #232946;">Configure</h2>
             <small style="color: #989797;">Manage /</small>
             <small style="color: #444444;">Configure</small>
         </div>
 
-        <div class="card shadow border-0 rounded-3 p-4 mb-4">
-            <h4 class="fw-bold mb-3">Fine Configuration History</h4>
-
-            <!-- Search bar -->
-            <div class="mb-3">
-                <input type="text" class="form-control" id="fineSearch" placeholder="Search fine history...">
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover align-middle" id="fineHistoryTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th scope="col">Type</th>
-                            <th>Amount (₱)</th>
-                            <th scope="col">Changed By</th>
-                            <th scope="col">Date Changed</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($history as $index => $record)
-                            <tr class="{{ $index >= 12 ? 'extra-row d-none' : '' }}">
-                                <td>{{ $record->type }}</td>
-                                <td>₱{{ number_format($record->amount, 0) }}</td>
-                                <td>{{ $record->updated_by ? \App\Models\User::find($record->updated_by)->name : 'System' }}</td>
-                                <td>{{ \Carbon\Carbon::parse($record->changed_at)->format('M d, Y h:i A') }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="text-center text-muted">No fine history found.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            @if(count($history) > 12)
-                <div class="text-center mt-3">
-                    <button id="toggleBtn" class="btn btn-outline-primary">See More</button>
-                </div>
+        <!-- Nav Tabs -->
+        <ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="fines-tab" data-bs-toggle="tab" data-bs-target="#fines" type="button" role="tab">Fine Settings</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="academic-tab" data-bs-toggle="tab" data-bs-target="#academic" type="button" role="tab">Academic Settings</button>
+            </li>
+            @if (Auth::user()->role === 'Super Admin')
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="delivery-tab" data-bs-toggle="tab" data-bs-target="#delivery" type="button" role="tab">Manage Delivery Units</button>
+                </li>
             @endif
-        </div>
 
-        <!-- Fine Configuration -->
-        <div class="card shadow border-0 rounded-3 p-4 mb-4">
-            <h4 class="fw-bold mb-4">Fine Configuration</h4>
-            <form action="{{ route('settings.updateFines') }}" method="POST">
-                @csrf
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Absentee Fine (Member)</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="number" name="absent_member" class="form-control" value="{{ (int) ($fines->absent_member ?? 0) }}" min="0" step="1">
-                        </div>
-                        <small class="form-text text-muted">Set the fine for members who are absent.</small>
+            @if (Auth::user()->role === 'Adviser' )
+            <li class="nav-item" role="presentation">
+        <button class="nav-link" id="officer-tab" data-bs-toggle="tab" data-bs-target="#officer" type="button" role="tab">Manage Officer Roles</button>
+        </li>
+@endif
+        </ul>
+
+        <div class="tab-content" id="configTabContent">
+            <!-- FINE SETTINGS TAB -->
+            <div class="tab-pane fade show active" id="fines" role="tabpanel">
+                <!-- Fine Configuration History -->
+                <div class="card shadow border-0 rounded-3 p-4 mb-4">
+                    <h4 class="fw-bold mb-3">Fine Configuration History</h4>
+
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="fineSearch" placeholder="Search fine history...">
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Absentee Fine (Officer)</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="number" name="absent_officer" class="form-control" value="{{ (int) ($fines->absent_officer ?? 0) }}" min="0" step="1">
-                        </div>
-                        <small class="form-text text-muted">Set the fine for officers who are absent.</small>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="fineHistoryTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Type</th>
+                                    <th>Amount (₱)</th>
+                                    <th scope="col">Changed By</th>
+                                    <th scope="col">Date Changed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($history as $index => $record)
+                                    <tr class="{{ $index >= 12 ? 'extra-row d-none' : '' }}">
+                                        <td>{{ $record->type }}</td>
+                                        <td>₱{{ number_format($record->amount, 0) }}</td>
+                                        <td>{{ $record->updated_by ? \App\Models\User::find($record->updated_by)->name : 'System' }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($record->changed_at)->format('M d, Y h:i A') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">No fine history found.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Late Fine (Member)</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="number" name="late_member" class="form-control" value="{{ (int) ($fines->late_member ?? 0) }}" min="0" step="1">
+                    @if(count($history) > 12)
+                        <div class="text-center mt-3">
+                            <button id="toggleBtn" class="btn btn-outline-primary">See More</button>
                         </div>
-                        <small class="form-text text-muted">Set the fine for members who arrive late.</small>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Late Fine (Officer)</label>
-                        <div class="input-group">
-                            <span class="input-group-text">₱</span>
-                            <input type="number" name="late_officer" class="form-control" value="{{ (int) ($fines->late_officer ?? 0) }}" min="0" step="1">
-                        </div>
-                        <small class="form-text text-muted">Set the fine for officers who arrive late.</small>
-                    </div>
+                    @endif
                 </div>
-                <div class="row mb-4">
-    <div class="col-md-6">
-        <label class="form-label fw-semibold">Grace Period (Minutes)</label>
-        <div class="input-group">
-            <input type="number" name="grace_period_minutes" class="form-control" value="{{ (int) ($fines->grace_period_minutes ?? 0) }}" min="0" step="1">
-            <span class="input-group-text">minutes</span>
+
+                <!-- Fine Configuration -->
+                <div class="card shadow border-0 rounded-3 p-4 mb-4">
+                    <h4 class="fw-bold mb-4">Fine Configuration</h4>
+                    <form action="{{ route('settings.updateFines') }}" method="POST">
+                        @csrf
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Absentee Fine (Member)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₱</span>
+                                    <input type="number" name="absent_member" class="form-control" value="{{ (int) ($fines->absent_member ?? 0) }}" min="0" step="1">
+                                </div>
+                                <small class="form-text text-muted">Set the fine for members who are absent.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Absentee Fine (Officer)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₱</span>
+                                    <input type="number" name="absent_officer" class="form-control" value="{{ (int) ($fines->absent_officer ?? 0) }}" min="0" step="1">
+                                </div>
+                                <small class="form-text text-muted">Set the fine for officers who are absent.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Late Fine (Member)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₱</span>
+                                    <input type="number" name="late_member" class="form-control" value="{{ (int) ($fines->late_member ?? 0) }}" min="0" step="1">
+                                </div>
+                                <small class="form-text text-muted">Set the fine for members who arrive late.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Late Fine (Officer)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₱</span>
+                                    <input type="number" name="late_officer" class="form-control" value="{{ (int) ($fines->late_officer ?? 0) }}" min="0" step="1">
+                                </div>
+                                <small class="form-text text-muted">Set the fine for officers who arrive late.</small>
+                            </div>
+                        </div>
+                        <div class="row mb-4 mt-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Grace Period (Minutes)</label>
+                                <div class="input-group">
+                                    <input type="number" name="grace_period_minutes" class="form-control" value="{{ (int) ($fines->grace_period_minutes ?? 0) }}" min="0" step="1">
+                                    <span class="input-group-text">minutes</span>
+                                </div>
+                                <small class="form-text text-muted">Set how many minutes after the call time a student can time in before being marked late.</small>
+                            </div>
+                        </div>
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-primary px-4">Save Fines</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ACADEMIC TERM SETTINGS TAB -->
+            <div class="tab-pane fade" id="academic" role="tabpanel">
+                <div class="card shadow border-0 rounded-3 p-4">
+                    <h4 class="fw-bold mb-4">Academic Year & Term Settings</h4>
+                    <form action="{{ route('settings.updateAcademicYear') }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Academic Year & Term</label>
+                            <input type="text" name="academic_term" class="form-control" placeholder="e.g., 24-1 First Sem A.Y. 2024-2025" value="{{ $academic_term ?? '' }}">
+                            <small class="form-text text-muted">Example: 24-1 First Sem A.Y. 2024-2025</small>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-success px-4">Save Academic Settings</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            @if (Auth::user()->role === 'Adviser')
+<div class="tab-pane fade" id="officer" role="tabpanel">
+    <div class="card shadow border-0 rounded-3 p-4 mb-4">
+        <h4 class="fw-bold mb-4">Manage Officer Roles for Your Organization</h4>
+
+        <!-- Add Officer Role Form -->
+        <form action="{{ route('officer-roles.store' ) }}" method="POST" class="mb-4">
+            @csrf
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Position Title</label>
+                <input type="text" name="title" class="form-control" placeholder="e.g., President, Treasurer" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Description (Optional)</label>
+                <textarea name="description" class="form-control" rows="2"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Officer Role</button>
+        </form>
+
+        <hr>
+
+        <!-- Officer Roles List Table -->
+        <h5 class="fw-bold mb-3">Current Officer Roles</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($officerRoles as $role)
+                        <tr>
+                            <td>{{ $role->title }}</td>
+                            <td>{{ $role->description ?? '—' }}</td>
+                            <td>
+                                <form action="{{ route('officer-roles.destroy', $role->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this role?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">No officer roles found.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-        <small class="form-text text-muted">Set how many minutes after the call time a student can time in before being marked late.</small>
     </div>
 </div>
-                <div class="text-end mt-4">
-                    <button type="submit" class="btn btn-primary px-4">Save Fines</button>
-                </div>
-            </form>
-        </div>
+@endif
 
-        <!-- Academic Year and Term Settings -->
-        <div class="card shadow border-0 rounded-3 p-4">
-            <h4 class="fw-bold mb-4">Academic Year & Term Settings</h4>
-            <form action="{{ route('settings.updateAcademicYear') }}" method="POST">
-                @csrf
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Academic Year & Term</label>
-                    <input type="text" name="academic_term" class="form-control" placeholder="e.g., 24-1 First Sem A.Y. 2024-2025" value="{{ $academic_term ?? '' }}">
-                    <small class="form-text text-muted">Example: 24-1 First Sem A.Y. 2024-2025</small>
-                </div>
-                <div class="text-end">
-                    <button type="submit" class="btn btn-success px-4">Save Academic Settings</button>
-                </div>
-            </form>
+            <!-- SUPER ADMIN ONLY TAB -->
+            @if (Auth::user()->role === 'Super Admin')
+            <div class="tab-pane fade" id="delivery" role="tabpanel">
+                <div class="card shadow border-0 rounded-3 p-4 mb-4">
+                    <h4 class="fw-bold mb-4">Manage Delivery Units & Courses</h4>
+
+                    <!-- Add Delivery Unit -->
+                    <form action="{{ route('delivery-units.store') }}" method="POST" class="mb-4">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Delivery Unit Name</label>
+                            <input type="text" name="unit_name" class="form-control" placeholder="e.g., College of Computing Studies">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Description</label>
+                            <textarea name="unit_description" class="form-control" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Delivery Unit</button>
+                    </form>
+
+                    <hr>
+
+                    <!-- Add Course -->
+                    <form action="{{ route('courses.store') }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select Delivery Unit</label>
+                             <select name="unit_id" class="form-select">
+                                @foreach ($deliveryUnits as $unit)
+                                    <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Course Name</label>
+                            <input type="text" name="course_name" class="form-control" placeholder="e.g., Bachelor of Science in IT">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Course Code</label>
+                            <input type="text" name="course_code" class="form-control" placeholder="e.g., BSIT">
+                        </div>
+                        <button type="submit" class="btn btn-success">Add Course</button>
+                    </form>
+
+
+                    
+    <div class="mt-5">
+        <h5 class="fw-bold mb-3">Current Delivery Units & Courses</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 25%;">Delivery Unit</th>
+                        <th style="width: 25%;">Description</th>
+                        <th style="width: 50%;">Courses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                  @forelse($deliveryUnits as $unit)
+                <tr>
+                    <td>{{ $unit->name }}</td>
+                    <td>{{ $unit->description }}</td>
+                    <td>
+                        @foreach($unit->courses as $course)
+                            <div><strong>{{ $course->code }}</strong> - {{ $course->name }}</div>
+                        @endforeach
+                    </td>
+                </tr>
+                @empty
+                <tr><td colspan="3" class="text-center text-muted">No delivery units found.</td></tr>
+                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                                </div>
+                            </div>
+                            @endif
         </div>
     </div>
 
-    <!-- JS toggle functionality -->
-    <script>
+    <!-- Toggle Extra Fine History -->
+
+</main>
+
+        <script>
         document.addEventListener('DOMContentLoaded', function () {
             const toggleBtn = document.getElementById('toggleBtn');
             let expanded = false;
@@ -172,8 +338,6 @@
             }
         });
     </script>
-</main>
-    
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>

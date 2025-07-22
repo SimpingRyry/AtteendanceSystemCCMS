@@ -24,7 +24,6 @@ public function store(Request $request)
 
     $existingIds = [];
 
-    // === Helper to check if student is officer in the event org ===
     $isOfficerForOrg = function ($studentId, $org) use ($acadTerm) {
         return User::where('student_id', $studentId)
             ->where('term', $acadTerm)
@@ -48,9 +47,9 @@ public function store(Request $request)
         if (!$fineSettings) continue;
 
         $isOfficer = $isOfficerForOrg($record['student_id'], $eventOrg);
-        $studentOrg = $eventOrg === 'CCMS Student Government'
-            ? $eventOrg
-            : User::where('student_id', $record['student_id'])->where('term', $acadTerm)->value('org');
+       $studentOrg = $eventOrg === 'CCMS Student Government'
+    ? $eventOrg
+    : (User::where('student_id', $record['student_id'])->where('term', $acadTerm)->value('org') ?? $eventOrg);
 
         $getFineAmount = function ($status) use ($fineSettings, $isOfficer) {
             if ($isOfficer) {
@@ -87,7 +86,19 @@ public function store(Request $request)
             }
         } else {
             $status = strtolower($record['status']);
-            if ($status === 'late' || $status === 'absent') {
+            $shouldSkipLateFine = false;
+
+            if ($status === 'late') {
+                $attendance = Attendance::where('student_id', $record['student_id'])
+                    ->whereDate('created_at', $record['date'])
+                    ->first();
+
+                if ($attendance && !is_null($attendance->time_in1) && is_null($attendance->time_out1)) {
+                    $shouldSkipLateFine = true;
+                }
+            }
+
+            if (($status === 'late' && !$shouldSkipLateFine) || $status === 'absent') {
                 $fineAmount = $getFineAmount(ucfirst($status));
                 Transaction::create([
                     'student_id' => $record['student_id'],
@@ -254,6 +265,7 @@ public function store(Request $request)
 
     return redirect()->back()->with('success', 'Attendance fines recorded successfully, including absentees.');
 }
+
 
 public function liveData()
 {

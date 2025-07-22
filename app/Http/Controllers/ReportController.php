@@ -132,37 +132,56 @@ public function generatePdf()
     $org = Auth::user()->org;
     $term = Setting::where('key', 'academic_term')->first()->value ?? 'Unknown Term';
 
-    $baseRoles = [
-        'President',
-        'Vice President For Internal Affairs',
-        'Vice President For External Affairs',
-        'Vice President For Financial Affairs',
-        'Executive Secretary',
-        'Internal Secretary',
-        'Auditing Officer I',
-        'Auditing Officer II',
-        'Managing Officer I',
-        'Managing Officer II',
-        'Multimedia Officer',
-        'Parliamentary Officer',
+    // Use the detailed roles for CCMS Student Government
+    if ($org === 'CCMS Student Government') {
+        $baseRoles = [
+            'President',
+            'Vice President For Internal Affairs',
+            'Vice President For External Affairs',
+            'Vice President For Financial Affairs',
+            'Executive Secretary',
+            'Internal Secretary',
+            'Auditing Officer I',
+            'Auditing Officer II',
+            'Managing Officer I',
+            'Managing Officer II',
+            'Multimedia Officer',
+            'Parliamentary Officer',
 
-        // Added roles
-        '3rd Year Senator',
-        'JC - Project Management and Development Committee',
-        'JC - Project Management and Development Committee',
-        'JC - Secretariat Committee',
-        'JC - Secretariat Committee',
-        'JC - Secretariat Committee',
-        'JC - Resource Management Committee',
-        'JC - Resource Management Committee',
-        'JC - Resource Management Committee',
-        'JC - Creative Development Committee',
-        'JC - Creative Development Committee',
-        'JC - Creative Development Committee',
-        'JC - Technical Committee',
-        'JC - Technical Committee',
-        'JC - Technical Committee',
-    ];
+            // Added roles
+            '3rd Year Senator',
+            'JC - Project Management and Development Committee',
+            'JC - Project Management and Development Committee',
+            'JC - Secretariat Committee',
+            'JC - Secretariat Committee',
+            'JC - Secretariat Committee',
+            'JC - Resource Management Committee',
+            'JC - Resource Management Committee',
+            'JC - Resource Management Committee',
+            'JC - Creative Development Committee',
+            'JC - Creative Development Committee',
+            'JC - Creative Development Committee',
+            'JC - Technical Committee',
+            'JC - Technical Committee',
+            'JC - Technical Committee',
+        ];
+    } else {
+        // Simpler role list for other organizations
+        $baseRoles = [
+            'President',
+            'Vice President',
+            'Executive Secretary',
+            'Administrative Secretary',
+            'Treasurer',
+            'Auditor',
+            'Public Information Officer',
+            'Business Manager 1',
+            'Business Manager 2',
+            'Sentinel 1',
+            'Sentinal 2',
+            'Multimedia Officer',
+        ];
+    }
 
     $officers = [];
 
@@ -201,7 +220,7 @@ public function generatePdf()
         }
     }
 
-    $pdf = Pdf::loadView('report.roster', compact('officers','org'))
+    $pdf = Pdf::loadView('report.roster', compact('officers', 'org'))
         ->setPaper('A4', 'portrait')
         ->setOption('isHtml5ParserEnabled', true)
         ->setOption('isPhpEnabled', true);

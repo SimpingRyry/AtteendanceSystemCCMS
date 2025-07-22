@@ -339,70 +339,53 @@
                 <h6 class="fw-bold text-info">Role / Position</h6>
                 <label class="form-label" for="roleSelect">Select Role <span class="text-danger">*</span></label>
                 <select name="role" id="roleSelect" class="form-select" required>
-                  <option value="">-- Select Role --</option>
-                  @if(auth()->user()->org == 'Information Technology Society' || auth()->user()->org == 'SG')
-                    <option value="Member">Member</option>
-                    <option value="President">President</option>
-                    <option value="Vice President">Vice President</option>
-                    <option value="Executive Secretary">Executive Secretary</option>
-                    <option value="Administrative Secretary">Administrative Secretary</option>
-                    <option value="Treasurer">Treasurer</option>
-                    <option value="Auditor">Auditor</option>
-                    <option value="Public Information Officer">Public Info Officer</option>
-                    <option value="Business Manager 1">Business Manager 1</option>
-                    <option value="Business Manager 2">Business Manager 2</option>
-                    <option value="Sentinel 1">Sentinel 1</option>
-                    <option value="Sentinal 2">Sentinal 2</option>
-                    <option value="Multimedia Officer">Multimedia Officer</option>
-                  @elseif(auth()->user()->org == 'PRAXIS')
-                    <option value="member">Member</option>
-                    <option value="President">President</option>
-                    <option value="Vice President For Internal Affairs">VP Internal Affairs</option>
-                    <option value="Vice President For External Affairs">VP External Affairs</option>
-                    <option value="Vice President For Financial Affairs">VP Financial Affairs</option>
-                    <option value="Auditing Officer">Auditing Officer</option>
-                    <option value="Technical Officer">Technical Officer</option>
-                    <option value="Sentinel Officer">Sentinel Officer</option>
-                  @elseif(auth()->user()->org == 'CCMS Student Government')
-                    <!-- No default roles here, handled below -->
-                  @else
-                    <option value="Member">Member</option>
-                    <option value="President">President</option>
-                    <option value="Vice President">Vice President</option>
-                    <option value="Executive Secretary">Executive Secretary</option>
-                    <option value="Administrative Secretary">Administrative Secretary</option>
-                    <option value="Treasurer">Treasurer</option>
-                    <option value="Auditor">Auditor</option>
-                    <option value="Public Information Officer">Public Info Officer</option>
-                    <option value="Business Manager 1">Business Manager 1</option>
-                    <option value="Business Manager 2">Business Manager 2</option>
-                    <option value="Sentinel 1">Sentinel 1</option>
-                    <option value="Sentinal 2">Sentinal 2</option>
-                    <option value="Multimedia Officer">Multimedia Officer</option>
-                  @endif
-                </select>
+  
+
+    <option value="Member">Member</option>
+
+    @foreach($officerRoles as $role)
+        <option value="{{ $role->title }}">{{ $role->title }}</option>
+    @endforeach
+</select>
               </div>
 
               <!-- SG Role Dropdown -->
-              @if(auth()->user()->org == 'CCMS Student Government')
+              @if(auth()->user()->org == 'CCMS Student Government' || auth()->user()->role == 'Super Admin')
               <div class="mb-4">
                 <label class="form-label" for="sgOfficerRole">SG Officer Role <span class="text-danger">*</span></label>
-                <select name="sg_officer_role" id="sgOfficerRole" class="form-select">
-                  <option value="">-- Select SG Officer Role --</option>
-                  <option value="President">President</option>
-                  <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
-                  <option value="Vice President For External Affairs">Vice President For External Affairs</option>
-                  <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
-                  <option value="Executive Secretary">Executive Secretary</option>
-                  <option value="Internal Secretary">Internal Secretary</option>
-                  <option value="Parliamentary Officer">Parliamentary Officer</option>
-                  <option value="Auditing Officer I">Auditing Officer I</option>
-                  <option value="Auditing Officer II">Auditing Officer II</option>
-                  <option value="Managing Officer I">Managing Officer I</option>
-                  <option value="Managing Officer II">Managing Officer II</option>
-                  <option value="Multimedia Officer">Multimedia Officer</option>
-                  <option value="Information Communications Officer">Information Communications Officer</option>
-                </select>
+               <select name="sg_officer_role" id="sgOfficerRole" class="form-select">
+  <option value="">-- Select SG Officer Role --</option>
+  <option value="President">President</option>
+  <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
+  <option value="Vice President For External Affairs">Vice President For External Affairs</option>
+  <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
+  <option value="Executive Secretary">Executive Secretary</option>
+  <option value="Internal Secretary">Internal Secretary</option>
+  <option value="Parliamentary Officer">Parliamentary Officer</option>
+  <option value="Auditing Officer I">Auditing Officer I</option>
+  <option value="Auditing Officer II">Auditing Officer II</option>
+  <option value="Managing Officer I">Managing Officer I</option>
+  <option value="Managing Officer II">Managing Officer II</option>
+  <option value="Multimedia Officer">Multimedia Officer</option>
+  <option value="Information Communications Officer">Information Communications Officer</option>
+
+  <!-- Additional Positions -->
+  <option value="3rd Year Senator">3rd Year Senator</option>
+  <option value="JC - Project Management and Development Committee">JC - Project Management and Development Committee</option>
+  <option value="JC - Project Management and Development Committee">JC - Project Management and Development Committee</option>
+  <option value="JC - Secretariat Committee">JC - Secretariat Committee</option>
+  <option value="JC - Secretariat Committee">JC - Secretariat Committee</option>
+  <option value="JC - Secretariat Committee">JC - Secretariat Committee</option>
+  <option value="JC - Resource Management Committee">JC - Resource Management Committee</option>
+  <option value="JC - Resource Management Committee">JC - Resource Management Committee</option>
+  <option value="JC - Resource Management Committee">JC - Resource Management Committee</option>
+  <option value="JC - Creative Development Committee">JC - Creative Development Committee</option>
+  <option value="JC - Creative Development Committee">JC - Creative Development Committee</option>
+  <option value="JC - Creative Development Committee">JC - Creative Development Committee</option>
+  <option value="JC - Technical Committee">JC - Technical Committee</option>
+  <option value="JC - Technical Committee">JC - Technical Committee</option>
+  <option value="JC - Technical Committee">JC - Technical Committee</option>
+</select>
               </div>
               @endif
             </div>

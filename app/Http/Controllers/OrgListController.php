@@ -8,65 +8,98 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
+use App\Models\DeliveryUnit;
+use App\Models\Course;
 
 class OrgListController extends Controller
 {
-    public function index()
-    {
-        $org_list = \App\Models\OrgList::all(); // fetch all orgs
-        return view('manage_orgs_page', compact('org_list')); // pass it to view
-    }
+  public function index()
+{
+    $org_list = OrgList::all(); // fetch all orgs
+    $deliveryUnits = DeliveryUnit::with('courses')->get(); // if needed for other uses
+    $courses = Course::all(); // fetch all courses directly
 
+    return view('manage_orgs_page', compact('org_list', 'deliveryUnits', 'courses'));
+}
     public function showOrg()
 {
     $org_list = OrgList::all();
     return view('student', compact('org_list'));
 }
-  public function store(Request $request)
+public function store(Request $request)
 {
-    // Validate the incoming request
     $request->validate([
-        'org_name'   => 'required|string|max:255',
-        'description'=> 'required|string',
-        'org_logo'   => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        'bg_image'   => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        'name'       => 'required|string|max:255',
-        'email'      => 'required|string|email|max:255|unique:users,email',
-        'password'   => 'required|string|min:6',
+        'org_name'          => 'required|string|max:255',
+        'description'       => 'required|string',
+        'org_logo'          => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        'bg_image'          => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
+        'scope'             => 'required|in:unit,course',
+        'delivery_unit_id'  => 'required_if:scope,unit|nullable|exists:delivery_units,id',
+        'course_id'         => 'required_if:scope,course|nullable|exists:courses,id',
+
+        // Adviser (required)
+        'adviser_name'      => 'required|string|max:255',
+        'adviser_email'     => 'required|string|email|max:255|unique:users,email',
+        'adviser_password'  => 'required|string|min:6',
+
+        // President (optional)
+        'president_email'   => 'nullable|email|unique:users,email',
+        'president_name'    => 'nullable|string|max:255',
+        'president_password'=> 'nullable|string|min:6',
     ]);
 
-    // Sanitize org_name for safe filenames
-    $sanitizedOrgName = preg_replace('/[^A-Za-z0-9_\-]/', '_', strtolower($request->org_name));
+    // Sanitize and handle files
+    $sanitizedOrgName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $request->org_name);
 
-    // Handle organization logo upload
     $orgLogoName = $sanitizedOrgName . '_logo.' . $request->org_logo->extension();
-    $request->org_logo->move(public_path('images'), $orgLogoName);
+    $request->org_logo->move(public_path('images/org_list'), $orgLogoName);
 
-    // Handle background image upload
     $bgImageName = $sanitizedOrgName . '_bg.' . $request->bg_image->extension();
     $request->bg_image->move(public_path('images'), $bgImageName);
 
-    // Create organization using new + save()
-    $organization = new OrgList();
-    $organization->org_name = $request->org_name;
-    $organization->description = $request->description;
-    $organization->org_logo = $orgLogoName;
-    $organization->bg_image = $bgImageName;
-    $organization->save();
+    // Create the organization
+    $organization = OrgList::create([
+        'org_name'         => $request->org_name,
+        'description'      => $request->description,
+        'org_logo'         => $orgLogoName,
+        'bg_image'         => $bgImageName,
+        'scope'            => $request->scope,
+        'delivery_unit_id' => $request->scope === 'unit' ? $request->delivery_unit_id : null,
+        'course_id'        => $request->scope === 'course' ? $request->course_id : null,
+    ]);
 
-    // Create admin user for organization using new + save()
-    $user = new User();
-    $user->name = $request->name;
-    $user->email = $request->email;
-    $user->password = Hash::make($request->password); // Always hash passwords!
-    $user->org = $organization->org_name; // Save org name to 'org' column
-    $user->role = 'Adviser';
-    $user->save();
+    // Create Adviser
+    $adviser = User::create([
+        'name'     => $request->adviser_name,
+        'email'    => $request->adviser_email,
+        'password' => Hash::make($request->adviser_password),
+        'org'      => $organization->org_name,
+        'role'     => 'Adviser',
+    ]);
 
-    event(new Registered($user));
+    event(new Registered($adviser));
 
-    return redirect()->back()->with('success', 'Organization and Admin created successfully. Please confirm the email for the account for activation');
+    // Create President (if provided)
+    if (
+        $request->filled('president_name') &&
+        $request->filled('president_email') &&
+        $request->filled('president_password')
+    ) {
+        $president = User::create([
+            'name'     => $request->president_name,
+            'email'    => $request->president_email,
+            'password' => Hash::make($request->president_password),
+            'org'      => $organization->org_name,
+            'role'     => 'President - Officer',
+        ]);
+
+        event(new Registered($president));
+    }
+
+    return redirect()->back()->with('success', 'Organization and user accounts created successfully. Please confirm the emails for activation.');
 }
+
 
     // ✅ Update an existing organization
     public function update(Request $request, $id)

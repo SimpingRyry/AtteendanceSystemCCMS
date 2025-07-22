@@ -49,8 +49,7 @@
 
   {{-- Sidebar --}}
   @include('layout.sidebar')
-
-  <main>
+<main>
   <div class="container outer-box mt-5 pt-5 pb-4">
     <div class="container inner-glass shadow p-4" id="main_box">
       <!-- Heading -->
@@ -60,15 +59,30 @@
         <small style="color: #444444;">Statement of Account</small>
       </div>
 
-      <!-- Filter Form (optional, can be used to filter semesters or years) -->
+      <!-- Filter Form -->
       <div class="mb-4">
-  <form class="row g-3" onsubmit="return false;">
-    <div class="col-md-3">
-      <label for="inputSemester" class="form-label fw-semibold">Semester</label>
-      <input type="text" class="form-control" id="inputSemester" placeholder="e.g., 1st Semester">
-    </div>
-  </form>
-</div>
+        <form class="row g-3" method="GET" action="{{ route('student.statement') }}">
+          <!-- Semester Input -->
+          <div class="col-md-3">
+            <label for="inputSemester" class="form-label fw-semibold">Semester</label>
+            <input type="text" class="form-control" name="semester" id="inputSemester" placeholder="e.g., 1st Semester"
+                   value="{{ request('semester') }}">
+          </div>
+
+          <!-- Organization Filter -->
+          <div class="col-md-3">
+            <label for="inputOrganization" class="form-label fw-semibold">Organization</label>
+            <select id="inputOrganization" name="organization" class="form-select" onchange="this.form.submit()">
+              <option disabled {{ is_null($selectedOrg) ? 'selected' : '' }}>Select organization</option>
+              <option value="All" {{ $selectedOrg == 'All' ? 'selected' : '' }}>All</option>
+              <option value="CCMS Student Government" {{ $selectedOrg == 'CCMS Student Government' ? 'selected' : '' }}>CCMS Student Government</option>
+              <option value="{{ auth()->user()->org }}" {{ $selectedOrg == auth()->user()->org ? 'selected' : '' }}>
+                {{ auth()->user()->org }}
+              </option>
+            </select>
+          </div>
+        </form>
+      </div>
 
       <!-- Student Info -->
       <p><strong>Student Name:</strong> <span id="studentName">{{ $student->name }}</span></p>
@@ -86,38 +100,42 @@
               <th>Debit</th>
               <th>Credit</th>
               <th>Balance</th>
+              <th>OR/Reference No.</th>
             </tr>
           </thead>
           <tbody id="soaTableBody">
-          @php $grandTotal = 0; @endphp
+            @php $grandTotal = 0; @endphp
 
-    @foreach ($transactionsGrouped as $acadCode => $transactions)
-        <tr>
-            <td colspan="6" class="table-primary fw-bold">
-                Academic Code: {{ $acadCode }}
-            </td>
-        </tr>
+            @forelse ($transactionsGrouped as $acadCode => $transactions)
+              <tr>
+                <td colspan="7" class="table-primary fw-bold">
+                  Academic Code: {{ $acadCode }}
+                </td>
+              </tr>
 
-        @php $balance = 0; @endphp
-
-        @foreach ($transactions as $transaction)
-            @php
-                $debit = $transaction->transaction_type === 'FINE' ? $transaction->fine_amount : 0;
-                $credit = $transaction->transaction_type === 'PAYMENT' ? $transaction->fine_amount : 0;
-                $balance += ($debit - $credit);
-                $grandTotal += ($debit - $credit);
-            @endphp
-            <tr>
-                <td>{{ \Carbon\Carbon::parse($transaction->date)->format('M d, Y') }}</td>
-                <td>{{ $transaction->event }}</td>
-
-                <td>{{ $transaction->transaction_type }}</td>
-                <td>{{ $debit > 0 ? number_format($debit, 2) : '-' }}</td>
-                <td>{{ $credit > 0 ? number_format($credit, 2) : '-' }}</td>
-                <td>{{ number_format($balance, 2) }}</td>
-            </tr>
-        @endforeach
-    @endforeach
+              @php $balance = 0; @endphp
+              @foreach ($transactions as $transaction)
+                @php
+                  $debit = $transaction->transaction_type === 'FINE' ? $transaction->fine_amount : 0;
+                  $credit = $transaction->transaction_type === 'PAYMENT' ? $transaction->fine_amount : 0;
+                  $balance += ($debit - $credit);
+                  $grandTotal += ($debit - $credit);
+                @endphp
+                <tr>
+                  <td>{{ \Carbon\Carbon::parse($transaction->date)->format('M d, Y') }}</td>
+                  <td>{{ $transaction->event }}</td>
+                  <td>{{ $transaction->transaction_type }}</td>
+                  <td>{{ $debit > 0 ? number_format($debit, 2) : '-' }}</td>
+                  <td>{{ $credit > 0 ? number_format($credit, 2) : '-' }}</td>
+                  <td>{{ number_format($balance, 2) }}</td>
+                  <td>{{ $transaction->or_num ?? '-' }}</td>
+                </tr>
+              @endforeach
+            @empty
+              <tr>
+                <td colspan="6" class="text-center text-muted">No transactions found for the selected filter.</td>
+              </tr>
+            @endforelse
           </tbody>
         </table>
       </div>
@@ -125,11 +143,13 @@
       <div class="mt-3 fw-bold">
         Total Remaining Balance: <span id="totalBalance">{{ number_format($grandTotal, 2) }}</span>
       </div>
-      <div class="mt-4">
-  <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#onlinePaymentModal">
-    <i class="fas fa-wallet me-1"></i> Pay Online
-  </button>
-</div>
+
+      <!-- Pay Online Button -->
+      <div class="mt-4" id="payOnlineWrapper" style="display: none;">
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#onlinePaymentModal">
+          <i class="fas fa-wallet me-1"></i> Pay Online
+        </button>
+      </div>
     </div>
   </div>
 </main>
@@ -180,7 +200,32 @@
   </div>
 </div>
 @endif
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const orgSelect = document.getElementById('inputOrganization');
+    const payBtnWrapper = document.getElementById('payOnlineWrapper');
 
+    function togglePayButton(value) {
+      if (
+        value &&
+        value !== 'All' &&
+        value !== 'Select organization'
+      ) {
+        payBtnWrapper.style.display = 'block';
+      } else {
+        payBtnWrapper.style.display = 'none';
+      }
+    }
+
+    // Check on page load
+    togglePayButton(orgSelect.value);
+
+    // Also update on change
+    orgSelect.addEventListener('change', function () {
+      togglePayButton(this.value);
+    });
+  });
+</script>
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
 @if(session('error'))

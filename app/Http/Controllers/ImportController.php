@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\OrgList;
 use App\Models\Student;
+use App\Models\OfficerRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -91,7 +92,6 @@ public function show(Request $request)
 {
     $query = Student::query();
 
-   
     if ($request->filled('section')) {
         $query->where('section', $request->section);
     }
@@ -102,12 +102,14 @@ public function show(Request $request)
         $query->where('status', $request->status);
     }
 
-    $students = $query->paginate(10); // enable pagination
+    $students = $query->paginate(10);
     $org_list = OrgList::all();
     $sections = Student::select('section')->distinct()->pluck('section')->filter()->sort()->values();
     $years = Student::select('year')->distinct()->pluck('year')->filter()->sort()->values();
 
-    return view('student', compact('students', 'org_list', 'sections', 'years'));
+    $officerRoles = OfficerRole::where('org', auth()->user()->org)->get();
+
+    return view('student', compact('students', 'org_list', 'sections', 'years', 'officerRoles'));
 }
 
 public function preview(Request $request)

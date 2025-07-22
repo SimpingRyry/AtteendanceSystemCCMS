@@ -112,7 +112,7 @@ public function studentindex()
     })->reverse(); // from oldest to latest
 
     // Upcoming Events
-    $upcomingEvents = Event::where('event_date', '>', now())
+    $upcomingEvents = Event::where('event_date', '>=', Carbon::today('Asia/Manila'))
         ->orderBy('event_date')
         ->take(5)
         ->get();

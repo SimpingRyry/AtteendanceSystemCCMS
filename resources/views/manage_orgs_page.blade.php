@@ -115,53 +115,143 @@
 </main>
 
     {{-- Modal: Add Organization --}}
-    <div class="modal fade" id="addOrgModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="addOrgModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content shadow glassy-bg">
             <div class="modal-header">
                 <h5 class="modal-title">Add Organization</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('orgs.store') }}" method="POST" enctype="multipart/form-data">
+
+            <form action="{{ route('orgs.store') }}" method="POST" enctype="multipart/form-data" id="addOrgForm">
                 @csrf
+
+                <!-- Step Indicators -->
+                <div class="d-flex justify-content-center mb-4 mt-3">
+                    <div class="step-indicator text-center mx-2" id="stepIndicator1">
+                        <div class="circle">1</div>
+                        <small>Organization</small>
+                    </div>
+                    <div class="step-indicator text-center mx-2" id="stepIndicator2">
+                        <div class="circle">2</div>
+                        <small>Adviser</small>
+                    </div>
+                    <div class="step-indicator text-center mx-2" id="stepIndicator3">
+                        <div class="circle">3</div>
+                        <small>President</small>
+                    </div>
+                    <div class="step-indicator text-center mx-2" id="stepIndicator4">
+                        <div class="circle">4</div>
+                        <small>Confirm</small>
+                    </div>
+                </div>
+
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="org_name" class="form-label">Organization Name <span class="text-danger">*</span></label>
-                        <input type="text" name="org_name" class="form-control" required>
+
+                    <!-- Step 1 -->
+                    <div class="form-step step-1">
+                        <h5>Step 1: Organization Information</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Organization Name <span class="text-danger">*</span></label>
+                            <input type="text" name="org_name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description <span class="text-danger">*</span></label>
+                            <textarea name="description" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Organization Logo <span class="text-danger">*</span></label>
+                            <input type="file" name="org_logo" class="form-control" accept="image/*" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Background Image <span class="text-danger">*</span></label>
+                            <input type="file" name="bg_image" class="form-control" accept="image/*" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Organization Scope <span class="text-danger">*</span></label>
+                            <select class="form-select" name="scope" id="scopeSelector" required>
+                                <option value="">-- Select Scope --</option>
+                                <option value="unit">Delivery Unit</option>
+                                <option value="course">Specific Course</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3 d-none" id="unitSelectWrapper">
+                            <label class="form-label">Delivery Unit <span class="text-danger">*</span></label>
+                            <select name="delivery_unit_id" class="form-select">
+                                @foreach($deliveryUnits as $unit)
+                                    <option value="{{ $unit->id }}">{{ $unit->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="mb-3 d-none" id="courseSelectWrapper">
+                            <label class="form-label">Course <span class="text-danger">*</span></label>
+                            <select name="course_id" class="form-select">
+                                @foreach($courses as $course)
+                                    <option value="{{ $course->id }}">{{ $course->code }} - {{ $course->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
-                        <textarea name="description" class="form-control" rows="3" required></textarea>
+
+                    <!-- Step 2 -->
+                    <div class="form-step step-2 d-none">
+                        <h5>Step 2: Adviser Account</h5>
+                        <div class="mb-3">
+                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="adviser_name" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" name="adviser_email" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password <span class="text-danger">*</span></label>
+                            <input type="password" name="adviser_password" class="form-control" required>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="org_logo" class="form-label">Organization Logo <span class="text-danger">*</span></label>
-                        <input type="file" name="org_logo" class="form-control" accept="image/*" required>
+
+                    <!-- Step 3 -->
+                    <div class="form-step step-3 d-none">
+                        <h5>Step 3: President Account (Optional)</h5>
+                        <div class="form-check mb-3">
+                            <input type="checkbox" id="skipPresident" class="form-check-input">
+                            <label class="form-check-label" for="skipPresident">Skip adding president account</label>
+                        </div>
+                        <div id="presidentFields">
+                            <div class="mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" name="president_name" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="president_email" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <input type="password" name="president_password" class="form-control">
+                            </div>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="bg_image" class="form-label">Background Image <span class="text-danger">*</span></label>
-                        <input type="file" name="bg_image" class="form-control" accept="image/*" required>
+
+                    <!-- Step 4 -->
+                    <div class="form-step step-4 d-none">
+                        <h5>Step 4: Confirm and Submit</h5>
+                        <p class="text-muted">Please review your details before submitting.</p>
+                        <ul class="list-group">
+                            <li class="list-group-item"><strong>Organization:</strong> <span id="confirmOrgName"></span></li>
+                            <li class="list-group-item"><strong>Adviser:</strong> <span id="confirmAdviserName"></span></li>
+                            <li class="list-group-item"><strong>President:</strong> <span id="confirmPresidentName"></span></li>
+                        </ul>
                     </div>
-                    <hr>
-                    <h5 class="mt-4">Organization Adviser Account</h5>
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Full Name <span class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
-                        <input type="email" name="email" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
-                        <input type="password" name="password" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="org_admin_org" class="form-label">Organization <span class="text-danger">*</span></label>
-                        <input type="text" id="org_admin_org" name="org_admin_org" class="form-control" readonly>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Create Organization</button>
-                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="prevStep" disabled>Previous</button>
+                    <button type="button" class="btn btn-primary" id="nextStep">Next</button>
+                    <button type="submit" class="btn btn-success d-none" id="submitBtn">Submit</button>
                 </div>
             </form>
         </div>
@@ -185,6 +275,88 @@
 </div>
 @endif
 
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const scopeSelector = document.getElementById('scopeSelector');
+        const unitWrapper = document.getElementById('unitSelectWrapper');
+        const courseWrapper = document.getElementById('courseSelectWrapper');
+
+        scopeSelector.addEventListener('change', function () {
+            const value = this.value;
+            if (value === 'unit') {
+                unitWrapper.classList.remove('d-none');
+                courseWrapper.classList.add('d-none');
+            } else if (value === 'course') {
+                courseWrapper.classList.remove('d-none');
+                unitWrapper.classList.add('d-none');
+            } else {
+                unitWrapper.classList.add('d-none');
+                courseWrapper.classList.add('d-none');
+            }
+        });
+    });
+</script>
+<script>
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    function showStep(step) {
+        // Toggle step content
+        document.querySelectorAll('.form-step').forEach((el, idx) => {
+            el.classList.add('d-none');
+            if (idx === step - 1) el.classList.remove('d-none');
+        });
+
+        // Toggle step indicators
+        for (let i = 1; i <= totalSteps; i++) {
+            const indicator = document.getElementById(`stepIndicator${i}`);
+            indicator.classList.toggle('active', i === step);
+        }
+
+        // Button visibility
+        document.getElementById('prevStep').disabled = step === 1;
+        document.getElementById('nextStep').classList.toggle('d-none', step === totalSteps);
+        document.getElementById('submitBtn').classList.toggle('d-none', step !== totalSteps);
+    }
+
+    document.getElementById('nextStep').addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+            currentStep++;
+            if (currentStep === totalSteps) {
+                document.getElementById('confirmOrgName').innerText = document.querySelector('[name="org_name"]').value;
+                document.getElementById('confirmAdviserName').innerText = document.querySelector('[name="adviser_name"]').value;
+                document.getElementById('confirmPresidentName').innerText = document.querySelector('[name="president_name"]').value || "Skipped";
+            }
+            showStep(currentStep);
+        }
+    });
+
+    document.getElementById('prevStep').addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    });
+
+    // Toggle president fields
+    document.getElementById('skipPresident').addEventListener('change', (e) => {
+        document.getElementById('presidentFields').style.display = e.target.checked ? 'none' : 'block';
+    });
+
+    // Reset on modal close
+    document.getElementById('addOrgModal').addEventListener('hidden.bs.modal', () => {
+        currentStep = 1;
+        showStep(currentStep);
+        document.getElementById('addOrgForm').reset();
+        document.getElementById('presidentFields').style.display = 'block';
+        document.getElementById('skipPresident').checked = false;
+    });
+
+    // Initialize step
+    document.addEventListener('DOMContentLoaded', () => {
+        showStep(currentStep);
+    });
 </script>
 @if(session('success'))
 <script>
@@ -295,5 +467,40 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
 </body>
+<style>
+    .step-indicator .circle {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background-color: #ccc;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        transition: background-color 0.3s ease;
+        margin-bottom: 5px;
+    }
+
+    .step-indicator.active .circle {
+        background-color: #198754;
+    }
+
+    .form-step {
+        animation: fadeIn 0.3s ease-in-out;
+        transition: opacity 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+</style>
 
 </html>
