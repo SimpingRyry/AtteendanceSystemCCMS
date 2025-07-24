@@ -111,13 +111,11 @@ public function index()
         // Fetch the event to get 'name' and 'course'
       
         // Save evaluation with event name and course
-        $evaluation = Evaluation::create([
-           
-              // store event name as string
-            // store course as string
-            'title'       => $request->title,
-            'description' => $request->description,
-        ]);
+       $evaluation = Evaluation::create([
+    'title'       => $request->title,
+    'description' => $request->description,
+    'created_by'  => Auth::user()->name, // 👈 insert the current user's name
+]);
 
         $questions = json_decode($request->questions_json, true);
 

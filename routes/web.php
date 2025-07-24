@@ -188,6 +188,8 @@ Route::delete('/evaluations/{evaluation}', [EvaluationController::class,'destroy
 // existing POST /evaluation (store) already there
 
 Route::resource('evaluation', App\Http\Controllers\EvaluationController::class);
+
+
 Route::get('evaluation/{evaluation}/questions', [App\Http\Controllers\EvaluationController::class,'questions'])
      ->name('evaluation.questions');   // used by the modal’s AJAX call
 Route::put('/evaluation/{evaluation}', [EvaluationController::class, 'update'])->name('evaluation.update');
@@ -243,7 +245,7 @@ Route::get('/officer-users', function () {
     $authUser = Auth::user();
     $currentTerm = Setting::where('key', 'academic_term')->value('value');
 
-    return User::where('role', 'LIKE', '%Officer')
+    return User::where('role', 'LIKE', '%- Officer%')
         ->where('org', $authUser->org)
         ->where('term', $currentTerm)
         ->get(['name', 'email', 'picture']);
@@ -273,3 +275,4 @@ Route::post('/settings/delivery-units', [SettingsController::class, 'storeUnit']
 Route::post('/settings/courses', [SettingsController::class, 'storeCourse'])->name('courses.store');
     Route::post('/officer-roles', [SettingsController::class, 'store'])->name('officer-roles.store');
     Route::delete('/officer-roles/{id}', [SettingsController::class, 'destroy'])->name('officer-roles.destroy');
+Route::post('/orgs/set-hierarchy', [OrgListController::class, 'setHierarchy'])->name('orgs.setHierarchy');

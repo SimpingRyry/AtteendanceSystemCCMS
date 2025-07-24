@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="{{ asset('css/evaluation.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_side.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
     <title>CCMS Attendance System</title>
 </head>
@@ -37,23 +39,57 @@
       <!-- Page Title and Tabs -->
       <div class="mb-4">
         <div class="mb-4">
-                <h2 class="fw-bold" style="color: #232946;">Evaluation</h2>
-                <small style="color: #989797;">Manage /</small>
-                <small style="color: #444444;">Evaluation</small>
-            </div>
+          <h2 class="fw-bold" style="color: #232946;">Evaluation</h2>
+          <small style="color: #989797;">Manage /</small>
+          <small style="color: #444444;">Evaluation</small>
+        </div>
         <ul class="nav nav-tabs" id="evaluationTab" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="evaluations-tab" data-bs-toggle="tab" data-bs-target="#evaluations" type="button" role="tab">Evaluations</button>
+            <button class="nav-link active" id="responses-tab" data-bs-toggle="tab" data-bs-target="#responses" type="button" role="tab">Responses</button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="responses-tab" data-bs-toggle="tab" data-bs-target="#responses" type="button" role="tab">Responses</button>
+            <button class="nav-link" id="evaluations-tab" data-bs-toggle="tab" data-bs-target="#evaluations" type="button" role="tab">Evaluation Templates</button>
           </li>
         </ul>
       </div>
 
       <div class="tab-content" id="evaluationTabContent">
+        <!-- 🔵 Responses Tab (now default active) -->
+        <div class="tab-pane fade show active" id="responses" role="tabpanel">
+          <h4 class="fw-bold mt-4" style="color:#232946;">Evaluation Responses</h4>
+<table class="table table-hover align-middle">
+  <thead>
+    <tr>
+      <th>Event</th>
+      <th>Evaluation</th>
+      <th>Description</th>
+      <th>Overall Rating</th>
+      <th>Respondents</th> <!-- 👈 New column -->
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach ($assignments as $assignment)
+      <tr data-assignment-id="{{ $assignment->id }}">
+        <td>{{ $assignment->event->name ?? 'N/A' }}</td>
+        <td>{{ $assignment->evaluation->title }}</td>
+        <td>{{ Str::limit($assignment->evaluation->description, 80) }}</td>
+        <td class="overall-rating">Loading...</td>
+        <td class="respondent-count text-muted small">Loading...</td> <!-- 👈 New cell for respondents -->
+        <td>
+          <a href="javascript:void(0)" class="btn btn-sm btn-primary view-responses-btn"
+             data-assignment-id="{{ $assignment->id }}">
+            <i class="fa fa-eye"></i> View Responses
+          </a>
+        </td>
+      </tr>
+    @endforeach
+  </tbody>
+</table>
+        </div>
+
         <!-- 🟢 Evaluations Tab -->
-        <div class="tab-pane fade show active" id="evaluations" role="tabpanel">
+        <div class="tab-pane fade" id="evaluations" role="tabpanel">
           <!-- Success/Error messages -->
           @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
@@ -76,11 +112,11 @@
               <div id="builder_mode">
                 <div class="mb-3">
                   <label class="form-label fw-semibold">Evaluation Title</label>
-                  <input type="text" name="title" class="form-control" required>
+                  <input type="text" name="title" class="form-control" required id="eval_title">
                 </div>
                 <div class="mb-3">
                   <label class="form-label fw-semibold">Description</label>
-                  <textarea name="description" class="form-control" rows="2"></textarea>
+                  <textarea name="description" class="form-control" rows="2" id="eval_desc"></textarea>
                 </div>
                 <div id="questions_container"></div>
                 <button type="button" class="btn btn-secondary my-2" onclick="addQuestion()">Add Question</button>
@@ -100,66 +136,40 @@
           <!-- Evaluation Table -->
           <h4 class="fw-bold text-center mt-4" style="color:#232946;">Evaluation Table</h4>
           <table class="table table-hover align-middle">
-            <thead class="table-dark">
-              <tr>
-                <th>Title</th>
-                <th>Description</th>
-                <th style="width:200px">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach($evaluations as $evaluation)
-              <tr>
-                <td>{{ $evaluation->title }}</td>
-                <td>{{ Str::limit($evaluation->description, 80) }}</td>
-                <td>
-                  <button class="btn btn-sm btn-primary" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#viewModal">
-                    <i class="fa fa-eye"></i>
-                  </button>
-                  <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#editModal">
-                    <i class="fa fa-pen"></i>
-                  </button>
-                  <button class="btn btn-sm btn-success send-eval-btn" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#sendEvaluationModal">
-                    <i class="fa fa-paper-plane"></i>
-                  </button>
-                  <form action="" class="d-inline" onsubmit="return confirm('Delete this evaluation?')">
-                    <button class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
-                  </form>
-                </td>
-              </tr>
-              @endforeach
-            </tbody>
-          </table>
-        </div>
-
-        <!-- 🔵 Responses Tab -->
-        <div class="tab-pane fade" id="responses" role="tabpanel">
-          <h4 class="fw-bold mt-4" style="color:#232946;">Evaluation Responses</h4>
-          <table class="table table-hover align-middle">
-            <thead class="table-dark">
-              <tr>
-                <th>Event Name</th>
-                <th>Evaluation Title</th>
-                <th>Description</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach ($assignments as $assignment)
-              <tr>
-                <td>{{ $assignment->event->name ?? 'N/A' }}</td>
-                <td>{{ $assignment->evaluation->title }}</td>
-                <td>{{ Str::limit($assignment->evaluation->description, 80) }}</td>
-                <td>
-                  <a href="javascript:void(0)" class="btn btn-sm btn-primary view-responses-btn"
-                     data-assignment-id="{{ $assignment->id }}">
-                    <i class="fa fa-eye"></i> View Responses
-                  </a>
-                </td>
-              </tr>
-              @endforeach
-            </tbody>
-          </table>
+  <thead class="table-dark">
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Date Created</th>
+      <th>Creator</th>
+      <th style="width:200px">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach($evaluations as $evaluation)
+    <tr>
+      <td>{{ $evaluation->title }}</td>
+      <td>{{ Str::limit($evaluation->description, 80) }}</td>
+      <td>{{ \Carbon\Carbon::parse($evaluation->created_at)->format('Y-m-d') }}</td>
+      <td>{{ $evaluation->created_by }}</td>
+      <td>
+        <button class="btn btn-sm btn-primary" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#viewModal">
+          <i class="fa fa-eye"></i>
+        </button>
+        <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#editModal">
+          <i class="fa fa-pen"></i>
+        </button>
+        <button class="btn btn-sm btn-success send-eval-btn" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#sendEvaluationModal">
+          <i class="fa fa-paper-plane"></i>
+        </button>
+        <form action="" class="d-inline" onsubmit="return confirm('Delete this evaluation?')">
+          <button class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
+        </form>
+      </td>
+    </tr>
+    @endforeach
+  </tbody>
+</table>
         </div>
       </div>
     </div>
@@ -277,7 +287,30 @@
         </div>
     </div>
 
+<script>
+  $(document).ready(function () {
+    $('tr[data-assignment-id]').each(function () {
+      const row = $(this);
+      const assignmentId = row.data('assignment-id');
 
+      $.ajax({
+        url: `/evaluation-responses/${assignmentId}/summary`,
+        method: 'GET',
+        success: function (data) {
+          const rating = data.overall_rating ?? 'N/A';
+          const resText = data.respondent_text ?? 'N/A';
+
+          row.find('.overall-rating').html(rating !== 'N/A' ? `⭐ ${rating} / 5` : 'N/A');
+          row.find('.respondent-count').text(resText);
+        },
+        error: function () {
+          row.find('.overall-rating').text('Error');
+          row.find('.respondent-count').text('Error');
+        }
+      });
+    });
+  });
+</script>
 <script>
     document.querySelectorAll('.view-responses-btn').forEach(button => {
         button.addEventListener('click', function () {

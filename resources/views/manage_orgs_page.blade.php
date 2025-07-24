@@ -50,6 +50,7 @@
 <main>
     <div class="container outer-box mt-5 pt-5 pb-4">
         <div class="container bg-white rounded-4 shadow-sm p-4" id="main_box">
+
             <!-- Heading -->
             <div class="mb-3">
                 <h2 class="fw-bold text-dark">Manage Orgs</h2>
@@ -57,62 +58,134 @@
                 <small class="text-secondary">Orgs</small>
             </div>
 
-            <!-- Add Organization Button -->
-            <div class="text-end mb-3">
-                <button class="btn btn-success px-3" data-bs-toggle="modal" data-bs-target="#addOrgModal" title="Add Organization">
-                    <i class="bi bi-plus-lg"></i> Add Organization
-                </button>
-            </div>
+            <!-- Tabs -->
+            <ul class="nav nav-tabs mb-3" id="orgTabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#manageOrgsTab">Manage Orgs</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#orgHierarchyTab">Organization Hierarchy Configuration</a>
+                </li>
+            </ul>
 
-            <!-- Organization Table -->
-            <div class="card border-0 shadow-sm p-4">
-                <h5 class="mb-3 text-dark">Organization List</h5>
-                <div class="table-responsive">
-                    <table class="table align-middle text-center table-borderless">
-                         <thead class="table-dark">
-                            <tr>
-                                <th>No.</th>
-                                <th>Organization Name</th>
-                                <th>Logo</th>
-                                <th>Description</th>
-                                <th>Background</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php $i = 1; @endphp
-                            @forelse ($org_list as $org)
-                                <tr class="border-bottom">
-                                    <td>{{ $i++ }}</td>
-                                    <td>{{ $org->org_name }}</td>
-                                    <td>
-                                        <img src="{{ asset('images/' . $org->org_logo) }}" alt="Logo" width="50" class="rounded">
-                                    </td>
-                                    <td class="text-truncate" style="max-width: 200px;">{{ $org->description }}</td>
-                                    <td>
-                                        <img src="{{ asset('images/' . $org->bg_image) }}" alt="Background" width="50" class="rounded">
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#editOrgModal{{ $org->id }}" title="Edit">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteOrgModal{{ $org->id }}" title="Delete">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted">No organizations found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+            <!-- Tab Content -->
+            <div class="tab-content">
+
+                <!-- Manage Orgs Tab -->
+                <div class="tab-pane fade show active" id="manageOrgsTab">
+                    <!-- Add Organization Button -->
+                    <div class="text-end mb-3">
+                        <button class="btn btn-success px-3" data-bs-toggle="modal" data-bs-target="#addOrgModal" title="Add Organization">
+                            <i class="bi bi-plus-lg"></i> Add Organization
+                        </button>
+                    </div>
+
+                    <!-- Organization Table -->
+                    <div class="card border-0 shadow-sm p-4">
+                        <h5 class="mb-3 text-dark">Organization List</h5>
+                        <div class="table-responsive">
+                            <table class="table align-middle text-center table-borderless">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Organization Name</th>
+                                        <th>Logo</th>
+                                        <th>Description</th>
+                                        <th>Background</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php $i = 1; @endphp
+                                    @forelse ($org_list as $org)
+                                        <tr class="border-bottom">
+                                            <td>{{ $i++ }}</td>
+                                            <td>{{ $org->org_name }}</td>
+                                            <td>
+                                                <img src="{{ asset('images/' . $org->org_logo) }}" alt="Logo" width="50" class="rounded">
+                                            </td>
+                                            <td class="text-truncate" style="max-width: 200px;">{{ $org->description }}</td>
+                                            <td>
+                                                <img src="{{ asset('images/' . $org->bg_image) }}" alt="Background" width="50" class="rounded">
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#editOrgModal{{ $org->id }}" title="Edit">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteOrgModal{{ $org->id }}" title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">No organizations found.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                <!-- Org Hierarchy Tab -->
+                <div class="tab-pane fade" id="orgHierarchyTab">
+                    <div class="card border-0 shadow-sm p-4 mt-4">
+                        <h5 class="mb-3 text-dark">Set Organization Hierarchy</h5>
+                        <form method="POST" action="{{ route('orgs.setHierarchy') }}">
+                            @csrf
+                            <div class="row">
+                                 <div class="col-md-6 mb-3">
+                                    <label for="parent_org_id" class="form-label">Parent Organization</label>
+                                    <select class="form-select" name="parent_org_id">
+                                        <option value="">No Parent (Top-level Org)</option>
+                                        @foreach ($org_list as $org)
+                                            <option value="{{ $org->id }}">{{ $org->org_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="child_org_id" class="form-label">Child Organization</label>
+                                    <select class="form-select" name="child_org_id" required>
+                                        <option value="">Select Child Organization</option>
+                                        @foreach ($org_list as $org)
+                                            <option value="{{ $org->id }}">{{ $org->org_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                               
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">Set Hierarchy</button>
+                            </div>
+                        </form>
+
+                        <div class="mt-4">
+    <h6>Current Organization Hierarchy:</h6>
+    <ul class="list-group">
+        @foreach ($org_list->where('parent_id', null) as $topLevelOrg)
+            <li class="list-group-item">
+                <strong>{{ $topLevelOrg->org_name }}</strong>
+                @if ($topLevelOrg->children->count())
+                    <ul class="ms-4 mt-2">
+                        @foreach ($topLevelOrg->children as $child)
+                            @include('partials.org-tree', ['org' => $child])
+                        @endforeach
+                    </ul>
+                @endif
+            </li>
+        @endforeach
+    </ul>
+</div>
+                    </div>
+                </div>
+
+            </div> <!-- End Tab Content -->
+
         </div>
     </div>
 </main>
+
 
     {{-- Modal: Add Organization --}}
 <div class="modal fade" id="addOrgModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
@@ -168,32 +241,7 @@
                             <input type="file" name="bg_image" class="form-control" accept="image/*" required>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Organization Scope <span class="text-danger">*</span></label>
-                            <select class="form-select" name="scope" id="scopeSelector" required>
-                                <option value="">-- Select Scope --</option>
-                                <option value="unit">Delivery Unit</option>
-                                <option value="course">Specific Course</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3 d-none" id="unitSelectWrapper">
-                            <label class="form-label">Delivery Unit <span class="text-danger">*</span></label>
-                            <select name="delivery_unit_id" class="form-select">
-                                @foreach($deliveryUnits as $unit)
-                                    <option value="{{ $unit->id }}">{{ $unit->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="mb-3 d-none" id="courseSelectWrapper">
-                            <label class="form-label">Course <span class="text-danger">*</span></label>
-                            <select name="course_id" class="form-select">
-                                @foreach($courses as $course)
-                                    <option value="{{ $course->id }}">{{ $course->code }} - {{ $course->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                       
                     </div>
 
                     <!-- Step 2 -->

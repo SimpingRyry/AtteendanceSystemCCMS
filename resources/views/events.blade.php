@@ -97,126 +97,156 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <div class="modal-body">
-                <form id="eventForm" method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
-                    @csrf
-
-                    <div class="row">
-                        <div class="mb-3 col-md-6">
-                            <label for="eventName" class="form-label">Event Title</label>
-                            <input type="text" class="form-control" id="eventName" name="name" required>
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="venue" class="form-label">Location</label>
-                            <input type="text" class="form-control" id="venue" name="venue">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-                    </div>
-
-                    <div class="row">
-                        <div class="mb-3 col-md-6">
-                            <label for="eventDate" class="form-label">Event Date</label>
-                            <input type="date" class="form-control" id="eventDate" name="event_date" required>
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="dayType" class="form-label">Day Type</label>
-                            <select class="form-select" id="dayType" name="timeouts" required>
-                                <option value="">Select Day Type</option>
-                                <option value="2">Half Day</option>
-                                <option value="4">Whole Day</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="mb-3 col-md-6">
-                            <label for="involvedStudents" class="form-label">Involved Students</label>
-                            <select class="form-select" id="involvedStudents" name="involved_students" required>
-                                <option value="">-- Select --</option>
-                                <option value="All">All</option>
-                               
-                                <option value="Officers">Officers</option>
-                            </select>
-                        </div>
-
-                        @if(auth()->user()->role === 'Super Admin')
-                        <div class="mb-3 col-md-6">
-                            <label for="organization" class="form-label">Organization</label>
-                            <select class="form-select" id="organization" name="organization" required>
-                                <option value="">-- Select Organization --</option>
-                                @foreach($orgs as $org)
-                                    <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        @endif
-                    </div>
-
-                    <!-- Time Pickers -->
-                   <div id="timePickers" class="mb-3 d-none">
-    <!-- Half Day Fields -->
-    <div id="halfDayTimes" class="d-none row">
-        <label class="form-label">Half Day Schedule</label>
-        <div class="col-md-6 mb-2">
-            <label for="half_start" class="form-label">Time In</label>
-            <input type="time" class="form-control" name="half_start" id="half_start">
-        </div>
-        <div class="col-md-6 mb-2">
-            <label for="half_end" class="form-label">Time Out</label>
-            <input type="time" class="form-control" name="half_end" id="half_end">
-        </div>
+            <div class="modal-body position-relative">
+                <!-- Step Indicators -->
+<div class="d-flex justify-content-center align-items-center my-4 gap-4 step-indicator">
+    <div class="d-flex flex-column align-items-center">
+        <div class="step-circle active" data-step="1">1</div>
+        <div class="step-label mt-1 text-center">Event Setup</div>
     </div>
-
-    <!-- Whole Day Fields -->
-    <div id="wholeDayTimes" class="d-none">
-        <label class="form-label">Whole Day Schedule</label>
-        <div class="row">
-            <div class="col-md-6 mb-2">
-                <label for="morning_start" class="form-label">Morning Time In</label>
-                <input type="time" class="form-control" name="morning_start" id="morning_start">
-            </div>
-            <div class="col-md-6 mb-2">
-                <label for="morning_end" class="form-label">Morning Time Out</label>
-                <input type="time" class="form-control" name="morning_end" id="morning_end">
-            </div>
-        </div>
-        <div class="row mt-2">
-            <div class="col-md-6 mb-2">
-                <label for="afternoon_start" class="form-label">Afternoon Time In</label>
-                <input type="time" class="form-control" name="afternoon_start" id="afternoon_start">
-            </div>
-            <div class="col-md-6 mb-2">
-                <label for="afternoon_end" class="form-label">Afternoon Time Out</label>
-                <input type="time" class="form-control" name="afternoon_end" id="afternoon_end">
-            </div>
-        </div>
+    <div class="line"></div>
+    <div class="d-flex flex-column align-items-center">
+        <div class="step-circle" data-step="2">2</div>
+        <div class="step-label mt-1 text-center">Evaluation</div>
     </div>
 </div>
 
-                    <div class="mb-3">
-                        <label for="repeatDates" class="form-label">Repeat On</label>
-                        <input type="text" id="repeatDates" class="form-control" placeholder="Select one or more dates">
-                        <input type="hidden" id="repeatDatesHidden" name="repeat_dates">
+                <form id="eventForm" method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
+                    @csrf
+
+                    <!-- Step 1: Event Details -->
+                    <div class="step step-1">
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="eventName" class="form-label">Event Title</label>
+                                <input type="text" class="form-control" id="eventName" name="name" required>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="venue" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="venue" name="venue">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="eventDate" class="form-label">Event Date</label>
+                                <input type="date" class="form-control" id="eventDate" name="event_date" required>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="dayType" class="form-label">Day Type</label>
+                                <select class="form-select" id="dayType" name="timeouts" required>
+                                    <option value="">Select Day Type</option>
+                                    <option value="2">Half Day</option>
+                                    <option value="4">Whole Day</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="involvedStudents" class="form-label">Involved Students</label>
+                                <select class="form-select" id="involvedStudents" name="involved_students" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="All">All</option>
+                                    <option value="Officers">Officers</option>
+                                </select>
+                            </div>
+
+                            @if(auth()->user()->role === 'Super Admin')
+                                <div class="mb-3 col-md-6">
+                                    <label for="organization" class="form-label">Organization</label>
+                                    <select class="form-select" id="organization" name="organization" required>
+                                        <option value="">-- Select Organization --</option>
+                                        @foreach($orgs as $org)
+                                            <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Time Pickers -->
+                        <div id="timePickers" class="mb-3 d-none">
+                            <!-- Half Day -->
+                            <div id="halfDayTimes" class="d-none row">
+                                <label class="form-label">Half Day Schedule</label>
+                                <div class="col-md-6 mb-2">
+                                    <label for="half_start" class="form-label">Time In</label>
+                                    <input type="time" class="form-control" name="half_start" id="half_start">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <label for="half_end" class="form-label">Time Out</label>
+                                    <input type="time" class="form-control" name="half_end" id="half_end">
+                                </div>
+                            </div>
+
+                            <!-- Whole Day -->
+                            <div id="wholeDayTimes" class="d-none">
+                                <label class="form-label">Whole Day Schedule</label>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <label for="morning_start" class="form-label">Morning Time In</label>
+                                        <input type="time" class="form-control" name="morning_start" id="morning_start">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="morning_end" class="form-label">Morning Time Out</label>
+                                        <input type="time" class="form-control" name="morning_end" id="morning_end">
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6 mb-2">
+                                        <label for="afternoon_start" class="form-label">Afternoon Time In</label>
+                                        <input type="time" class="form-control" name="afternoon_start" id="afternoon_start">
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label for="afternoon_end" class="form-label">Afternoon Time Out</label>
+                                        <input type="time" class="form-control" name="afternoon_end" id="afternoon_end">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="repeatDates" class="form-label">Repeat On</label>
+                            <input type="text" id="repeatDates" class="form-control" placeholder="Select one or more dates">
+                            <input type="hidden" id="repeatDatesHidden" name="repeat_dates">
+                        </div>
+
+                        <div class="mb-3 col-md-6 position-relative">
+                            <label for="guests" class="form-label">Add Guests (Optional)</label>
+                            <input type="text" class="form-control" id="guests" name="guests" placeholder="Type @ to tag officers">
+                            <div id="mentionDropdown" class="list-group position-absolute w-100 z-3" style="display: none; max-height: 200px; overflow-y: auto;"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="attachedMemo" class="form-label">Attached Memo</label>
+                            <input type="file" class="form-control" id="attachedMemo" name="attached_memo" accept="image/*">
+                        </div>
                     </div>
 
-                    <div class="mb-3 col-md-6 position-relative">
-                        <label for="guests" class="form-label">Add Guests (Optional)</label>
-                        <input type="text" class="form-control" id="guests" name="guests" placeholder="Type @ to tag officers">
-                        <div id="mentionDropdown" class="list-group position-absolute w-100 z-3" style="display: none; max-height: 200px; overflow-y: auto;"></div>
+                    <!-- Step 2: Evaluation Template -->
+                    <div class="step step-2 d-none">
+                        <div class="mb-3">
+                            <label for="evalTemplate" class="form-label">Evaluation Template</label>
+                            <select class="form-select" name="evaluation_template" id="evalTemplate" required>
+                                <option value="">-- Select Evaluation Template --</option>
+                               @foreach($evaluationTemplates as $template)
+                                    <option value="{{ $template->id }}">{{ $template->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="attachedMemo" class="form-label">Attached Memo</label>
-                        <input type="file" class="form-control" id="attachedMemo" name="attached_memo" accept="image/*">
-                    </div>
-
-                    <div class="modal-footer mt-3">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Event</button>
+                    <!-- Step Navigation -->
+                    <div class="modal-footer d-flex justify-content-between mt-3">
+                        <button type="button" class="btn btn-secondary" id="prevBtn" disabled>Previous</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
+                        <button type="submit" class="btn btn-success d-none" id="submitBtn">Save Event</button>
                     </div>
                 </form>
             </div>
@@ -400,7 +430,78 @@
 @endif
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<style>
+    .step {
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
 
+    .step.d-none {
+        opacity: 0;
+        transform: translateX(50px);
+        position: absolute;
+        width: 100%;
+    }
+
+    .step-circle {
+        width: 35px;
+        height: 35px;
+        background: #ccc;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 35px;
+        font-weight: bold;
+        transition: background 0.3s ease;
+    }
+
+    .step-circle.active {
+        background-color: #0d6efd;
+    }
+
+    .line {
+        width: 50px;
+        height: 3px;
+        background: #ccc;
+    }
+
+    .step-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #555;
+    }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let currentStep = 1;
+
+        function showStep(step) {
+            document.querySelectorAll(".step").forEach(el => el.classList.add("d-none"));
+            document.querySelector(`.step-${step}`).classList.remove("d-none");
+
+            document.querySelectorAll(".step-circle").forEach(c => c.classList.remove("active"));
+            document.querySelector(`.step-circle[data-step="${step}"]`).classList.add("active");
+
+            document.getElementById("prevBtn").disabled = step === 1;
+            document.getElementById("nextBtn").classList.toggle("d-none", step === 2);
+            document.getElementById("submitBtn").classList.toggle("d-none", step !== 2);
+        }
+
+        document.getElementById("nextBtn").addEventListener("click", function () {
+            currentStep++;
+            showStep(currentStep);
+        });
+
+        document.getElementById("prevBtn").addEventListener("click", function () {
+            currentStep--;
+            showStep(currentStep);
+        });
+
+        showStep(currentStep);
+
+        // Optional: Time Picker toggle based on dayType
+      
+    });
+</script>
 
 <script>
 let adminUsers = [];
@@ -410,7 +511,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const mentionDropdown = document.getElementById("mentionDropdown");
 
     // Load admin users
-    fetch('/admin-users') // Laravel route returns admins
+    fetch('/officer-users') // Laravel route returns admins
         .then(res => res.json())
         .then(data => adminUsers = data);
 

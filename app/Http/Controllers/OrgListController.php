@@ -26,6 +26,20 @@ class OrgListController extends Controller
     $org_list = OrgList::all();
     return view('student', compact('org_list'));
 }
+
+public function setHierarchy(Request $request)
+{
+    $request->validate([
+        'child_org_id' => 'required|exists:org_list,id',
+        'parent_org_id' => 'nullable|exists:org_list,id|different:child_org_id',
+    ]);
+
+    $child = OrgList::findOrFail($request->child_org_id);
+    $child->parent_org_id = $request->parent_org_id; // assumes you have this column
+    $child->save();
+
+    return back()->with('success', 'Hierarchy updated successfully!');
+}
 public function store(Request $request)
 {
     $request->validate([
@@ -34,9 +48,7 @@ public function store(Request $request)
         'org_logo'          => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         'bg_image'          => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
 
-        'scope'             => 'required|in:unit,course',
-        'delivery_unit_id'  => 'required_if:scope,unit|nullable|exists:delivery_units,id',
-        'course_id'         => 'required_if:scope,course|nullable|exists:courses,id',
+      
 
         // Adviser (required)
         'adviser_name'      => 'required|string|max:255',
@@ -64,9 +76,7 @@ public function store(Request $request)
         'description'      => $request->description,
         'org_logo'         => $orgLogoName,
         'bg_image'         => $bgImageName,
-        'scope'            => $request->scope,
-        'delivery_unit_id' => $request->scope === 'unit' ? $request->delivery_unit_id : null,
-        'course_id'        => $request->scope === 'course' ? $request->course_id : null,
+       
     ]);
 
     // Create Adviser
