@@ -28,6 +28,8 @@
     @include('layout.navbar')
     @include('layout.sidebar')
 
+
+
 <main class="d-flex justify-content-center align-items-start py-5" style="min-height: 100vh; background-color: #f8f9fa;">
     <div class="container" style="max-width: 960px; width: 100%;">
         @if (session('success'))
@@ -46,72 +48,28 @@
                 <button class="nav-link active" id="fines-tab" data-bs-toggle="tab" data-bs-target="#fines" type="button" role="tab">Fine Settings</button>
             </li>
             <li class="nav-item" role="presentation">
+                <button class="nav-link" id="fine-history-tab" data-bs-toggle="tab" data-bs-target="#fine-history" type="button" role="tab">Fine History</button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="academic-tab" data-bs-toggle="tab" data-bs-target="#academic" type="button" role="tab">Academic Settings</button>
             </li>
-            @if (Auth::user()->role === 'Super Admin')
+        
+            @if (Auth::user()->role === 'Adviser' )
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="delivery-tab" data-bs-toggle="tab" data-bs-target="#delivery" type="button" role="tab">Manage Delivery Units</button>
+                    <button class="nav-link" id="officer-tab" data-bs-toggle="tab" data-bs-target="#officer" type="button" role="tab">Manage Officer Roles</button>
                 </li>
             @endif
-
-            @if (Auth::user()->role === 'Adviser' )
-            <li class="nav-item" role="presentation">
-        <button class="nav-link" id="officer-tab" data-bs-toggle="tab" data-bs-target="#officer" type="button" role="tab">Manage Officer Roles</button>
-        </li>
-@endif
         </ul>
 
         <div class="tab-content" id="configTabContent">
             <!-- FINE SETTINGS TAB -->
             <div class="tab-pane fade show active" id="fines" role="tabpanel">
-                <!-- Fine Configuration History -->
-                <div class="card shadow border-0 rounded-3 p-4 mb-4">
-                    <h4 class="fw-bold mb-3">Fine Configuration History</h4>
-
-                    <div class="mb-3">
-                        <input type="text" class="form-control" id="fineSearch" placeholder="Search fine history...">
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle" id="fineHistoryTable">
-                            <thead class="table-light">
-                                <tr>
-                                    <th scope="col">Type</th>
-                                    <th>Amount (₱)</th>
-                                    <th scope="col">Changed By</th>
-                                    <th scope="col">Date Changed</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($history as $index => $record)
-                                    <tr class="{{ $index >= 12 ? 'extra-row d-none' : '' }}">
-                                        <td>{{ $record->type }}</td>
-                                        <td>₱{{ number_format($record->amount, 0) }}</td>
-                                        <td>{{ $record->updated_by ? \App\Models\User::find($record->updated_by)->name : 'System' }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($record->changed_at)->format('M d, Y h:i A') }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="text-center text-muted">No fine history found.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-
-                    @if(count($history) > 12)
-                        <div class="text-center mt-3">
-                            <button id="toggleBtn" class="btn btn-outline-primary">See More</button>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Fine Configuration -->
                 <div class="card shadow border-0 rounded-3 p-4 mb-4">
                     <h4 class="fw-bold mb-4">Fine Configuration</h4>
                     <form action="{{ route('settings.updateFines') }}" method="POST">
                         @csrf
                         <div class="row g-3">
+                            <!-- Fine input fields (same as before) -->
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Absentee Fine (Member)</label>
                                 <div class="input-group">
@@ -162,8 +120,59 @@
                 </div>
             </div>
 
-            <!-- ACADEMIC TERM SETTINGS TAB -->
-            <div class="tab-pane fade" id="academic" role="tabpanel">
+            <!-- FINE HISTORY TAB -->
+            <div class="tab-pane fade" id="fine-history" role="tabpanel">
+                <div class="card shadow border-0 rounded-3 p-4 mb-4">
+                    <h4 class="fw-bold mb-3">Fine Configuration History</h4>
+                    @if($academicTerm && $acadCode)
+    <div class="mb-3">
+        <strong>Current Academic Term:</strong> {{ $academicTerm }}<br>
+        <strong>Academic Code:</strong> {{ $acadCode }}
+    </div>
+@endif
+
+<div class="mb-3">
+<input type="text" class="form-control" id="fineSearch" placeholder="Search fine history by academic code...">
+</div>
+
+                   
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="fineHistoryTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Amount (₱)</th>
+                                    <th>Changed By</th>
+                                    <th>Date Changed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($history as $index => $record)
+                                    <tr class="{{ $index >= 12 ? 'extra-row d-none' : '' }}">
+                                        <td>{{ $record->type }}</td>
+                                        <td>₱{{ number_format($record->amount, 0) }}</td>
+                                        <td>{{ $record->updated_by ? \App\Models\User::find($record->updated_by)->name : 'System' }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($record->changed_at)->format('M d, Y h:i A') }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">No fine history found.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                    @if(count($history) > 12)
+                        <div class="text-center mt-3">
+                            <button id="toggleBtn" class="btn btn-outline-primary">See More</button>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+             <div class="tab-pane fade" id="academic" role="tabpanel">
                 <div class="card shadow border-0 rounded-3 p-4">
                     <h4 class="fw-bold mb-4">Academic Year & Term Settings</h4>
                     <form action="{{ route('settings.updateAcademicYear') }}" method="POST">
@@ -238,89 +247,64 @@
 @endif
 
             <!-- SUPER ADMIN ONLY TAB -->
-            @if (Auth::user()->role === 'Super Admin')
-            <div class="tab-pane fade" id="delivery" role="tabpanel">
-                <div class="card shadow border-0 rounded-3 p-4 mb-4">
-                    <h4 class="fw-bold mb-4">Manage Delivery Units & Courses</h4>
-
-                    <!-- Add Delivery Unit -->
-                    <form action="{{ route('delivery-units.store') }}" method="POST" class="mb-4">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Delivery Unit Name</label>
-                            <input type="text" name="unit_name" class="form-control" placeholder="e.g., College of Computing Studies">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Description</label>
-                            <textarea name="unit_description" class="form-control" rows="2"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add Delivery Unit</button>
-                    </form>
-
-                    <hr>
-
-                    <!-- Add Course -->
-                    <form action="{{ route('courses.store') }}" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Select Delivery Unit</label>
-                             <select name="unit_id" class="form-select">
-                                @foreach ($deliveryUnits as $unit)
-                                    <option value="{{ $unit->id }}">{{ $unit->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Course Name</label>
-                            <input type="text" name="course_name" class="form-control" placeholder="e.g., Bachelor of Science in IT">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Course Code</label>
-                            <input type="text" name="course_code" class="form-control" placeholder="e.g., BSIT">
-                        </div>
-                        <button type="submit" class="btn btn-success">Add Course</button>
-                    </form>
-
-
-                    
-    <div class="mt-5">
-        <h5 class="fw-bold mb-3">Current Delivery Units & Courses</h5>
-        <div class="table-responsive">
-            <table class="table table-bordered align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 25%;">Delivery Unit</th>
-                        <th style="width: 25%;">Description</th>
-                        <th style="width: 50%;">Courses</th>
-                    </tr>
-                </thead>
-                <tbody>
-                  @forelse($deliveryUnits as $unit)
-                <tr>
-                    <td>{{ $unit->name }}</td>
-                    <td>{{ $unit->description }}</td>
-                    <td>
-                        @foreach($unit->courses as $course)
-                            <div><strong>{{ $course->code }}</strong> - {{ $course->name }}</div>
-                        @endforeach
-                    </td>
-                </tr>
-                @empty
-                <tr><td colspan="3" class="text-center text-muted">No delivery units found.</td></tr>
-                @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                                </div>
-                            </div>
-                            @endif
+         
+        </div>
+    </div>
         </div>
     </div>
 
-    <!-- Toggle Extra Fine History -->
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('fineSearch');
 
+    input.addEventListener('input', function () {
+        const acadCode = input.value.trim();
+
+        if (acadCode.length === 0) return;
+
+        fetch(`/fine-history/search/${acadCode}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector('#fineHistoryTable tbody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No fine history found.</td></tr>';
+                return;
+            }
+
+            data.forEach(record => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${record.type}</td>
+                    <td>₱${parseInt(record.amount).toLocaleString()}</td>
+                    <td>${record.updated_by_name ?? 'System'}</td>
+                    <td>${record.changed_at}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        });
+    });
+});
+</script>
+
+    <!-- Optional: JS to search rows -->
+    <script>
+        document.getElementById('fineSearch').addEventListener('input', function () {
+            const value = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#fineHistoryTable tbody tr');
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(value) ? '' : 'none';
+            });
+        });
+    </script>
 </main>
 
         <script>

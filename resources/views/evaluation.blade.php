@@ -57,40 +57,40 @@
         <!-- 🔵 Responses Tab (now default active) -->
         <div class="tab-pane fade show active" id="responses" role="tabpanel">
           <h4 class="fw-bold mt-4" style="color:#232946;">Evaluation Responses</h4>
-<table class="table table-hover align-middle">
-  <thead>
-    <tr>
-      <th>Event</th>
-      <th>Evaluation</th>
-      <th>Description</th>
-      <th>Overall Rating</th>
-      <th>Respondents</th> <!-- 👈 New column -->
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    @foreach ($assignments as $assignment)
-      <tr data-assignment-id="{{ $assignment->id }}">
-        <td>{{ $assignment->event->name ?? 'N/A' }}</td>
-        <td>{{ $assignment->evaluation->title }}</td>
-        <td>{{ Str::limit($assignment->evaluation->description, 80) }}</td>
-        <td class="overall-rating">Loading...</td>
-        <td class="respondent-count text-muted small">Loading...</td> <!-- 👈 New cell for respondents -->
-        <td>
-          <a href="javascript:void(0)" class="btn btn-sm btn-primary view-responses-btn"
-             data-assignment-id="{{ $assignment->id }}">
-            <i class="fa fa-eye"></i> View Responses
-          </a>
-        </td>
-      </tr>
-    @endforeach
-  </tbody>
-</table>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Evaluation</th>
+                  <th>Description</th>
+                  <th>Overall Rating</th>
+                  <th>Respondents</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach ($assignments as $assignment)
+                  <tr data-assignment-id="{{ $assignment->id }}">
+                    <td>{{ $assignment->event->name ?? 'N/A' }}</td>
+                    <td>{{ $assignment->evaluation->title }}</td>
+                    <td>{{ Str::limit($assignment->evaluation->description, 80) }}</td>
+                    <td class="overall-rating text-center">Loading...</td>
+                    <td class="respondent-count text-muted small">Loading...</td>
+                    <td>
+                      <a href="javascript:void(0)" class="btn btn-sm btn-primary view-responses-btn" data-assignment-id="{{ $assignment->id }}">
+                        <i class="fa fa-eye"></i> View
+                      </a>
+                    </td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <!-- 🟢 Evaluations Tab -->
         <div class="tab-pane fade" id="evaluations" role="tabpanel">
-          <!-- Success/Error messages -->
           @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
           @endif
@@ -98,10 +98,7 @@
             <div class="alert alert-danger">{{ session('error') }}</div>
           @endif
 
-          <!-- Create Evaluation Button -->
-          <button class="btn btn-success mb-3" type="button"
-                  data-bs-toggle="collapse" data-bs-target="#evaluationCreator"
-                  aria-expanded="false" aria-controls="evaluationCreator">
+          <button class="btn btn-success mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#evaluationCreator" aria-expanded="false" aria-controls="evaluationCreator">
             <i class="fa fa-plus me-1"></i> Create Evaluation
           </button>
 
@@ -135,46 +132,49 @@
 
           <!-- Evaluation Table -->
           <h4 class="fw-bold text-center mt-4" style="color:#232946;">Evaluation Table</h4>
-          <table class="table table-hover align-middle">
-  <thead class="table-dark">
-    <tr>
-      <th>Title</th>
-      <th>Description</th>
-      <th>Date Created</th>
-      <th>Creator</th>
-      <th style="width:200px">Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    @foreach($evaluations as $evaluation)
-    <tr>
-      <td>{{ $evaluation->title }}</td>
-      <td>{{ Str::limit($evaluation->description, 80) }}</td>
-      <td>{{ \Carbon\Carbon::parse($evaluation->created_at)->format('Y-m-d') }}</td>
-      <td>{{ $evaluation->created_by }}</td>
-      <td>
-        <button class="btn btn-sm btn-primary" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#viewModal">
-          <i class="fa fa-eye"></i>
-        </button>
-        <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#editModal">
-          <i class="fa fa-pen"></i>
-        </button>
-        <button class="btn btn-sm btn-success send-eval-btn" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#sendEvaluationModal">
-          <i class="fa fa-paper-plane"></i>
-        </button>
-        <form action="" class="d-inline" onsubmit="return confirm('Delete this evaluation?')">
-          <button class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
-        </form>
-      </td>
-    </tr>
-    @endforeach
-  </tbody>
-</table>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Title</th>
+                  <th>Description</th>
+                  <th>Date Created</th>
+                  <th>Creator</th>
+                  <th style="width:200px">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach($evaluations as $evaluation)
+                  <tr>
+                    <td>{{ $evaluation->title }}</td>
+                    <td>{{ Str::limit($evaluation->description, 80) }}</td>
+                    <td>{{ \Carbon\Carbon::parse($evaluation->created_at)->format('Y-m-d') }}</td>
+                    <td>{{ $evaluation->created_by }}</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#viewModal">
+                        <i class="fa fa-eye"></i>
+                      </button>
+                      <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#editModal">
+                        <i class="fa fa-pen"></i>
+                      </button>
+                      <button class="btn btn-sm btn-success send-eval-btn" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#sendEvaluationModal">
+                        <i class="fa fa-paper-plane"></i>
+                      </button>
+                      <form action="" class="d-inline" onsubmit="return confirm('Delete this evaluation?')">
+                        <button class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
+                      </form>
+                    </td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </main>
+
 
     <div class="modal fade" id="sendEvaluationModal" tabindex="-1" aria-labelledby="sendEvaluationModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -297,10 +297,10 @@
         url: `/evaluation-responses/${assignmentId}/summary`,
         method: 'GET',
         success: function (data) {
-          const rating = data.overall_rating ?? 'N/A';
+          const rating = data.overall_rating ?? '-';
           const resText = data.respondent_text ?? 'N/A';
 
-          row.find('.overall-rating').html(rating !== 'N/A' ? `⭐ ${rating} / 5` : 'N/A');
+          row.find('.overall-rating').html(rating !== '-' ? `⭐ ${rating} / 5` : '-');
           row.find('.respondent-count').text(resText);
         },
         error: function () {

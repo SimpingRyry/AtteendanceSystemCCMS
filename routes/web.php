@@ -276,3 +276,8 @@ Route::post('/settings/courses', [SettingsController::class, 'storeCourse'])->na
     Route::post('/officer-roles', [SettingsController::class, 'store'])->name('officer-roles.store');
     Route::delete('/officer-roles/{id}', [SettingsController::class, 'destroy'])->name('officer-roles.destroy');
 Route::post('/orgs/set-hierarchy', [OrgListController::class, 'setHierarchy'])->name('orgs.setHierarchy');
+Route::get('/officer-roles/{org_name}', function ($org_name) {
+    return \App\Models\OfficerRole::where('org', $org_name)->pluck('title');
+});
+
+Route::get('/fine-history/search/{acadCode}', [SettingsController::class, 'searchFineHistory']);

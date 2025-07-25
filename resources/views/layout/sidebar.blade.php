@@ -87,6 +87,12 @@
                     </a>
                     <div class="collapse show" id="manageMenu">
                         <ul class="navbar-nav ps-3">
+
+                             <li>
+                                <a href="{{ url('manage_orgs_page') }}" class="nav-link text-white {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}">
+                                    <img src="{{ asset('images/org_ico.png') }}" class="sidebar-icon"> Organization
+                                </a>
+                            </li>
                             <li>
                                 <a href="{{ url('student') }}" class="nav-link text-white {{ request()->is('student') ? 'active-link' : '' }}">
                                     <img src="{{ asset('images/user_prof.png') }}" class="sidebar-icon"> Students
@@ -99,11 +105,10 @@
                             </li>
                            
                             
-                            <li>
-                                <a href="{{ url('manage_orgs_page') }}" class="nav-link text-white {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}">
-                                    <img src="{{ asset('images/org_ico.png') }}" class="sidebar-icon"> Organization
-                                </a>
-                            </li>
+                           
+
+                             <li><a href="{{ url('officers') }}" class="nav-link text-white {{ request()->is('officers') ? 'active-link' : '' }}"><img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Officers</a></li>
+
                         </ul>
                     </div>
                 </li>

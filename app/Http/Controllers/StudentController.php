@@ -34,12 +34,12 @@ public function store(Request $request)
     ]);
 
     // ❌ Prevent being officer in both main org and Student Government
-if (
-    Str::lower($request->role) !== 'member' &&
-    $request->filled('sg_officer_role')
-) {
-    return redirect()->back()->with('error', 'You cannot be an officer in both your local organization and the Student Government.');
-}
+    if (
+        Str::lower($request->role) !== 'member' &&
+        $request->filled('sg_officer_role')
+    ) {
+        return redirect()->back()->with('error', 'You cannot be an officer in both your local organization and the Student Government.');
+    }
 
     // ✅ Handle image requirements
     if (!$request->uploaded_picture && !$request->captured_image) {
@@ -52,14 +52,12 @@ if (
 
     $filename = null;
 
-    // ✅ Save uploaded picture
     if ($request->hasFile('uploaded_picture')) {
         $image = $request->file('uploaded_picture');
         $filename = uniqid() . '.' . $image->getClientOriginalExtension();
         $image->move(public_path('uploads'), $filename);
     }
 
-    // ✅ Save captured image
     if ($request->captured_image) {
         $image = $request->captured_image;
         $image = str_replace('data:image/png;base64,', '', $image);
@@ -70,20 +68,23 @@ if (
         file_put_contents(public_path('uploads/' . $filename), $imageData);
     }
 
-    // ✅ Determine organization logic
-    $currentUserRole = Str::lower(Auth::user()->role);
-    $userOrg = Auth::user()->org;
+    // ✅ Determine organization
+    $currentUser = Auth::user();
+    $currentUserOrgName = $currentUser->org;
+    $currentUserOrg = \App\Models\OrgList::where('org_name', $currentUserOrgName)->first();
+    $isParentOrg = $currentUserOrg && $currentUserOrg->children()->exists();
 
-    if (
-        ($currentUserRole === 'adviser' || Str::contains($currentUserRole, 'officer')) &&
-        $userOrg !== 'CCMS Student Government'
-    ) {
-        $organization = $userOrg;
-    } else {
+    if ($isParentOrg && $request->filled('organization')) {
+        $validOrgs = $currentUserOrg->children()->pluck('org_name')->toArray();
+        if (!in_array($request->organization, $validOrgs)) {
+            return back()->withErrors(['organization' => 'Invalid organization selected.']);
+        }
         $organization = $request->organization;
+    } else {
+        $organization = $currentUserOrgName;
     }
 
-    // ✅ Create main MEMBER account
+    // ✅ Create base MEMBER user
     $memberUser = new User();
     $memberUser->name = $request->sname;
     $memberUser->email = $request->email;
@@ -98,9 +99,9 @@ if (
 
     event(new Registered($memberUser));
 
-    $term = Setting::where('key', 'academic_term')->value('value'); // current term
+    $term = Setting::where('key', 'academic_term')->value('value');
 
-    // ✅ If role is not member → create officer account (main org)
+    // ✅ Main org officer account
     if (Str::lower($request->role) !== 'member') {
         $officerUser = new User();
         $officerUser->name = $request->sname;
@@ -117,7 +118,7 @@ if (
         $officerUser->save();
     }
 
-    // ✅ If role is member AND SG role is selected → create SG officer account
+    // ✅ SG officer account (if Member but selected SG role)
     if (
         Str::lower($request->role) === 'member' &&
         $request->filled('sg_officer_role')
@@ -129,7 +130,7 @@ if (
         $sgOfficer->picture = $filename;
         $sgOfficer->role = $request->sg_officer_role . ' - Officer';
         $sgOfficer->student_id = $request->student_id;
-        $sgOfficer->org = 'CCMS Student Government';
+        $sgOfficer->org = $currentUserOrgName;
         $sgOfficer->email_verified_at = now();
         $sgOfficer->term = $term;
 
@@ -157,6 +158,7 @@ if (
 
     return redirect()->back()->with('success', 'Student registered successfully!');
 }
+
 
 
     

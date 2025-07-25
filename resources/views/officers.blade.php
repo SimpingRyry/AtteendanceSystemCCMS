@@ -56,31 +56,68 @@
         <p class="mb-2 text-muted">Service Year: <strong>{{ $yearOnly }}</strong></p>
 
         <!-- Service Year Filter -->
-        <form method="GET" id="filterForm" onsubmit="return false;">
+        <form method="GET" id="termfilterForm" onsubmit="return false;">
             <div style="max-width: 250px;">
                 <label for="termSearch" class="form-label mb-1">Service Year</label>
                 <input type="text" name="term" id="termSearch" class="form-control form-control-sm"
                        placeholder="e.g. 2025-2026" value="{{ request('term') }}"
-                       onchange="document.getElementById('filterForm').submit()">
+                       onchange="document.getElementById('termfilterForm').submit()">
             </div>
         </form>
     </div>
 
     <!-- Right: Add Officer Button and Search Input -->
     <div class="col-12 col-md-6 d-flex flex-column align-items-stretch align-items-md-end gap-2 order-1 order-md-2 mb-2 mb-md-0">
-        @if (Auth::user()->org === 'CCMS Student Government')
-            <button type="button" class="btn btn-primary "
-                    data-bs-toggle="modal" data-bs-target="#addOfficerModal">
-                <i class="bi bi-plus-circle me-1"></i> Add Officer
-            </button>
-        @endif
+    @if (Auth::user()->role != 'OSSD')
+        <button type="button" class="btn btn-primary"
+                data-bs-toggle="modal" data-bs-target="#addOfficerModal">
+            <i class="bi bi-plus-circle me-1"></i> Add Officer
+        </button>
+    @endif
 
-        <div style="min-width: 250px; max-width: 300px;">
+    <!-- Grouped Search Input and Filter Button -->
+    <div class="d-flex align-items-end gap-2" style="min-width: 250px; max-width: 300px;">
+        <div class="flex-grow-1">
             <label class="form-label mb-1">Search</label>
             <input type="text" id="searchInput" class="form-control form-control-sm"
                    placeholder="Search name...">
         </div>
+         @if (Auth::user()->role === 'OSSD')
+        <div style="position: relative;">
+            <label class="form-label mb-1 d-none d-md-block" style="visibility: hidden;">Filter</label> <!-- for spacing alignment -->
+
+           
+              <button class="btn btn-outline-secondary" type="button" onclick="toggleFilterCloud()" style="border-radius: 6px;">
+                <i class="bi bi-funnel-fill"></i>
+            </button>
+           
+          
+
+            <!-- Filter Dropdown -->
+            <div id="filterCloud" class="shadow p-3 rounded"
+                 style="position: absolute; top: 120%; right: 0; background-color: white; border: 1px solid #ddd; border-radius: 12px; display: none; min-width: 250px; z-index: 10;">
+                <div>
+<form method="GET" id="filterForm">
+    <!-- Hidden input to preserve term filter -->
+    <input type="hidden" name="term" value="{{ request('org') }}">
+
+    <label for="deptFilter" class="form-label">Filter by Organization</label>
+    <select id="deptFilter" name="org" class="form-select form-select-sm"
+            onchange="document.getElementById('filterForm').submit()">
+        <option value="">All Organizations</option>
+        @foreach($orgs as $org)
+            <option value="{{ $org->org_name }}" {{ request('org') == $org->org_name ? 'selected' : '' }}>
+                {{ $org->org_name }}
+            </option>
+        @endforeach
+    </select>
+</form>
+                </div>
+            </div>
+        </div>
+         @endif
     </div>
+</div>
 </div>
 
                 <!-- Officer Table -->
@@ -151,36 +188,10 @@
     <label for="officerPosition" class="form-label">Officer Position</label>
     <select class="form-select" id="officerPosition" name="officerPosition" required>
         <option value="">Select Position</option>
-
-        @if (Auth::user()->org === 'CCMS Student Government')
-        <option value="President">President</option>
-            <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
-            <option value="Vice President For External Affairs">Vice President For External Affairs</option>
-            <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
-            <option value="Executive Secretary">Executive Secretary</option>
-            <option value="Internal Secretary">Internal Secretary</option>
-         
-            <option value="Auditing Officer I">Auditing Officer I</option>
-            <option value="Auditing Officer II">Auditing Officer II</option>
-            <option value="Managing Officer I">Managing Officer I</option>
-            <option value="Managing Officer II">Managing Officer II</option>
-           <option value="Multimedia Officer">Multimedia Officer</option>
-              <option value="Parliamentary Officer">Parliamentary Officer</option>
-          
-
-        @elseif (Auth::user()->role === 'PRAXIS')
-            <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
-            <option value="Vice President For External Affairs">Vice President For External Affairs</option>
-            <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
-            <option value="Auditing Officer">Auditing Officer</option>
-            <option value="Technical Officer">Technical Officer</option>
-            <option value="Sentinel Officer">Sentinel Officer</option>
-
-        @else
-            <option value="Position 1 (TBD)">Position 1 (TBD)</option>
-            <option value="Position 2 (TBD)">Position 2 (TBD)</option>
-            <option value="Position 3 (TBD)">Position 3 (TBD)</option>
-        @endif
+         @foreach ($officerRoles as $role)
+        <option value="{{ $role->title }}">{{ $role->title }}</option>
+    @endforeach
+       
     </select>
 </div>
         </div>

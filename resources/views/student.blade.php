@@ -322,72 +322,41 @@
               </div>
 
               <!-- Organization Selection -->
-              @if(auth()->user()->role == 'Super Admin' || auth()->user()->org == 'CCMS Student Government')
-              <div class="mb-4">
-                <label class="form-label" for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
-                <select name="organization" id="organizationSelect" class="form-select" required>
-                  <option value="">-- Select Organization --</option>
-                  @foreach ($org_list as $org)
-                    <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
-                  @endforeach
-                </select>
-              </div>
-              @endif
+@if ($org_list->isNotEmpty())
+<div class="mb-4">
+  <label class="form-label" for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
+  <select name="organization" id="organizationSelect" class="form-select" required>
+    <option value="">-- Select Organization --</option>
+    @foreach ($org_list as $org)
+      <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
+    @endforeach
+  </select>
+</div>
+@endif
 
               <!-- Role / Position -->
               <div class="mb-4">
-                <h6 class="fw-bold text-info">Role / Position</h6>
-                <label class="form-label" for="roleSelect">Select Role <span class="text-danger">*</span></label>
-                <select name="role" id="roleSelect" class="form-select" required>
-  
-
+  <h6 class="fw-bold text-info">Role / Position</h6>
+  <label class="form-label" for="roleSelect">Select Role <span class="text-danger">*</span></label>
+  <select name="role" id="roleSelect" class="form-select" required>
     <option value="Member">Member</option>
-
     @foreach($officerRoles as $role)
         <option value="{{ $role->title }}">{{ $role->title }}</option>
     @endforeach
-</select>
-              </div>
-
+  </select>
+</div>
               <!-- SG Role Dropdown -->
-              @if(auth()->user()->org == 'CCMS Student Government' || auth()->user()->role == 'Super Admin')
-              <div class="mb-4">
-                <label class="form-label" for="sgOfficerRole">SG Officer Role <span class="text-danger">*</span></label>
-               <select name="sg_officer_role" id="sgOfficerRole" class="form-select">
-  <option value="">-- Select SG Officer Role --</option>
-  <option value="President">President</option>
-  <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
-  <option value="Vice President For External Affairs">Vice President For External Affairs</option>
-  <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
-  <option value="Executive Secretary">Executive Secretary</option>
-  <option value="Internal Secretary">Internal Secretary</option>
-  <option value="Parliamentary Officer">Parliamentary Officer</option>
-  <option value="Auditing Officer I">Auditing Officer I</option>
-  <option value="Auditing Officer II">Auditing Officer II</option>
-  <option value="Managing Officer I">Managing Officer I</option>
-  <option value="Managing Officer II">Managing Officer II</option>
-  <option value="Multimedia Officer">Multimedia Officer</option>
-  <option value="Information Communications Officer">Information Communications Officer</option>
-
-  <!-- Additional Positions -->
-  <option value="3rd Year Senator">3rd Year Senator</option>
-  <option value="JC - Project Management and Development Committee">JC - Project Management and Development Committee</option>
-  <option value="JC - Project Management and Development Committee">JC - Project Management and Development Committee</option>
-  <option value="JC - Secretariat Committee">JC - Secretariat Committee</option>
-  <option value="JC - Secretariat Committee">JC - Secretariat Committee</option>
-  <option value="JC - Secretariat Committee">JC - Secretariat Committee</option>
-  <option value="JC - Resource Management Committee">JC - Resource Management Committee</option>
-  <option value="JC - Resource Management Committee">JC - Resource Management Committee</option>
-  <option value="JC - Resource Management Committee">JC - Resource Management Committee</option>
-  <option value="JC - Creative Development Committee">JC - Creative Development Committee</option>
-  <option value="JC - Creative Development Committee">JC - Creative Development Committee</option>
-  <option value="JC - Creative Development Committee">JC - Creative Development Committee</option>
-  <option value="JC - Technical Committee">JC - Technical Committee</option>
-  <option value="JC - Technical Committee">JC - Technical Committee</option>
-  <option value="JC - Technical Committee">JC - Technical Committee</option>
-</select>
-              </div>
-              @endif
+              @if ($sgRoles->isNotEmpty())
+<div class="mb-4">
+  <label class="form-label" for="sgOfficerRole">SG Officer Role <span class="text-danger">*</span></label>
+  <select name="sg_officer_role" id="sgOfficerRole" class="form-select">
+    <option value="">-- Select SG Officer Role --</option>
+    @foreach ($sgRoles as $role)
+      <option value="{{ $role->title }}">{{ $role->title }}</option>
+    @endforeach
+  </select>
+</div>
+@endif
             </div>
           </div>
         </form>
@@ -401,8 +370,32 @@
   </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $('#organizationSelect').on('change', function () {
+    const selectedOrg = $(this).val();
 
-@if(auth()->user()->role == 'Super Admin' || auth()->user()->org == 'CCMS Student Government')
+    if (selectedOrg) {
+      $.ajax({
+        url: `/officer-roles/${encodeURIComponent(selectedOrg)}`,
+        type: 'GET',
+        success: function (roles) {
+          const $roleSelect = $('#roleSelect');
+          $roleSelect.empty();
+          $roleSelect.append(`<option value="Member">Member</option>`); // Default
+
+          roles.forEach(function (role) {
+            $roleSelect.append(`<option value="${role}">${role}</option>`);
+          });
+        },
+        error: function () {
+          alert('Failed to load officer roles.');
+        }
+      });
+    }
+  });
+</script>
+<!-- @if(auth()->user()->role == 'Super Admin' || auth()->user()->org == 'CCMS Student Government')
 <script>
   const roleSelect = document.getElementById('roleSelect');
   const orgSelect = document.getElementById('organizationSelect');
@@ -453,7 +446,7 @@
     }
   });
 </script>
-@endif
+@endif -->
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="POST" action="{{ url('/generate-biometrics-schedule') }}" target="_blank">

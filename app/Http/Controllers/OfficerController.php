@@ -7,21 +7,31 @@ use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\OfficerRole;
+use App\Models\OrgList;
 
 class OfficerController extends Controller
-{public function showOfficerPage(Request $request)
+{
+public function showOfficerPage(Request $request)
 {
     $currentUser = Auth::user();
     $orgId = $currentUser->org;
+    $role = $currentUser->role;
 
     // Get academic term from settings
     $term = Setting::where('key', 'academic_term')->value('value');
     preg_match('/\d{4}-\d{4}/', $term, $matches);
     $yearOnly = $matches[0] ?? 'N/A';
 
-    $query = User::activeOfficers()->where('org', $orgId);
+    // Start query
+    $query = User::activeOfficers();
 
-    // Filter by year or full text if applicable
+    // If NOT OSSD or Super Admin, limit to own org
+    if (!in_array($role, ['OSSD', 'Super Admin'])) {
+        $query->where('org', $orgId);
+    }
+
+    // Filter by academic term
     if ($request->filled('term')) {
         preg_match('/\d{4}-\d{4}/', $request->term, $searchMatch);
 
@@ -32,9 +42,24 @@ class OfficerController extends Controller
         }
     }
 
+    // Optional: Filter by org via dropdown (for OSSD/Super Admin)
+    if ($request->filled('org')) {
+        $query->where('org', $request->org);
+    }
+
+    // Ensure it finishes one org before moving to next
+    $query->orderBy('org');
+
+    // Paginate the result
     $users = $query->paginate(10);
 
-    return view('officers', compact('users', 'yearOnly'));
+    // Officer roles (based on current user's org)
+    $officerRoles = OfficerRole::where('org', $orgId)->get();
+
+    // Fetch all orgs for dropdown
+    $orgs = OrgList::orderBy('org_name')->get();
+
+    return view('officers', compact('users', 'yearOnly', 'officerRoles', 'orgs'));
 }
 
 

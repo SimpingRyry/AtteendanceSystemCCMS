@@ -10,6 +10,8 @@ use App\Models\DeliveryUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use Carbon\Carbon;
 
 class SettingsController extends Controller
 {
@@ -20,25 +22,55 @@ public function index()
 {
     $authOrg = Auth::user()->org;
 
-    // Get fine settings for the authenticated user's org
+    // Get fine settings
     $fines = DB::table('fine_settings')
         ->where('org', $authOrg)
         ->first();
 
-    // Get fine history for the authenticated user's org
+    // Get current academic term full record
+    $academicTermRecord = Setting::where('key', 'academic_term')->first();
+    $academicTerm = $academicTermRecord->value ?? null;
+
+    // Get acad_code from the academic term record
+    $acadCode = $academicTermRecord->acad_code ?? null;
+
+    // Get fine history filtered by org and acad code
     $history = FineHistory::where('org', $authOrg)
+        ->where('acad_code', $acadCode) // assuming your table has this column
         ->orderBy('changed_at', 'desc')
         ->get();
 
-    $academicTerm = Setting::where('key', 'academic_term')->value('value');
     $deliveryUnits = DeliveryUnit::with('courses')->get();
-
-    // Get officer roles for this org
     $officerRoles = OfficerRole::where('org', $authOrg)->get();
 
-    return view('config', compact('fines', 'history', 'academicTerm', 'deliveryUnits', 'officerRoles'));
+    return view('config', compact(
+        'fines',
+        'history',
+        'academicTerm',
+        'acadCode',
+        'deliveryUnits',
+        'officerRoles'
+    ));
 }
+public function searchFineHistory($acadCode)
+{
+    $authOrg = Auth::user()->org;
 
+    $history = FineHistory::where('org', $authOrg)
+        ->where('acad_code', $acadCode)
+        ->orderBy('changed_at', 'desc')
+        ->get()
+        ->map(function ($record) {
+            return [
+                'type' => $record->type,
+                'amount' => $record->amount,
+                'updated_by_name' => $record->updated_by ? User::find($record->updated_by)->name : null,
+                'changed_at' => Carbon::parse($record->changed_at)->format('M d, Y h:i A')
+            ];
+        });
+
+    return response()->json($history);
+}
     
 public function destroy($id)
 {

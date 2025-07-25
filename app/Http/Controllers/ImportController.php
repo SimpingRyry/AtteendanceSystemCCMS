@@ -95,21 +95,48 @@ public function show(Request $request)
     if ($request->filled('section')) {
         $query->where('section', $request->section);
     }
+
     if ($request->filled('year')) {
         $query->where('year', $request->year);
     }
+
     if ($request->filled('status')) {
         $query->where('status', $request->status);
     }
 
     $students = $query->paginate(10);
-    $org_list = OrgList::all();
     $sections = Student::select('section')->distinct()->pluck('section')->filter()->sort()->values();
     $years = Student::select('year')->distinct()->pluck('year')->filter()->sort()->values();
 
-    $officerRoles = OfficerRole::where('org', auth()->user()->org)->get();
+    $user = auth()->user();
+    $userOrg = OrgList::where('org_name', $user->org)->first();
 
-    return view('student', compact('students', 'org_list', 'sections', 'years', 'officerRoles'));
+    $org_list = collect();
+    $officerRoles = collect(); // Empty unless not a parent
+    $sgRoles = collect();
+
+    if ($userOrg) {
+        $childOrgs = $userOrg->children()->get();
+
+        if ($childOrgs->isNotEmpty()) {
+            // ✅ Parent org: load children for selection, wait for AJAX to get roles
+            $org_list = $childOrgs;
+            $sgRoles = OfficerRole::where('org', $userOrg->org_name)->get();
+            // officerRoles will be loaded via AJAX — leave it empty
+        } else {
+            // ✅ Not a parent: load current org roles right away
+            $officerRoles = OfficerRole::where('org', $user->org)->get();
+        }
+    }
+
+    return view('student', compact(
+        'students',
+        'sections',
+        'years',
+        'org_list',
+        'officerRoles',
+        'sgRoles'
+    ));
 }
 
 public function preview(Request $request)
