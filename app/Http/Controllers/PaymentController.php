@@ -40,39 +40,42 @@ public function showStatementOfAccount(Request $request)
 
 public function index()
 {
-    $authOrg = Auth::user()->org;
-    $userRole = Auth::user()->role;
-    $ccmsOrg = 'CCMS Student Government';
+    $authUser = Auth::user();
+    $authOrg = $authUser->org;
+    $userRole = $authUser->role;
 
-    // Determine if user can view all students
-    $viewAllStudents = ($authOrg === $ccmsOrg || $userRole === 'Super Admin');
+    // Get the authenticated org record with its children
+    $org = OrgList::where('org_name', $authOrg)->with('children')->first();
+    $childOrgNames = $org?->children->pluck('org_name')->toArray() ?? [];
+    $isParentOrg = !empty($childOrgNames);
 
     $studentsQuery = User::query();
 
-    if (!$viewAllStudents) {
-        // Only students with transactions from their org
-        $studentsQuery->whereHas('transactions', function ($query) use ($authOrg) {
-            $query->where('org', $authOrg);
-        });
-    } else {
-        // Show all students (but we'll still filter transactions per org)
+    if ($userRole === 'Super Admin') {
+        // Show all users that have a student list entry
         $studentsQuery->whereHas('studentList');
+    } elseif ($isParentOrg) {
+        // For parent org: fetch members from all child orgs
+        $studentsQuery->whereIn('org', $childOrgNames)
+                      ->where('role', 'Member');
+    } else {
+        // For child org: fetch all members under that org regardless of transactions
+        $studentsQuery->where('org', $authOrg)
+                      ->where('role', 'Member');
     }
 
-    // Set which org's fines and payments to show
-    $finesOrg = $authOrg;
-
+    // Always load only the transactions related to the logged-in org (parent or child)
     $students = $studentsQuery
         ->with([
             'studentList',
-            'transactions' => function ($query) use ($finesOrg) {
-                $query->where('org', $finesOrg);
+            'transactions' => function ($query) use ($authOrg) {
+                $query->where('org', $authOrg);
             }
         ])
         ->get()
         ->unique('student_id');
 
-    // Compute balances from filtered transactions
+    // Compute balances based on filtered transactions
     $balances = [];
     foreach ($students as $student) {
         $balance = 0;
@@ -86,15 +89,14 @@ public function index()
         $balances[$student->student_id] = $balance;
     }
 
-    // Distinct years and sections
+    // Filters
     $years = Student::select('year')->distinct()->pluck('year')->filter()->sort()->values();
     $sections = Student::select('section')->distinct()->pluck('section')->filter()->sort()->values();
-
-    // Get list of organizations
     $orgs = OrgList::select('org_name')->distinct()->pluck('org_name');
 
     return view('payment_page2', compact('students', 'balances', 'years', 'sections', 'orgs'));
 }
+
 
 
 

@@ -47,6 +47,8 @@
     @include('layout.sidebar')
     <main>
         <div id="userRole" data-role="{{ strtolower(auth()->user()->role) }}"></div>
+                <input type="hidden" id="currentUserRole" value="{{ Auth::user()->role }}">
+<input type="hidden" id="currentStudentId" value="{{ Auth::user()->student_id }}">
 
     <div class="container-fluid mt-5 px-4">
         <div class="row g-4">
@@ -366,11 +368,20 @@
           </div>
         </div>
 
+       
+               <div id="yourAttendanceSection" class="mb-4 p-3 border-start border-4 border-warning bg-white rounded shadow-sm d-none">
+            <h6 class="fw-semibold mb-2"><i class="bi bi-person-check-fill me-2 text-warning"></i>Your Attendance</h6>
+          <div id="attendanceDetails" class="text-secondary"></div>
+            </div>
+       
+ 
+
         <!-- Description & Guests -->
         <div class="mb-4 p-3 border-start border-4 border-success bg-white rounded shadow-sm">
           <h6 class="fw-semibold mb-2"><i class="bi bi-chat-dots-fill me-2 text-success"></i>Description & Guests</h6>
           <div id="viewEventDescGuests" class="text-secondary"></div>
         </div>
+        
 
         <!-- Attached Memo -->
         <div class="mb-3">
@@ -945,6 +956,50 @@ if (memoUrl) {
     memoDownloadLink.classList.add('d-none');
 }
 
+const userRole = document.getElementById('currentUserRole').value;
+const studentId = document.getElementById('currentStudentId').value;
+const eventId = info.event.id;
+
+
+if (userRole === 'Member') {
+    fetch(`/api/attendance/${eventId}/${studentId}`)
+        .then(res => {
+            if (!res.ok) throw new Error('No attendance');
+            return res.json();
+        })
+        .then(data => {
+            const section = document.getElementById('yourAttendanceSection');
+            const details = document.getElementById('attendanceDetails');
+            const timeCount = times.length; // taken from event.extendedProps.times
+
+            let attendanceHTML = '';
+
+            if (timeCount === 2) {
+                attendanceHTML += `
+                    <strong>Your Time In:</strong> ${data.time_in1 || '<span class="text-muted">N/A</span>'}<br>
+                    <strong>Your Time Out:</strong> ${data.time_out1 || '<span class="text-muted">N/A</span>'}<br>
+                    <strong>Status:</strong> ${data.status || '<span class="text-muted">N/A</span>'}
+                `;
+            } else if (timeCount === 4) {
+                attendanceHTML += `
+                    <strong>Morning In:</strong> ${data.time_in1 || '<span class="text-muted">N/A</span>'}<br>
+                    <strong>Morning Out:</strong> ${data.time_out1 || '<span class="text-muted">N/A</span>'}<br>
+                    <strong>Morning Status:</strong> ${data.morning_status || '<span class="text-muted">N/A</span>'}<br><br>
+                    <strong>Afternoon In:</strong> ${data.time_in2 || '<span class="text-muted">N/A</span>'}<br>
+                    <strong>Afternoon Out:</strong> ${data.time_out2 || '<span class="text-muted">N/A</span>'}<br>
+                    <strong>Afternoon Status:</strong> ${data.afternoon_status || '<span class="text-muted">N/A</span>'}
+                `;
+            } else {
+                attendanceHTML = `<span class="text-muted">No attendance information available for this format.</span>`;
+            }
+
+            section.classList.remove('d-none');
+            details.innerHTML = attendanceHTML;
+        })
+        .catch(() => {
+            document.getElementById('yourAttendanceSection').classList.add('d-none');
+        });
+}
     // Show modal
     new bootstrap.Modal(document.getElementById('viewEventModal')).show();
         },

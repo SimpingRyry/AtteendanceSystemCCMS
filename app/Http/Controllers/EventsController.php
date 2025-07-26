@@ -236,6 +236,7 @@ public function fetchEvents()
 
         // ✅ Format for calendar
         $calendarEvents[] = [
+            'id' => $event->id,
             'title' => $event->name,
             'start' => $event->event_date . 'T' . $times[0],
             'end' => $event->timeouts == 4

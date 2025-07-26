@@ -86,6 +86,10 @@ Route::get('/template', function () {
 Route::get('/payment_page', function () {
     return view('payment_page');
 });
+
+Route::get('/notification', function () {
+    return view('notification');
+});
 Route::get('/payment', [PaymentController::class, 'index'])->name('payments.index');
 
 
@@ -281,3 +285,4 @@ Route::get('/officer-roles/{org_name}', function ($org_name) {
 });
 
 Route::get('/fine-history/search/{acadCode}', [SettingsController::class, 'searchFineHistory']);
+Route::get('/attendance/{eventId}/{studentId}', [AttendanceController::class, 'getAttendance']);

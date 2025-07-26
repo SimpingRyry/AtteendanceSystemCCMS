@@ -17,46 +17,58 @@ class ClearanceController extends Controller
 
 public function index()
 {
-    $authOrg = Auth::user()->org;
-    $userRole = Auth::user()->role;
+    $authUser = Auth::user();
+    $authOrgName = $authUser->org;
+    $userRole = $authUser->role;
 
-    $ccmsOrg = 'CCMS Student Government';
+    // Get the org record including its children
+    $org = OrgList::where('org_name', $authOrgName)->with('children')->first();
 
-    // Determine if user is privileged to view all students
-    $viewAllStudents = ($authOrg === $ccmsOrg || $userRole === 'Super Admin');
+    // Get the names of all children orgs (for parent org view)
+    $childOrgNames = $org?->children->pluck('org_name')->toArray() ?? [];
+
+    // Determine if parent org (has children)
+    $isParentOrg = !empty($childOrgNames);
 
     $studentsQuery = User::query();
 
-    if (!$viewAllStudents) {
-        // Limit students to only those with transactions under their org
-        $studentsQuery->whereHas('transactions', function ($query) use ($authOrg) {
-            $query->where('org', $authOrg);
-        });
+    if ($userRole !== 'Super Admin') {
+        if ($isParentOrg) {
+            // If current org is a parent: fetch members from all child orgs
+            $studentsQuery->whereIn('org', $childOrgNames)
+                          ->where('role', 'Member');
+        } else {
+            // Otherwise, fetch members from the current (child) org
+            $studentsQuery->where('org', $authOrgName)
+                          ->where('role', 'Member');
+        }
     } else {
-        // Show all students (still ensure they have a studentList entry)
+        // Super Admin: show all with student list
         $studentsQuery->whereHas('studentList');
     }
 
-    // Determine which org's fines to show based on current user's org
-    $finesOrg = $authOrg;
-
+    // Fetch the students along with transactions tied to the current org (not children)
     $students = $studentsQuery
         ->with([
             'studentList',
-            'transactions' => function ($query) use ($finesOrg) {
-                $query->where('org', $finesOrg); // Filter fines to match current user's org
+            'transactions' => function ($query) use ($authOrgName) {
+                $query->where('org', $authOrgName);
             }
         ])
         ->get()
         ->unique('student_id');
 
-    // Get organization names, courses, and sections
+    // For filters or dropdowns
     $organizations = OrgList::pluck('org_name');
     $courses = Student::distinct()->pluck('course');
     $sections = Student::distinct()->pluck('section');
 
     return view('clearance', compact('students', 'organizations', 'courses', 'sections'));
 }
+
+
+
+
 
 
 public function generate($id)
