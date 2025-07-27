@@ -143,8 +143,8 @@
               <th>No</th>
               <th>Student ID</th>
               <th>Name</th>
-              <th>Gender</th>
-              <th>Course</th>
+              <th>Sex</th>
+              <th>Program</th>
               <th>Year</th>
               <th>Units</th>
               <th>Section</th>
@@ -244,7 +244,7 @@
                 <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showCamera()">Capture Image</button>
               </div>
 
-              <input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
+<input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
               
               <div id="cameraContainer" class="text-center" style="display: none;">
                 <video id="cameraStream" class="rounded border" width="100%" height="200" autoplay playsinline></video>
@@ -280,7 +280,7 @@
                     <input type="text" name="sname" id="modalStudentName" class="form-control" value="${data.name}" readonly>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Gender</label>
+                    <label class="form-label">Sex</label>
                     <input type="text" class="form-control" id="modalGender" value="${data.gender}" readonly>
                   </div>
                   <div class="col-md-6">
@@ -371,6 +371,11 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+function showUpload() {
+  document.getElementById('uploadInput').click();
+}
+</script>
 <script>
   $('#organizationSelect').on('change', function () {
     const selectedOrg = $(this).val();
@@ -743,9 +748,12 @@ function applySearchFilter() {
 
 <script>
   function showUpload() {
-    document.getElementById('uploadInput').style.display = 'block';
-    document.getElementById('cameraContainer').style.display = 'none';
-    document.getElementById('capturedImage').style.display = 'none';
+ 
+  document.getElementById('uploadInput').click();
+
+    // document.getElementById('uploadInput').style.display = 'block';
+    // document.getElementById('cameraContainer').style.display = 'none';
+    // document.getElementById('capturedImage').style.display = 'none';
     stopCamera();
   }
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\OrgList;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Verified;
@@ -15,8 +16,8 @@ use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\EventsController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\MemberController;
-use App\Http\Controllers\ReportController;
 
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdviserController;
 use App\Http\Controllers\OfficerController;
 use App\Http\Controllers\OrgListController;
@@ -34,7 +35,7 @@ use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\GCashPaymentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrgDashboardController;
-use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\OssdDashboardController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -80,6 +81,8 @@ Route::get('/evaluation', function () {
 
 
 Route::get('/super_dashboard', [DashboardController::class, 'index']);
+Route::get('/ossd-dashboard', [OssdDashboardController::class, 'index']);
+
 Route::get('/template', function () {
     return view('schedTemplate');
 });
@@ -107,11 +110,12 @@ Route::post('/events/update', [EventsController::class, 'update'])->name('events
 
 
 // Route to fetch all events from the database (GET request)
-Route::get('/events', [EventsController::class, 'index']);
+Route::get('/events', [EventsController::class, 'index'])->name('events.index');
 
 
 Route::get('/api/events', [EventsController::class, 'fetchEvents'])->name('events.fetch');
 
+use App\Http\Controllers\Auth\VerificationController;
 use App\Http\Controllers\StudentEvaluationController;
 use App\Http\Controllers\EvaluationResponseController;
 
@@ -249,9 +253,26 @@ Route::get('/officer-users', function () {
     $authUser = Auth::user();
     $currentTerm = Setting::where('key', 'academic_term')->value('value');
 
-    return User::where('role', 'LIKE', '%- Officer%')
-        ->where('org', $authUser->org)
-        ->where('term', $currentTerm)
+    // Get the current organization object
+    $authOrg = OrgList::where('org_name', $authUser->org)->first();
+
+    // Initialize an array of org names to query members from
+    $orgNames = [];
+
+    if ($authOrg) {
+        // Always include current org
+        $orgNames[] = $authOrg->org_name;
+
+        // If it's a parent org, include children orgs
+        if ($authOrg->children()->exists()) {
+            $childOrgNames = $authOrg->children->pluck('org_name')->toArray();
+            $orgNames = array_merge($orgNames, $childOrgNames);
+        }
+    }
+
+    return User::where('role', 'Member')
+        ->whereIn('org', $orgNames)
+        
         ->get(['name', 'email', 'picture']);
 });
 

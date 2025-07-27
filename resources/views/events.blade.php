@@ -101,17 +101,17 @@
 
             <div class="modal-body position-relative">
                 <!-- Step Indicators -->
-<div class="d-flex justify-content-center align-items-center my-4 gap-4 step-indicator">
-    <div class="d-flex flex-column align-items-center">
-        <div class="step-circle active" data-step="1">1</div>
-        <div class="step-label mt-1 text-center">Event Setup</div>
-    </div>
-    <div class="line"></div>
-    <div class="d-flex flex-column align-items-center">
-        <div class="step-circle" data-step="2">2</div>
-        <div class="step-label mt-1 text-center">Evaluation</div>
-    </div>
-</div>
+                <div class="d-flex justify-content-center align-items-center my-4 gap-4 step-indicator">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="step-circle active" data-step="1">1</div>
+                        <div class="step-label mt-1 text-center">Event Setup</div>
+                    </div>
+                    <div class="line"></div>
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="step-circle" data-step="2">2</div>
+                        <div class="step-label mt-1 text-center">Evaluation</div>
+                    </div>
+                </div>
 
                 <form id="eventForm" method="POST" action="{{ route('events.store') }}" enctype="multipart/form-data">
                     @csrf
@@ -149,80 +149,83 @@
                             </div>
                         </div>
 
+                        @if(auth()->user()->role === 'Super Admin')
                         <div class="row">
                             <div class="mb-3 col-md-6">
-                                <label for="involvedStudents" class="form-label">Involved Students</label>
-                                <select class="form-select" id="involvedStudents" name="involved_students" required>
-                                    <option value="">-- Select --</option>
-                                    <option value="All">All</option>
-                                    <option value="Officers">Officers</option>
+                                <label for="organization" class="form-label">Organization</label>
+                                <select class="form-select" id="organization" name="organization" required>
+                                    <option value="">-- Select Organization --</option>
+                                    @foreach($orgs as $org)
+                                        <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
+                                    @endforeach
                                 </select>
                             </div>
+                        </div>
+                        @endif
 
-                            @if(auth()->user()->role === 'Super Admin')
-                                <div class="mb-3 col-md-6">
-                                    <label for="organization" class="form-label">Organization</label>
-                                    <select class="form-select" id="organization" name="organization" required>
-                                        <option value="">-- Select Organization --</option>
-                                        @foreach($orgs as $org)
-                                            <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
-                                        @endforeach
+                        <!-- Combined Participants Section -->
+                        <div class="mb-3">
+                            <label class="form-label">Participants</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <select class="form-select" id="involvedStudents" name="involved_students" required>
+                                        <option value="">-- Select Students --</option>
+                                        <option value="All">All</option>
+                                        <option value="Officers">Officers</option>
                                     </select>
                                 </div>
-                            @endif
+                                <div class="col-md-6 position-relative">
+                                    <input type="text" class="form-control" id="guests" name="guests" placeholder="Add guests, use @ to tag members or officers (optional)">
+                                    <div id="mentionDropdown" class="list-group position-absolute w-100 z-3" style="display: none; max-height: 200px; overflow-y: auto;"></div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Time Pickers -->
                         <div id="timePickers" class="mb-3 d-none">
-                            <!-- Half Day -->
-                            <div id="halfDayTimes" class="d-none row">
-                                <label class="form-label">Half Day Schedule</label>
-                                <div class="col-md-6 mb-2">
-                                    <label for="half_start" class="form-label">Time In</label>
-                                    <input type="time" class="form-control" name="half_start" id="half_start">
-                                </div>
-                                <div class="col-md-6 mb-2">
-                                    <label for="half_end" class="form-label">Time Out</label>
-                                    <input type="time" class="form-control" name="half_end" id="half_end">
-                                </div>
-                            </div>
+    <!-- Half Day -->
+    <div id="halfDayTimes" class="d-none row">
+        <label class="form-label">Half Day Schedule</label>
+        <div class="col-md-6 mb-2">
+            <label for="half_start" class="form-label">Time In</label>
+            <input type="time" class="form-control" name="half_start" id="half_start" value="{{ $timeSettings->morning_in ?? '' }}">
+        </div>
+        <div class="col-md-6 mb-2">
+            <label for="half_end" class="form-label">Time Out</label>
+            <input type="time" class="form-control" name="half_end" id="half_end" value="{{ $timeSettings->afternoon_out ?? '' }}">
+        </div>
+    </div>
 
-                            <!-- Whole Day -->
-                            <div id="wholeDayTimes" class="d-none">
-                                <label class="form-label">Whole Day Schedule</label>
-                                <div class="row">
-                                    <div class="col-md-6 mb-2">
-                                        <label for="morning_start" class="form-label">Morning Time In</label>
-                                        <input type="time" class="form-control" name="morning_start" id="morning_start">
-                                    </div>
-                                    <div class="col-md-6 mb-2">
-                                        <label for="morning_end" class="form-label">Morning Time Out</label>
-                                        <input type="time" class="form-control" name="morning_end" id="morning_end">
-                                    </div>
-                                </div>
-                                <div class="row mt-2">
-                                    <div class="col-md-6 mb-2">
-                                        <label for="afternoon_start" class="form-label">Afternoon Time In</label>
-                                        <input type="time" class="form-control" name="afternoon_start" id="afternoon_start">
-                                    </div>
-                                    <div class="col-md-6 mb-2">
-                                        <label for="afternoon_end" class="form-label">Afternoon Time Out</label>
-                                        <input type="time" class="form-control" name="afternoon_end" id="afternoon_end">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Whole Day -->
+    <div id="wholeDayTimes" class="d-none">
+        <label class="form-label">Whole Day Schedule</label>
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <label for="morning_start" class="form-label">Morning Time In</label>
+                <input type="time" class="form-control" name="morning_start" id="morning_start" value="{{ $timeSettings->morning_in ?? '' }}">
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="morning_end" class="form-label">Morning Time Out</label>
+                <input type="time" class="form-control" name="morning_end" id="morning_end" value="{{ $timeSettings->morning_out ?? '' }}">
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-6 mb-2">
+                <label for="afternoon_start" class="form-label">Afternoon Time In</label>
+                <input type="time" class="form-control" name="afternoon_start" id="afternoon_start" value="{{ $timeSettings->afternoon_in ?? '' }}">
+            </div>
+            <div class="col-md-6 mb-2">
+                <label for="afternoon_end" class="form-label">Afternoon Time Out</label>
+                <input type="time" class="form-control" name="afternoon_end" id="afternoon_end" value="{{ $timeSettings->afternoon_out ?? '' }}">
+            </div>
+        </div>
+    </div>
+</div>
 
                         <div class="mb-3">
                             <label for="repeatDates" class="form-label">Repeat On</label>
                             <input type="text" id="repeatDates" class="form-control" placeholder="Select one or more dates">
                             <input type="hidden" id="repeatDatesHidden" name="repeat_dates">
-                        </div>
-
-                        <div class="mb-3 col-md-6 position-relative">
-                            <label for="guests" class="form-label">Add Guests (Optional)</label>
-                            <input type="text" class="form-control" id="guests" name="guests" placeholder="Type @ to tag officers">
-                            <div id="mentionDropdown" class="list-group position-absolute w-100 z-3" style="display: none; max-height: 200px; overflow-y: auto;"></div>
                         </div>
 
                         <div class="mb-3">
@@ -237,7 +240,7 @@
                             <label for="evalTemplate" class="form-label">Evaluation Template</label>
                             <select class="form-select" name="evaluation_template" id="evalTemplate" required>
                                 <option value="">-- Select Evaluation Template --</option>
-                               @foreach($evaluationTemplates as $template)
+                                @foreach($evaluationTemplates as $template)
                                     <option value="{{ $template->id }}">{{ $template->title }}</option>
                                 @endforeach
                             </select>
@@ -258,31 +261,8 @@
 
 
 
-<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventDetailsLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="eventDetailsLabel">Event Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Event Name:</strong> <span id="modalEventName"></span></p>
-                <p><strong>Venue:</strong> <span id="modalEventVenue"></span></p>
-                <p><strong>Date:</strong> <span id="modalEventDate"></span></p>
-                <p><strong>Timeouts:</strong> <span id="modalEventTimeouts"></span></p>
-                <p><strong>Times:</strong> <span id="modalEventTimes"></span></p>
-                <p><strong>Course:</strong> <span id="modalEventCourse"></span></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button id="generateAttendanceBtn" class="btn btn-primary" disabled>Generate Attendance Sheet</button>
-        
-        <!-- Note for availability -->
-            <p id="attendanceNote" class="text-muted" style="display: none;"></p>
-            </div>
-        </div>
-    </div>
-</div>
+
+
 
 <div class="modal fade" id="editEventModal" tabindex="-1">
   <div class="modal-dialog">
@@ -539,7 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (matches.length) {
                 mentionDropdown.innerHTML = matches.map(user => `
                     <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" data-email="${user.email}">
-                        <img src="${user.profile_picture || '/default-avatar.png'}" class="rounded-circle me-2" width="30" height="30">
+            <img src="/uploads/${user.picture || 'human.png'}" class="rounded-circle me-2" width="30" height="30">
                         <div>
                             <strong>${user.name}</strong><br>
                             <small>${user.email}</small>

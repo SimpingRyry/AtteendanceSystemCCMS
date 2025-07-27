@@ -48,49 +48,52 @@ public function store(Request $request)
         'org_logo'          => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         'bg_image'          => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
 
-      
+        // Adviser fields are nullable
+        'adviser_name'      => 'nullable|string|max:255',
+        'adviser_email'     => 'nullable|string|email|max:255|unique:users,email',
+        'adviser_password'  => 'nullable|string|min:6',
 
-        // Adviser (required)
-        'adviser_name'      => 'required|string|max:255',
-        'adviser_email'     => 'required|string|email|max:255|unique:users,email',
-        'adviser_password'  => 'required|string|min:6',
-
-        // President (optional)
-        'president_email'   => 'nullable|email|unique:users,email',
+        // President fields are nullable
         'president_name'    => 'nullable|string|max:255',
+        'president_email'   => 'nullable|email|unique:users,email',
         'president_password'=> 'nullable|string|min:6',
     ]);
 
-    // Sanitize and handle files
+    // Sanitize and handle file uploads
     $sanitizedOrgName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $request->org_name);
 
     $orgLogoName = $sanitizedOrgName . '_logo.' . $request->org_logo->extension();
     $request->org_logo->move(public_path('images/org_list'), $orgLogoName);
 
     $bgImageName = $sanitizedOrgName . '_bg.' . $request->bg_image->extension();
-    $request->bg_image->move(public_path('images'), $bgImageName);
+    $request->bg_image->move(public_path('images/org_lists'), $bgImageName);
 
     // Create the organization
     $organization = OrgList::create([
-        'org_name'         => $request->org_name,
-        'description'      => $request->description,
-        'org_logo'         => $orgLogoName,
-        'bg_image'         => $bgImageName,
-       
+        'org_name'    => $request->org_name,
+        'description' => $request->description,
+        'org_logo'    => $orgLogoName,
+        'bg_image'    => $bgImageName,
     ]);
 
-    // Create Adviser
-    $adviser = User::create([
-        'name'     => $request->adviser_name,
-        'email'    => $request->adviser_email,
-        'password' => Hash::make($request->adviser_password),
-        'org'      => $organization->org_name,
-        'role'     => 'Adviser',
-    ]);
+    // Check and create Adviser if all fields are filled
+    if (
+        $request->filled('adviser_name') &&
+        $request->filled('adviser_email') &&
+        $request->filled('adviser_password')
+    ) {
+        $adviser = User::create([
+            'name'     => $request->adviser_name,
+            'email'    => $request->adviser_email,
+            'password' => Hash::make($request->adviser_password),
+            'org'      => $organization->org_name,
+            'role'     => 'Adviser',
+        ]);
 
-    event(new Registered($adviser));
+        event(new Registered($adviser));
+    }
 
-    // Create President (if provided)
+    // Check and create President if all fields are filled
     if (
         $request->filled('president_name') &&
         $request->filled('president_email') &&
@@ -107,9 +110,8 @@ public function store(Request $request)
         event(new Registered($president));
     }
 
-    return redirect()->back()->with('success', 'Organization and user accounts created successfully. Please confirm the emails for activation.');
+    return redirect()->back()->with('success', 'Organization and available user accounts created successfully. Please confirm the emails for activation.');
 }
-
 
     // ✅ Update an existing organization
     public function update(Request $request, $id)

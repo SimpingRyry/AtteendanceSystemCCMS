@@ -39,6 +39,8 @@ class LoginController extends Controller
                     return redirect()->intended('/student_dashboard');
                 } elseif ($user->role === 'Super Admin') {
                     return redirect()->intended('/super_dashboard');
+                } elseif ($user->role === 'OSSD') {
+                    return redirect()->intended('/ossd-dashboard');
                 } else {
                     return redirect()->intended('/dashboard_page');
                 }

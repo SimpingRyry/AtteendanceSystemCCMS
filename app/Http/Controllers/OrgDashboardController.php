@@ -59,7 +59,7 @@ public function dashboard()
     $upcomingEvents = Event::where('org', $orgId)
         ->whereDate('event_date', '>=', Carbon::today('Asia/Manila'))
         ->orderBy('event_date')
-        ->select('name', 'event_date')
+        ->select('name', 'event_date','times')
         ->take(3)
         ->get();
 

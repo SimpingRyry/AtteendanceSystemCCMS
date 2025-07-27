@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Event;
 use App\Models\Notification;
+use Illuminate\Pagination\Paginator;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -26,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
 {
+     Paginator::useBootstrapFive();
     View::composer('*', function ($view) {
     if (auth()->check()) {
         $notifs = Notification::where('user_id', auth()->id())
@@ -40,4 +42,6 @@ class AppServiceProvider extends ServiceProvider
     }
 });
 }
+
+
 }

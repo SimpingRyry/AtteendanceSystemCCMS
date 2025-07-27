@@ -32,12 +32,12 @@
     {{-- Sidebar --}}
     @include('layout.sidebar')
 
-    <main>
+<main>
     <div class="container outer-box mt-5 pt-5 pb-4">
         <div class="container inner-glass shadow p-4" id="main_box">
             <!-- Heading -->
             <div class="mb-3">
-                <h2 class="fw-bold" style="color: #232946;">Super Admin Dashboard</h2>
+                <h2 class="fw-bold" style="color: #232946;">OSSD Dashboard</h2>
                 <small style="color: #989797;">Home /</small>
                 <small style="color: #444444;">Dashboard</small>
             </div>
@@ -58,89 +58,36 @@
                 </div>
                 <div class="col-md-3">
                     <div class="card text-center shadow-sm p-3 rounded-4">
-                        <h6 class="text-muted">Users</h6>
-                        <h2>{{ $totalUsers }}</h2>
+                        <h6 class="text-muted">Registered</h6>
+                        <h2>{{ $registeredStudents }}</h2>
                     </div>
                 </div>
                 <div class="col-md-3">
-    <div class="card text-center shadow-sm p-3 rounded-4">
-        <h6 class="text-muted">Total Students</h6>
-        <h2>{{ $totalStudents }}</h2>
-    </div>
-</div>
+                    <div class="card text-center shadow-sm p-3 rounded-4">
+                        <h6 class="text-muted">Total Students</h6>
+                        <h2>{{ $totalStudents }}</h2>
+                    </div>
+                </div>
             </div>
 
             <!-- Charts Row -->
             <div class="row g-4 mb-4">
-                <!-- Organization Activity Chart -->
+                <!-- Events per Org Chart -->
                 <div class="col-lg-6">
                     <div class="card shadow-sm p-3 rounded-4">
-                        <h6 class="mb-3 text-center">Events created per Organization</h6>
+                        <h6 class="mb-3 text-center">Events Created per Organization</h6>
                         <div id="eventsChartData"
-     data-labels='@json(array_keys($eventsPerOrg))'
-     data-values='@json(array_values($eventsPerOrg))'>
-</div>
+                             data-labels='@json(array_keys($eventsPerOrg))'
+                             data-values='@json(array_values($eventsPerOrg))'>
+                        </div>
                         <canvas id="absenteesChart" style="height: 300px;"></canvas>
                     </div>
                 </div>
 
-                <!-- User Registration Trends -->
+                <!-- Upcoming Events Expanded -->
                 <div class="col-lg-6">
-  <div class="card shadow-sm p-3 rounded-4">
-    <h6 class="mb-3 text-center">Student Distribution by Program</h6>
-    <div class="chart-container" style="max-width: 350px; margin: auto;">
-
-    <div id="studentProgramData"
-     data-labels='@json($studentDistribution->keys())'
-     data-values='@json($studentDistribution->values())'>
-</div>
-      <canvas id="studentProgramPieChart" width="300" height="290"></canvas>
-    </div>
-  </div>
-</div>     </div>
-
-            <!-- Table & Events Row -->
-            <div class="row g-4">
-                <!-- Activity Table -->
-                <div class="col-lg-6">
-                    <div class="card shadow-sm p-3 rounded-4">
-                        <h6 class="mb-3 text-center">Recent Activities</h6>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>User</th>
-                                        <th>Role</th>
-                                        <th>Action</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>SuperUser1</td>
-                                        <td>Moderator</td>
-                                        <td>Created Event</td>
-                                        <td>2025-05-10</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>Admin2</td>
-                                        <td>Org Admin</td>
-                                        <td>Updated Organization Info</td>
-                                        <td>2025-05-09</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Upcoming Events -->
-                   <div class="col-lg-6">
- <div class="card shadow-sm p-3 rounded-4" style="min-height: 200px">
-    <h6 class="mb-3 text-center">Upcoming Events</h6>
+                    <div class="card shadow-sm p-3 rounded-4 h-100">
+                        <h6 class="mb-3 text-center">Upcoming Events</h6>
     <ul class="list-group list-group-flush">
       @forelse($upcomingEvents as $event)
         @php
@@ -170,14 +117,57 @@
         <li class="list-group-item text-center">No upcoming events.</li>
       @endforelse
     </ul>
-</div>
+                    </div>
+                </div>
+            </div>
 
-</div>
+            <!-- Recently Added Organizations Table -->
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="card shadow-sm p-3 rounded-4">
+                        <h6 class="mb-3 text-center">Recently Added Organizations</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Organization Name</th>
+                                        <th>Organization Description</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+    @if ($latestOrg)
+    <tr>
+        <td>1</td>
+        <td>{{ $latestOrg->org_name }}</td>
+        <td>{{ $latestOrg->description }}</td>
+
+    </tr>
+    @else
+    <tr>
+        <td colspan="2">No organizations found.</td>
+    </tr>
+    @endif
+</tbody>
+                            </table>
+                        </div>
+
+                        <div class="text-center mt-3" >
+                            <a href="/manage_orgs_page" class="btn btn-outline-primary">
+                                See More <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
     </div>
 </main>
+
+
+
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

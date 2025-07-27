@@ -121,9 +121,11 @@ $unreadCount = Notification::where('user_id', $user->id)
       </div>
 
       <!-- Pagination -->
-      <div class="mt-4">
-        {{ $notifications->withQueryString()->links() }}
-      </div>
+      <div class="d-flex justify-content-center mt-4">
+  <nav>
+    {{ $notifications->links('pagination::bootstrap-5') }}
+  </nav>
+</div>
 
       <!-- Mark All as Read -->
       <form action="" method="POST" class="mt-3">

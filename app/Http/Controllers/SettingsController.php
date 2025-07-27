@@ -93,9 +93,14 @@ public function updateFines(Request $request)
         'late_member' => 'required|numeric|min:0',
         'late_officer' => 'required|numeric|min:0',
         'grace_period_minutes' => 'required|integer|min:0',
+        // Optional validation for time inputs (future-proof)
+        'morning_in' => 'nullable|date_format:H:i',
+        'morning_out' => 'nullable|date_format:H:i',
+        'afternoon_in' => 'nullable|date_format:H:i',
+        'afternoon_out' => 'nullable|date_format:H:i',
     ]);
 
-    $orgName = auth()->user()->org; // Get the org name from the authenticated user
+    $orgName = auth()->user()->org;
 
     $data = [
         'absent_member' => $request->absent_member,
@@ -105,6 +110,14 @@ public function updateFines(Request $request)
         'grace_period_minutes' => $request->grace_period_minutes,
         'updated_at' => now(),
     ];
+
+    // Only include time fields if columns exist (for now, just prepare)
+    $timeFields = ['morning_in', 'morning_out', 'afternoon_in', 'afternoon_out'];
+    foreach ($timeFields as $field) {
+        if ($request->has($field)) {
+            $data[$field] = $request->$field; // Won't error even if column not yet added
+        }
+    }
 
     $existing = DB::table('fine_settings')->where('org', $orgName)->first();
 
@@ -116,7 +129,7 @@ public function updateFines(Request $request)
         DB::table('fine_settings')->insert($data);
     }
 
-    // Store each change in the fine history table
+    // Fine history (only for monetary values)
     $fineTypes = [
         'Absent Fine (Member)' => $request->absent_member,
         'Absent Fine (Officer)' => $request->absent_officer,

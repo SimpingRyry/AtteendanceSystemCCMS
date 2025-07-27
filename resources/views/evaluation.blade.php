@@ -154,15 +154,17 @@
                       <button class="btn btn-sm btn-primary" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#viewModal">
                         <i class="fa fa-eye"></i>
                       </button>
-                      <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#editModal">
+
+                      @if (Auth::user()->role === 'Super Admin' || Auth::user()->role === 'President - Officer' || Auth::user()->role === 'Adviser')
+                       <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#editModal">
                         <i class="fa fa-pen"></i>
                       </button>
-                      <button class="btn btn-sm btn-success send-eval-btn" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#sendEvaluationModal">
-                        <i class="fa fa-paper-plane"></i>
-                      </button>
+                     
                       <form action="" class="d-inline" onsubmit="return confirm('Delete this evaluation?')">
                         <button class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
                       </form>
+                      @endif
+                     
                     </td>
                   </tr>
                 @endforeach

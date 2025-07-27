@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\OrgList;
+use Illuminate\Support\Facades\Auth;
 
 class ScheduleController extends Controller
 {
@@ -38,34 +41,48 @@ class ScheduleController extends Controller
         // Return the generated PDF with streaming (inline display)
         return $pdf->download('Schedule.pdf'); 
     }
-
 public function generateBiometricsSchedule(Request $request)
 {
-    $startDate = \Carbon\Carbon::parse($request->input('start_date'));
-    $endDate = \Carbon\Carbon::parse($request->input('end_date'));
+    $startDate = Carbon::parse($request->input('start_date'));
+    $endDate = Carbon::parse($request->input('end_date'));
 
+    // Retrieve only unregistered students
     $students = Student::where('status', 'Unregistered')
         ->orderBy('name')
         ->get();
 
+    // Chunk students into groups of 10 (10 per day)
+    $chunks = $students->chunk(10);
+
+    // Limit the date range based on number of student chunks
     $dateRange = [];
-    for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
-        $dateRange[] = $date->copy();
+    $maxDaysNeeded = $chunks->count();
+
+    $currentDate = $startDate->copy();
+    while ($currentDate->lte($endDate) && count($dateRange) < $maxDaysNeeded) {
+        $dateRange[] = $currentDate->copy();
+        $currentDate->addDay();
     }
 
-    $chunks = $students->chunk(10); // 10 students per day
+    // Build paged chunks for the view
     $pagedChunks = [];
-
     foreach ($dateRange as $index => $date) {
         $pagedChunks[] = [
             'date' => $date->format('F d, Y'),
-            'students' => $chunks[$index] ?? collect(), // fallback to empty if not enough students
+            'students' => $chunks[$index] ?? collect(),
         ];
     }
 
+    // ✅ Get authenticated user org and fetch the logo from OrgList
+    $authUser = Auth::user();
+    $orgList = OrgList::where('org_name', $authUser->org)->first();
+    $orgLogo = $orgList?->org_logo ?? 'default-logo.png';
+
+    // Generate PDF with passed data
     $pdf = Pdf::loadView('biometrics_schedule', [
         'title' => 'Biometric Registration Schedule',
         'pagedChunks' => $pagedChunks,
+        'orgLogo' => $orgLogo,
     ]);
 
     return $pdf->stream('biometrics_schedule.pdf');

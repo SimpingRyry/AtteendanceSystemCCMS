@@ -45,46 +45,59 @@
         <div class="d-flex flex-column lh-sm text-start">
           <span class="profile-name">{{ $user->name ?? 'No Name' }}</span>
           <small class="profile-role">
-            @php
-              $org = $user->org ?? '';
-              $role = str_replace(' - Officer', '', $user->role) ?? 'No Role';
-              $orgAbbrev = match($org) {
-                'Information Technology Society' => 'ITS',
-                'CCMS Student Government' => 'CCMS SG',
-                default => $org,
-              };
-            @endphp
-            {{ $role }} - {{ $orgAbbrev }}
-          </small>
+    @php
+        $org = $user->org ?? '';
+        $role = str_replace(' - Officer', '', $user->role) ?? 'No Role';
+
+        $orgAbbrev = '';
+        if (!empty($org)) {
+            $orgAbbrev = match($org) {
+                'Information Technology Society' => '- ITS',
+                'CCMS Student Government' => '- CCMS SG',
+                default => '- ' . $org,
+            };
+        }
+    @endphp
+    {{ $role }}{{ $orgAbbrev }}
+</small>
         </div>
       </a>
 
       <!-- Notification Bell -->
-      <div class="dropdown">
-        <a class="nav-link text-white position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="bi bi-bell fs-5"></i>
-          @if($unreadCount > 0)
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-              {{ $unreadCount }}
-              <span class="visually-hidden">unread notifications</span>
-            </span>
-          @endif
-        </a>
+<div class="dropdown">
+  <a class="nav-link text-white position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-bell fs-5"></i>
+    @if($unreadCount > 0)
+      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        {{ $unreadCount }}
+        <span class="visually-hidden">unread notifications</span>
+      </span>
+    @endif
+  </a>
 
-        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" style="min-width: 300px;">
-          @forelse ($notifications as $notif)
-            <li class="dropdown-item small notification-item {{ $notif->read_at ? 'text-muted' : '' }}"
-                data-id="{{ $notif->id }}"
-                style="{{ $notif->read_at ? 'opacity: 0.6;' : '' }}">
-              <strong>{{ $notif->title }}</strong><br>
-              <span>{{ $notif->message }}</span><br>
-              <small class="text-muted">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>
-            </li>
-          @empty
-            <li class="dropdown-item text-muted">No new notifications</li>
-          @endforelse
-        </ul>
-      </div>
+  <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" style="min-width: 300px; max-height: 400px; overflow-y: auto;">
+    @forelse ($notifications as $notif)
+      <li class="dropdown-item small notification-item {{ $notif->read_at ? 'text-muted' : '' }}"
+          data-id="{{ $notif->id }}"
+          style="{{ $notif->read_at ? 'opacity: 0.6;' : '' }}">
+        <strong>{{ $notif->title }}</strong><br>
+        <span>{{ $notif->message }}</span><br>
+        <small class="text-muted">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</small>
+      </li>
+    @empty
+      <li class="dropdown-item text-muted">No new notifications</li>
+    @endforelse
+
+    @if ($notifications->count() >= 5) {{-- or whatever threshold you prefer --}}
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a href="/notification" class="dropdown-item text-center text-primary">
+          See More
+        </a>
+      </li>
+    @endif
+  </ul>
+</div>
     </div>
     
   </div>

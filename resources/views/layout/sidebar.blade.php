@@ -10,7 +10,7 @@
             <img src="{{ asset('images/org_list/' . $org->org_logo) }}" alt="{{ $org->org_name }} Logo"
                  class="rounded-circle mb-3 border border-secondary" width="100" height="100" style="object-fit: cover;">
         @else
-            <img src="{{ asset('images/default.png') }}" alt="Default Org Logo"
+            <img src="{{ asset('images/human.png') }}" alt="Default Org Logo"
                  class="rounded-circle mb-3 border border-secondary" width="100" height="100" style="object-fit: cover;">
         @endif
 
@@ -72,7 +72,7 @@
                 </li>
 
                 <li>
-                    <a href="{{ url('dashboard_page') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('dashboard_page') ? 'active-link' : '' }}">
+                    <a href="{{ url('ossd-dashboard') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('ossd-dashboard') ? 'active-link' : '' }}">
                         <img src="{{ asset('images/dashh_ico.png') }}" class="sidebar-icon"> <span>Dashboard</span>
                     </a>
                 </li>
@@ -114,6 +114,20 @@
 
                              <li><a href="{{ url('officers') }}" class="nav-link text-white {{ request()->is('officers') ? 'active-link' : '' }}"><img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Officers</a></li>
 
+                        </ul>
+                    </div>
+                </li>
+                <li class="mt-3 mb-2">
+                    <div class="small fw-bold text-uppercase core-section">SYSTEM SETTINGS</div>
+                </li>
+                <li>
+                    <a class="nav-link px-3 text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#systemSettings" role="button" aria-expanded="false" aria-controls="systemSettings">
+                        <span><img src="{{ asset('images/system.png') }}" class="sidebar-icon me-2">Settings</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </a>
+                    <div class="collapse" id="systemSettings">
+                        <ul class="navbar-nav ps-3">
+                            <li><a href="{{ url('config') }}" class="nav-link text-white {{ request()->is('config') ? 'active-link' : '' }}"><img src="{{ asset('images/config_ico.png') }}" class="sidebar-icon"> Configure</a></li>
                         </ul>
                     </div>
                 </li>

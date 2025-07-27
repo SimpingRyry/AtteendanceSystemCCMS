@@ -61,7 +61,7 @@
             <!-- Tabs -->
             <ul class="nav nav-tabs mb-3" id="orgTabs">
                 <li class="nav-item">
-                    <a class="nav-link active" data-bs-toggle="tab" href="#manageOrgsTab">Manage Orgs</a>
+                    <a class="nav-link active" data-bs-toggle="tab" href="#manageOrgsTab">Manage Organizations</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="tab" href="#orgHierarchyTab">Organization Hierarchy Configuration</a>
@@ -102,11 +102,11 @@
                                             <td>{{ $i++ }}</td>
                                             <td>{{ $org->org_name }}</td>
                                             <td>
-                                                <img src="{{ asset('images/' . $org->org_logo) }}" alt="Logo" width="50" class="rounded">
+                                                <img src="{{ asset('images/org_list/' . $org->org_logo) }}" alt="Logo" width="50" class="rounded">
                                             </td>
                                             <td class="text-truncate" style="max-width: 200px;">{{ $org->description }}</td>
                                             <td>
-                                                <img src="{{ asset('images/' . $org->bg_image) }}" alt="Background" width="50" class="rounded">
+                                                <img src="{{ asset('images/org_list/' . $org->bg_image) }}" alt="Background" width="50" class="rounded">
                                             </td>
                                             <td>
                                                 <button class="btn btn-sm btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#editOrgModal{{ $org->id }}" title="Edit">
@@ -240,24 +240,22 @@
                             <label class="form-label">Background Image <span class="text-danger">*</span></label>
                             <input type="file" name="bg_image" class="form-control" accept="image/*" required>
                         </div>
-
-                       
                     </div>
 
                     <!-- Step 2 -->
                     <div class="form-step step-2 d-none">
                         <h5>Step 2: Adviser Account</h5>
                         <div class="mb-3">
-                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" name="adviser_name" class="form-control" required>
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="adviser_name" class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Email <span class="text-danger">*</span></label>
-                            <input type="email" name="adviser_email" class="form-control" required>
+                            <label class="form-label">Email</label>
+                            <input type="email" name="adviser_email" class="form-control">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Password <span class="text-danger">*</span></label>
-                            <input type="password" name="adviser_password" class="form-control" required>
+                            <label class="form-label">Password</label>
+                            <input type="password" name="adviser_password" class="form-control">
                         </div>
                     </div>
 
@@ -299,12 +297,13 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="prevStep" disabled>Previous</button>
                     <button type="button" class="btn btn-primary" id="nextStep">Next</button>
-                    <button type="submit" class="btn btn-success d-none" id="submitBtn">Submit</button>
+                    <button type="submit" class="btn btn-success d-none" id="submitBtn">Add Organization</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
 
 @if(session('success'))
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
@@ -350,19 +349,16 @@
     const totalSteps = 4;
 
     function showStep(step) {
-        // Toggle step content
         document.querySelectorAll('.form-step').forEach((el, idx) => {
             el.classList.add('d-none');
             if (idx === step - 1) el.classList.remove('d-none');
         });
 
-        // Toggle step indicators
         for (let i = 1; i <= totalSteps; i++) {
             const indicator = document.getElementById(`stepIndicator${i}`);
             indicator.classList.toggle('active', i === step);
         }
 
-        // Button visibility
         document.getElementById('prevStep').disabled = step === 1;
         document.getElementById('nextStep').classList.toggle('d-none', step === totalSteps);
         document.getElementById('submitBtn').classList.toggle('d-none', step !== totalSteps);
@@ -373,8 +369,9 @@
             currentStep++;
             if (currentStep === totalSteps) {
                 document.getElementById('confirmOrgName').innerText = document.querySelector('[name="org_name"]').value;
-                document.getElementById('confirmAdviserName').innerText = document.querySelector('[name="adviser_name"]').value;
-                document.getElementById('confirmPresidentName').innerText = document.querySelector('[name="president_name"]').value || "Skipped";
+                document.getElementById('confirmAdviserName').innerText = document.querySelector('[name="adviser_name"]').value || "N/A";
+                const presName = document.querySelector('[name="president_name"]').value;
+                document.getElementById('confirmPresidentName').innerText = presName || (document.getElementById('skipPresident').checked ? "Skipped" : "N/A");
             }
             showStep(currentStep);
         }
@@ -387,12 +384,10 @@
         }
     });
 
-    // Toggle president fields
     document.getElementById('skipPresident').addEventListener('change', (e) => {
         document.getElementById('presidentFields').style.display = e.target.checked ? 'none' : 'block';
     });
 
-    // Reset on modal close
     document.getElementById('addOrgModal').addEventListener('hidden.bs.modal', () => {
         currentStep = 1;
         showStep(currentStep);
@@ -401,9 +396,80 @@
         document.getElementById('skipPresident').checked = false;
     });
 
-    // Initialize step
     document.addEventListener('DOMContentLoaded', () => {
         showStep(currentStep);
+          checkMutualExclusivity(); 
+    });
+
+    function checkMutualExclusivity() {
+    const adviserFields = ['adviser_name', 'adviser_email', 'adviser_password'].map(id => document.querySelector(`[name="${id}"]`));
+    const presidentFields = ['president_name', 'president_email', 'president_password'].map(id => document.querySelector(`[name="${id}"]`));
+    const skipPresidentCheckbox = document.getElementById('skipPresident');
+
+    // Adviser input changes
+    adviserFields.forEach(field => {
+        field.addEventListener('input', () => {
+            const adviserFilled = adviserFields.some(f => f.value.trim() !== '');
+            if (adviserFilled) {
+                // Auto-skip and disable president fields
+                skipPresidentCheckbox.checked = true;
+                document.getElementById('presidentFields').style.display = 'none';
+                presidentFields.forEach(f => {
+                    f.value = '';
+                    f.disabled = true;
+                });
+            } else {
+                // Re-enable president fields
+                skipPresidentCheckbox.checked = false;
+                document.getElementById('presidentFields').style.display = 'block';
+                presidentFields.forEach(f => f.disabled = false);
+            }
+        });
+    });
+
+    // President input changes
+    presidentFields.forEach(field => {
+        field.addEventListener('input', () => {
+            const presFilled = presidentFields.some(f => f.value.trim() !== '');
+            if (presFilled) {
+                // Disable adviser fields
+                adviserFields.forEach(f => {
+                    f.value = '';
+                    f.disabled = true;
+                });
+            } else {
+                // Re-enable adviser fields
+                adviserFields.forEach(f => f.disabled = false);
+            }
+        });
+    });
+}
+
+    // Core validation logic
+    document.getElementById('addOrgForm').addEventListener('submit', function(e) {
+        const adviserName = document.querySelector('[name="adviser_name"]').value.trim();
+        const adviserEmail = document.querySelector('[name="adviser_email"]').value.trim();
+        const adviserPass = document.querySelector('[name="adviser_password"]').value.trim();
+
+        const presidentName = document.querySelector('[name="president_name"]').value.trim();
+        const presidentEmail = document.querySelector('[name="president_email"]').value.trim();
+        const presidentPass = document.querySelector('[name="president_password"]').value.trim();
+
+        const skipPresident = document.getElementById('skipPresident').checked;
+
+        const adviserFilled = adviserName || adviserEmail || adviserPass;
+        const presidentFilled = skipPresident || presidentName || presidentEmail || presidentPass;
+
+        if (!adviserFilled && !presidentFilled) {
+            e.preventDefault();
+            alert("Please fill out either Adviser or President details.");
+        } else if (adviserFilled && (!adviserName || !adviserEmail || !adviserPass)) {
+            e.preventDefault();
+            alert("Please complete all Adviser fields or leave them all empty.");
+        } else if (!skipPresident && (presidentFilled && (!presidentName || !presidentEmail || !presidentPass))) {
+            e.preventDefault();
+            alert("Please complete all President fields or check 'Skip adding president account'.");
+        }
     });
 </script>
 @if(session('success'))

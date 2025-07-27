@@ -10,18 +10,27 @@ use App\Models\Evaluation;
 use Illuminate\Support\Str;
 use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\EvaluationAssignment;
 use Illuminate\Support\Facades\Auth;
 
 class EventsController extends Controller
 {
 
-   public function index()
+public function index()
 {
     $orgs = OrgList::all();
-    $evaluationTemplates = Evaluation::all(); // Fetch evaluations
+    $evaluationTemplates = Evaluation::all();
 
-    return view('events', compact('orgs', 'evaluationTemplates'));
+    $org = auth()->user()->org;
+
+    // Get default time settings for the current org
+    $timeSettings = DB::table('fine_settings')
+        ->where('org', $org)
+        ->select('morning_in', 'morning_out', 'afternoon_in', 'afternoon_out')
+        ->first();
+
+    return view('events', compact('orgs', 'evaluationTemplates', 'timeSettings'));
 }
 public function store(Request $request)
 {
