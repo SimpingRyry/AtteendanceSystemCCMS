@@ -253,11 +253,15 @@
                             <label class="form-label">Email</label>
                             <input type="email" name="adviser_email" class="form-control">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" name="adviser_password" class="form-control">
-                        </div>
-                    </div>
+                       <div class="mb-3">
+  <label class="form-label">Password</label>
+  <div class="input-group">
+    <input type="password" name="adviser_password" class="form-control" id="adviserPassword">
+    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('adviserPassword', this)">
+      <i class="bi bi-eye"></i>
+    </button>
+  </div>
+</div>             </div>
 
                     <!-- Step 3 -->
                     <div class="form-step step-3 d-none">
@@ -275,10 +279,15 @@
                                 <label class="form-label">Email</label>
                                 <input type="email" name="president_email" class="form-control">
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Password</label>
-                                <input type="password" name="president_password" class="form-control">
-                            </div>
+                           <div class="mb-3">
+  <label class="form-label">Password</label>
+  <div class="input-group">
+    <input type="password" name="president_password" class="form-control" id="presidentPassword">
+    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('presidentPassword', this)">
+      <i class="bi bi-eye"></i>
+    </button>
+  </div>
+</div>
                         </div>
                     </div>
 
@@ -580,6 +589,23 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+
+        <script>
+function togglePassword(inputId, button) {
+    const input = document.getElementById(inputId);
+    const icon = button.querySelector('i');
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+</script>
 </body>
 <style>
     .step-indicator .circle {

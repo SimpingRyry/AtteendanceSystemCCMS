@@ -155,6 +155,18 @@ $recipients = \App\Models\User::whereIn('org', $targetOrgs)->get()->filter(funct
             ]);
         }
 
+        $advisers = \App\Models\User::whereIn('org', $targetOrgs)
+    ->where('role', 'Adviser')
+    ->get();
+
+foreach ($advisers as $adviser) {
+    \App\Models\Notification::create([
+        'user_id' => $adviser->id,
+        'title' => 'Adviser Notice: Event "' . $event->name . '" Scheduled',
+        'message' => 'Your advised org has an event on ' . $event->event_date . ' at ' . $event->venue,
+    ]);
+}
+
         if (!empty($guestEmails)) {
             $guestUsers = \App\Models\User::whereIn('email', $guestEmails)->get();
 

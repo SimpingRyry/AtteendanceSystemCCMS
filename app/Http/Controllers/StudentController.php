@@ -17,6 +17,7 @@ class StudentController extends Controller
 {
 public function store(Request $request)
 {
+    
     Log::info('Starting user creation', ['request' => $request->all()]);
 
     $request->validate([
