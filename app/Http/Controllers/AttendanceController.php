@@ -323,6 +323,19 @@ public function getAttendance($eventId, $studentId)
 
     return response()->json(null, 404);
 }
+
+
+public function showArchive(Request $request, $event_id)
+{
+    $archiveEvent = Event::findOrFail($event_id);
+    $archiveAttendances = Attendance::with('student', 'event')
+        ->where('event_id', $event_id)
+        ->get();
+
+
+    return view('attendance', compact('archiveEvent', 'archiveAttendances'));
+}
+
 public function liveData()
 {
     $event = Event::whereDate('event_date', now()->toDateString())->first();
@@ -352,5 +365,75 @@ public function liveData()
 
     return response()->json($records);
 }
-    
+    public function fetchArchiveAjax($event_id)
+{
+    $event = Event::findOrFail($event_id);
+    $attendances = Attendance::with('student', 'event')
+        ->where('event_id', $event_id)
+        ->get();
+
+    ob_start(); // start output buffer
+    ?>
+    <div class="table-responsive mt-3">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th rowspan="<?= $event->timeouts == 4 ? 2 : 1 ?>">Student ID</th>
+                    <th rowspan="<?= $event->timeouts == 4 ? 2 : 1 ?>">Name</th>
+                    <th rowspan="<?= $event->timeouts == 4 ? 2 : 1 ?>">Program</th>
+                    <th rowspan="<?= $event->timeouts == 4 ? 2 : 1 ?>">Block</th>
+                    <th rowspan="<?= $event->timeouts == 4 ? 2 : 1 ?>">Event</th>
+                    <th rowspan="<?= $event->timeouts == 4 ? 2 : 1 ?>">Date</th>
+
+                    <?php if($event->timeouts == 4): ?>
+                        <th colspan="2" class="text-center">Morning</th>
+                        <th colspan="2" class="text-center">Afternoon</th>
+                        <th colspan="2" class="text-center">Status</th>
+                    <?php else: ?>
+                        <th>Time-In</th>
+                        <th>Time-Out</th>
+                        <th>Status</th>
+                    <?php endif; ?>
+                </tr>
+                <?php if($event->timeouts == 4): ?>
+                    <tr>
+                        <th>Time-In</th>
+                        <th>Time-Out</th>
+                        <th>Time-In</th>
+                        <th>Time-Out</th>
+                        <th>Morning</th>
+                        <th>Afternoon</th>
+                    </tr>
+                <?php endif; ?>
+            </thead>
+            <tbody>
+                <?php foreach($attendances as $attendance): ?>
+                    <tr>
+                        <td><?= $attendance->student_id ?></td>
+                        <td><?= $attendance->student->name ?? 'N/A' ?></td>
+                        <td><?= $attendance->student->course ?? 'N/A' ?></td>
+                        <td><?= $attendance->student->section ?? 'N/A' ?></td>
+                        <td><?= $attendance->event->name ?></td>
+                        <td><?= $attendance->date ?></td>
+                        <?php if($event->timeouts == 4): ?>
+                            <td><?= $attendance->time_in1 ?></td>
+                            <td><?= $attendance->time_out1 ?></td>
+                            <td><?= $attendance->time_in2 ?></td>
+                            <td><?= $attendance->time_out2 ?></td>
+                            <td><?= $attendance->morning_status ?></td>
+                            <td><?= $attendance->afternoon_status ?></td>
+                        <?php else: ?>
+                            <td><?= $attendance->time_in1 ?></td>
+                            <td><?= $attendance->time_out1 ?></td>
+                            <td><?= $attendance->status ?></td>
+                        <?php endif; ?>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php
+    return response(ob_get_clean());
+}
+
 }

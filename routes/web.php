@@ -307,3 +307,5 @@ Route::get('/officer-roles/{org_name}', function ($org_name) {
 
 Route::get('/fine-history/search/{acadCode}', [SettingsController::class, 'searchFineHistory']);
 Route::get('/attendance/{eventId}/{studentId}', [AttendanceController::class, 'getAttendance']);
+
+ Route::get('/attendance/archive/ajax/{event_id}', [AttendanceController::class, 'fetchArchiveAjax'])->name('attendance.archive.ajax');

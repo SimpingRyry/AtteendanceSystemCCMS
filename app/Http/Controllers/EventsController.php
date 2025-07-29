@@ -373,9 +373,14 @@ public function CurrentEvent()
     $today = Carbon::today('Asia/Manila')->toDateString(); // Gets today's date in 'Y-m-d'
 
     $currentEvent = Event::whereDate('event_date', $today)->first(); // Assumes only one event per day
+    
+    $pastEvents = Event::whereDate('event_date', '<', now())
+        ->where('org', auth()->user()->org)
+        ->get();
 
     return view('attendance', [ // replace 'your_view_name' with actual Blade name
         'currentEvent' => $currentEvent,
+        'pastEvents' => $pastEvents,
        
     ]);
 }

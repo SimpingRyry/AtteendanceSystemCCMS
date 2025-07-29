@@ -31,107 +31,131 @@
     {{-- Sidebar --}}
     @include('layout.sidebar')
 
-    <main>
+<main>
     <div class="container outer-box mt-5 pt-5 pb-4">
-        @if($currentEvent && auth()->user()->org === $currentEvent->org)
-        <div class="container inner-glass shadow p-4" id="main_box" data-timeouts="{{ $currentEvent->timeouts }}">
-        @endif
-            <div class="mb-4">
-                <h2 class="fw-bold" style="color: #232946;">Attendance</h2>
-                <small style="color: #989797;">Monitor /</small>
-                <small style="color: #444444;">Attendance Records</small>
+        <ul class="nav nav-tabs mb-4" id="attendanceTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="today-tab" data-bs-toggle="tab" data-bs-target="#today" type="button" role="tab">Today</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="archive-tab" data-bs-toggle="tab" data-bs-target="#archive" type="button" role="tab">Attendance Archives</button>
+            </li>
+        </ul>
 
+        <div class="tab-content" id="attendanceTabContent">
+            <!-- Today's Attendance Tab -->
+            <div class="tab-pane fade show active" id="today" role="tabpanel">
                 @if($currentEvent && auth()->user()->org === $currentEvent->org)
-                    <div class="alert alert-info mt-3">
-                        <strong>Today's Event:</strong> {{ $currentEvent->name }} at {{ $currentEvent->venue }}
-                    </div>
-                @else
-                    <div class="alert alert-secondary mt-3">
-                        No event scheduled for today.
-                    </div>
+                <div class="container inner-glass shadow p-4" id="main_box" data-timeouts="{{ $currentEvent->timeouts }}">
                 @endif
-            </div>
 
-            @if($currentEvent && auth()->user()->org === $currentEvent->org)
-                <!-- Filter Form -->
-                <form method="GET" class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <label for="program" class="form-label">Filter by Program</label>
-                        <select name="program" id="program" class="form-select">
-                            <option value="">All Programs</option>
-                            <option value="BSIT">BSIT</option>
-                            <option value="BSCS">BSCS</option>
-                            <!-- Add more as needed -->
-                        </select>
+                    <div class="mb-4">
+                        <h2 class="fw-bold" style="color: #232946;">Attendance</h2>
+                        <small style="color: #989797;">Monitor /</small>
+                        <small style="color: #444444;">Attendance Records</small>
+
+                        @if($currentEvent && auth()->user()->org === $currentEvent->org)
+                            <div class="alert alert-info mt-3">
+                                <strong>Today's Event:</strong> {{ $currentEvent->name }} at {{ $currentEvent->venue }}
+                            </div>
+                        @else
+                            <div class="alert alert-secondary mt-3">
+                                No event scheduled for today.
+                            </div>
+                        @endif
                     </div>
-                </form>
 
-                <!-- Attendance Table -->
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="attendanceTable">
-                        <thead class="table-light">
-                                <tr>
-                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Student ID</th>
-                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Name</th>
-                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Program</th>
-                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Block</th>
-                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Event</th>
-                                    <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Date</th>
+                    @if($currentEvent && auth()->user()->org === $currentEvent->org)
+                        <!-- Filter Form -->
+                        <form method="GET" class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label for="program" class="form-label">Filter by Program</label>
+                                <select name="program" id="program" class="form-select">
+                                    <option value="">All Programs</option>
+                                    <option value="BSIT">BSIT</option>
+                                    <option value="BSCS">BSCS</option>
+                                    <!-- Add more as needed -->
+                                </select>
+                            </div>
+                        </form>
+
+                        <!-- Attendance Table -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="attendanceTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Student ID</th>
+                                        <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Name</th>
+                                        <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Program</th>
+                                        <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Block</th>
+                                        <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Event</th>
+                                        <th rowspan="{{ $currentEvent->timeouts == 4 ? 2 : 1 }}">Date</th>
+
+                                        @if($currentEvent->timeouts == 4)
+                                            <th colspan="2" class="text-center">Morning</th>
+                                            <th colspan="2" class="text-center">Afternoon</th>
+                                            <th colspan="2" class="text-center">Status</th>
+                                        @else
+                                            <th>Time-In</th>
+                                            <th>Time-Out</th>
+                                            <th>Status</th>
+                                        @endif
+                                    </tr>
 
                                     @if($currentEvent->timeouts == 4)
-                                        <th colspan="2" class="text-center">Morning</th>
-                                        <th colspan="2" class="text-center">Afternoon</th>
-                                        <th colspan="2" class="text-center">Status</th>
-                                    @else
-                                        <th rowspan="1">Time-In</th>
-                                        <th rowspan="1">Time-Out</th>
-                                        <th rowspan="1">Status</th>
+                                    <tr>
+                                        <th>Time-In</th>
+                                        <th>Time-Out</th>
+                                        <th>Time-In</th>
+                                        <th>Time-Out</th>
+                                        <th>Morning</th>
+                                        <th>Afternoon</th>
+                                    </tr>
                                     @endif
-                                </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Your dynamic data -->
+                                </tbody>
+                            </table>
+                        </div>
 
-                                @if($currentEvent->timeouts == 4)
-                                <tr>
-                                    <th>Time-In</th>
-                                    <th>Time-Out</th>
-                                    <th>Time-In</th>
-                                    <th>Time-Out</th>
-                                    <th>Morning</th>
-                                    <th>Afternoon</th>
-                                </tr>
-                                @endif
-                            </thead>
-                        <tbody>
-                            <!-- Sample Row (replace with dynamic content) -->
-                            @if($currentEvent->timeouts == 4)
-                                <tr>
-                                    
-                                </tr>
-                            @else
-                                <tr>
-                                   
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
+                        <!-- Record Attendance Form -->
+                        
+                    @else
+                        <div class="alert alert-warning mt-4">
+                            <strong>Notice:</strong> Attendance sheet is disabled because there's no event scheduled for today.
+                        </div>
+                    @endif
                 </div>
+            </div>
 
-                <!-- Record Attendance Form -->
-                <form method="POST" action="{{ route('record.attendance') }}" id="recordAttendanceForm">
-                    @csrf
-                    <input type="hidden" name="attendance_data" id="attendance_data">
-                    <button type="submit" class="btn btn-sm btn-primary mt-3">
-                        <i class="fas fa-file-pdf"></i> Record Attendance
-                    </button>
-                </form>
-            @else
-                <!-- Disabled Message -->
-                <div class="alert alert-warning mt-4">
-                    <strong>Notice:</strong> Attendance sheet is disabled because there's no event scheduled for today.
-                </div>
-            @endif
+            <!-- Attendance Archives Tab -->
+         <div class="tab-pane fade" id="archive" role="tabpanel">
+    <div class="container inner-glass shadow p-4">
+        <h4 class="fw-bold mb-3">Attendance Archives</h4>
+        <form method="GET" class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label for="archiveEvent" class="form-label">Select Past Event</label>
+                <select name="archive_event_id" id="archiveEvent" class="form-select">
+                    <option value="">-- Select an Event --</option>
+                    @foreach($pastEvents as $event)
+                        <option value="{{ $event->id }}">
+                            {{ $event->name }} ({{ \Carbon\Carbon::parse($event->event_date)->format('F j, Y') }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        </form>
+
+        <!-- Archive results injected here -->
+        <div id="archiveResults"></div>
+    </div>
+</div>
         </div>
     </div>
 </main>
+
+
 
 @if(session('success'))
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
@@ -149,7 +173,27 @@
   </div>
 </div>
 @endif
-
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    $('#archiveEvent').on('change', function () {
+        const eventId = $(this).val();
+        if (eventId) {
+            $.ajax({
+                url: '/attendance/archive/ajax/' + eventId,
+                type: 'GET',
+                success: function (response) {
+                    $('#archiveResults').html(response);
+                },
+                error: function () {
+                    $('#archiveResults').html('<div class="alert alert-danger">Failed to load archive data.</div>');
+                }
+            });
+        } else {
+            $('#archiveResults').empty();
+        }
+    });
+});
+</script>
 @if(session('success'))
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -254,6 +298,7 @@ setInterval(() => {
         });
 }, 1000);
 </script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
