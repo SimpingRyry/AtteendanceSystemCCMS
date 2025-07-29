@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Models\OrgList;
 use App\Models\Evaluation;
 use Illuminate\Http\Request;
 use App\Models\EvaluationAnswer;
@@ -50,22 +52,52 @@ class EvaluationResponseController extends Controller
 }
 
 
+
 public function summary($assignmentId)
 {
     $assignment = EvaluationAssignment::with(['event', 'evaluation'])->findOrFail($assignmentId);
     $evaluationId = $assignment->evaluation_id;
+    $event = $assignment->event;
     $eventId = $assignment->event_id;
-    Log::info('Evaluation ID: ' . $evaluationId);
-    Log::info('Event ID: ' . $eventId);
-   
-    // Count distinct student respondents for this specific evaluation-event pair
-    $respondentCount = EvaluationAnswer::where('evaluation_id', $evaluationId)
-        ->where('event_id', $eventId)
-        ->distinct('student_id')
-        ->count('student_id');
 
+    // Actual respondents (who answered)
+$respondentCount = EvaluationAnswer::where('evaluation_id', $evaluationId)
+    ->where('event_id', $eventId)
+    ->distinct('student_id')
+    ->count('student_id');
+
+// Step 1: Get the org associated with the event (using org name)
+$eventOrg = OrgList::where('org_name', $event->org)->first();
+
+// Step 2: Get org names (not IDs) — because User.org stores names
+$orgNames = [];
+
+if ($eventOrg) {
+    $orgNames[] = $eventOrg->org_name; // Add the parent org name
+
+    $childOrgNames = OrgList::where('parent_org_id', $eventOrg->id)
+        ->pluck('org_name')
+        ->toArray();
+
+    if (!empty($childOrgNames)) {
+        $orgNames = array_merge($orgNames, $childOrgNames);
+    }
+}
+
+// Step 3: Count members by org name (not ID)
+$totalMembers = User::where('role', 'Member')
+    ->whereIn('org', $orgNames)
+    ->count();
+
+// Format the response text like 3/10 (30%)
+$respondentText = $totalMembers > 0
+    ? "{$respondentCount}/{$totalMembers} (" . round(($respondentCount / $totalMembers) * 100, 2) . "%)"
+    : "{$respondentCount}/0 (0%)";
+
+    // Existing logic: compute question-wise summary
     $questions = EvaluationQuestion::where('evaluation_id', $evaluationId)->get();
     $summary = [];
+    $questionAverages = [];
 
     foreach ($questions as $question) {
         $data = [
@@ -74,49 +106,66 @@ public function summary($assignmentId)
             'text' => $question->question ?? '',
             'responses' => [],
         ];
-        
+
         if ($question->type === 'mcq' && $question->options) {
             $options = is_array($question->options) ? $question->options : [];
-            Log::info('Options:', $question->options);
-            
-        
+
+            $totalScore = 0;
+            $totalResponses = 0;
+
             foreach ($options as $opt) {
+                $optTrimmed = trim($opt);
                 $count = EvaluationAnswer::where([
                         ['evaluation_id', $evaluationId],
                         ['event_id', $eventId],
                         ['question_id', $question->id],
-                        ['answer', trim($opt)],
-                    ])
-                    ->count();
-        
+                        ['answer', $optTrimmed],
+                    ])->count();
+
+                if (is_numeric($optTrimmed)) {
+                    $totalScore += $optTrimmed * $count;
+                    $totalResponses += $count;
+                }
+
                 $data['responses'][] = [
-                    'option' => trim($opt),
+                    'option' => $optTrimmed,
                     'count' => $count,
                 ];
+            }
+
+            if ($totalResponses > 0) {
+                $average = $totalScore / $totalResponses;
+                $data['average'] = round($average, 2);
+                $questionAverages[] = $average;
+            } else {
+                $data['average'] = null;
             }
         } else {
             $count = EvaluationAnswer::where([
                     ['evaluation_id', $evaluationId],
                     ['event_id', $eventId],
                     ['question_id', $question->id],
-                ])
-                ->whereNotNull('answer')
-                ->count();
-        
-            $data['responses'][] = [
-                'answered' => $count,
-            ];
+                ])->whereNotNull('answer')->count();
+
+            $data['responses'][] = ['answered' => $count];
         }
 
         $summary[] = $data;
     }
 
+    $overallRating = count($questionAverages) > 0
+        ? round(array_sum($questionAverages) / count($questionAverages), 2)
+        : null;
+
     return response()->json([
         'evaluation_title' => $assignment->evaluation->title,
-        'event_name' => $assignment->event->name ?? 'N/A',
+        'event_name' => $event->name ?? 'N/A',
         'respondent_count' => $respondentCount,
+        'respondent_text' => $respondentText,
+        'overall_rating' => $overallRating,
         'summary' => $summary,
     ]);
 }
+
 
 }

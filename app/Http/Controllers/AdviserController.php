@@ -8,27 +8,35 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Validator;
+use App\Models\User;
+use App\Models\Setting;
 
 class AdviserController extends Controller
 {
-    public function index()
-    {
-        $advisers = Adviser::all(); // Fetch all advisers
-        $org_list = $org_list = OrgList::all();
+public function index()
+{
+    $currentterm = Setting::where('key', 'academic_term')->value('value');
 
-        return view('advisers', compact('advisers','org_list')); // Make sure this file exists: resources/views/advisers.blade.php
-    }
+    $advisers = User::where('role', 'Adviser')
+                    ->where('term', $currentterm)
+                    ->get();
+
+    $org_list = OrgList::all();
+
+    return view('advisers', compact('advisers', 'org_list'));
+}
+
+
 
 public function store(Request $request)
 {
     $validator = Validator::make($request->all(), [
         'name'         => 'required|string|max:255',
-        'email'        => 'required|email|unique:adviser,email',
+        'email'        => 'required|email|unique:users,email',
         'password'     => 'required|min:6',
         'organization' => 'required|string',
     ]);
 
-    // Handle validation errors
     if ($validator->fails()) {
         if ($validator->errors()->has('email')) {
             return redirect()->back()->with('error', 'Email already exists')->withInput();
@@ -37,17 +45,23 @@ public function store(Request $request)
         return redirect()->back()->withErrors($validator)->withInput();
     }
 
-    // Create adviser
-    $adviser = Adviser::create([
-        'name'         => $request->name,
-        'email'        => $request->email,
-        'password'     => Hash::make($request->password),
-        'org'          => $request->organization,
+    // Get the current academic term
+    $term = Setting::where('key', 'academic_term')->value('value');
+
+    // Create user (adviser)
+    $user = User::create([
+        'name'     => $request->name,
+        'email'    => $request->email,
+        'password' => Hash::make($request->password),
+        'org'      => $request->organization,
+        'role'     => 'Adviser',
+        'term'     => $term, // add the term here
     ]);
 
-    // Fire the Registered event
-    event(new Registered($adviser));
+    event(new Registered($user));
 
     return redirect()->back()->with('success', 'Adviser added successfully!');
 }
+
+
 }

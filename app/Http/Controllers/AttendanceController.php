@@ -24,13 +24,22 @@ public function store(Request $request)
 
     $existingIds = [];
 
-    // === Helper to check if student is officer in the event org ===
     $isOfficerForOrg = function ($studentId, $org) use ($acadTerm) {
         return User::where('student_id', $studentId)
             ->where('term', $acadTerm)
             ->where('org', $org)
             ->where('role', 'like', '%- Officer')
             ->exists();
+    };
+
+    $isParentOrg = function ($org) {
+        return \App\Models\OrgList::where('name', $org)->whereNull('parent_id')->exists();
+    };
+
+    $getChildOrgs = function ($org) {
+        return \App\Models\OrgList::whereHas('parent', function ($q) use ($org) {
+            $q->where('name', $org);
+        })->pluck('name')->toArray();
     };
 
     foreach ($attendanceData as $record) {
@@ -47,16 +56,30 @@ public function store(Request $request)
         $fineSettings = FineSetting::where('org', $eventOrg)->first();
         if (!$fineSettings) continue;
 
-        $isOfficer = $isOfficerForOrg($record['student_id'], $eventOrg);
-        $studentOrg = $eventOrg === 'CCMS Student Government'
-            ? $eventOrg
-            : User::where('student_id', $record['student_id'])->where('term', $acadTerm)->value('org');
+        $studentOrg = User::where('student_id', $record['student_id'])
+            ->where('term', $acadTerm)
+            ->value('org') ?? $eventOrg;
 
-        $getFineAmount = function ($status) use ($fineSettings, $isOfficer) {
+        $isParent = $isParentOrg($eventOrg);
+        $childOrgs = $isParent ? $getChildOrgs($eventOrg) : [];
+
+        $isOfficer = $isParent
+            ? $isOfficerForOrg($record['student_id'], $eventOrg)
+            : $isOfficerForOrg($record['student_id'], $eventOrg);
+
+        $applyParentFine = $isParent && in_array($studentOrg, $childOrgs) && !$isOfficer;
+
+        $getFineAmount = function ($status) use ($fineSettings, $isOfficer, $applyParentFine) {
             if ($isOfficer) {
                 return match ($status) {
                     'Late' => $fineSettings->late_officer,
                     'Absent' => $fineSettings->absent_officer,
+                    default => 0,
+                };
+            } elseif ($applyParentFine) {
+                return match ($status) {
+                    'Late' => $fineSettings->late_member,
+                    'Absent' => $fineSettings->absent_member,
                     default => 0,
                 };
             } else {
@@ -87,7 +110,19 @@ public function store(Request $request)
             }
         } else {
             $status = strtolower($record['status']);
-            if ($status === 'late' || $status === 'absent') {
+            $shouldSkipLateFine = false;
+
+            if ($status === 'late') {
+                $attendance = Attendance::where('student_id', $record['student_id'])
+                    ->whereDate('created_at', $record['date'])
+                    ->first();
+
+                if ($attendance && !is_null($attendance->time_in1) && is_null($attendance->time_out1)) {
+                    $shouldSkipLateFine = true;
+                }
+            }
+
+            if (($status === 'late' && !$shouldSkipLateFine) || $status === 'absent') {
                 $fineAmount = $getFineAmount(ucfirst($status));
                 Transaction::create([
                     'student_id' => $record['student_id'],
@@ -115,18 +150,31 @@ public function store(Request $request)
         $fineSettings = FineSetting::where('org', $eventOrg)->first();
         if (!$eventOrg || !$fineSettings) return;
 
-        $allOrgUsers = $eventOrg === 'CCMS Student Government'
-            ? User::where('term', $acadTerm)->get()
+        $isParent = $isParentOrg($eventOrg);
+        $childOrgs = $isParent ? $getChildOrgs($eventOrg) : [];
+
+        $allOrgUsers = $isParent
+            ? User::whereIn('org', $childOrgs)->orWhere('org', $eventOrg)->where('term', $acadTerm)->get()
             : User::where('org', $eventOrg)->where('term', $acadTerm)->get();
 
         foreach ($allOrgUsers as $user) {
             if (in_array($user->student_id, $existingIds)) continue;
 
-            $isOfficer = $isOfficerForOrg($user->student_id, $eventOrg);
-            $getFineAmount = function ($status) use ($fineSettings, $isOfficer) {
+            $isOfficer = $isParent
+                ? $isOfficerForOrg($user->student_id, $eventOrg)
+                : $isOfficerForOrg($user->student_id, $eventOrg);
+
+            $applyParentFine = $isParent && in_array($user->org, $childOrgs) && !$isOfficer;
+
+            $getFineAmount = function ($status) use ($fineSettings, $isOfficer, $applyParentFine) {
                 if ($isOfficer) {
                     return match ($status) {
                         'Absent' => $fineSettings->absent_officer,
+                        default => 0,
+                    };
+                } elseif ($applyParentFine) {
+                    return match ($status) {
+                        'Absent' => $fineSettings->absent_member,
                         default => 0,
                     };
                 } else {
@@ -255,6 +303,26 @@ public function store(Request $request)
     return redirect()->back()->with('success', 'Attendance fines recorded successfully, including absentees.');
 }
 
+public function getAttendance($eventId, $studentId)
+{
+ $attendance = Attendance::where('event_id', $eventId)
+        ->where('student_id', $studentId)
+        ->first();
+
+    if ($attendance) {
+        return response()->json([
+            'time_in1' => $attendance->time_in1,
+            'time_out1' => $attendance->time_out1,
+            'time_in2' => $attendance->time_in2,
+            'time_out2' => $attendance->time_out2,
+            'status' => $attendance->status,
+            'morning_status' => $attendance->morning_status,
+            'afternoon_status' => $attendance->afternoon_status,
+        ]);
+    }
+
+    return response()->json(null, 404);
+}
 public function liveData()
 {
     $event = Event::whereDate('event_date', now()->toDateString())->first();

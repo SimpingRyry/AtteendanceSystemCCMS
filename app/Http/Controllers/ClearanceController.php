@@ -17,28 +17,60 @@ class ClearanceController extends Controller
 
 public function index()
 {
-    $authOrg = Auth::user()->org;
+    $authUser = Auth::user();
+    $authOrgName = $authUser->org;
+    $userRole = $authUser->role;
 
-    // Get all users with studentList and transactions belonging to the user's org
-    $students = User::whereHas('studentList')
+    // Get the org record including its children
+    $org = OrgList::where('org_name', $authOrgName)->with('children')->first();
+
+    // Get the names of all children orgs (for parent org view)
+    $childOrgNames = $org?->children->pluck('org_name')->toArray() ?? [];
+
+    // Determine if parent org (has children)
+    $isParentOrg = !empty($childOrgNames);
+
+    $studentsQuery = User::query();
+
+    if ($userRole !== 'Super Admin') {
+        if ($isParentOrg) {
+            // If current org is a parent: fetch members from all child orgs
+            $studentsQuery->whereIn('org', $childOrgNames)
+                          ->where('role', 'Member');
+        } else {
+            // Otherwise, fetch members from the current (child) org
+            $studentsQuery->where('org', $authOrgName)
+                          ->where('role', 'Member');
+        }
+    } else {
+        // Super Admin: show all with student list
+        $studentsQuery->whereHas('studentList');
+    }
+
+    // Fetch the students along with transactions tied to the current org (not children)
+    $students = $studentsQuery
         ->with([
             'studentList',
-            'transactions' => function ($query) use ($authOrg) {
-                $query->where('org', $authOrg); // Filter transactions by auth org
+            'transactions' => function ($query) use ($authOrgName) {
+                $query->where('org', $authOrgName);
             }
         ])
         ->get()
         ->unique('student_id');
 
-    // Get all organization names from org_list table
+    // For filters or dropdowns
     $organizations = OrgList::pluck('org_name');
-
-    // Get all distinct courses and sections from student_list table
     $courses = Student::distinct()->pluck('course');
     $sections = Student::distinct()->pluck('section');
 
     return view('clearance', compact('students', 'organizations', 'courses', 'sections'));
 }
+
+
+
+
+
+
 public function generate($id)
 {
     // Get current academic term from settings

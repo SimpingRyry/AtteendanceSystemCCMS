@@ -19,13 +19,27 @@ class EvaluationController extends Controller
     // ----------------------------------------------
     // LIST
     // ----------------------------------------------
-    public function index()
-    {
-        $evaluations = Evaluation::latest()->get();
-        $eventNames = Event::pluck('name', 'id'); // Fixed: Use id=>name pair
+public function index()
+{
+    $user = Auth::user();
+    $org = $user->org;
 
-        return view('evaluation', compact('evaluations', 'eventNames'));
-    }
+    // Evaluation assignments (for "Responses" tab)
+    $assignments = EvaluationAssignment::with(['evaluation', 'event'])
+        ->whereHas('event', function ($query) use ($org) {
+            $query->where('org', $org);
+        })
+        ->latest()
+        ->get();
+
+    // Evaluations (for "Evaluations" tab)
+    $evaluations = Evaluation::latest()->get();
+
+    // Event names (for dropdown)
+    $eventNames = Event::pluck('name', 'id'); // [id => name]
+
+    return view('evaluation', compact('assignments', 'evaluations', 'eventNames'));
+}
 
     public function create()
     {
@@ -97,13 +111,11 @@ class EvaluationController extends Controller
         // Fetch the event to get 'name' and 'course'
       
         // Save evaluation with event name and course
-        $evaluation = Evaluation::create([
-           
-              // store event name as string
-            // store course as string
-            'title'       => $request->title,
-            'description' => $request->description,
-        ]);
+       $evaluation = Evaluation::create([
+    'title'       => $request->title,
+    'description' => $request->description,
+    'created_by'  => Auth::user()->name, // 👈 insert the current user's name
+]);
 
         $questions = json_decode($request->questions_json, true);
 

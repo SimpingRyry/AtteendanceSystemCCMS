@@ -12,8 +12,11 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use App\Models\FineSetting;
+use App\Models\Transaction;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\AttendanceController;
 
 
 /*
@@ -30,6 +33,7 @@ use App\Http\Controllers\DeviceController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::get('/attendance/{eventId}/{studentId}', [AttendanceController::class, 'getAttendance']);
 
 
 Route::post('/device/name/{name}/mute', [DeviceController::class, 'toggleMuteByName']);
@@ -202,7 +206,7 @@ Route::post('/scan', function (Request $request) {
     // ✅ Time-In Logic
     if (is_null($existing->$timeInField)) {
         $refTime = isset($times[$timeIndex]) ? Carbon::parse($times[$timeIndex], 'Asia/Manila') : null;
-        $onTimeCutoff = $refTime?->copy()->addMinutes(15); // 5-minute "On Time" window
+        $onTimeCutoff = $refTime?->copy()->addMinutes(15); // 15-minute grace
 
         if ($refTime && $onTimeCutoff) {
             $existing->$timeInField = $now->format('H:i');
@@ -219,6 +223,39 @@ Route::post('/scan', function (Request $request) {
             $existing->status_morning = $statusMorning;
             $existing->status_afternoon = $statusAfternoon;
             $existing->save();
+
+            // ✅ Auto-Fine Logic (Late)
+            $fineSettings = FineSetting::where('org', $event->org)->first();
+if ($fineSettings && $status === 'Late') {
+    // Get the setting row with academic_term key
+    $setting = Setting::where('key', 'academic_term')->first();
+    
+    $term = $setting->value ?? 'Unknown Term';
+    $acadCode = $setting->acad_code ?? 'Unknown Code';
+
+    // Check if student is officer for this term
+$isOfficer = User::where('student_id', $student->id_number)
+    ->where('term', $term)
+    ->where('org', $event->org) // ✅ add org condition here
+    ->where('role', 'like', '%- Officer')
+    ->exists();
+
+$fineAmount = $isOfficer ? $fineSettings->late_officer : $fineSettings->late_member;
+
+if ($fineAmount > 0) {
+    Transaction::create([
+        'student_id'       => $student->id_number,
+        'event'            => $event->name,
+        'transaction_type' => 'FINE',
+        'fine_amount'      => $fineAmount,
+        'org'              => $event->org,
+        'date'             => $today,
+        'acad_term'        => $term,
+        'acad_code'        => $acadCode,
+    ]);
+}
+}
+
 
             return response()->json([
                 'message' => 'Time-in recorded',
@@ -274,15 +311,6 @@ Route::post('/scan', function (Request $request) {
         'message' => 'Already recorded for this session.',
         'student' => $student->name,
         'image' => $image
-    ]);
-});
-Route::get('/event', function () {
-    $today = Carbon::now('Asia/Manila')->toDateString();
-
-    $event = Event::whereDate('event_date', $today)->first();
-
-    return response()->json([
-        'event_name' => $event?->name ?? 'Untitled Event'
     ]);
 });
 

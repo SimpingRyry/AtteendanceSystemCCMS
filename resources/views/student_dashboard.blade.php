@@ -70,7 +70,8 @@
         <div id="upcomingEventsJson">{!! json_encode($upcomingEvents->map(function($e){
           return [
             'title' => $e->name,
-            'date' => \Carbon\Carbon::parse($e->date)->format('F d, Y')
+            'date' => \Carbon\Carbon::parse($e->event_date)->format('F d, Y'),
+            'times' => json_decode($e->times, true) // Assuming times is stored as a JSON array
           ];
         })) !!}</div>
       </div>
@@ -124,7 +125,7 @@
       <!-- Tables -->
       <div class="row g-4">
         <div class="col-lg-6">
-          <div class="card shadow-sm p-3 rounded-4"style="min-height: 200px">
+          <div class="card shadow-sm p-3 rounded-4"style="min-height: 245px">
             <h6 class="mb-3 text-center">Recent Payments</h6>
             <div class="table-responsive">
               <table class="table table-hover">
@@ -194,16 +195,61 @@ eventsList.innerHTML = "";
 if (upcomingEvents.length === 0) {
   eventsList.innerHTML = `<li class="list-group-item text-center text-muted">No upcoming events.</li>`;
 } else {
-  upcomingEvents.forEach(event => {
-    const badgeColor = "primary"; // default color for all events
+  upcomingEvents.forEach((event, index) => {
+    const eventDate = new Date(event.date);
+    const formattedDate = eventDate.toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric'
+    });
 
-    const listItem = `<li class="list-group-item d-flex justify-content-between align-items-center">
-      ${event.title}
-      <span class="badge bg-${badgeColor} rounded-pill">${event.date}</span>
-    </li>`;
+    let startTime = 'N/A';
+    try {
+      const times = event.times;
+      if (times.length > 0) {
+        const [hours, minutes] = times[0].split(':');
+        const timeObj = new Date();
+        timeObj.setHours(parseInt(hours));
+        timeObj.setMinutes(parseInt(minutes));
+        startTime = timeObj.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
+      }
+    } catch (e) {
+      console.error("Invalid time format:", event.times);
+    }
+
+    let badgeColor = 'secondary';
+    if (index === 0) badgeColor = 'primary';
+    else if (index === 1) badgeColor = 'success';
+    else if (index === 2) badgeColor = 'warning text-dark';
+
+    const listItem = `
+      <li class="list-group-item d-flex justify-content-between align-items-start flex-column flex-md-row">
+        <div>
+          <strong>${event.title}</strong><br>
+          <small class="text-muted">${formattedDate}</small>
+        </div>
+        <span class="badge bg-${badgeColor} rounded-pill align-self-md-center mt-2 mt-md-0">${startTime}</span>
+      </li>
+    `;
+
     eventsList.innerHTML += listItem;
   });
+
+  // Add the See More button
+  const seeMoreItem = `
+    <li class="list-group-item text-center">
+      <a href="/events" class="btn btn-outline-primary btn-sm ">
+        See More <i class="bi bi-arrow-right-circle"></i>
+      </a>
+    </li>
+  `;
+  eventsList.innerHTML += seeMoreItem;
 }
+
 
  new Chart(document.getElementById('myAttendanceChart').getContext('2d'), {
   type: 'bar',

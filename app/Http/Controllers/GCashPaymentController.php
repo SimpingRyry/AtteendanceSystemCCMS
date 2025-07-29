@@ -3,17 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 
 class GCashPaymentController extends Controller
 {
     public function createSource(Request $request)
-    {
-        $request->validate([
-            'amount' => 'required|numeric|min:21'
-        ], [
-            'amount.min' => 'Minimum GCash payment amount is ₱21.'
-        ]);
+{
+    $request->validate([
+        'amount' => 'required|numeric|min:1'
+    ]);
 
         $amountInCentavos = $request->amount * 100;
 
@@ -32,10 +31,9 @@ class GCashPaymentController extends Controller
                 ]
             ]);
 
-        if ($response->failed()) {
-
-            return back()->with('error', 'Failed to initiate GCash payment.');
-        }
+    if ($response->failed()) {
+        return back()->with('error', 'Failed to initiate GCash payment.');
+    }
 
         $source = $response->json();
 

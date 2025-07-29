@@ -6,19 +6,32 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\OrgList;
+use App\Models\Evaluation;
 use Illuminate\Support\Str;
 use App\Models\Notification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\EvaluationAssignment;
 use Illuminate\Support\Facades\Auth;
 
 class EventsController extends Controller
 {
 
-    public function index()
-    {
-         $orgs = OrgList::all();
-        return view('events',compact('orgs')); // Blade view
-    }
+public function index()
+{
+    $orgs = OrgList::all();
+    $evaluationTemplates = Evaluation::all();
+
+    $org = auth()->user()->org;
+
+    // Get default time settings for the current org
+    $timeSettings = DB::table('fine_settings')
+        ->where('org', $org)
+        ->select('morning_in', 'morning_out', 'afternoon_in', 'afternoon_out')
+        ->first();
+
+    return view('events', compact('orgs', 'evaluationTemplates', 'timeSettings'));
+}
 public function store(Request $request)
 {
     $request->validate([
@@ -33,9 +46,9 @@ public function store(Request $request)
         'guests' => 'nullable|string',
         'involved_students' => 'required|in:All,Members,Officers',
         'attached_memo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        'evaluation_template' => 'required|exists:evaluation,id',
     ]);
 
-    // ✅ Determine time slots
     $times = [];
     if ($request->timeouts == 2) {
         $times = [$request->half_start, $request->half_end];
@@ -48,7 +61,6 @@ public function store(Request $request)
         ];
     }
 
-    // ✅ Handle repeat dates
     $dates = [$request->event_date];
     if (!empty($request->repeat_dates)) {
         $extraDates = array_map('trim', explode(',', $request->repeat_dates));
@@ -57,11 +69,8 @@ public function store(Request $request)
 
     $user = auth()->user();
     $role = $user->role ?? null;
-
-    // ✅ Override org if Super Admin
     $organization = $role === 'Super Admin' ? $request->organization : $user->org;
 
-    // ✅ Determine course value
     $course = null;
     if ($role === 'Super Admin') {
         $course = 'MAIN-' . $request->course;
@@ -73,13 +82,11 @@ public function store(Request $request)
         $course = 'All';
     }
 
-    // ✅ Handle guests
     $guestEmails = [];
     if (!empty($request->guests)) {
         $guestEmails = array_filter(array_map('trim', explode(',', $request->guests)));
     }
 
-    // ✅ Handle attached memo image
     $memoFilename = null;
     if ($request->hasFile('attached_memo')) {
         $image = $request->file('attached_memo');
@@ -87,7 +94,6 @@ public function store(Request $request)
         $image->move(public_path('images'), $memoFilename);
     }
 
-    // ✅ Process each event date
     foreach ($dates as $date) {
         $existingEvent = Event::where('event_date', $date)
             ->when($request->venue, function ($query) use ($request) {
@@ -101,7 +107,6 @@ public function store(Request $request)
             ])->withInput();
         }
 
-        // ✅ Create event record
         $event = Event::create([
             'name' => $request->name,
             'venue' => $request->venue,
@@ -116,32 +121,32 @@ public function store(Request $request)
             'attached_memo' => $memoFilename,
         ]);
 
-        // ✅ Get target users
+        EvaluationAssignment::create([
+            'event_id' => $event->id,
+            'evaluation_id' => $request->evaluation_template,
+        ]);
+
         $involved = $request->involved_students;
 
-        if ($organization === 'CCMS Student Government' && $involved === 'All') {
-            // Notify all users regardless of org
-            $recipients = \App\Models\User::where(function ($query) {
-                $query->where('role', 'LIKE', '%officer%')
-                      ->orWhereRaw('LOWER(role) = ?', ['member']);
-            })->get();
-        } else {
-            // Notify based on org + involvement
-            $recipients = \App\Models\User::where('org', $organization)->get();
+       $targetOrgs = [$organization];
 
-            $recipients = $recipients->filter(function ($user) use ($involved) {
-                if ($involved === 'All') {
-                    return strtolower($user->role) === 'member' || stripos($user->role, 'officer') !== false;
-                } elseif ($involved === 'Members') {
-                    return strtolower($user->role) === 'member';
-                } elseif ($involved === 'Officers') {
-                    return stripos($user->role, 'officer') !== false;
-                }
-                return false;
-            });
-        }
+if (in_array($involved, ['All', 'Members'])) {
+    $orgModel = \App\Models\OrgList::where('org_name', $organization)->first();
+    $childOrgs = $orgModel ? $orgModel->children->pluck('org_name')->toArray() : [];
+    $targetOrgs = array_merge($targetOrgs, $childOrgs);
+}
 
-        // ✅ Notify internal users
+// Fetch users based on involved type and selected org scope
+$recipients = \App\Models\User::whereIn('org', $targetOrgs)->get()->filter(function ($user) use ($involved) {
+    $role = strtolower($user->role);
+    return match ($involved) {
+        'All'     => $role === 'member' || str_contains($role, 'officer'),
+        'Members' => $role === 'member',
+        'Officers' => str_contains($role, 'officer'),
+        default   => false,
+    };
+});
+
         foreach ($recipients as $user) {
             \App\Models\Notification::create([
                 'user_id' => $user->id,
@@ -150,7 +155,18 @@ public function store(Request $request)
             ]);
         }
 
-        // ✅ Notify guests
+        $advisers = \App\Models\User::whereIn('org', $targetOrgs)
+    ->where('role', 'Adviser')
+    ->get();
+
+foreach ($advisers as $adviser) {
+    \App\Models\Notification::create([
+        'user_id' => $adviser->id,
+        'title' => 'Adviser Notice: Event "' . $event->name . '" Scheduled',
+        'message' => 'Your advised org has an event on ' . $event->event_date . ' at ' . $event->venue,
+    ]);
+}
+
         if (!empty($guestEmails)) {
             $guestUsers = \App\Models\User::whereIn('email', $guestEmails)->get();
 
@@ -164,7 +180,7 @@ public function store(Request $request)
         }
     }
 
-    return redirect()->back()->with('success', 'Events created and notifications sent successfully!');
+    return redirect()->back()->with('success', 'Events created and evaluation assigned successfully!');
 }
 
 
@@ -174,11 +190,36 @@ public function store(Request $request)
 public function fetchEvents()
 {
     $user = Auth::user();
-    $userOrg = strtolower(trim($user->org));
+    $userOrgName = strtolower(trim($user->org));
     $userRole = strtolower($user->role);
 
-    $events = Event::all(); // fetch all and filter manually
+    // Get user's org record
+    $userOrg = OrgList::whereRaw('LOWER(TRIM(org_name)) = ?', [$userOrgName])->first();
 
+    if (!$userOrg) {
+        return response()->json([]); // No org, no events
+    }
+
+    $userOrgId = $userOrg->id;
+
+    // ✅ Get all orgs the user should access:
+    // If parent, only self
+    // If child, self + parent (if parent has "all" events)
+
+    $accessibleOrgIds = [$userOrgId];
+
+    if ($userOrg->parent_org_id) {
+        // If this is a child org
+        $accessibleOrgIds[] = $userOrg->parent_org_id;
+    }
+
+    // Get accessible org names
+    $accessibleOrgNames = OrgList::whereIn('id', $accessibleOrgIds)
+        ->pluck('org_name')
+        ->map(fn($name) => strtolower(trim($name)))
+        ->toArray();
+
+    $events = Event::all();
     $calendarEvents = [];
 
     foreach ($events as $event) {
@@ -187,44 +228,41 @@ public function fetchEvents()
         $times = json_decode($event->times, true);
         $guests = json_decode($event->guests, true);
 
-        // ✅ Special case: CCMS Student Government & All — show to all
-        if ($eventOrg === 'ccms student government' && $involved === 'all') {
-            // no org/role filtering
-        }
-        // ✅ CCMS Student Government & Officers — only its officers
-        elseif ($eventOrg === 'ccms student government' && $involved === 'officers') {
-            if ($userOrg !== 'ccms student government' || stripos($user->role, 'officer') === false) {
-                continue;
-            }
-        }
-        // ✅ CCMS Student Government & Members — only its members
-        elseif ($eventOrg === 'ccms student government' && $involved === 'members') {
-            if ($userOrg !== 'ccms student government' || $userRole !== 'member') {
-                continue;
-            }
-        }
-        // ✅ All other orgs — match by org and role
-        elseif ($eventOrg !== $userOrg) {
+        // ✅ Skip if not from accessible orgs
+        if (!in_array($eventOrg, $accessibleOrgNames)) {
             continue;
-        } else {
-            if ($involved === 'members' && $userRole !== 'member') {
-                continue;
-            }
-
-            if ($involved === 'officers' && stripos($user->role, 'officer') === false) {
-                continue;
-            }
-
-            if (!in_array($involved, ['all', 'members', 'officers'])) {
-                continue;
-            }
         }
 
-        // ✅ Build calendar event
+        // ✅ Child org user: only see parent events if "involved" is "all"
+        if (
+            $eventOrg !== $userOrgName && // means event is from parent
+            $userOrg->parent_org_id &&    // this user is from child org
+            $involved !== 'all'
+        ) {
+            continue;
+        }
+
+        // ✅ Role restrictions
+        if ($involved === 'members' && $userRole !== 'member') {
+            continue;
+        }
+
+        if ($involved === 'officers' && stripos($user->role, 'officer') === false) {
+            continue;
+        }
+
+        if (!in_array($involved, ['all', 'members', 'officers'])) {
+            continue;
+        }
+
+        // ✅ Format for calendar
         $calendarEvents[] = [
+            'id' => $event->id,
             'title' => $event->name,
             'start' => $event->event_date . 'T' . $times[0],
-            'end' => $event->timeouts == 4 ? $event->event_date . 'T' . $times[3] : $event->event_date . 'T' . $times[1],
+            'end' => $event->timeouts == 4
+                ? $event->event_date . 'T' . $times[3]
+                : $event->event_date . 'T' . $times[1],
             'extendedProps' => [
                 'id' => $event->id,
                 'org' => $event->org,
@@ -233,7 +271,7 @@ public function fetchEvents()
                 'times' => $times,
                 'guests' => $guests,
                 'description' => $event->description,
-                'attached_memo' => $event->attached_memo, // ✅ include attached memo
+                'attached_memo' => $event->attached_memo,
                 'attached_memo_url' => $event->attached_memo
                     ? asset('images/' . $event->attached_memo)
                     : null,
@@ -244,7 +282,6 @@ public function fetchEvents()
 
     return response()->json($calendarEvents);
 }
-
 
 
     

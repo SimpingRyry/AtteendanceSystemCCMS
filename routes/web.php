@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use App\Models\OrgList;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Auth;
@@ -14,9 +16,9 @@ use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\EventsController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\MemberController;
+
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AdviserController;
-
 use App\Http\Controllers\OfficerController;
 use App\Http\Controllers\OrgListController;
 use App\Http\Controllers\PaymentController;
@@ -30,11 +32,10 @@ use App\Http\Controllers\ClearanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\GCashPaymentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrgDashboardController;
-use App\Http\Controllers\Auth\VerificationController;
-use App\Http\Controllers\StudentEvaluationController;
-use App\Http\Controllers\EvaluationResponseController;
+use App\Http\Controllers\OssdDashboardController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -80,11 +81,17 @@ Route::get('/evaluation', function () {
 
 
 Route::get('/super_dashboard', [DashboardController::class, 'index']);
+Route::get('/ossd-dashboard', [OssdDashboardController::class, 'index']);
+
 Route::get('/template', function () {
     return view('schedTemplate');
 });
 Route::get('/payment_page', function () {
     return view('payment_page');
+});
+
+Route::get('/notification', function () {
+    return view('notification');
 });
 Route::get('/payment', [PaymentController::class, 'index'])->name('payments.index');
 
@@ -103,12 +110,14 @@ Route::post('/events/update', [EventsController::class, 'update'])->name('events
 
 
 // Route to fetch all events from the database (GET request)
-Route::get('/events', [EventsController::class, 'index']);
+Route::get('/events', [EventsController::class, 'index'])->name('events.index');
 
 
 Route::get('/api/events', [EventsController::class, 'fetchEvents'])->name('events.fetch');
 
-use App\Http\Controllers\GCashPaymentController;
+use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\StudentEvaluationController;
+use App\Http\Controllers\EvaluationResponseController;
 
 // Route that receives the POST form when user enters payment amount
 Route::post('/pay-with-gcash', [GCashPaymentController::class, 'createSource'])->name('gcash.pay');
@@ -164,10 +173,10 @@ Route::post('/profile/{id}/photo', [ProfileController::class, 'uploadPhoto'])->n
 
 Route::resource('orgs', OrgListController::class);
 
-Route::get('/reports/financial', [ReportController::class, 'generateFinancialReport'])->name('report.financial');
+Route::get('/reports/financial', [ReportController::class, 'exportFinancialReport'])->name('report.financial');
 
 Route::get('/report/student-list', [ReportController::class, 'generateStudentListReport'])->name('report.student_list');
-Route::get('/report/student-roster', [ReportController::class, 'generateStudentRoster'])->name('report.studentRoster');
+Route::get('/report/student-roster', [ReportController::class, 'generatePdf'])->name('report.studentRoster');
 
 
 
@@ -187,6 +196,8 @@ Route::delete('/evaluations/{evaluation}', [EvaluationController::class,'destroy
 // existing POST /evaluation (store) already there
 
 Route::resource('evaluation', App\Http\Controllers\EvaluationController::class);
+
+
 Route::get('evaluation/{evaluation}/questions', [App\Http\Controllers\EvaluationController::class,'questions'])
      ->name('evaluation.questions');   // used by the modal’s AJAX call
 Route::put('/evaluation/{evaluation}', [EvaluationController::class, 'update'])->name('evaluation.update');
@@ -238,9 +249,31 @@ Route::post('/logout', function () {
 })->name('logout');
 
 Route::post('/generate-biometrics-schedule', [ScheduleController::class, 'generateBiometricsSchedule']);
+Route::get('/officer-users', function () {
+    $authUser = Auth::user();
+    $currentTerm = Setting::where('key', 'academic_term')->value('value');
 
-Route::get('/admin-users', function () {
-    return \App\Models\User::where('role', 'Admin')->get(['name', 'email', 'picture']);
+    // Get the current organization object
+    $authOrg = OrgList::where('org_name', $authUser->org)->first();
+
+    // Initialize an array of org names to query members from
+    $orgNames = [];
+
+    if ($authOrg) {
+        // Always include current org
+        $orgNames[] = $authOrg->org_name;
+
+        // If it's a parent org, include children orgs
+        if ($authOrg->children()->exists()) {
+            $childOrgNames = $authOrg->children->pluck('org_name')->toArray();
+            $orgNames = array_merge($orgNames, $childOrgNames);
+        }
+    }
+
+    return User::where('role', 'Member')
+        ->whereIn('org', $orgNames)
+        
+        ->get(['name', 'email', 'picture']);
 });
 
 Route::get('/org-members', [UserController::class, 'getEligibleMembers']);
@@ -260,3 +293,17 @@ Route::get('/OSSD', [OSSDController::class, 'index'])->name('ossd.index');
 Route::get('/members', [MemberController::class, 'showMembers'])->middleware('auth');
 Route::post('/transactions/pay', [PaymentController::class, 'storePayment'])->name('transactions.pay');
 Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+Route::get('/student/statement', [PaymentController::class, 'showStatementOfAccount'])
+    ->name('student.statement'); // optional if route is protected
+
+Route::post('/settings/delivery-units', [SettingsController::class, 'storeUnit'])->name('delivery-units.store');
+Route::post('/settings/courses', [SettingsController::class, 'storeCourse'])->name('courses.store');
+    Route::post('/officer-roles', [SettingsController::class, 'store'])->name('officer-roles.store');
+    Route::delete('/officer-roles/{id}', [SettingsController::class, 'destroy'])->name('officer-roles.destroy');
+Route::post('/orgs/set-hierarchy', [OrgListController::class, 'setHierarchy'])->name('orgs.setHierarchy');
+Route::get('/officer-roles/{org_name}', function ($org_name) {
+    return \App\Models\OfficerRole::where('org', $org_name)->pluck('title');
+});
+
+Route::get('/fine-history/search/{acadCode}', [SettingsController::class, 'searchFineHistory']);
+Route::get('/attendance/{eventId}/{studentId}', [AttendanceController::class, 'getAttendance']);

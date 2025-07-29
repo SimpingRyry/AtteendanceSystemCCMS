@@ -36,12 +36,11 @@ public function index()
         ->groupBy('course')
         ->pluck('total', 'course'); // returns ['BSIT' => 750, 'BSIS' => 484]
 
-        $upcomingEvents = DB::table('events')
-        ->select('name', 'event_date')
-        ->whereDate('event_date', '>=', Carbon::now())
-        ->orderBy('event_date')
-        ->limit(3)
-        ->get();
+$upcomingEvents = Event::whereDate('event_date', '>=', Carbon::today('Asia/Manila'))
+    ->orderBy('event_date')
+    ->select('name', 'event_date', 'times')
+    ->take(3)
+    ->get();
 
     return view('super_dashboard', compact(
         'totalOrganizations',
@@ -112,7 +111,7 @@ public function studentindex()
     })->reverse(); // from oldest to latest
 
     // Upcoming Events
-    $upcomingEvents = Event::where('event_date', '>', now())
+    $upcomingEvents = Event::where('event_date', '>=', Carbon::today('Asia/Manila'))
         ->orderBy('event_date')
         ->take(5)
         ->get();

@@ -103,9 +103,14 @@
               </div>
 
               <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input name="password" type="password" class="form-control" id="password" required>
-              </div>
+  <label for="password" class="form-label">Password</label>
+  <div class="input-group">
+    <input name="password" type="password" class="form-control" id="password" required>
+    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+      <i class="bi bi-eye" id="toggleIcon"></i>
+    </button>
+  </div>
+</div>
 
           
 
@@ -122,6 +127,23 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
+        <script>
+document.getElementById('togglePassword').addEventListener('click', function () {
+  const passwordInput = document.getElementById('password');
+  const toggleIcon = document.getElementById('toggleIcon');
+
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    toggleIcon.classList.remove('bi-eye');
+    toggleIcon.classList.add('bi-eye-slash');
+  } else {
+    passwordInput.type = 'password';
+    toggleIcon.classList.remove('bi-eye-slash');
+    toggleIcon.classList.add('bi-eye');
+  }
+});
+</script>
+
 </body>
 
 </html>

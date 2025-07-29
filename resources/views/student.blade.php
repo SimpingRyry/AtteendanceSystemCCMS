@@ -143,8 +143,8 @@
               <th>No</th>
               <th>Student ID</th>
               <th>Name</th>
-              <th>Gender</th>
-              <th>Course</th>
+              <th>Sex</th>
+              <th>Program</th>
               <th>Year</th>
               <th>Units</th>
               <th>Section</th>
@@ -244,7 +244,7 @@
                 <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showCamera()">Capture Image</button>
               </div>
 
-              <input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
+<input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
               
               <div id="cameraContainer" class="text-center" style="display: none;">
                 <video id="cameraStream" class="rounded border" width="100%" height="200" autoplay playsinline></video>
@@ -280,7 +280,7 @@
                     <input type="text" name="sname" id="modalStudentName" class="form-control" value="${data.name}" readonly>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Gender</label>
+                    <label class="form-label">Sex</label>
                     <input type="text" class="form-control" id="modalGender" value="${data.gender}" readonly>
                   </div>
                   <div class="col-md-6">
@@ -322,89 +322,41 @@
               </div>
 
               <!-- Organization Selection -->
-              @if(auth()->user()->role == 'Super Admin' || auth()->user()->org == 'CCMS Student Government')
-              <div class="mb-4">
-                <label class="form-label" for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
-                <select name="organization" id="organizationSelect" class="form-select" required>
-                  <option value="">-- Select Organization --</option>
-                  @foreach ($org_list as $org)
-                    <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
-                  @endforeach
-                </select>
-              </div>
-              @endif
+@if ($org_list->isNotEmpty())
+<div class="mb-4">
+  <label class="form-label" for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
+  <select name="organization" id="organizationSelect" class="form-select" required>
+    <option value="">-- Select Organization --</option>
+    @foreach ($org_list as $org)
+      <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
+    @endforeach
+  </select>
+</div>
+@endif
 
               <!-- Role / Position -->
               <div class="mb-4">
-                <h6 class="fw-bold text-info">Role / Position</h6>
-                <label class="form-label" for="roleSelect">Select Role <span class="text-danger">*</span></label>
-                <select name="role" id="roleSelect" class="form-select" required>
-                  <option value="">-- Select Role --</option>
-                  @if(auth()->user()->org == 'Information Technology Society' || auth()->user()->org == 'SG')
-                    <option value="Member">Member</option>
-                    <option value="President">President</option>
-                    <option value="Vice President">Vice President</option>
-                    <option value="Executive Secretary">Executive Secretary</option>
-                    <option value="Administrative Secretary">Administrative Secretary</option>
-                    <option value="Treasurer">Treasurer</option>
-                    <option value="Auditor">Auditor</option>
-                    <option value="Public Information Officer">Public Info Officer</option>
-                    <option value="Business Manager 1">Business Manager 1</option>
-                    <option value="Business Manager 2">Business Manager 2</option>
-                    <option value="Sentinel 1">Sentinel 1</option>
-                    <option value="Sentinal 2">Sentinal 2</option>
-                    <option value="Multimedia Officer">Multimedia Officer</option>
-                  @elseif(auth()->user()->org == 'PRAXIS')
-                    <option value="member">Member</option>
-                    <option value="President">President</option>
-                    <option value="Vice President For Internal Affairs">VP Internal Affairs</option>
-                    <option value="Vice President For External Affairs">VP External Affairs</option>
-                    <option value="Vice President For Financial Affairs">VP Financial Affairs</option>
-                    <option value="Auditing Officer">Auditing Officer</option>
-                    <option value="Technical Officer">Technical Officer</option>
-                    <option value="Sentinel Officer">Sentinel Officer</option>
-                  @elseif(auth()->user()->org == 'CCMS Student Government')
-                    <!-- No default roles here, handled below -->
-                  @else
-                    <option value="Member">Member</option>
-                    <option value="President">President</option>
-                    <option value="Vice President">Vice President</option>
-                    <option value="Executive Secretary">Executive Secretary</option>
-                    <option value="Administrative Secretary">Administrative Secretary</option>
-                    <option value="Treasurer">Treasurer</option>
-                    <option value="Auditor">Auditor</option>
-                    <option value="Public Information Officer">Public Info Officer</option>
-                    <option value="Business Manager 1">Business Manager 1</option>
-                    <option value="Business Manager 2">Business Manager 2</option>
-                    <option value="Sentinel 1">Sentinel 1</option>
-                    <option value="Sentinal 2">Sentinal 2</option>
-                    <option value="Multimedia Officer">Multimedia Officer</option>
-                  @endif
-                </select>
-              </div>
-
+  <h6 class="fw-bold text-info">Role / Position</h6>
+  <label class="form-label" for="roleSelect">Select Role <span class="text-danger">*</span></label>
+  <select name="role" id="roleSelect" class="form-select" required>
+    <option value="Member">Member</option>
+    @foreach($officerRoles as $role)
+        <option value="{{ $role->title }}">{{ $role->title }}</option>
+    @endforeach
+  </select>
+</div>
               <!-- SG Role Dropdown -->
-              @if(auth()->user()->org == 'CCMS Student Government')
-              <div class="mb-4">
-                <label class="form-label" for="sgOfficerRole">SG Officer Role <span class="text-danger">*</span></label>
-                <select name="sg_officer_role" id="sgOfficerRole" class="form-select">
-                  <option value="">-- Select SG Officer Role --</option>
-                  <option value="President">President</option>
-                  <option value="Vice President For Internal Affairs">Vice President For Internal Affairs</option>
-                  <option value="Vice President For External Affairs">Vice President For External Affairs</option>
-                  <option value="Vice President For Financial Affairs">Vice President For Financial Affairs</option>
-                  <option value="Executive Secretary">Executive Secretary</option>
-                  <option value="Internal Secretary">Internal Secretary</option>
-                  <option value="Parliamentary Officer">Parliamentary Officer</option>
-                  <option value="Auditing Officer I">Auditing Officer I</option>
-                  <option value="Auditing Officer II">Auditing Officer II</option>
-                  <option value="Managing Officer I">Managing Officer I</option>
-                  <option value="Managing Officer II">Managing Officer II</option>
-                  <option value="Multimedia Officer">Multimedia Officer</option>
-                  <option value="Information Communications Officer">Information Communications Officer</option>
-                </select>
-              </div>
-              @endif
+              @if ($sgRoles->isNotEmpty())
+<div class="mb-4">
+  <label class="form-label" for="sgOfficerRole">SG Officer Role <span class="text-danger">*</span></label>
+  <select name="sg_officer_role" id="sgOfficerRole" class="form-select">
+    <option value="">-- Select SG Officer Role --</option>
+    @foreach ($sgRoles as $role)
+      <option value="{{ $role->title }}">{{ $role->title }}</option>
+    @endforeach
+  </select>
+</div>
+@endif
             </div>
           </div>
         </form>
@@ -418,8 +370,37 @@
   </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+function showUpload() {
+  document.getElementById('uploadInput').click();
+}
+</script>
+<script>
+  $('#organizationSelect').on('change', function () {
+    const selectedOrg = $(this).val();
 
-@if(auth()->user()->role == 'Super Admin' || auth()->user()->org == 'CCMS Student Government')
+    if (selectedOrg) {
+      $.ajax({
+        url: `/officer-roles/${encodeURIComponent(selectedOrg)}`,
+        type: 'GET',
+        success: function (roles) {
+          const $roleSelect = $('#roleSelect');
+          $roleSelect.empty();
+          $roleSelect.append(`<option value="Member">Member</option>`); // Default
+
+          roles.forEach(function (role) {
+            $roleSelect.append(`<option value="${role}">${role}</option>`);
+          });
+        },
+        error: function () {
+          alert('Failed to load officer roles.');
+        }
+      });
+    }
+  });
+</script>
+<!-- @if(auth()->user()->role == 'Super Admin' || auth()->user()->org == 'CCMS Student Government')
 <script>
   const roleSelect = document.getElementById('roleSelect');
   const orgSelect = document.getElementById('organizationSelect');
@@ -470,7 +451,7 @@
     }
   });
 </script>
-@endif
+@endif -->
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="POST" action="{{ url('/generate-biometrics-schedule') }}" target="_blank">
@@ -767,9 +748,12 @@ function applySearchFilter() {
 
 <script>
   function showUpload() {
-    document.getElementById('uploadInput').style.display = 'block';
-    document.getElementById('cameraContainer').style.display = 'none';
-    document.getElementById('capturedImage').style.display = 'none';
+ 
+  document.getElementById('uploadInput').click();
+
+    // document.getElementById('uploadInput').style.display = 'block';
+    // document.getElementById('cameraContainer').style.display = 'none';
+    // document.getElementById('capturedImage').style.display = 'none';
     stopCamera();
   }
 

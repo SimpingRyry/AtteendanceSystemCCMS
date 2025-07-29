@@ -18,5 +18,19 @@ class OrgList extends Model
         'description',
         'org_logo',
         'bg_image',
+        'delivery_unit_id',
+        'course_id',
+        'scope',
+        'parent_org_id'
     ];
+
+    public function parent()
+{
+    return $this->belongsTo(OrgList::class, 'parent_org_id');
+}
+
+public function children()
+{
+    return $this->hasMany(OrgList::class, 'parent_org_id');
+}
 }

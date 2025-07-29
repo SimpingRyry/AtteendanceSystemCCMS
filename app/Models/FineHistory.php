@@ -15,5 +15,6 @@ class FineHistory extends Model
         'updated_by',
         'changed_at',
         'org',
+        'acad_code'
     ];
 }

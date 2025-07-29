@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="{{ asset('css/evaluation.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_side.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
     <title>CCMS Attendance System</title>
 </head>
@@ -31,140 +33,150 @@
     {{-- Sidebar --}}
     @include('layout.sidebar')
 
-    <main>
-        <div class="container outer-box mt-5 pt-5 pb-4">
-            <div class="container inner-glass shadow p-4" id="main_box">
-                <div class="mb-4">
-                    <h2 class="fw-bold" style="color: #232946;">Evaluation</h2>
-                    <small style="color: #989797;">Manage /</small>
-                    <small style="color: #444444;">Evaluation</small>
-                </div>
-
-                @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-                @endif
-
-                @if(session('error'))
-                <div class="alert alert-danger">{{ session('error') }}</div>
-                @endif
-
-                <!-- Evaluation Creator hehe -->
-                {{-- ========================================= --}}
-                {{-- Trigger button (inside the main container)--}}
-                {{-- ========================================= --}}
-                <button class="btn btn-success mb-3" type="button"
-                    data-bs-toggle="collapse" data-bs-target="#evaluationCreator"
-                    aria-expanded="false" aria-controls="evaluationCreator">
-                    <i class="fa fa-plus me-1"></i> Create Evaluation
-                </button>
-
-                {{-- ========================================= --}}
-                {{-- Evaluation Creator (collapsed by default) --}}
-                {{-- ========================================= --}}
-                <div class="collapse" id="evaluationCreator">
-                    <form action="{{ route('evaluation.store') }}" method="POST" id="evaluationForm" class="border rounded p-4 shadow-sm">
-                        @csrf
-
-                        {{-- === Builder Mode === --}}
-                        <div id="builder_mode">
-                            <!-- <div class="mb-3">
-                                <label class="form-label fw-semibold">Filter by Event</label>
-                                <select class="form-select" name="event_id" id="event_id" required>
-                                    <option value="">Select event</option>
-                                    @foreach($eventNames as $id => $name)
-                                    <option value="{{ $id }}">{{ $name }}</option>
-                                    @endforeach
-                                </select>
-                            </div> -->
-
-
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Evaluation Title</label>
-                                <input type="text" name="title" class="form-control" id="eval_title" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Description</label>
-                                <textarea name="description" class="form-control" rows="2" id="eval_desc"></textarea>
-                            </div>
-
-                            <div id="questions_container"></div>
-
-                            <button type="button" class="btn btn-secondary my-2" onclick="addQuestion()">Add Question</button>
-                            <button type="button" class="btn btn-info my-2 ms-2" onclick="previewForm()">Preview</button>
-                        </div>
-
-                        {{-- === Preview Mode === --}}
-                        <div id="preview_mode" class="d-none">
-                            <h4 id="preview_title" class="fw-bold"></h4>
-                            <p id="preview_desc" class="text-muted"></p>
-                            <div id="preview_questions" class="mb-4"></div>
-
-                            <button type="button" class="btn btn-warning" onclick="backToEdit()">Back to Edit</button>
-                            <input type="hidden" name="questions_json" id="questions_json">
-                            <button type="submit" class="btn btn-success">Save Evaluation</button>
-                        </div>
-                    </form>
-                </div>
-                <h2 class="fw-bold text-center" style="color:#232946;">Evaluation Table</h2>
-
-
-                {{-- 1️⃣  TABLE LIST ----------------------------------------------------- --}}
-                <table class="table table-hover align-middle">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th style="width:200px">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($evaluations as $evaluation)
-                        <tr>
-                            <td>{{ $evaluation->title }}</td>
-                            <td>{{ Str::limit($evaluation->description, 80) }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary"
-                                    data-id="{{ $evaluation->id }}"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#viewModal">
-                                    <i class="fa fa-eye"></i>
-                                </button>
-
-                                <button class="btn btn-sm btn-warning edit-btn"
-                                    data-id="{{ $evaluation->id }}"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editModal">
-                                    <i class="fa fa-pen"></i>
-                                </button>
-
-                                <button class="btn btn-sm btn-success send-eval-btn"
-                                    data-id="{{ $evaluation->id }}"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#sendEvaluationModal">
-                                    <i class="fa fa-paper-plane"></i>
-                                </button>
-
-                                <form action=""
-                                    class="d-inline"
-                                    onsubmit="return confirm('Delete this evaluation?')">
-                                  
-                                    <button class="btn btn-sm btn-danger">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-                {{-- keep your “Create Evaluation” collapsible form here – unchanged --}}
-
-
-            </div>
+<main>
+  <div class="container outer-box mt-5 pt-5 pb-4">
+    <div class="container inner-glass shadow p-4" id="main_box">
+      <!-- Page Title and Tabs -->
+      <div class="mb-4">
+        <div class="mb-4">
+          <h2 class="fw-bold" style="color: #232946;">Evaluation</h2>
+          <small style="color: #989797;">Manage /</small>
+          <small style="color: #444444;">Evaluation</small>
         </div>
-    </main>
+        <ul class="nav nav-tabs" id="evaluationTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="responses-tab" data-bs-toggle="tab" data-bs-target="#responses" type="button" role="tab">Responses</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="evaluations-tab" data-bs-toggle="tab" data-bs-target="#evaluations" type="button" role="tab">Evaluation Templates</button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="tab-content" id="evaluationTabContent">
+        <!-- 🔵 Responses Tab (now default active) -->
+        <div class="tab-pane fade show active" id="responses" role="tabpanel">
+          <h4 class="fw-bold mt-4" style="color:#232946;">Evaluation Responses</h4>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Evaluation</th>
+                  <th>Description</th>
+                  <th>Overall Rating</th>
+                  <th>Respondents</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach ($assignments as $assignment)
+                  <tr data-assignment-id="{{ $assignment->id }}">
+                    <td>{{ $assignment->event->name ?? 'N/A' }}</td>
+                    <td>{{ $assignment->evaluation->title }}</td>
+                    <td>{{ Str::limit($assignment->evaluation->description, 80) }}</td>
+                    <td class="overall-rating text-center">Loading...</td>
+                    <td class="respondent-count text-muted small">Loading...</td>
+                    <td>
+                      <a href="javascript:void(0)" class="btn btn-sm btn-primary view-responses-btn" data-assignment-id="{{ $assignment->id }}">
+                        <i class="fa fa-eye"></i> View
+                      </a>
+                    </td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 🟢 Evaluations Tab -->
+        <div class="tab-pane fade" id="evaluations" role="tabpanel">
+          @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+          @endif
+          @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+          @endif
+
+          <button class="btn btn-success mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#evaluationCreator" aria-expanded="false" aria-controls="evaluationCreator">
+            <i class="fa fa-plus me-1"></i> Create Evaluation
+          </button>
+
+          <!-- Collapsible Form -->
+          <div class="collapse" id="evaluationCreator">
+            <form action="{{ route('evaluation.store') }}" method="POST" id="evaluationForm" class="border rounded p-4 shadow-sm">
+              @csrf
+              <div id="builder_mode">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Evaluation Title</label>
+                  <input type="text" name="title" class="form-control" required id="eval_title">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Description</label>
+                  <textarea name="description" class="form-control" rows="2" id="eval_desc"></textarea>
+                </div>
+                <div id="questions_container"></div>
+                <button type="button" class="btn btn-secondary my-2" onclick="addQuestion()">Add Question</button>
+                <button type="button" class="btn btn-info my-2 ms-2" onclick="previewForm()">Preview</button>
+              </div>
+              <div id="preview_mode" class="d-none">
+                <h4 id="preview_title" class="fw-bold"></h4>
+                <p id="preview_desc" class="text-muted"></p>
+                <div id="preview_questions" class="mb-4"></div>
+                <button type="button" class="btn btn-warning" onclick="backToEdit()">Back to Edit</button>
+                <input type="hidden" name="questions_json" id="questions_json">
+                <button type="submit" class="btn btn-success">Save Evaluation</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Evaluation Table -->
+          <h4 class="fw-bold text-center mt-4" style="color:#232946;">Evaluation Table</h4>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>Title</th>
+                  <th>Description</th>
+                  <th>Date Created</th>
+                  <th>Creator</th>
+                  <th style="width:200px">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach($evaluations as $evaluation)
+                  <tr>
+                    <td>{{ $evaluation->title }}</td>
+                    <td>{{ Str::limit($evaluation->description, 80) }}</td>
+                    <td>{{ \Carbon\Carbon::parse($evaluation->created_at)->format('Y-m-d') }}</td>
+                    <td>{{ $evaluation->created_by }}</td>
+                    <td>
+                      <button class="btn btn-sm btn-primary" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#viewModal">
+                        <i class="fa fa-eye"></i>
+                      </button>
+
+                      @if (Auth::user()->role === 'Super Admin' || Auth::user()->role === 'President - Officer' || Auth::user()->role === 'Adviser')
+                       <button class="btn btn-sm btn-warning edit-btn" data-id="{{ $evaluation->id }}" data-bs-toggle="modal" data-bs-target="#editModal">
+                        <i class="fa fa-pen"></i>
+                      </button>
+                     
+                      <form action="" class="d-inline" onsubmit="return confirm('Delete this evaluation?')">
+                        <button class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
+                      </form>
+                      @endif
+                     
+                    </td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
 
     <div class="modal fade" id="sendEvaluationModal" tabindex="-1" aria-labelledby="sendEvaluationModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -193,6 +205,20 @@
             </div>
         </div>
     </form>
+  </div>
+</div>
+
+<div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="responseModalLabel">Evaluation Summary</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="responseModalBody">
+        <p>Loading...</p>
+      </div>
+    </div>
   </div>
 </div>
     {{-- Success Modal (keep this where it already is) --}}
@@ -263,7 +289,113 @@
         </div>
     </div>
 
+<script>
+  $(document).ready(function () {
+    $('tr[data-assignment-id]').each(function () {
+      const row = $(this);
+      const assignmentId = row.data('assignment-id');
 
+      $.ajax({
+        url: `/evaluation-responses/${assignmentId}/summary`,
+        method: 'GET',
+        success: function (data) {
+          const rating = data.overall_rating ?? '-';
+          const resText = data.respondent_text ?? 'N/A';
+
+          row.find('.overall-rating').html(rating !== '-' ? `⭐ ${rating} / 5` : '-');
+          row.find('.respondent-count').text(resText);
+        },
+        error: function () {
+          row.find('.overall-rating').text('Error');
+          row.find('.respondent-count').text('Error');
+        }
+      });
+    });
+  });
+</script>
+<script>
+    document.querySelectorAll('.view-responses-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const assignmentId = this.getAttribute('data-assignment-id');
+            const modalBody = document.getElementById('responseModalBody');
+            const modal = new bootstrap.Modal(document.getElementById('responseModal'));
+
+            modalBody.innerHTML = `<p>Loading...</p>`;
+            modal.show();
+
+            fetch(`/evaluation-responses/${assignmentId}/summary`)
+                .then(response => response.json())
+                .then(data => {
+                    let html = `
+                        <h5 class="fw-bold">${data.evaluation_title} (Event: ${data.event_name})</h5>
+                        <p><strong>Total Students Responded:</strong> ${data.respondent_count}</p>
+                        <hr/>
+                    `;
+
+                    let chartIndex = 0;
+
+                    data.summary.forEach(q => {
+                        html += `<div class="mb-4"><strong>${q.text || q.question}</strong>`;
+
+                        if (q.type === 'mcq') {
+                            const canvasId = `chart-${chartIndex}`;
+                            html += `<canvas id="${canvasId}" height="50px"></canvas>`;
+                            chartIndex++;
+                        } else {
+                            html += `<p><strong>${q.responses[0].answered}</strong> responses</p>`;
+                        }
+
+                        html += `</div>`;
+                    });
+
+                    modalBody.innerHTML = html;
+
+                    // Render the charts after the DOM is updated
+                    chartIndex = 0;
+                    data.summary.forEach(q => {
+                        if (q.type === 'mcq') {
+                            const labels = q.responses.map(r => r.option);
+                            const counts = q.responses.map(r => r.count);
+                            const ctx = document.getElementById(`chart-${chartIndex}`).getContext('2d');
+
+                            new Chart(ctx, {
+                                type: 'bar', // or 'pie'
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        label: 'Responses',
+                                        data: counts,
+                                        backgroundColor: [
+                                            '#4e73df',
+                                            '#1cc88a',
+                                            '#36b9cc',
+                                            '#f6c23e',
+                                            '#e74a3b',
+                                            '#858796',
+                                        ],
+                                        borderColor: '#000',
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                            precision: 0
+                                        }
+                                    }
+                                }
+                            });
+
+                            chartIndex++;
+                        }
+                    });
+                });
+        });
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     {{-- Auto-show if flash exists --}}
     @if (session('success'))
