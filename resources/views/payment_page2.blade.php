@@ -214,7 +214,8 @@
         <div class="modal-body">
           <div class="mb-3">
             <label for="amount" class="form-label">Amount</label>
-            <input type="number" step="0.01" min="1" class="form-control" id="amount" name="amount" required>
+            <input type="number" step="0.01" min="21" class="form-control" id="amount" name="amount" required>
+
           </div>
         </div>
         <div class="modal-footer">

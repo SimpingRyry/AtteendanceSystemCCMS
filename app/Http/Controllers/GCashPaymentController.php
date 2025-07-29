@@ -8,34 +8,38 @@ use Illuminate\Support\Facades\Http;
 class GCashPaymentController extends Controller
 {
     public function createSource(Request $request)
-{
-    $request->validate([
-        'amount' => 'required|numeric|min:1'
-    ]);
-
-    $amountInCentavos = $request->amount * 100;
-
-    $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
-        ->post('https://api.paymongo.com/v1/sources', [
-            'data' => [
-                'attributes' => [
-                    'amount' => (int)$amountInCentavos,
-                    'redirect' => [
-                        'success' => route('gcash.success'),
-                        'failed' => route('gcash.failed'),
-                    ],
-                    'type' => 'gcash',
-                    'currency' => 'PHP'
-                ]
-            ]
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:21'
+        ], [
+            'amount.min' => 'Minimum GCash payment amount is ₱21.'
         ]);
 
-    if ($response->failed()) {
-        return back()->with('error', 'Failed to initiate GCash payment.');
+        $amountInCentavos = $request->amount * 100;
+
+        $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
+            ->post('https://api.paymongo.com/v1/sources', [
+                'data' => [
+                    'attributes' => [
+                        'amount' => (int)$amountInCentavos,
+                        'redirect' => [
+                            'success' => route('gcash.success'),
+                            'failed' => route('gcash.failed'),
+                        ],
+                        'type' => 'gcash',
+                        'currency' => 'PHP'
+                    ]
+                ]
+            ]);
+
+        if ($response->failed()) {
+
+            return back()->with('error', 'Failed to initiate GCash payment.');
+        }
+
+        $source = $response->json();
+
+        // ✅ This is the correct path to the GCash redirect URL
+        return redirect($source['data']['attributes']['redirect']['checkout_url']);
     }
-
-    $source = $response->json();
-
-    return redirect($source['data']['attributes']['redirect']['checkout_url']);
-}
 }
