@@ -212,17 +212,11 @@
           <h5 class="modal-title" id="paymentModalLabel">Payment Details</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        
-        <div class="modal-body px-4">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
-              <input type="number" step="0.01" min="1" class="form-control" id="amount" name="amount" placeholder="Enter payment amount" required>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="or_number" class="form-label">OR Number <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="or_number" name="or_number" placeholder="Enter official receipt number" required>
-            </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <input type="number" step="0.01" min="21" class="form-control" id="amount" name="amount" required>
+
           </div>
         </div>
         
