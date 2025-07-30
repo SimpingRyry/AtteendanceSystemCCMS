@@ -309,3 +309,4 @@ Route::get('/fine-history/search/{acadCode}', [SettingsController::class, 'searc
 Route::get('/attendance/{eventId}/{studentId}', [AttendanceController::class, 'getAttendance']);
 
  Route::get('/attendance/archive/ajax/{event_id}', [AttendanceController::class, 'fetchArchiveAjax'])->name('attendance.archive.ajax');
+Route::post('/submit-excuse', [AttendanceController::class, 'submitExcuse'])->name('excuse.submit');

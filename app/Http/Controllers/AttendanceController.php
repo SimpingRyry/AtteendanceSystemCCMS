@@ -11,7 +11,7 @@ use App\Models\FineSetting;
 use Illuminate\Support\Facades\Log;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 class AttendanceController extends Controller
 {
 public function store(Request $request)
@@ -365,75 +365,61 @@ public function liveData()
 
     return response()->json($records);
 }
-    public function fetchArchiveAjax($event_id)
+public function fetchArchiveAjax($event_id)
 {
     $event = Event::findOrFail($event_id);
     $attendances = Attendance::with('student', 'event')
         ->where('event_id', $event_id)
         ->get();
 
-    ob_start(); // start output buffer
-    ?>
-    <div class="table-responsive mt-3">
-        <table class="table table-bordered table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th rowspan="<?= $event->timeouts == 4 ? 2 : 1 ?>">Student ID</th>
-                    <th rowspan="<?= $event->timeouts == 4 ? 2 : 1 ?>">Name</th>
-                    <th rowspan="<?= $event->timeouts == 4 ? 2 : 1 ?>">Program</th>
-                    <th rowspan="<?= $event->timeouts == 4 ? 2 : 1 ?>">Block</th>
-                    <th rowspan="<?= $event->timeouts == 4 ? 2 : 1 ?>">Event</th>
-                    <th rowspan="<?= $event->timeouts == 4 ? 2 : 1 ?>">Date</th>
+    return view('partials.attendance_archive_table', compact('event', 'attendances'))->render();
+}
+public function submitExcuse(Request $request)
+{
+    $request->validate([
+        'attendance_id' => 'required|exists:attendances,id',
+        'reason' => 'required|string',
+        'excuse_letter' => 'required|file|mimes:pdf,jpg,png|max:2048',
+    ]);
 
-                    <?php if($event->timeouts == 4): ?>
-                        <th colspan="2" class="text-center">Morning</th>
-                        <th colspan="2" class="text-center">Afternoon</th>
-                        <th colspan="2" class="text-center">Status</th>
-                    <?php else: ?>
-                        <th>Time-In</th>
-                        <th>Time-Out</th>
-                        <th>Status</th>
-                    <?php endif; ?>
-                </tr>
-                <?php if($event->timeouts == 4): ?>
-                    <tr>
-                        <th>Time-In</th>
-                        <th>Time-Out</th>
-                        <th>Time-In</th>
-                        <th>Time-Out</th>
-                        <th>Morning</th>
-                        <th>Afternoon</th>
-                    </tr>
-                <?php endif; ?>
-            </thead>
-            <tbody>
-                <?php foreach($attendances as $attendance): ?>
-                    <tr>
-                        <td><?= $attendance->student_id ?></td>
-                        <td><?= $attendance->student->name ?? 'N/A' ?></td>
-                        <td><?= $attendance->student->course ?? 'N/A' ?></td>
-                        <td><?= $attendance->student->section ?? 'N/A' ?></td>
-                        <td><?= $attendance->event->name ?></td>
-                        <td><?= $attendance->date ?></td>
-                        <?php if($event->timeouts == 4): ?>
-                            <td><?= $attendance->time_in1 ?></td>
-                            <td><?= $attendance->time_out1 ?></td>
-                            <td><?= $attendance->time_in2 ?></td>
-                            <td><?= $attendance->time_out2 ?></td>
-                            <td><?= $attendance->morning_status ?></td>
-                            <td><?= $attendance->afternoon_status ?></td>
-                        <?php else: ?>
-                            <td><?= $attendance->time_in1 ?></td>
-                            <td><?= $attendance->time_out1 ?></td>
-                            <td><?= $attendance->status ?></td>
-                        <?php endif; ?>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-    <?php
-    return response(ob_get_clean());
+    DB::transaction(function () use ($request) {
+        // Save file to public/excuses
+        $file = $request->file('excuse_letter');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $destinationPath = public_path('excuses');
+        
+        // Create the directory if it doesn't exist
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
+
+        $file->move($destinationPath, $filename);
+        $excusePath = 'excuses/' . $filename;
+
+        // Update attendance
+        $attendance = Attendance::findOrFail($request->attendance_id);
+        $event = $attendance->event;
+
+        if ($event->timeouts == 4) {
+            $attendance->morning_status = 'Excused';
+            $attendance->afternoon_status = 'Excused';
+        } else {
+            $attendance->status = 'Excused';
+        }
+
+        $attendance->excuse_reason = $request->reason;
+        $attendance->excuse_letter = $excusePath;
+        $attendance->save();
+
+        // Delete related fine
+        Transaction::where('student_id', $attendance->student_id)
+            ->where('event', $attendance->event->name)
+            ->whereDate('date', $attendance->date)
+            ->where('transaction_type', 'fine')
+            ->delete();
+    });
+
+    return redirect()->back()->with('success', 'Excuse submitted and fine removed.');
 }
 
 }
