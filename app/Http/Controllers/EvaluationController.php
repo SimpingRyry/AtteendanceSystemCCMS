@@ -9,6 +9,7 @@ use App\Models\EvalAnswer;
 use App\Models\Evaluation;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
+use App\Models\EvaluationAnswer;
 use App\Models\EvaluationQuestion;
 use Illuminate\Support\Facades\DB;
 use App\Models\EvaluationAssignment;
@@ -269,4 +270,25 @@ public function submitAnswers(Request $request)
             return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
+
+public function getAnswers($evaluationId, $eventId)
+{
+    $studentId = auth()->user()->student_id;
+
+    $answers = EvaluationAnswer::where('evaluation_id', $evaluationId)
+        ->where('event_id', $eventId)
+        ->where('student_id', $studentId)
+        ->with('question')
+        ->get();
+
+    return response()->json(
+        $answers->map(function ($item) {
+            return [
+                'question' => $item->question->question ?? 'No question',
+                'answer' => $item->answer ?? 'No answer',
+            ];
+        })
+    );
+}
+
 }

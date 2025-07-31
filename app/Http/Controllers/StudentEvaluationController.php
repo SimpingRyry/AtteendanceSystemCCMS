@@ -9,33 +9,45 @@ use App\Models\EvaluationQuestion;
 use Illuminate\Support\Facades\DB;
 use App\Models\EvaluationAssignment;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Attendance;
+
 
 class StudentEvaluationController extends Controller
 {
     /**
      * Show evaluations available to student.
      */
+
 public function index()
 {
     $studentId = auth()->user()->student_id;
 
-    // Step 1: Get attended events
+    // Step 1: Get attended event IDs
     $attendedEventIds = DB::table('attendances')
         ->where('student_id', $studentId)
         ->pluck('event_id');
 
-    // Step 2: Get latest EvaluationAssignment based on event_date
+    // Step 2: Get latest EvaluationAssignment
     $latestAssignment = \App\Models\EvaluationAssignment::with(['evaluation', 'event'])
         ->whereIn('event_id', $attendedEventIds)
-        ->whereHas('event') // Ensure event relationship exists
+        ->whereHas('event')
         ->get()
-        ->sortByDesc(fn ($assignment) => $assignment->event->event_date) // Sort by event_date DESC
-        ->first(); // Get only the latest one
+        ->sortByDesc(fn ($assignment) => $assignment->event->event_date)
+        ->first();
+
+    // Step 3: Attach attendance manually (based on event + student)
+    if ($latestAssignment) {
+        $attendance = Attendance::where('student_id', $studentId)
+            ->where('event_id', $latestAssignment->event_id)
+            ->first();
+        $latestAssignment->attendance = $attendance; // dynamically attach
+    }
 
     return view('evaluation_student', [
         'assignments' => $latestAssignment ? [$latestAssignment] : []
     ]);
 }
+
 
     /**
      * Return JSON data for a specific evaluation including its questions.

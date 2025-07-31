@@ -58,11 +58,25 @@
   <td>{{ $assign->event->name ?? '—' }}</td>
   <td>{{ $assign->evaluation->title }}</td>
   <td>{{ Str::limit($assign->evaluation->description, 80) }}</td>
-  <td>
-    <button class="btn btn-sm btn-primary evaluation-card" data-id="{{ $assign->evaluation->id }}">
+<td>
+  @if($assign->attendance && $assign->attendance->is_answered)
+    <button 
+      class="btn btn-sm btn-success show-evaluation-btn" 
+      data-id="{{ $assign->evaluation->id }}" 
+      data-event-id="{{ $assign->event->id }}"
+    >
+      Show
+    </button>
+  @else
+    <button 
+      class="btn btn-sm btn-primary evaluation-card" 
+      data-id="{{ $assign->evaluation->id }}" 
+      data-event-id="{{ $assign->event->id }}"
+    >
       Answer
     </button>
-  </td>
+  @endif
+</td>
 </tr>
 @empty
 <tr>
@@ -100,9 +114,49 @@
   </div>
 </div>
 
+<div class="modal fade" id="viewEvaluationModal" tabindex="-1" aria-labelledby="viewEvaluationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title" id="viewEvaluationModalLabel">Evaluation Answers</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="evaluationAnswersContent">
+        <!-- Answers will be injected via JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.show-evaluation-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const evalId = this.getAttribute('data-id');
+      const eventId = this.getAttribute('data-event-id');
 
+      fetch(`/evaluation-answers/${evalId}/${eventId}`)
+        .then(res => res.json())
+        .then(data => {
+          let html = '';
+          data.forEach(item => {
+            html += `
+              <div class="mb-3">
+                <strong>Q: ${item.question}</strong>
+                <p class="ms-3">Answer: ${item.answer}</p>
+              </div>
+            `;
+          });
+
+          document.getElementById('evaluationAnswersContent').innerHTML = html;
+          new bootstrap.Modal(document.getElementById('viewEvaluationModal')).show();
+        });
+    });
+  });
+});
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const cards = document.querySelectorAll('.evaluation-card');

@@ -310,3 +310,4 @@ Route::get('/attendance/{eventId}/{studentId}', [AttendanceController::class, 'g
 
  Route::get('/attendance/archive/ajax/{event_id}', [AttendanceController::class, 'fetchArchiveAjax'])->name('attendance.archive.ajax');
 Route::post('/submit-excuse', [AttendanceController::class, 'submitExcuse'])->name('excuse.submit');
+Route::get('/evaluation-answers/{evaluation}/{event}', [EvaluationController::class, 'getAnswers']);
