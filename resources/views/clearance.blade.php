@@ -117,27 +117,27 @@
           </thead>
           <tbody>
             @foreach($students as $student)
-            <tr>
-              <td>{{ $student->student_id }}</td>
-              <td>{{ $student->name }}</td>
-              <td>{{ $student->studentList->course ?? 'N/A' }}</td>
-              <td>{{ $student->studentList->section ?? 'N/A' }}</td>
-              <td>{{ $student->org }}</td>
-              <td>{{ number_format($student->balance, 2) }}</td>
-              <td>
-                @if ($student->balance != 0)
-                  <span class="badge bg-danger">Not Eligible</span>
-                @else
-                  <span class="badge bg-success">Eligible</span>
-                @endif
-              </td>
-              <td>
-                <a href="{{ route('clearance.show', ['id' => $student->student_id]) }}" class="btn btn-sm btn-primary" target="_blank">
-                  Generate Clearance
-                </a>
-              </td>
-            </tr>
-            @endforeach
+<tr onclick="window.location='{{ route('payment.index') }}?search={{ $student->student_id }}'" style="cursor: pointer;">
+  <td>{{ $student->student_id }}</td>
+  <td>{{ $student->name }}</td>
+  <td>{{ $student->studentList->course ?? 'N/A' }}</td>
+  <td>{{ $student->studentList->section ?? 'N/A' }}</td>
+  <td>{{ $student->org }}</td>
+  <td>{{ number_format($student->balance, 2) }}</td>
+  <td>
+    @if ($student->balance != 0)
+      <span class="badge bg-danger">Not Eligible</span>
+    @else
+      <span class="badge bg-success">Eligible</span>
+    @endif
+  </td>
+  <td>
+    <a href="{{ route('clearance.show', ['id' => $student->student_id]) }}" class="btn btn-sm btn-primary" target="_blank">
+      Generate Clearance
+    </a>
+  </td>
+</tr>
+@endforeach
           </tbody>
         </table>
       </div>

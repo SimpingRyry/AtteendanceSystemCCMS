@@ -132,7 +132,7 @@
     <!-- Search Input -->
     <div style="min-width: 250px;">
       <label class="form-label mb-1">Search</label>
-      <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Enter name or ID...">
+<input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Enter name or ID..." oninput="applySearchFilter()">
     </div>
   </div>
 </div>
@@ -283,6 +283,29 @@
         });
     });
   });
+});
+</script>
+
+<script>
+function applySearchFilter() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("tbody tr");
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(input) ? "" : "none";
+    });
+}
+
+// If URL has a ?search=STUDENT_ID param, auto-fill and filter
+document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    const searchValue = params.get("search");
+
+    if (searchValue) {
+        document.getElementById("searchInput").value = searchValue;
+        applySearchFilter();
+    }
 });
 </script>
 <script>
