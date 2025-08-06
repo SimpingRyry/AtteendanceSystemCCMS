@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\Logs;
 
 class PaymentController extends Controller
 {
@@ -165,6 +166,14 @@ public function storePayment(Request $request)
         'processed_by'   => $processedBy,
         'fine_amount'    => $request->amount,
     ]);
+
+    Logs::create([
+    'action' => 'Create',
+    'description' => 'Recorded payment for student ID ' . $request->student_id . ' with OR No. ' . $request->or_number . ' (₱' . number_format($request->amount, 2) . ')',
+    'user' => auth()->user()->name ?? 'System',
+    'date_time' => now('Asia/Manila'),
+    'type' => 'Payment',
+]);
 
     return back()->with('success', 'Payment recorded successfully.');
 }

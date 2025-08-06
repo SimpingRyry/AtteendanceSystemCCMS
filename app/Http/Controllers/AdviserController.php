@@ -15,16 +15,21 @@ class AdviserController extends Controller
 {
 public function index()
 {
-    $currentterm = Setting::where('key', 'academic_term')->value('value');
+    $fullTerm = Setting::where('key', 'academic_term')->value('value');
+
+    // Extract year like 2025-2026 from the term string
+    preg_match('/\d{4}-\d{4}/', $fullTerm, $matches);
+    $termYear = $matches[0] ?? 'Unknown Year';
 
     $advisers = User::where('role', 'Adviser')
-                    ->where('term', $currentterm)
+                    ->where('term', 'like', "%$termYear%")
                     ->get();
 
     $org_list = OrgList::all();
 
     return view('advisers', compact('advisers', 'org_list'));
 }
+
 
 
 

@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\OfficerRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\Logs;
 
 class ImportController extends Controller
 {
@@ -255,6 +256,14 @@ public function confirmImport()
     }
 
     session()->forget('previewData');
+
+    Logs::create([
+    'action' => 'Import',
+    'description' => "Student import completed — Imported: $imported, Updated: $updated, Skipped: $skipped",
+    'user' => auth()->user()->name ?? 'System',
+    'date_time' => now(),
+    'type' => 'Others',
+]);
 
     return redirect()->back()->with('success', "Students imported: $imported, updated: $updated, skipped: $skipped");
 }

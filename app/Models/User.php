@@ -69,7 +69,13 @@ public function getBalanceAttribute()
 
 public function scopeActiveOfficers($query)
 {
-    $currentTerm = Setting::where('key', 'academic_term')->value('value');
-    return $query->where('role', 'like', '%- Officer%')->where('term', $currentTerm);
+$currentTerm = Setting::where('key', 'academic_term')->value('value');
+
+// Extract year like 2025-2026 from the term
+preg_match('/\d{4}-\d{4}/', $currentTerm, $matches);
+$termYear = $matches[0] ?? 'Unknown Year';
+
+return $query->where('role', 'like', '%- Officer%')
+             ->where('term', 'like', "%$termYear%");
 }
 }

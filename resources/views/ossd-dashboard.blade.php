@@ -93,7 +93,7 @@
         @php
           $times = json_decode($event->times, true);
           $startTime = (!empty($times) && isset($times[0]))
-              ? \Carbon\Carbon::createFromFormat('H:i', trim($times[0]))->format('g:i A')
+    ? \Carbon\Carbon::createFromFormat('H:i:s', trim($times[0]))->format('g:i A')
               : 'N/A';
         @endphp
         <li class="list-group-item d-flex justify-content-between align-items-start flex-column flex-md-row">

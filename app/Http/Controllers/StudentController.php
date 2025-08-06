@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
+use App\Models\Logs;
 
 class StudentController extends Controller
 {
@@ -156,6 +157,14 @@ public function store(Request $request)
     } else {
         return redirect()->back()->with('error', 'Student record not found.');
     }
+
+    Logs::create([
+    'action' => 'Create',
+    'description' => 'Registered student "' . $request->sname . '" with ID: ' . $request->student_id,
+    'user' => auth()->user()->name ?? 'System',
+    'date_time' => now('Asia/Manila'),
+    'type' => 'User',
+]);
 
     return redirect()->back()->with('success', 'Student registered successfully!');
 }

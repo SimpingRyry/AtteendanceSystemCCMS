@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\OfficerRole;
+use App\Models\Logs;
 
 
 class ReportController extends Controller
@@ -83,6 +84,38 @@ public function exportFinancialReport(Request $request)
     $expenses = collect($tableData)->sum('total');
     $balance = $cashOnHand - $expenses;
 
+    // Get academic term and extract year range (e.g., "2025-2026")
+    $fullTerm = Setting::where('key', 'academic_term')->first()->value ?? 'Unknown Term';
+    preg_match('/\d{4}-\d{4}/', $fullTerm, $matches);
+    $termYear = $matches[0] ?? 'Unknown Year';
+
+    // Officers using extracted year from term
+    $presidentUser = User::where('role', 'LIKE', '%President%')
+        ->where('org', $org)
+        ->where('term', 'LIKE', "%$termYear%")
+        ->first();
+
+    $financialUser = User::where(function($q) {
+            $q->where('role', 'LIKE', '%Financial Affairs%')
+              ->orWhere('role', 'LIKE', '%Treasurer%');
+        })
+        ->where('org', $org)
+        ->where('term', 'LIKE', "%$termYear%")
+        ->first();
+
+    $auditorUser = User::where(function($q) {
+            $q->where('role', 'LIKE', '%Auditor%')
+              ->orWhere('role', 'LIKE', '%Auditing Officer%');
+        })
+        ->where('org', $org)
+        ->where('term', 'LIKE', "%$termYear%")
+        ->first();
+
+    $adviserUser = User::where('role', 'LIKE', '%Adviser%')
+        ->where('org', $org)
+        ->where('term', 'LIKE', "%$termYear%")
+        ->first();
+
     // Generate PDF
     $pdf = Pdf::loadView('report.financial_pdf2', [
         'tableData' => $tableData,
@@ -92,10 +125,22 @@ public function exportFinancialReport(Request $request)
         'balance' => number_format($balance, 2),
         'logo' => $logo,
         'org' => $org,
+        'financialUser' => $financialUser,
+        'presidentUser' => $presidentUser,
+        'auditorUser' => $auditorUser,
+        'adviserUser' => $adviserUser,
     ]);
+    Logs::create([
+    'action' => 'Export',
+    'description' => 'Exported financial report for event "' . $event . '" (Cash on Hand: ₱' . number_format($cashOnHand, 2) . ')',
+    'user' => auth()->user()->name ?? 'System',
+    'date_time' => now('Asia/Manila'),
+    'type' => 'Others',
+]);
 
     return $pdf->stream('financial_report.pdf');
 }
+
 
 
 
@@ -131,11 +176,15 @@ public function exportFinancialReport(Request $request)
 public function generatePdf() 
 {
     $org = Auth::user()->org;
-    $term = Setting::where('key', 'academic_term')->first()->value ?? 'Unknown Term';
+    
+    // Get academic term and extract year range (e.g., "2025-2026")
+    $fullTerm = Setting::where('key', 'academic_term')->first()->value ?? 'Unknown Term';
+    preg_match('/\d{4}-\d{4}/', $fullTerm, $matches);
+    $termYear = $matches[0] ?? 'Unknown Year';
 
     // Fetch officer roles dynamically from the DB
     $baseRoles = OfficerRole::where('org', $org)
-        ->orderBy('id') // or order by 'title' if needed
+        ->orderBy('id')
         ->pluck('title')
         ->toArray();
 
@@ -146,7 +195,7 @@ public function generatePdf()
 
         $user = User::whereRaw("TRIM(role) = ?", [$fullRole])
             ->where('org', $org)
-            ->where('term', $term)
+            ->where('term', 'LIKE', "%$termYear%")
             ->first();
 
         if ($user) {
@@ -176,13 +225,39 @@ public function generatePdf()
         }
     }
 
-    $pdf = Pdf::loadView('report.roster', compact('officers', 'org'))
+    // President
+    $presidentUser = User::whereRaw("TRIM(role) = ?", ['President - Officer'])
+        ->where('org', $org)
+        ->where('term', 'LIKE', "%$termYear%")
+        ->first();
+
+    $presidentName = $presidentUser ? $presidentUser->name : 'Not Appointed';
+
+    // Adviser
+    $adviserUser = User::where('role', 'Adviser')
+        ->where('org', $org)
+        ->where('term', 'LIKE', "%$termYear%")
+        ->first();
+
+    $adviserName = $adviserUser ? $adviserUser->name : 'Not Set';
+
+    // Generate PDF
+    $pdf = Pdf::loadView('report.roster', compact('officers', 'org', 'presidentName', 'adviserName'))
         ->setPaper('A4', 'portrait')
         ->setOption('isHtml5ParserEnabled', true)
         ->setOption('isPhpEnabled', true);
 
+        Logs::create([
+    'action' => 'Export',
+    'description' => 'Exported officer roster PDF for org "' . $org . '" (' . $termYear . ')',
+    'user' => auth()->user()->name ?? 'System',
+    'date_time' => now('Asia/Manila'),
+    'type' => 'Others',
+]);
+
     return $pdf->stream('officer_roster.pdf');
 }
+
 
 
 

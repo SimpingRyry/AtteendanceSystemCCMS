@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\EvaluationAssignment;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Logs;
 
 class EventsController extends Controller
 {
@@ -129,7 +130,13 @@ public function store(Request $request)
         $involved = $request->involved_students;
 
        $targetOrgs = [$organization];
-
+    Logs::create([
+    'action' => 'Create',
+    'description' => 'Created event "' . $event->name . '" on ' . $event->event_date . ' at ' . $event->venue,
+    'user' => auth()->user()->name ?? 'Unknown',
+    'date_time' => now('Asia/Manila'),
+    'type' => 'Event',
+]);
 if (in_array($involved, ['All', 'Members'])) {
     $orgModel = \App\Models\OrgList::where('org_name', $organization)->first();
     $childOrgs = $orgModel ? $orgModel->children->pluck('org_name')->toArray() : [];
@@ -318,6 +325,13 @@ public function fetchEvents()
         $event->times = json_encode($request->edit_times); // Save times as JSON
     
         $event->save();
+        Logs::create([
+    'action' => 'Update',
+    'description' => 'Updated event "' . $event->name . '" (ID: ' . $event->id . ') on ' . $event->event_date . ' at ' . ($event->venue ?? 'unspecified venue'),
+    'user' => auth()->user()->name ?? 'Unknown',
+    'date_time' => now('Asia/Manila'),
+    'type' => 'Event',
+]);
     
         return redirect()->back()->with('success', 'Event updated successfully!');
     }

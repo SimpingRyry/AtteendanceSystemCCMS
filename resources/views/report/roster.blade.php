@@ -208,6 +208,55 @@
     </tbody>
 </table>
 
+<!-- Signatories Section -->
+<table style="width: 100%; margin-top: 60px; font-size: 12px; border-collapse: collapse;">
+
+    <!-- Row 1: President and Prepared by aligned horizontally -->
+    <tr>
+        <!-- Noted by (President) -->
+        <td style="width: 50%; vertical-align: top; padding-right: 20px;">
+            <div style="font-weight: bold; text-align:left; margin-left: 50px;" >Noted by (President):</div>
+            <div style="margin-top: 30px; text-align: center;">
+                <div style="border-bottom: 1px solid #000; display: inline-block; min-width: 220px; font-weight: bold;">
+                    {{ $presidentName }}
+                </div>
+                <div style="margin-top: 5px;">Signature over Printed Name</div>
+            </div>
+        </td>
+
+        <!-- Prepared by -->
+        <td style="width: 50%; vertical-align: top; padding-left: 20px;">
+            <div style="font-weight: bold; text-align: left; margin-left: 50px;">Prepared by:</div>
+             <div style="margin-top: 30px; text-align: center;">
+                <div style="border-bottom: 1px solid #000; display: inline-block; min-width: 220px; font-weight: bold;">
+                    {{ $preparedByName ?? 'Not Set' }}
+                </div>
+                <div style="margin-top: 5px;">Signature over Printed Name</div>
+            </div>
+        </td>
+    </tr>
+
+    <!-- Spacer Row to create vertical space before Adviser -->
+    <tr>
+        <td colspan="2" style="height: 80px;"></td>
+    </tr>
+
+    <!-- Row 2: Adviser below -->
+    <tr>
+        <td style="width: 50%; vertical-align: top; padding-right: 20px;">
+            <div style="font-weight: bold; text-align:left; margin-left: 50px;" >Attested by (Adviser):</div>
+            <div style="margin-top: 30px; text-align: center;">
+                <div style="border-bottom: 1px solid #000; display: inline-block; min-width: 220px; font-weight: bold;">
+                    {{ $adviserName }}
+                </div>
+                <div style="margin-top: 5px;">Signature over Printed Name</div>
+            </div>
+        </td>
+    </tr>
+
+</table>
+
+
 <!-- Page Number Script for DOMPDF -->
 <script type="text/php">
     if (isset($pdf)) {

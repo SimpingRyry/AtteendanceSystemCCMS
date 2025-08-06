@@ -40,7 +40,7 @@
       <div class="mb-3">
         <h2 class="fw-bold" style="color: #232946;">Dashboard</h2>
         <small style="color: #989797;">Home /</small>
-        <small style="color: #444444;">Dash</small>
+        <small style="color: #444444;">Dashboard</small>
       </div>
 
       <!-- Fines Filter -->
@@ -173,7 +173,7 @@
         @php
           $times = json_decode($event->times, true);
           $startTime = (!empty($times) && isset($times[0]))
-              ? \Carbon\Carbon::createFromFormat('H:i', trim($times[0]))->format('g:i A')
+    ? \Carbon\Carbon::createFromFormat('H:i:s', trim($times[0]))->format('g:i A')
               : 'N/A';
         @endphp
         <li class="list-group-item d-flex justify-content-between align-items-start flex-column flex-md-row">

@@ -227,6 +227,43 @@
     </tr>
   </table>
 </div>
+
+
+<!-- Signatories Table -->
+<table style="width: 100%; margin-top: 100px; font-size: 12px; margin-left: 20px;">
+  <tr>
+    <!-- Prepared by -->
+    <td style="width: 100%; text-align: left; vertical-align: top;">
+      <div style="margin-bottom: 5px;">Prepared by:</div>
+      <strong style="font-size: 14px;">{{ $financialUser->name ?? 'Not Set' }}</strong><br>
+      <span style="font-size: 12px;">{{ $financialUser->role ?? 'N/A' }}</span>
+    </td>
+
+    <!-- Attested by -->
+    <td style="width: 20%; text-align: left; vertical-align: top; margin-left: 20px;">
+      <div style="margin-bottom: 5px;">Attested:</div>
+      <strong style="font-size: 14px;">{{ $presidentUser->name ?? 'Not Set' }}</strong><br>
+      <span style="font-size: 12px;">{{ $presidentUser->role ?? 'N/A' }}</span>
+    </td>
+  </tr>
+
+  <tr>
+    <!-- Audited -->
+    <td style="width: 50%; text-align: left; padding-top: 40px;">
+      <div style="margin-bottom: 5px;">Audited:</div>
+      <strong style="font-size: 14px;">{{ $auditorUser->name ?? 'Not Set' }}</strong><br>
+      <span style="font-size: 12px;">{{ $auditorUser->role ?? 'N/A' }}</span>
+    </td>
+
+    <!-- Noted -->
+    <td style="width: 50%; text-align: left; padding-top: 40px;">
+      <div style="margin-bottom: 5px; ">Noted:</div>
+      <strong style="font-size: 14px;">{{ $adviserUser->name ?? 'Not Set' }}</strong><br>
+      <span style="font-size: 12px;">{{ $adviserUser->role ?? 'Adviser' }}</span>
+    </td>
+  </tr>
+</table>
+
   </div>
 </body>
 </html>
