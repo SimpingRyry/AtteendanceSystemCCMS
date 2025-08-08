@@ -31,40 +31,152 @@
     {{-- Sidebar --}}
     @include('layout.sidebar')
 
-    <main>
-    <div class="container outer-box mt-5 pt-5 pb-4">
-        <div class="container inner-glass shadow p-4" id="main_box">
-            <h4 class="mb-4 text-center glow-text">L O G S</h4>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover table-striped align-middle">
-                    <thead class="table-primary text-center">
-                        <tr>
-                            <th>No.</th> <!-- New Column -->
-                            <th>Action</th>
-                            <th>Description</th>
-                            <th>User</th>
-                            <th>Date & Time</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-center">
-                        @forelse ($logs as $log)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td> <!-- Auto-increment number -->
-                                <td>{{ $log->action }}</td>
-                                <td>{{ $log->description }}</td>
-                                <td>{{ $log->user }}</td>
-                                <td>{{ \Carbon\Carbon::parse($log->date_time)->format('Y-m-d H:i:s') }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="text-center">No data</td> <!-- updated colspan -->
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+   <main>
+  <div class="container outer-box mt-5 pt-5 pb-4">
+    <div class="container inner-glass shadow p-4" id="main_box">
+      <!-- Page Title and Tabs -->
+      <div class="mb-4">
+        <div class="mb-4">
+          <h2 class="fw-bold" style="color: #232946;">Logs</h2>
+          <small style="color: #989797;">Manage /</small>
+          <small style="color: #444444;">Logs</small>
         </div>
+        <ul class="nav nav-tabs" id="logsTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="user-tab" data-bs-toggle="tab" data-bs-target="#userLogs" type="button" role="tab">User</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="event-tab" data-bs-toggle="tab" data-bs-target="#eventLogs" type="button" role="tab">Events</button>
+          </li>
+
+           <li class="nav-item" role="presentation">
+            <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#paymentLogs" type="button" role="tab">Payments</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="other-tab" data-bs-toggle="tab" data-bs-target="#otherLogs" type="button" role="tab">Others</button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="tab-content" id="logsTabContent">
+        <!-- 🟦 User Logs Tab -->
+        <div class="tab-pane fade show active" id="userLogs" role="tabpanel">
+          <h4 class="fw-bold mt-4" style="color:#232946;">User Logs</h4>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-dark">
+                <tr>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Description</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                  @foreach ($userLogs as $log)
+    <tr>
+      <td>{{ $log->user ?? 'N/A' }}</td>
+      <td>{{ $log->action }}</td>
+      <td>{{ $log->description }}</td>
+      <td>{{ \Carbon\Carbon::parse($log->date_time)->format('Y-m-d H:i:s') }}</td>
+    </tr>
+  @endforeach
+              
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 🟩 Event Logs Tab -->
+        <div class="tab-pane fade" id="eventLogs" role="tabpanel">
+          <h4 class="fw-bold mt-4" style="color:#232946;">Event Logs</h4>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                <tr>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Description</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+
+                @foreach ($eventLogs as $log)
+                  <tr>
+                    <td>{{ $log->user }}</td>
+                    <td>{{ $log->action }}</td>
+                    <td>{{ $log->description }}</td>
+                    <td>{{ \Carbon\Carbon::parse($log->created_at)->format('Y-m-d H:i:s') }}</td>
+                  </tr>
+                @endforeach
+
+
+          
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+         <div class="tab-pane fade" id="paymentLogs" role="tabpanel">
+          <h4 class="fw-bold mt-4" style="color:#232946;">Event Logs</h4>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                 <thead class="table-dark">
+                <tr>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Description</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach ($paymentLogs as $log)
+                  <tr>
+                    <td>{{ $log->user ?? 'N/A' }}</td>
+                    <td>{{ $log->action }}</td>
+                    <td>{{ $log->description }}</td>
+                    <td>{{ \Carbon\Carbon::parse($log->date_time)->format('Y-m-d H:i:s') }}</td>
+                  </tr>
+                @endforeach
+          
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 🟨 Other Logs Tab -->
+        <div class="tab-pane fade" id="otherLogs" role="tabpanel">
+          <h4 class="fw-bold mt-4" style="color:#232946;">Other Logs</h4>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                <tr>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Description</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach ($otherLogs as $log)
+                  <tr>
+                    <td>{{ $log->user ?? 'N/A' }}</td>
+                    <td>{{ $log->action }}</td>
+                    <td>{{ $log->description }}</td>
+                    <td>{{ \Carbon\Carbon::parse($log->date_time)->format('Y-m-d H:i:s') }}</td>
+                  </tr>
+                @endforeach
+             
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
     </div>
+  </div>
 </main>
 
     <!-- Bootstrap JS -->
