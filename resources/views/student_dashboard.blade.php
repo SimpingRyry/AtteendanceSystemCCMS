@@ -29,7 +29,12 @@
       max-width: 400px;
       margin: 0 auto;
     }
+
+      thead.table-dark th {
+    color: #fff !important;
+  }
   </style>
+
 </head>
 
 <body style="background-color: #fffffe;">
@@ -71,7 +76,7 @@
           return [
             'title' => $e->name,
             'date' => \Carbon\Carbon::parse($e->event_date)->format('F d, Y'),
-            'times' => json_decode($e->times, true) // Assuming times is stored as a JSON array
+            'times' => json_decode($e->times, true)
           ];
         })) !!}</div>
       </div>
@@ -122,17 +127,17 @@
         </div>
       </div>
 
-      <!-- Tables -->
+      <!-- Tables Row -->
       <div class="row g-4">
+        <!-- Recent Payments -->
         <div class="col-lg-6">
-          <div class="card shadow-sm p-3 rounded-4"style="min-height: 245px">
+          <div class="card shadow-sm p-3 rounded-4" style="min-height: 245px">
             <h6 class="mb-3 text-center">Recent Payments</h6>
             <div class="table-responsive">
               <table class="table table-hover">
                 <thead class="table-light">
                   <tr>
                     <th>#</th>
-                  
                     <th>Amount</th>
                     <th>Date</th>
                   </tr>
@@ -143,18 +148,233 @@
           </div>
         </div>
 
+        <!-- Upcoming Events -->
         <div class="col-lg-6">
-          <div class="card shadow-sm p-3 rounded-4"style="min-height: 200px">
+          <div class="card shadow-sm p-3 rounded-4" style="min-height: 200px">
             <h6 class="mb-3 text-center">Upcoming Events</h6>
             <ul class="list-group list-group-flush" id="upcomingEventsList"></ul>
           </div>
         </div>
       </div>
+
+      <!-- Evaluation Section -->
+      <div class="row g-4 mt-1">
+        <div class="col-12">
+          <div class="card shadow-sm p-3 rounded-4">
+            <h6 class="mb-3 text-center">Evaluation</h6>
+            @if(session('success'))
+              <div class="alert alert-success mt-3">{{ session('success') }}</div>
+            @endif
+            <div class="table-responsive">
+              <table class="table table-bordered mt-2">
+                <thead class="table-dark text-white">
+                  <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Event Date</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @forelse ($assignments as $assign)
+                  <tr>
+                    <td>{{ $assign->event->name ?? '—' }}</td>
+                    <td>{{ $assign->evaluation->title }}</td>
+                    <td>{{ Str::limit($assign->evaluation->description, 80) }}</td>
+                    <td>
+                      @if($assign->attendance && $assign->attendance->is_answered)
+                        <button class="btn btn-sm btn-success show-evaluation-btn" 
+                          data-id="{{ $assign->evaluation->id }}" 
+                          data-event-id="{{ $assign->event->id }}">
+                          Show
+                        </button>
+                      @else
+                        <button class="btn btn-sm btn-primary evaluation-card" 
+                          data-id="{{ $assign->evaluation->id }}" 
+                          data-event-id="{{ $assign->event->id }}">
+                          Answer
+                        </button>
+                      @endif
+                    </td>
+                  </tr>
+                  @empty
+                  <tr>
+                    <td colspan="4" class="text-center text-muted">No evaluations available.</td>
+                  </tr>
+                  @endforelse
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </main>
 
+
+<div class="modal fade" id="evalModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <form id="evalForm" class="modal-content">
+      @csrf
+      <input type="hidden" name="evaluation_id" id="evaluation_id">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <p id="modalDesc" class="text-muted"></p>
+        <div id="modalQuestions"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="viewEvaluationModal" tabindex="-1" aria-labelledby="viewEvaluationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title" id="viewEvaluationModalLabel">Evaluation Answers</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="evaluationAnswersContent">
+        <!-- Answers will be injected via JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.show-evaluation-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const evalId = this.getAttribute('data-id');
+      const eventId = this.getAttribute('data-event-id');
+
+      fetch(`/evaluation-answers/${evalId}/${eventId}`)
+        .then(res => res.json())
+        .then(data => {
+          let html = '';
+          data.forEach(item => {
+            html += `
+              <div class="mb-3">
+                <strong>Q: ${item.question}</strong>
+                <p class="ms-3">Answer: ${item.answer}</p>
+              </div>
+            `;
+          });
+
+          document.getElementById('evaluationAnswersContent').innerHTML = html;
+          new bootstrap.Modal(document.getElementById('viewEvaluationModal')).show();
+        });
+    });
+  });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const cards = document.querySelectorAll('.evaluation-card');
+  const modal = new bootstrap.Modal(document.getElementById('evalModal'));
+
+  cards.forEach(card => {
+    card.addEventListener('click', async () => {
+      const id = card.dataset.id;
+      const res = await fetch(`/student/evaluation/${id}/json`);
+      if (!res.ok) return alert('Failed to load evaluation.');
+
+      const data = await res.json();
+      document.getElementById('modalTitle').textContent = data.title;
+      document.getElementById('modalDesc').textContent = data.description || '—';
+      document.getElementById('evaluation_id').value = data.id;
+
+      const container = document.getElementById('modalQuestions');
+      container.innerHTML = '';
+
+      data.questions.forEach((q, i) => {
+        const base = `responses[${i}]`;
+        let html = `
+          <div class="mb-4">
+            <input type="hidden" name="${base}[question_id]" value="${q.id}">
+            <label class="form-label fw-semibold">${q.order}. ${q.question}</label>
+        `;
+
+        switch (q.type) {
+          case 'short':
+            html += `<input type="text" class="form-control" name="${base}[answer]" required>`;
+            break;
+          case 'textarea':
+            html += `<textarea class="form-control" name="${base}[answer]" rows="3" required></textarea>`;
+            break;
+          case 'mcq':
+            q.options.forEach(opt => {
+              html += `
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="${base}[answer]" value="${opt}" required>
+                  <label class="form-check-label">${opt}</label>
+                </div>`;
+            });
+            break;
+          case 'checkbox':
+            q.options.forEach(opt => {
+              html += `
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="${base}[answer][]" value="${opt}">
+                  <label class="form-check-label">${opt}</label>
+                </div>`;
+            });
+            break;
+        }
+
+        container.insertAdjacentHTML('beforeend', html + '</div>');
+      });
+
+      modal.show();
+    });
+  });
+
+  // Form submission via AJAX
+  document.getElementById('evalForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const form = e.target;
+  const formData = new FormData(form);
+
+  try {
+    const res = await fetch('/student/evaluation/submit', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value
+      },
+      body: formData
+    });
+
+    if (res.ok) {
+      alert('Your responses were submitted!');
+      bootstrap.Modal.getInstance(document.getElementById('evalModal')).hide();
+      form.reset();
+    } else {
+      const errorText = await res.text();
+      alert('Error submitting answers: ' + errorText);
+      console.error('Submit error:', errorText);
+    }
+  } catch (error) {
+    alert('Network or server error: ' + error.message);
+    console.error(error);
+  }
+});
+});
+</script>
 <script>
   const completedEvents = parseInt(document.getElementById('completedEventsValue').textContent);
   const myEvents = parseInt(document.getElementById('myEventsValue').textContent);

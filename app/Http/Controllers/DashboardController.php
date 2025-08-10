@@ -56,51 +56,54 @@ $upcomingEvents = Event::whereDate('event_date', '>=', Carbon::today('Asia/Manil
 public function studentindex()
 {
     $user = auth()->user();
+    $studentId = $user->student_id;
 
-    // Completed events = all attendance records
-    $completedEvents = Attendance::where('student_id', $user->student_id)->count();
+    // Completed events
+    $completedEvents = Attendance::where('student_id', $studentId)->count();
 
-    // Upcoming events
+    // Upcoming events count
     $upcomingEventsCount = Event::where('event_date', '>', now())->count();
 
-    // Attendance Breakdown
-    $attended = Attendance::where('student_id', $user->student_id)
+    // Attendance breakdown
+    $attended = Attendance::where('student_id', $studentId)
         ->where(function ($q) {
             $q->whereIn('status', ['On Time', 'Late'])
               ->orWhereIn('status_morning', ['On Time', 'Late'])
               ->orWhereIn('status_afternoon', ['On Time', 'Late']);
         })->count();
 
-    $absent = Attendance::where('student_id', $user->student_id)
+    $absent = Attendance::where('student_id', $studentId)
         ->where(function ($q) {
             $q->where('status', 'Absent')
               ->orWhere('status_morning', 'Absent')
               ->orWhere('status_afternoon', 'Absent');
         })->count();
 
-    $attendancePercentage = $completedEvents > 0 ? round(($attended / $completedEvents) * 100) : 0;
+    $attendancePercentage = $completedEvents > 0
+        ? round(($attended / $completedEvents) * 100)
+        : 0;
 
     // Total fines calculation
-    $fines = Transaction::where('student_id', $user->student_id)
+    $fines = Transaction::where('student_id', $studentId)
         ->where('transaction_type', 'FINE')
         ->sum('fine_amount');
 
-    $payments = Transaction::where('student_id', $user->student_id)
+    $payments = Transaction::where('student_id', $studentId)
         ->where('transaction_type', 'PAYMENT')
         ->sum('fine_amount');
 
     $totalFines = $fines - $payments;
 
-    // Recent Payments
-    $recentPayments = Transaction::where('student_id', $user->student_id)
+    // Recent payments
+    $recentPayments = Transaction::where('student_id', $studentId)
         ->where('transaction_type', 'PAYMENT')
         ->orderByDesc('date')
         ->take(5)
         ->get();
 
     $now = Carbon::now();
-    $studentId = $user->student_id;
 
+    // Monthly fines
     $monthlyFines = collect(range(0, 3))->mapWithKeys(function ($i) use ($now, $studentId) {
         $month = $now->copy()->subMonths($i)->format('Y-m');
         $fines = \App\Models\Transaction::where('student_id', $studentId)
@@ -108,13 +111,39 @@ public function studentindex()
             ->where('date', 'like', "$month%")
             ->sum('fine_amount');
         return [$month => $fines];
-    })->reverse(); // from oldest to latest
+    })->reverse();
 
-    // Upcoming Events
+    // Upcoming events list
     $upcomingEvents = Event::where('event_date', '>=', Carbon::today('Asia/Manila'))
         ->orderBy('event_date')
         ->take(5)
         ->get();
+
+    /**
+     * EVALUATION ASSIGNMENTS SECTION
+     */
+    // Get attended event IDs
+    $attendedEventIds = DB::table('attendances')
+        ->where('student_id', $studentId)
+        ->pluck('event_id');
+
+    // Get latest EvaluationAssignment
+    $latestAssignment = \App\Models\EvaluationAssignment::with(['evaluation', 'event'])
+        ->whereIn('event_id', $attendedEventIds)
+        ->whereHas('event')
+        ->get()
+        ->sortByDesc(fn ($assignment) => $assignment->event->event_date)
+        ->first();
+
+    // Attach attendance
+    if ($latestAssignment) {
+        $attendance = Attendance::where('student_id', $studentId)
+            ->where('event_id', $latestAssignment->event_id)
+            ->first();
+        $latestAssignment->attendance = $attendance;
+    }
+
+    $assignments = $latestAssignment ? [$latestAssignment] : [];
 
     return view('student_dashboard', compact(
         'completedEvents',
@@ -125,7 +154,8 @@ public function studentindex()
         'upcomingEvents',
         'attended',
         'absent',
-        'monthlyFines'
+        'monthlyFines',
+        'assignments' // added here for the Evaluation section
     ));
 }
 

@@ -160,26 +160,29 @@
         <h5 class="modal-title" id="onlinePaymentModalLabel">Online Payment</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form id="onlinePaymentForm" method="POST" action="{{ route('gcash.pay') }}">
-        @csrf
-        <div class="modal-body">
-          <div class="mb-3">
+  <form id="onlinePaymentForm" method="POST" action="{{ route('gcash.pay') }}">
+    @csrf
+    <input type="hidden" name="organization" value="{{ $selectedOrg }}"> <!-- ✅ Send selected org -->
+
+    <div class="modal-body">
+        <div class="mb-3">
             <label for="paymentAmount" class="form-label">Enter Amount to Pay</label>
-            <input type="number" class="form-control" id="paymentAmount" name="amount" placeholder="₱0.00" required min="20">
+            <input type="number" class="form-control" id="paymentAmount" name="amount"
+                   placeholder="₱0.00" required min="20">
             <small class="form-text text-danger mt-1">
-              Please pay either the exact amount or any amount <strong>not less than ₱20.00</strong>.
+                Please pay either the exact amount or any amount <strong>not less than ₱20.00</strong>.
             </small>
-          </div>
-          <div class="text-muted small">
+        </div>
+        <div class="text-muted small">
             You will be redirected to GCash to complete your payment.
-          </div>
         </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">
             <i class="fas fa-paper-plane me-1"></i> Proceed Payment
-          </button>
-        </div>
-      </form>
+        </button>
+    </div>
+</form>
     </div>
   </div>
 </div>

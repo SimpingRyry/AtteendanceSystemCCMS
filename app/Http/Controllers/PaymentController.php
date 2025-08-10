@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\Logs;
+use Illuminate\Support\Facades\Http;
 
 class PaymentController extends Controller
 {
@@ -177,5 +178,53 @@ public function storePayment(Request $request)
 
     return back()->with('success', 'Payment recorded successfully.');
 }
+public function gcashSuccess(Request $request)
+{
+    // PayMongo passes the source ID back
+    $sourceId = $request->query('source');
 
+    if (!$sourceId) {
+        return redirect()->route('home')->with('error', 'Missing payment source ID.');
+    }
+
+    // Check payment status via PayMongo API
+    $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
+        ->get("https://api.paymongo.com/v1/sources/{$sourceId}");
+
+    if ($response->failed()) {
+        return redirect()->route('home')->with('error', 'Unable to verify payment.');
+    }
+
+    $sourceData = $response->json('data.attributes');
+
+    if ($sourceData['status'] === 'chargeable') {
+        // Here you can store the payment in your database
+        $user = auth()->user();
+
+        Transaction::create([
+            'student_id'       => $user->student_id,
+            'transaction_type' => 'PAYMENT',
+            'org'              => $user->org,
+            'or_num'           => 'GCASH-' . strtoupper(uniqid()),
+            'date'             => now('Asia/Manila'),
+            'acad_code'        => Setting::where('key', 'academic_term')->value('acad_code'),
+            'acad_term'        => Setting::where('key', 'academic_term')->value('value'),
+            'processed_by'     => 'GCASH',
+            'fine_amount'      => $sourceData['amount'] / 100, // convert centavos to pesos
+        ]);
+
+        Logs::create([
+            'action'      => 'Create',
+            'description' => 'Recorded GCash payment for student ID ' . $user->student_id .
+                             ' (₱' . number_format($sourceData['amount'] / 100, 2) . ')',
+            'user'        => $user->name,
+            'date_time'   => now('Asia/Manila'),
+            'type'        => 'Payment',
+        ]);
+
+        return redirect()->route('home')->with('success', 'GCash payment recorded successfully.');
+    }
+
+    return redirect()->route('home')->with('error', 'Payment not completed.');
+}
 }

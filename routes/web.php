@@ -312,3 +312,5 @@ Route::get('/attendance/{eventId}/{studentId}', [AttendanceController::class, 'g
 Route::post('/submit-excuse', [AttendanceController::class, 'submitExcuse'])->name('excuse.submit');
 Route::get('/evaluation-answers/{evaluation}/{event}', [EvaluationController::class, 'getAnswers']);
 Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
+Route::get('/gcash/success', [PaymentController::class, 'gcashSuccess'])->name('gcash.success');
+Route::get('/gcash/failed', [PaymentController::class, 'gcashFailed'])->name('gcash.failed');

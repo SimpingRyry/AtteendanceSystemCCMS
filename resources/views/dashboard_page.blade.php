@@ -77,25 +77,25 @@
       <!-- Overview Cards -->
       <div class="row g-4 mb-4">
         <div class="col-md-3">
-          <div class="card text-center shadow-sm p-3 rounded-4">
+          <div class="card text-center shadow-sm p-3 rounded-4 h-100">
             <h6 class="text-muted">Total Members</h6>
             <h2>{{ number_format($totalMembers) }}</h2>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="card text-center shadow-sm p-3 rounded-4">
+          <div class="card text-center shadow-sm p-3 rounded-4 h-100">
             <h6 class="text-muted">Registered</h6>
             <h2>{{ number_format($registered) }}</h2>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="card text-center shadow-sm p-3 rounded-4">
+          <div class="card text-center shadow-sm p-3 rounded-4 h-100">
             <h6 class="text-muted">Total Collected Fines</h6>
             <h2>₱{{ number_format($totalCollectedFines) }}</h2>
           </div>
         </div>
         <div class="col-md-3">
-          <div class="card text-center shadow-sm p-3 rounded-4">
+          <div class="card text-center shadow-sm p-3 rounded-4 h-100">
             <h6 class="text-muted">Total Issued Fines</h6>
             <h2 id="totalFines">₱{{ number_format($totalFines) }}</h2>
           </div>
@@ -104,26 +104,25 @@
 
       <!-- Charts Row -->
       <div class="row g-4 mb-4">
-      <div class="col-lg-6">
+             <div class="col-lg-6">
   <div class="card shadow-sm p-3 rounded-4">
     <h6 class="mb-3 text-center">Fines Issued by Month</h6>
     <div id="finesChartWrapper" data-fines='@json($finesByMonth)'></div>
     <canvas id="finesChart" style="height: 300px;"></canvas>
   </div>
 </div>
-       <div class="col-lg-6">
-  <div class="card shadow-sm p-3 rounded-4">
-    <h6 class="mb-3 text-center">Registered Students by Program, Year and Block</h6>
-    <div id="registrationChartData"
-         data-labels='@json(array_keys($yearLevelData->toArray()))'
-         data-values='@json(array_values($yearLevelData->toArray()))'>
-    </div>
-
-    <div style="height: 300px; width: 400px; margin: auto;">
-      <canvas id="registrationChart"></canvas>
-    </div>
-  </div>
-</div>
+        <div class="col-lg-6">
+          <div class="card shadow-sm p-3 rounded-4 h-100">
+            <h6 class="mb-3 text-center">Registered Students by Program, Year and Block</h6>
+            <div id="registrationChartData"
+                 data-labels='@json(array_keys($yearLevelData->toArray()))'
+                 data-values='@json(array_values($yearLevelData->toArray()))'>
+            </div>
+            <div class="w-100" style="height: 300px;">
+              <canvas id="registrationChart"></canvas>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Table & Events Row -->
@@ -165,53 +164,53 @@
             </div>
           </div>
         </div>
-       <div class="col-lg-6">
-<div class="card shadow-sm p-3 rounded-4" style="min-height: 200px"> 
-    <h6 class="mb-3 text-center">Upcoming Events</h6>
-    <ul class="list-group list-group-flush">
-      @forelse($upcomingEvents as $event)
-        @php
-          $times = json_decode($event->times, true);
-          $startTime = (!empty($times) && isset($times[0]))
-    ? \Carbon\Carbon::createFromFormat('H:i:s', trim($times[0]))->format('g:i A')
-              : 'N/A';
-        @endphp
-        <li class="list-group-item d-flex justify-content-between align-items-start flex-column flex-md-row">
-          <div>
-            <strong>{{ $event->name }}</strong><br>
-            <small class="text-muted">
-              {{ \Carbon\Carbon::parse($event->event_date)->format('F j, Y') }}
-            </small>
+        <div class="col-lg-6">
+          <div class="card shadow-sm p-3 rounded-4" style="min-height: 200px">
+            <h6 class="mb-3 text-center">Upcoming Events</h6>
+            <ul class="list-group list-group-flush">
+              @forelse($upcomingEvents as $event)
+                @php
+                  $times = json_decode($event->times, true);
+                  $startTime = (!empty($times) && isset($times[0]))
+                    ? \Carbon\Carbon::createFromFormat('H:i:s', trim($times[0]))->format('g:i A')
+                    : 'N/A';
+                @endphp
+                <li class="list-group-item d-flex justify-content-between align-items-start flex-column flex-md-row">
+                  <div>
+                    <strong>{{ $event->name }}</strong><br>
+                    <small class="text-muted">
+                      {{ \Carbon\Carbon::parse($event->event_date)->format('F j, Y') }}
+                    </small>
+                  </div>
+                  <span class="badge 
+                      @if($loop->index == 0) bg-primary
+                      @elseif($loop->index == 1) bg-success
+                      @elseif($loop->index == 2) bg-warning text-dark
+                      @else bg-secondary
+                      @endif
+                      rounded-pill align-self-md-center mt-2 mt-md-0">
+                    {{ $startTime }}
+                  </span>
+                </li>
+              @empty
+                <li class="list-group-item text-center">No upcoming events.</li>
+              @endforelse
+            </ul>
+
+            {{-- See More Button --}}
+            <div class="text-center mt-3">
+              <a href="{{ route('events.index') }}" class="btn btn-outline-primary btn-sm">
+                See More <i class="bi bi-arrow-right-circle"></i>
+              </a>
+            </div>
           </div>
-          <span class="badge 
-              @if($loop->index == 0) bg-primary
-              @elseif($loop->index == 1) bg-success
-              @elseif($loop->index == 2) bg-warning text-dark
-              @else bg-secondary
-              @endif
-              rounded-pill align-self-md-center mt-2 mt-md-0">
-            {{ $startTime }}
-          </span>
-        </li>
-      @empty
-        <li class="list-group-item text-center">No upcoming events.</li>
-      @endforelse
-    </ul>
-
-    {{-- See More Button --}}
-    <div class="text-center mt-3">
-        <a href="{{ route('events.index') }}" class="btn btn-outline-primary btn-sm ">
-            See More <i class="bi bi-arrow-right-circle"></i>
-        </a>
-    </div>
-</div>
-
-</div>
+        </div>
       </div>
 
     </div>
   </div>
 </main>
+
 <script>
   const finesData = {
     "2025-04": 12450,

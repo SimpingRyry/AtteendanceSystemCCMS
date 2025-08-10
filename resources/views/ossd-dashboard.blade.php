@@ -45,27 +45,27 @@
             <!-- Overview Cards -->
             <div class="row g-4 mb-4">
                 <div class="col-md-3">
-                    <div class="card text-center shadow-sm p-3 rounded-4">
+                    <div class="card text-center shadow-sm p-3 rounded-4 h-100">
                         <h6 class="text-muted">Total Organizations</h6>
-                        <h2>{{ $totalOrganizations }}</h2>
+                     <h2 class="text-center">{{ $totalOrganizations }}</h2>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card text-center shadow-sm p-3 rounded-4">
+                    <div class="card text-center shadow-sm p-3 rounded-4 h-100">
                         <h6 class="text-muted">Events Created</h6>
-                        <h2>{{ $totalEvents }}</h2>
+                        <h2 class="text-center">{{ $totalEvents }}</h2>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card text-center shadow-sm p-3 rounded-4">
+                    <div class="card text-center shadow-sm p-3 rounded-4 h-100">
                         <h6 class="text-muted">Registered</h6>
-                        <h2>{{ $registeredStudents }}</h2>
+                      <h2 class="text-center"></h2>  <h2>{{ $registeredStudents }}</h2>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card text-center shadow-sm p-3 rounded-4">
+                    <div class="card text-center shadow-sm p-3 rounded-4 h-100">
                         <h6 class="text-muted">Total Students</h6>
-                        <h2>{{ $totalStudents }}</h2>
+                        <h2 class="text-center">{{ $totalStudents }}</h2>
                     </div>
                 </div>
             </div>
@@ -80,7 +80,9 @@
                              data-labels='@json(array_keys($eventsPerOrg))'
                              data-values='@json(array_values($eventsPerOrg))'>
                         </div>
-                        <canvas id="absenteesChart" style="height: 300px;"></canvas>
+                      <div class="chart-wrapper">
+    <canvas id="absenteesChart"></canvas>
+</div>
                     </div>
                 </div>
 
@@ -171,12 +173,26 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+        <style>
+.chart-wrapper {
+    position: relative;
+    height: 300px; /* Default desktop height */
+}
+
+/* On small screens, allow more height so labels fit */
+@media (max-width: 768px) {
+    .chart-wrapper {
+        height: 400px;
+    }
+}
+</style>
     <script>
     const eventsChartData = document.getElementById('eventsChartData');
 const orgLabels = JSON.parse(eventsChartData.dataset.labels);
 const orgEvents = JSON.parse(eventsChartData.dataset.values);
+const ctx = document.getElementById('absenteesChart').getContext('2d');
 
-new Chart(document.getElementById('absenteesChart').getContext('2d'), {
+new Chart(ctx, {
     type: 'bar',
     data: {
         labels: orgLabels,
@@ -189,17 +205,30 @@ new Chart(document.getElementById('absenteesChart').getContext('2d'), {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: { display: false }
         },
         scales: {
-            y: {
-                beginAtZero: true
+            x: {
+                ticks: {
+                    autoSkip: false,
+                    maxRotation: window.innerWidth < 768 ? 45 : 0,
+                    minRotation: 0,
+                    callback: function(value) {
+                        let label = this.getLabelForValue(value);
+
+                        // On small screens, shorten labels to avoid overlap
+                        if (window.innerWidth < 768) {
+                            return label.length > 8 ? label.slice(0, 8) + '…' : label;
+                        }
+                        return label; // full label on desktop
+                    }
+                }
             }
         }
     }
 });
-
 const programChartData = document.getElementById('studentProgramData');
 const programLabels = JSON.parse(programChartData.dataset.labels);
 const programValues = JSON.parse(programChartData.dataset.values);
