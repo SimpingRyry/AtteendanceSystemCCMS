@@ -58,14 +58,27 @@ public function index()
         ->get()
         ->unique('student_id');
 
+    // Compute balances based on filtered transactions (copied from payments page)
+    $balances = [];
+    foreach ($students as $student) {
+        $balance = 0;
+        foreach ($student->transactions as $transaction) {
+            if ($transaction->transaction_type === 'FINE') {
+                $balance += $transaction->fine_amount;
+            } elseif ($transaction->transaction_type === 'PAYMENT') {
+                $balance -= $transaction->fine_amount;
+            }
+        }
+        $balances[$student->student_id] = $balance;
+    }
+
     // For filters or dropdowns
     $organizations = OrgList::pluck('org_name');
     $courses = Student::distinct()->pluck('course');
     $sections = Student::distinct()->pluck('section');
 
-    return view('clearance', compact('students', 'organizations', 'courses', 'sections'));
+    return view('clearance', compact('students', 'balances', 'organizations', 'courses', 'sections'));
 }
-
 
 
 

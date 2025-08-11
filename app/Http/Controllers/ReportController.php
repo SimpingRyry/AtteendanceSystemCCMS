@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\OfficerRole;
 use App\Models\Logs;
-
+use App\Models\Transaction;
+use App\Models\OrgList;
 
 class ReportController extends Controller
 {
@@ -173,89 +174,153 @@ public function exportFinancialReport(Request $request)
     return $pdf->download('student_roster.pdf');
 }
 
-public function generatePdf() 
+public function generatePdf(Request $request)
 {
     $org = Auth::user()->org;
-    
-    // Get academic term and extract year range (e.g., "2025-2026")
+    $selectedRole = $request->input('role');
+
     $fullTerm = Setting::where('key', 'academic_term')->first()->value ?? 'Unknown Term';
     preg_match('/\d{4}-\d{4}/', $fullTerm, $matches);
     $termYear = $matches[0] ?? 'Unknown Year';
 
-    // Fetch officer roles dynamically from the DB
-    $baseRoles = OfficerRole::where('org', $org)
-        ->orderBy('id')
-        ->pluck('title')
-        ->toArray();
-
     $officers = [];
+    $presidentName = '';
+    $adviserName = '';
+    $preparedByName = auth()->user()->name ?? 'Not Set';
 
-    foreach ($baseRoles as $baseRole) {
-        $fullRole = $baseRole . ' - Officer';
+    if ($selectedRole === 'Officer') {
+        // --- Your existing Officer logic ---
+        $baseRoles = OfficerRole::where('org', $org)
+            ->orderBy('id')
+            ->pluck('title')
+            ->toArray();
 
-        $user = User::whereRaw("TRIM(role) = ?", [$fullRole])
+        foreach ($baseRoles as $baseRole) {
+            $fullRole = $baseRole . ' - Officer';
+
+            $user = User::whereRaw("TRIM(role) = ?", [$fullRole])
+                ->where('org', $org)
+                ->where('term', 'LIKE', "%$termYear%")
+                ->first();
+
+            if ($user) {
+                $student = Student::where('id_number', $user->student_id)->first();
+                $photoPath = public_path("uploads/{$user->picture}");
+                $photo = file_exists($photoPath) ? $photoPath : public_path("images/default.png");
+
+                $officers[] = [
+                    'position' => $baseRole,
+                    'name' => $user->name,
+                    'photo' => $photo,
+                    'birth_date' => $student->birth_date ?? 'Not Set',
+                    'address' => $student->address ?? 'Not Set',
+                    'course' => $student->course ?? 'N/A',
+                    'year' => $student->year ?? null,
+                ];
+            } else {
+                $officers[] = [
+                    'position' => $baseRole,
+                    'name' => 'Not Appointed',
+                    'photo' => public_path("images/default.png"),
+                    'birth_date' => '-',
+                    'address' => '-',
+                    'course' => '-',
+                    'year' => '-',
+                ];
+            }
+        }
+
+        $presidentUser = User::whereRaw("TRIM(role) = ?", ['President - Officer'])
             ->where('org', $org)
             ->where('term', 'LIKE', "%$termYear%")
             ->first();
+        $presidentName = $presidentUser ? $presidentUser->name : 'Not Appointed';
 
-        if ($user) {
-            $student = Student::where('id_number', $user->student_id)->first();
-            $photoPath = public_path("uploads/{$user->picture}");
+ $adviserUser = User::where('role', 'Adviser')
+    ->where('org', $org)
+    ->where('term', 'like', "%$termYear%")
+    ->first(); // <-- fetch the actual user
+
+$adviserName = $adviserUser ? $adviserUser->name : 'Not Set';
+
+Log::info('Adviser Name: ' . $adviserName);
+
+    } elseif ($selectedRole === 'Member') {
+        // --- Member logic ---
+        $orgModel = OrgList::where('org_name', $org)->first();
+        if (!$orgModel) {
+            abort(404, 'Organization not found');
+        }
+
+        if ($orgModel->children()->exists()) {
+            $orgNames = $orgModel->children()->pluck('org_name')->toArray();
+            $orgNames[] = $org;
+        } else {
+            $orgNames = [$org];
+        }
+
+        $members = User::whereIn('org', $orgNames)
+            ->where('role', 'Member')
+            ->get();
+
+        foreach ($members as $member) {
+            $student = Student::where('id_number', $member->student_id)->first();
+            $photoPath = public_path("uploads/{$member->picture}");
             $photo = file_exists($photoPath) ? $photoPath : public_path("images/default.png");
 
-            $officers[] = [
-                'position' => $baseRole,
-                'name' => $user->name,
+            $officers[] = [ // same name so template works
+                'position' => 'Member',
+                'name' => $member->name,
                 'photo' => $photo,
                 'birth_date' => $student->birth_date ?? 'Not Set',
                 'address' => $student->address ?? 'Not Set',
                 'course' => $student->course ?? 'N/A',
                 'year' => $student->year ?? null,
             ];
-        } else {
-            $officers[] = [
-                'position' => $baseRole,
-                'name' => 'Not Appointed',
-                'photo' => public_path("images/default.png"),
-                'birth_date' => '-',
-                'address' => '-',
-                'course' => '-',
-                'year' => '-',
-            ];
         }
+
+                $presidentUser = User::whereRaw("TRIM(role) = ?", ['President - Officer'])
+            ->where('org', $org)
+            ->where('term', 'LIKE', "%$termYear%")
+            ->first();
+        $presidentName = $presidentUser ? $presidentUser->name : 'Not Appointed';
+
+ $adviserUser = User::where('role', 'Adviser')
+    ->where('org', $org)
+    ->where('term', 'like', "%$termYear%")
+    ->first(); // <-- fetch the actual user
+
+$adviserName = $adviserUser ? $adviserUser->name : 'Not Set';
+$roleLabel = ucfirst(strtolower($request->input('role'))) . 's';
+
+    
     }
+    Log::info('Adviser Name: ' . $adviserName);
 
-    // President
-    $presidentUser = User::whereRaw("TRIM(role) = ?", ['President - Officer'])
-        ->where('org', $org)
-        ->where('term', 'LIKE', "%$termYear%")
-        ->first();
+    
 
-    $presidentName = $presidentUser ? $presidentUser->name : 'Not Appointed';
+    $pdf = Pdf::loadView('report.roster', compact(
+        'officers',
+        'org',
+        'presidentName',
+        'adviserName',
+        'preparedByName',
+        'roleLabel',
 
-    // Adviser
-    $adviserUser = User::where('role', 'Adviser')
-        ->where('org', $org)
-        ->where('term', 'LIKE', "%$termYear%")
-        ->first();
-
-    $adviserName = $adviserUser ? $adviserUser->name : 'Not Set';
-
-    // Generate PDF
-    $pdf = Pdf::loadView('report.roster', compact('officers', 'org', 'presidentName', 'adviserName'))
+    ))
         ->setPaper('A4', 'portrait')
         ->setOption('isHtml5ParserEnabled', true)
         ->setOption('isPhpEnabled', true);
 
-        Logs::create([
-    'action' => 'Export',
-    'description' => 'Exported officer roster PDF for org "' . $org . '" (' . $termYear . ')',
-    'user' => auth()->user()->name ?? 'System',
-    'date_time' => now('Asia/Manila'),
-    'type' => 'Others',
-]);
+    Logs::create([
+        'action' => 'Export',
+        'description' => 'Exported ' . strtolower($selectedRole) . ' roster PDF for org "' . $org . '" (' . $termYear . ')',
+        'user' => auth()->user()->name ?? 'System',
+        'date_time' => now('Asia/Manila'),
+        'type' => 'Others',
+    ]);
 
-    return $pdf->stream('officer_roster.pdf');
+    return $pdf->stream(strtolower($selectedRole) . '_roster.pdf');
 }
 
 

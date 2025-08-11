@@ -135,13 +135,11 @@
                                     </div>
                                     @endif
                                     <div class="col-md-4">
-                                        <label class="form-label">Year Level</label>
-                                        <select class="form-select" name="year_level">
-                                            <option value="">All</option>
-                                            <option value="1st Year">1st Year</option>
-                                            <option value="2nd Year">2nd Year</option>
-                                            <option value="3rd Year">3rd Year</option>
-                                            <option value="4th Year">4th Year</option>
+                                        <label class="form-label">Role</label>
+                                        <select class="form-select" name="role">
+                                            <option value="Member">Members</option>
+                                            <option value="Officer">Officers</option>
+                                  
                                         </select>
                                     </div>
                                 </div>

@@ -123,7 +123,7 @@
   <td>{{ $student->studentList->course ?? 'N/A' }}</td>
   <td>{{ $student->studentList->section ?? 'N/A' }}</td>
   <td>{{ $student->org }}</td>
-  <td>{{ number_format($student->balance, 2) }}</td>
+  <td>₱{{ number_format($balances[$student->student_id] ?? 0, 2) }}</td>
   <td>
     @if ($student->balance != 0)
       <span class="badge bg-danger">Not Eligible</span>

@@ -156,7 +156,7 @@
 </footer>
 
 <!-- Main Content Starts -->
-<div class="title">ROSTER OF OFFICERS</div>
+<div class="title">ROSTER OF {{ strtoupper($roleLabel) }}</div>
 
 <div class="org-section" style="text-align: center; margin-bottom: 10px;">
     <div style="font-size: 14px; font-weight: bold;">{{ $org }}</div>
