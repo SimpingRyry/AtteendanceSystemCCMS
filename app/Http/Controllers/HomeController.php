@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\OrgList;
-
+use App\Models\Event;
+use Carbon\Carbon;
 class HomeController extends Controller
 {
     public function showlogin()
@@ -14,17 +15,19 @@ class HomeController extends Controller
     public function index()
     {
 
-        $orgs = OrgList::all();
+        $organizations = OrgList::all(); // fetch all orgs
+           $events = Event::where('event_date', '>=', Carbon::today())
+        ->orderBy('event_date', 'asc')
+        ->take(3)
+        ->get();
 
-        $carouselSlides = $orgs->map(function ($org) {
-            return [
-                'image' => $org->bg_image,
-                'logos' => [$org->org_logo], // assuming 1 logo per org
-                'title' => $org->org_name,
-                'subtitle' => $org->description
-            ];
-        });
+    return view('Home-Page', compact('organizations', 'events'));
+    }
 
-        return view('home', compact('carouselSlides'));
+       public function show($id)
+    {
+        $organization = OrgList::findOrFail($id);
+          $organizations = OrgList::all(); // fetch all orgs
+        return view('organization', compact('organization', 'organizations'));
     }
 }

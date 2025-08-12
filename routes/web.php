@@ -71,6 +71,9 @@ Route::get('/student', function () {
     return view('student');
 });
 
+Route::get('/Home', function () {
+    return view('Home-Page');
+});
 Route::get('/dashboard_page', [OrgDashboardController::class, 'dashboard']);
 
 Route::get('/student_dashboard', [DashboardController::class, 'studentindex']);
@@ -314,3 +317,4 @@ Route::get('/evaluation-answers/{evaluation}/{event}', [EvaluationController::cl
 Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
 Route::get('/gcash/success', [PaymentController::class, 'gcashSuccess'])->name('gcash.success');
 Route::get('/gcash/failed', [PaymentController::class, 'gcashFailed'])->name('gcash.failed');
+Route::get('/organization/{id}', [HomeController::class, 'show']);
