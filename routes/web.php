@@ -318,3 +318,6 @@ Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index
 Route::get('/gcash/success', [PaymentController::class, 'gcashSuccess'])->name('gcash.success');
 Route::get('/gcash/failed', [PaymentController::class, 'gcashFailed'])->name('gcash.failed');
 Route::get('/organization/{id}', [HomeController::class, 'show']);
+Route::get('/events/{event}', [HomeController::class, 'showEvent'])->name('events.show');
+Route::get('/homeevents', [HomeController::class, 'showHomeEvent'])->name('homeevents.show');
+

@@ -71,47 +71,23 @@
     <!-- Page Header Start -->
    <div class="container-fluid page-header py-6 my-6 mt-0 wow fadeIn" data-wow-delay="0.1s">
     <div class="container text-center">
-        <h1 class="display-4 text-white animated slideInDown mb-4">{{ $organization->org_name }}</h1>
+        <h1 class="display-4 text-white animated slideInDown mb-4">Events</h1>
         <nav aria-label="breadcrumb animated slideInDown">
             <ol class="breadcrumb justify-content-center mb-0">
                 <li class="breadcrumb-item"><a class="text-white" href="{{ url('/') }}">Home</a></li>
-                <li class="breadcrumb-item"><a class="text-white" href="#">Organizations</a></li>
-                <li class="breadcrumb-item text-primary active" aria-current="page">{{ $organization->org_name }}</li>
+                <li class="breadcrumb-item"><a class="text-white" href="#">Events</a></li>
             </ol>
         </nav>
     </div>
 </div>
 
 <!-- Organization Info Start -->
-<div class="container-xxl py-6">
+<div class="container-xxl events my-6 py-6 pb-0">
     <div class="container">
-        <div class="row align-items-center">
-            <!-- Left: Description -->
-            <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
-                <h6 class="text-primary text-uppercase mb-2">About Us</h6>
-                <h1 class="display-6 mb-4">{{ $organization->org_name }}</h1>
-                <p class="mb-4">{{ $organization->description }}</p>
+        <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 500px;">
+                <h6 class="text-primary text-uppercase mb-2">Upcoming Events</h6>
+                <h1 class="display-6 mb-4">Monitor and be alert in upcoming events</h1>
             </div>
-
-            <!-- Right: Logo -->
-            <div class="col-lg-6 text-center wow fadeInUp" data-wow-delay="0.3s">
-                @if($organization->org_logo)
-                    <img src="{{ asset('images/org_list/' . $organization->org_logo) }}" alt="{{ $organization->org_name }}" class="img-fluid" style="max-width: 300px;">
-                @else
-                    <img src="{{ asset('img/default-logo.png') }}" alt="Default Logo" class="img-fluid" style="max-width: 300px;">
-                @endif
-            </div>
-        </div>
-    </div>
-</div>
-    <!-- Team End -->
-
-
-    <div class="container-xxl events my-6 py-6 pb-0">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-5 wow fadeInUp" data-wow-delay="0.1s">
-            <h1 class="fw-bold">Upcoming Events</h1>
-        </div>
         <div class="row g-4 justify-content-center">
             
             @forelse($events as $event)
@@ -145,6 +121,7 @@
         </div>
     </div>
 </div>
+    <!-- Team End -->
 
     <!-- Footer Start -->
     <div class="container-fluid bg-dark text-light footer my-6 mb-0 py-6 wow fadeIn" data-wow-delay="0.1s">

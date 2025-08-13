@@ -19,6 +19,8 @@
     <!-- Icon Font Stylesheet -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
 
     <!-- Libraries Stylesheet -->
     <link href="{{ asset('lib/animate/animate.min.css') }}" rel="stylesheet">
@@ -50,7 +52,7 @@
             <div class="navbar-nav ms-auto p-4 p-lg-0">
                 <a href="{{ url('/') }}" class="nav-item nav-link active">Home</a>
                 <a href="{{ url('/about') }}" class="nav-item nav-link">About</a>
-                <a href="{{ url('/Events') }}" class="nav-item nav-link">Events</a>
+                <a href="{{ route('homeevents.show') }}" class="nav-item nav-link">Events</a>
                 <div class="nav-item dropdown">
     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Organizations</a>
     <div class="dropdown-menu bg-light m-0">
@@ -208,13 +210,13 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-5 wow fadeInUp" data-wow-delay="0.1s">
             <h1 class="fw-bold">Upcoming Events</h1>
-            <a href="{{ url('/events') }}" class="btn btn-outline-warning">See All</a>
+            <a href="{{ route('homeevents.show') }}" class="btn btn-outline-warning">See All</a>
         </div>
         <div class="row g-4 justify-content-center">
             
             @forelse($events as $event)
                 <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.{{ $loop->iteration }}s">
-                    <a href="{{ url('/events/' . $event->id) }}" class="text-decoration-none text-dark">
+<a href="{{ route('events.show', $event->id) }}" class="text-decoration-none text-dark">
                         <div class="event-item bg-white h-100 shadow-sm">
                             <div class="position-relative">
                                 <img class="img-fluid w-100" 
@@ -293,8 +295,8 @@
         </div>
         <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.5s">
             <div class="position-relative overflow-hidden pe-5 pt-5 h-100" style="min-height: 400px;">
-                <img class="position-absolute w-100 h-100" src="img/about-1.jpg" alt="" style="object-fit: cover;">
-                <img class="position-absolute top-0 end-0 bg-white ps-3 pb-3" src="{{asset('img/about-2.jpg')}}" alt="" style="width: 200px; height: 200px">
+                <img class="position-absolute w-100 h-100" src="images/carousel_image3.jpg" alt="" style="object-fit: cover;">
+                <img class="position-absolute top-0 end-0 bg-white ps-3 pb-3" src="{{asset('images/carousel_image4.jpg')}}" alt="" style="width: 200px; height: 200px">
             </div>
         </div>
     </div>
@@ -421,12 +423,12 @@
 
     <!-- Template Javascript -->
     <script src="{{ asset('js/main.js') }}"></script>
-    <script>
+<script>
 $(document).ready(function(){
     $('.team-carousel').owlCarousel({
         loop: true,
         margin: 30,
-        center: true, // Makes the middle card centered (circle effect)
+        center: true, // Middle card centered
         autoplay: true,
         autoplayTimeout: 2500,
         autoplayHoverPause: true,
@@ -434,8 +436,8 @@ $(document).ready(function(){
         dots: false,
         nav: true,
         navText: [
-            '<i class="bi bi-arrow-left"></i>',
-            '<i class="bi bi-arrow-right"></i>'
+            '<i class="bi bi-arrow-left-circle fs-3"></i>',
+            '<i class="bi bi-arrow-right-circle fs-3"></i>'
         ],
         responsive: {
             0: { items: 1 },

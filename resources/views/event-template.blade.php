@@ -71,12 +71,12 @@
     <!-- Page Header Start -->
    <div class="container-fluid page-header py-6 my-6 mt-0 wow fadeIn" data-wow-delay="0.1s">
     <div class="container text-center">
-        <h1 class="display-4 text-white animated slideInDown mb-4">{{ $organization->org_name }}</h1>
+        <h1 class="display-4 text-white animated slideInDown mb-4">{{ $event->name}}</h1>
         <nav aria-label="breadcrumb animated slideInDown">
             <ol class="breadcrumb justify-content-center mb-0">
                 <li class="breadcrumb-item"><a class="text-white" href="{{ url('/') }}">Home</a></li>
-                <li class="breadcrumb-item"><a class="text-white" href="#">Organizations</a></li>
-                <li class="breadcrumb-item text-primary active" aria-current="page">{{ $organization->org_name }}</li>
+                <li class="breadcrumb-item"><a class="text-white" href="#">Events</a></li>
+                <li class="breadcrumb-item text-primary active" aria-current="page">{{$event->name }}</li>
             </ol>
         </nav>
     </div>
@@ -85,66 +85,57 @@
 <!-- Organization Info Start -->
 <div class="container-xxl py-6">
     <div class="container">
-        <div class="row align-items-center">
-            <!-- Left: Description -->
-            <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
-                <h6 class="text-primary text-uppercase mb-2">About Us</h6>
-                <h1 class="display-6 mb-4">{{ $organization->org_name }}</h1>
-                <p class="mb-4">{{ $organization->description }}</p>
-            </div>
+        <div class="text-center mb-4">
+            <h1 class="fw-bold">{{ $event->name }}</h1>
+        </div>
 
-            <!-- Right: Logo -->
-            <div class="col-lg-6 text-center wow fadeInUp" data-wow-delay="0.3s">
-                @if($organization->org_logo)
-                    <img src="{{ asset('images/org_list/' . $organization->org_logo) }}" alt="{{ $organization->org_name }}" class="img-fluid" style="max-width: 300px;">
-                @else
-                    <img src="{{ asset('img/default-logo.png') }}" alt="Default Logo" class="img-fluid" style="max-width: 300px;">
-                @endif
+        <div class="row">
+            <!-- Event Image -->
+            <div class="col-12 text-center mb-4">
+                <img src="{{ $event->attached_memo ? asset('images/'. $event->attached_memo) : asset('img/default-event.jpg') }}"
+                     alt="{{ $event->name }}"
+                     class="img-fluid rounded"
+                     style="max-height: 400px; object-fit: cover;">
             </div>
+        </div>
+
+        <!-- Event Info (Centered) -->
+        <div class="row text-center mb-4 justify-content-center">
+            <div class="col-md-4 mb-3">
+                <i class="fa fa-map-marker-alt text-warning"></i>
+                <strong> Location</strong>
+                <p>{{ $event->venue }}</p>
+            </div>
+            <div class="col-md-4 mb-3">
+                <i class="fa fa-calendar text-warning"></i>
+                <strong> Date</strong>
+                <p>{{ \Carbon\Carbon::parse($event->event_date)->format('F d, Y') }}</p>
+            </div>
+       <div class="col-md-4 mb-3">
+    <i class="fa fa-clock text-warning"></i>
+    <strong> Time</strong>
+    <p>
+        @php
+            $timesArray = is_array($event->times) ? $event->times : json_decode($event->times, true);
+        @endphp
+
+        @if(!empty($timesArray) && isset($timesArray[0]))
+            {{ \Carbon\Carbon::createFromFormat('H:i:s', $timesArray[0])->format('h:i A') }}
+        @else
+            TBA
+        @endif
+    </p>
+</div>
+        </div>
+
+        <!-- About Event -->
+        <div>
+            <h4 class="fw-bold">About Event</h4>
+            <p>{{ $event->description }}</p>
         </div>
     </div>
 </div>
     <!-- Team End -->
-
-
-    <div class="container-xxl events my-6 py-6 pb-0">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-5 wow fadeInUp" data-wow-delay="0.1s">
-            <h1 class="fw-bold">Upcoming Events</h1>
-        </div>
-        <div class="row g-4 justify-content-center">
-            
-            @forelse($events as $event)
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.{{ $loop->iteration }}s">
-<a href="{{ route('events.show', $event->id) }}" class="text-decoration-none text-dark">
-                        <div class="event-item bg-white h-100 shadow-sm">
-                            <div class="position-relative">
-                                <img class="img-fluid w-100" 
-                                    src="{{ asset('images/'.$event->attached_memo) ?? asset('img/default-event.jpg') }}" 
-                                    alt="{{ $event->name }}">
-                                <div class="position-absolute top-0 start-0 bg-warning text-white text-center px-3 py-2">
-                                    <div class="fs-4 fw-bold">{{ \Carbon\Carbon::parse($event->event_date)->format('d') }}</div>
-                                    <div class="small text-uppercase">{{ \Carbon\Carbon::parse($event->event_date)->format('F') }}</div>
-                                </div>
-                            </div>
-                            <div class="p-4">
-                                <p class="text-muted small mb-2">
-                                    <i class="fa fa-map-marker-alt text-warning me-2"></i>{{ $event->venue }}
-                                </p>
-                                <h5 class="fw-bold">{{ $event->name }}</h5>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            @empty
-                <div class="col-12 text-center">
-                    <p class="text-muted">No upcoming events</p>
-                </div>
-            @endforelse
-
-        </div>
-    </div>
-</div>
 
     <!-- Footer Start -->
     <div class="container-fluid bg-dark text-light footer my-6 mb-0 py-6 wow fadeIn" data-wow-delay="0.1s">
