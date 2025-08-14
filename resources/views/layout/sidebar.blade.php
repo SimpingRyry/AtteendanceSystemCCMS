@@ -174,6 +174,8 @@
                         <img src="{{ asset('images/evaluation_ico.png') }}" class="sidebar-icon"> <span>Notifications</span>
                     </a>
                 </li>
+                                            <li><a href="{{ url('officers') }}" class="nav-link text-white {{ request()->is('officers') ? 'active-link' : '' }}"><img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Officers</a></li>
+
                             @if (Auth::user()->role !== 'OSSD')
                             <li><a href="{{ url('attendance') }}" class="nav-link text-white {{ request()->is('attendance') ? 'active-link' : '' }}"><img src="{{ asset('images/attendance.png') }}" class="sidebar-icon"> Attendance</a></li>
                             <li><a href="{{ url('payment') }}" class="nav-link text-white {{ request()->is('payment') ? 'active-link' : '' }}"><img src="{{ asset('images/payment_ico.png') }}" class="sidebar-icon"> Payment</a></li>

@@ -121,36 +121,75 @@
 </div>
 
                 <!-- Officer Table -->
-                @if($users->isEmpty())
-                    <p>No users found.</p>
-                @else
-                    <div class="table-responsive">
-                        <table id="studentsTable" class="table table-borderless align-middle text-center shadow-sm rounded" style="background-color: #f9f9f9;">
-                            <thead class="table-dark text-light">
-                                <tr>
-                                    <th>No</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Org</th>
-                                    
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($users as $user)
-                                    <tr style="border-bottom: 1px solid #dee2e6;">
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td class="name-cell">{{ $user->name }}</td>
-                                        <td>{{ $user->email }}</td>
-                                        <td>{{ str_replace(' - Officer', '', $user->role) }}</td>
-                                        <td>{{ $user->org }}</td>
-                                     
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+@if($users->isEmpty())
+    <p>No users found.</p>
+@else
+    <div class="table-responsive">
+        <table id="studentsTable" class="table table-borderless align-middle text-center shadow-sm rounded" style="background-color: #f9f9f9;">
+            <thead class="table-dark text-light">
+                <tr>
+                    <th>No</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Org</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($users as $user)
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td>{{ $loop->iteration }}</td>
+                        <td class="name-cell">{{ $user->name }}</td>
+                        <td>{{ $user->email }}</td>
+                        <td>{{ str_replace(' - Officer', '', $user->role) }}</td>
+                        <td>{{ $user->org }}</td>
+                        <td>
+                            @if(auth()->id() === $user->id)
+                                <button type="button" 
+                                    class="btn btn-warning btn-sm" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editPasswordModal{{ $user->id }}">
+                                    Edit Password
+                                </button>
+                            @endif
+                        </td>
+                    </tr>
+
+                    {{-- Edit Password Modal --}}
+                    <div class="modal fade" id="editPasswordModal{{ $user->id }}" tabindex="-1" aria-labelledby="editPasswordModalLabel{{ $user->id }}" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form action="{{ route('users.updatePassword', $user->id) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editPasswordModalLabel{{ $user->id }}">Edit Password</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label">New Password</label>
+                                            <input type="password" name="password" class="form-control" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="password_confirmation" class="form-label">Confirm Password</label>
+                                            <input type="password" name="password_confirmation" class="form-control" required>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary">Save changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                @endif
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+@endif
 
                 <!-- Pagination -->
                 <div class="d-flex justify-content-end mt-3">

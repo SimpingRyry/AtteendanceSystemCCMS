@@ -282,7 +282,7 @@ Route::get('/officer-users', function () {
 Route::get('/org-members', [UserController::class, 'getEligibleMembers']);
 Route::post('/notifications/mark-seen', [NotificationController::class, 'markAllAsSeen'])->name('notifications.markSeen');
 Route::get('/public-events', [EventsController::class, 'publicFetchEvents'])->name('events.public.fetch');
-Route::get('/student_payment', [PaymentController::class, 'showStatementOfAccount'])->name('statement.account')->middleware('auth');
+Route::get('/student_payment', [PaymentController::class, 'showStatementOfAccount'])->name('student_payment')->middleware('auth');
 Route::post('/officers/add', [OfficerController::class, 'add'])->name('officers.add');
 Route::get('/admin/soa/{studentId}', [PaymentController::class, 'loadStudentSOA']);
 Route::get('/attendance/live-data', [AttendanceController::class, 'liveData']);
@@ -320,4 +320,5 @@ Route::get('/gcash/failed', [PaymentController::class, 'gcashFailed'])->name('gc
 Route::get('/organization/{id}', [HomeController::class, 'show']);
 Route::get('/events/{event}', [HomeController::class, 'showEvent'])->name('events.show');
 Route::get('/homeevents', [HomeController::class, 'showHomeEvent'])->name('homeevents.show');
+Route::put('/users/{id}/update-password', [UserController::class, 'updatePassword'])->name('users.updatePassword');
 

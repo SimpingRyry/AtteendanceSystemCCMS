@@ -180,11 +180,13 @@ public function storePayment(Request $request)
 }
 public function gcashSuccess(Request $request)
 {
-    // PayMongo passes the source ID back
-    $sourceId = $request->query('source');
+    // Fetch source ID from either ?id=xxx or ?source[id]=xxx
+$sourceId = $request->query('source_id');
+    Log::info('GCash payment success callback received with source ID: ' . $sourceId);
+    $organization = $request->query('organization');
 
     if (!$sourceId) {
-        return redirect()->route('home')->with('error', 'Missing payment source ID.');
+        return redirect()->route('student_payment')->with('error', 'Missing payment source ID.');
     }
 
     // Check payment status via PayMongo API
@@ -192,25 +194,24 @@ public function gcashSuccess(Request $request)
         ->get("https://api.paymongo.com/v1/sources/{$sourceId}");
 
     if ($response->failed()) {
-        return redirect()->route('home')->with('error', 'Unable to verify payment.');
+        return redirect()->route('student_payment')->with('error', 'Unable to verify payment.');
     }
 
     $sourceData = $response->json('data.attributes');
 
     if ($sourceData['status'] === 'chargeable') {
-        // Here you can store the payment in your database
         $user = auth()->user();
 
         Transaction::create([
             'student_id'       => $user->student_id,
             'transaction_type' => 'PAYMENT',
-            'org'              => $user->org,
+            'org'              => $organization ?? $user->org,
             'or_num'           => 'GCASH-' . strtoupper(uniqid()),
             'date'             => now('Asia/Manila'),
             'acad_code'        => Setting::where('key', 'academic_term')->value('acad_code'),
             'acad_term'        => Setting::where('key', 'academic_term')->value('value'),
             'processed_by'     => 'GCASH',
-            'fine_amount'      => $sourceData['amount'] / 100, // convert centavos to pesos
+            'fine_amount'      => $sourceData['amount'] / 100,
         ]);
 
         Logs::create([
@@ -222,9 +223,10 @@ public function gcashSuccess(Request $request)
             'type'        => 'Payment',
         ]);
 
-        return redirect()->route('home')->with('success', 'GCash payment recorded successfully.');
+        return redirect()->route('student_payment')->with('success', 'GCash payment recorded successfully.');
     }
 
-    return redirect()->route('home')->with('error', 'Payment not completed.');
+    return redirect()->route('student_payment')->with('error', 'Payment not completed.');
 }
+
 }
