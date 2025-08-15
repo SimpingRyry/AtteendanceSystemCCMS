@@ -180,33 +180,61 @@ public function storePayment(Request $request)
 }
 public function gcashSuccess(Request $request)
 {
-    // Fetch source ID from either ?id=xxx or ?source[id]=xxx
-$sourceId = $request->query('source_id');
-    Log::info('GCash payment success callback received with source ID: ' . $sourceId);
-    $organization = $request->query('organization');
+    $sourceId = $request->input('source.id') 
+        ?? ($request->query('source')['id'] ?? null)
+        ?? session('gcash_source_id');
+
+    $organization = $request->query('organization')
+        ?? session('gcash_organization');
 
     if (!$sourceId) {
         return redirect()->route('student_payment')->with('error', 'Missing payment source ID.');
     }
 
-    // Check payment status via PayMongo API
-    $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
+    Log::info('GCash payment success', [
+        'source_id' => $sourceId,
+        'organization' => $organization,
+    ]);
+
+    // Verify source status
+    $sourceResponse = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
         ->get("https://api.paymongo.com/v1/sources/{$sourceId}");
 
-    if ($response->failed()) {
-        return redirect()->route('student_payment')->with('error', 'Unable to verify payment.');
-    }
-
-    $sourceData = $response->json('data.attributes');
-
+    $sourceData = $sourceResponse->json('data.attributes');
+    Log::info('Source data received', $sourceData);
+    // Wait until source is 'chargeable'
     if ($sourceData['status'] === 'chargeable') {
+
+        // Create payment
+        $paymentResponse = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
+            ->post('https://api.paymongo.com/v1/payments', [
+                'data' => [
+                    'attributes' => [
+                        'amount' => $sourceData['amount'],
+                        'source' => [
+                            'id' => $sourceId,
+                            'type' => 'source'
+                        ],
+                        'currency' => 'PHP'
+                    ]
+                ]
+            ]);
+
+        $paymentData = $paymentResponse->json('data');
+
+        // Store payment ID in session for reference
+        session(['gcash_payment_id' => $paymentData['id'] ?? null]);
+
+        $gcashRef = $paymentData['attributes']['reference_number'] ?? strtoupper(uniqid());
+        
+
         $user = auth()->user();
 
         Transaction::create([
             'student_id'       => $user->student_id,
             'transaction_type' => 'PAYMENT',
             'org'              => $organization ?? $user->org,
-            'or_num'           => 'GCASH-' . strtoupper(uniqid()),
+            'or_num'           => 'GCASH-' . $gcashRef,
             'date'             => now('Asia/Manila'),
             'acad_code'        => Setting::where('key', 'academic_term')->value('acad_code'),
             'acad_term'        => Setting::where('key', 'academic_term')->value('value'),
@@ -226,7 +254,7 @@ $sourceId = $request->query('source_id');
         return redirect()->route('student_payment')->with('success', 'GCash payment recorded successfully.');
     }
 
-    return redirect()->route('student_payment')->with('error', 'Payment not completed.');
+    return redirect()->route('student_payment')->with('error', 'Payment not yet completed. Please wait a moment and try again.');
 }
 
 }

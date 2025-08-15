@@ -52,7 +52,7 @@
             <!-- Devices Container -->
             <div id="deviceContainer" class="row g-4">
     @foreach ($devices as $device)
-    <div class="col-md-3">
+<div class="col-md-6 col-lg-3">
         <div class="card p-3 rounded status-box glass-box shadow-sm position-relative">
             <h5 class="mb-3 text-center">
                 <i class="fas fa-microchip me-2"></i>{{ $device->name }}
@@ -268,7 +268,7 @@ document.querySelectorAll('.speaker-toggle').forEach(toggle => {
             })
             .then(data => {
                 const card = `
-                <div class="col-md-3">
+<div class="col-md-6 col-lg-3">
                     <div class="card p-3 rounded status-box glass-box shadow-sm">
                         <h5 class="mb-3 text-center">
                             <i class="fas fa-microchip me-2"></i>${name}

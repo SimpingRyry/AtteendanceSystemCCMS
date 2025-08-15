@@ -18,39 +18,48 @@ public function createSource(Request $request)
     ]);
 
     $amountInCentavos = $request->amount * 100;
-$response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
-    ->post('https://api.paymongo.com/v1/sources', [
-        'data' => [
-            'attributes' => [
-                'amount' => (int)$amountInCentavos,
-                'redirect' => [
-                    'success' => route('gcash.success'), // temp placeholder
-                    'failed'  => route('gcash.failed'),
-                ],
-                'type'     => 'gcash',
-                'currency' => 'PHP'
+
+    $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
+        ->post('https://api.paymongo.com/v1/sources', [
+            'data' => [
+                'attributes' => [
+                    'amount'   => $amountInCentavos,
+                    'redirect' => [
+                        'success' => route('gcash.success'),
+                        'failed'  => route('gcash.failed'),
+                    ],
+                    'type'     => 'gcash',
+                    'currency' => 'PHP',
+                ]
             ]
-        ]
+        ]);
+
+    $data = $response->json();
+
+    // Store source ID and organization in session
+    if (isset($data['data']['id'])) {
+        session([
+            'gcash_source_id' => $data['data']['id'],
+            'gcash_organization' => $request->organization,
+        ]);
+    }
+
+    $ID = session('gcash_source_id');
+
+    Log::info('GCash source created', [
+        'source_id' => $ID,
+        'amount'    => $request->amount,
+        'organization' => $request->organization,
     ]);
 
-if ($response->failed()) {
-    $errorMessage = $response->json('errors.0.detail') ?? 'Failed to initiate GCash payment.';
-    return back()->withInput()->with('error', $errorMessage);
+    // Log the full API response for debugging
+    Log::info('PayMongo createSource Response:', $data);
+
+    if (isset($data['data']['attributes']['redirect']['checkout_url'])) {
+        return redirect($data['data']['attributes']['redirect']['checkout_url']);
+    }
+
+    return back()->withErrors(['gcash_error' => 'Unable to create GCash source.']);
 }
 
-$source = $response->json();
-$sourceId = $source['data']['id']; // PayMongo's generated source id
-    Log::info('GCash payment source created with ID: ' . $sourceId);
-
-// Build success URL manually with sourceId + organization
-$successUrl = route('gcash.success', [
-    'organization' => $request->organization,
-    'source_id'    => $sourceId
-]);
-
-// Update the redirect URL by replacing the one you sent earlier
-$checkoutUrl = $source['data']['attributes']['redirect']['checkout_url'] . '&success_url=' . urlencode($successUrl);
-
-return redirect($checkoutUrl);
-}
 }
