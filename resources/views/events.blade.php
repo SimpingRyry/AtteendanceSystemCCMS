@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -168,14 +170,14 @@
                             <label class="form-label">Participants</label>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <select class="form-select" id="involvedStudents" name="involved_students" required>
+                                    <select class="form-select" id="involvedStudents" name="involved_students" >
                                         <option value="">-- Select Students --</option>
                                         <option value="All">All</option>
                                         <option value="Officers">Officers</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6 position-relative">
-                                    <input type="text" class="form-control" id="guests" name="guests" placeholder="Add guests, use @ to tag members or officers (optional)">
+                                    <input type="text" class="form-control" id="guests" name="guests" placeholder="use @ to involved specific members or officers (optional)">
                                     <div id="mentionDropdown" class="list-group position-absolute w-100 z-3" style="display: none; max-height: 200px; overflow-y: auto;"></div>
                                 </div>
                             </div>
@@ -867,13 +869,34 @@ if (memoUrl) {
             });
 
             // (Optional) Delete icon
-            const deleteIcon = iconContainer.querySelector('.fa-trash');
-            deleteIcon.addEventListener('click', function (e) {
-                e.stopPropagation();
-                if (confirm('Are you sure you want to delete this event?')) {
-                    // Add delete logic here
-                }
-            });
+const deleteIcon = iconContainer.querySelector('.fa-trash');
+deleteIcon.addEventListener('click', function (e) {
+    e.stopPropagation();
+
+    if (confirm('Are you sure you want to delete this event?')) {
+        const eventId = event.id; // <-- use event.id not extendedProps.id
+
+        fetch(`/events/${eventId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to delete');
+            return res.json();
+        })
+        .then(data => {
+            alert(data.message || 'Event deleted!');
+            event.remove(); // frontend remove
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Could not delete event.');
+        });
+    }
+});
             }
            
         },

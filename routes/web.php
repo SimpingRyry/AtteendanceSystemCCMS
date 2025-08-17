@@ -321,4 +321,5 @@ Route::get('/organization/{id}', [HomeController::class, 'show']);
 Route::get('/events/{event}', [HomeController::class, 'showEvent'])->name('events.show');
 Route::get('/homeevents', [HomeController::class, 'showHomeEvent'])->name('homeevents.show');
 Route::put('/users/{id}/update-password', [UserController::class, 'updatePassword'])->name('users.updatePassword');
+Route::delete('/events/{id}', [EventsController::class, 'destroy'])->name('events.destroy');
 

@@ -45,7 +45,7 @@ public function store(Request $request)
         'organization' => 'nullable|string', // for Super Admin
         'repeat_dates' => 'nullable|string',
         'guests' => 'nullable|string',
-        'involved_students' => 'required|in:All,Members,Officers',
+        'involved_students' => 'nullable|in:All,Members,Officers', // allow null now
         'attached_memo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         'evaluation_template' => 'required|exists:evaluation,id',
     ]);
@@ -127,62 +127,67 @@ public function store(Request $request)
             'evaluation_id' => $request->evaluation_template,
         ]);
 
+        Logs::create([
+            'action' => 'Create',
+            'description' => 'Created event "' . $event->name . '" on ' . $event->event_date . ' at ' . $event->venue,
+            'user' => auth()->user()->name ?? 'Unknown',
+            'date_time' => now('Asia/Manila'),
+            'type' => 'Event',
+        ]);
+
         $involved = $request->involved_students;
 
-       $targetOrgs = [$organization];
-    Logs::create([
-    'action' => 'Create',
-    'description' => 'Created event "' . $event->name . '" on ' . $event->event_date . ' at ' . $event->venue,
-    'user' => auth()->user()->name ?? 'Unknown',
-    'date_time' => now('Asia/Manila'),
-    'type' => 'Event',
-]);
-if (in_array($involved, ['All', 'Members'])) {
-    $orgModel = \App\Models\OrgList::where('org_name', $organization)->first();
-    $childOrgs = $orgModel ? $orgModel->children->pluck('org_name')->toArray() : [];
-    $targetOrgs = array_merge($targetOrgs, $childOrgs);
-}
+        if ($involved !== null) {
+            // === Notify based on involved_students ===
+            $targetOrgs = [$organization];
 
-// Fetch users based on involved type and selected org scope
-$recipients = \App\Models\User::whereIn('org', $targetOrgs)->get()->filter(function ($user) use ($involved) {
-    $role = strtolower($user->role);
-    return match ($involved) {
-        'All'     => $role === 'member' || str_contains($role, 'officer'),
-        'Members' => $role === 'member',
-        'Officers' => str_contains($role, 'officer'),
-        default   => false,
-    };
-});
+            if (in_array($involved, ['All', 'Members'])) {
+                $orgModel = \App\Models\OrgList::where('org_name', $organization)->first();
+                $childOrgs = $orgModel ? $orgModel->children->pluck('org_name')->toArray() : [];
+                $targetOrgs = array_merge($targetOrgs, $childOrgs);
+            }
 
-        foreach ($recipients as $user) {
-            \App\Models\Notification::create([
-                'user_id' => $user->id,
-                'title' => 'New Event: ' . $event->name,
-                'message' => 'An event is scheduled for ' . $event->event_date . ' at ' . $event->venue,
-            ]);
-        }
+            $recipients = \App\Models\User::whereIn('org', $targetOrgs)->get()->filter(function ($user) use ($involved) {
+                $role = strtolower($user->role);
+                return match ($involved) {
+                    'All'     => $role === 'member' || str_contains($role, 'officer'),
+                    'Members' => $role === 'member',
+                    'Officers' => str_contains($role, 'officer'),
+                    default   => false,
+                };
+            });
 
-        $advisers = \App\Models\User::whereIn('org', $targetOrgs)
-    ->where('role', 'Adviser')
-    ->get();
-
-foreach ($advisers as $adviser) {
-    \App\Models\Notification::create([
-        'user_id' => $adviser->id,
-        'title' => 'Adviser Notice: Event "' . $event->name . '" Scheduled',
-        'message' => 'Your advised org has an event on ' . $event->event_date . ' at ' . $event->venue,
-    ]);
-}
-
-        if (!empty($guestEmails)) {
-            $guestUsers = \App\Models\User::whereIn('email', $guestEmails)->get();
-
-            foreach ($guestUsers as $guest) {
+            foreach ($recipients as $user) {
                 \App\Models\Notification::create([
-                    'user_id' => $guest->id,
-                    'title' => 'You were tagged in an event: ' . $event->name,
-                    'message' => 'You were invited to the event on ' . $event->event_date . ' at ' . $event->venue,
+                    'user_id' => $user->id,
+                    'title' => 'New Event: ' . $event->name,
+                    'message' => 'An event is scheduled for ' . $event->event_date . ' at ' . $event->venue,
                 ]);
+            }
+
+            $advisers = \App\Models\User::whereIn('org', $targetOrgs)
+                ->where('role', 'Adviser')
+                ->get();
+
+            foreach ($advisers as $adviser) {
+                \App\Models\Notification::create([
+                    'user_id' => $adviser->id,
+                    'title' => 'Adviser Notice: Event "' . $event->name . '" Scheduled',
+                    'message' => 'Your advised org has an event on ' . $event->event_date . ' at ' . $event->venue,
+                ]);
+            }
+        } else {
+            // === involved_students is NULL → notify only guests ===
+            if (!empty($guestEmails)) {
+                $guestUsers = \App\Models\User::whereIn('email', $guestEmails)->get();
+
+                foreach ($guestUsers as $guest) {
+                    \App\Models\Notification::create([
+                        'user_id' => $guest->id,
+                        'title' => 'You were tagged in an event: ' . $event->name,
+                        'message' => 'You were invited to the event on ' . $event->event_date . ' at ' . $event->venue,
+                    ]);
+                }
             }
         }
     }
@@ -193,34 +198,25 @@ foreach ($advisers as $adviser) {
 
     
     
-    
-public function fetchEvents()
+    public function fetchEvents()
 {
     $user = Auth::user();
     $userOrgName = strtolower(trim($user->org));
     $userRole = strtolower($user->role);
 
-    // Get user's org record
     $userOrg = OrgList::whereRaw('LOWER(TRIM(org_name)) = ?', [$userOrgName])->first();
 
     if (!$userOrg) {
-        return response()->json([]); // No org, no events
+        return response()->json([]);
     }
 
     $userOrgId = $userOrg->id;
-
-    // ✅ Get all orgs the user should access:
-    // If parent, only self
-    // If child, self + parent (if parent has "all" events)
-
     $accessibleOrgIds = [$userOrgId];
 
     if ($userOrg->parent_org_id) {
-        // If this is a child org
         $accessibleOrgIds[] = $userOrg->parent_org_id;
     }
 
-    // Get accessible org names
     $accessibleOrgNames = OrgList::whereIn('id', $accessibleOrgIds)
         ->pluck('org_name')
         ->map(fn($name) => strtolower(trim($name)))
@@ -231,35 +227,42 @@ public function fetchEvents()
 
     foreach ($events as $event) {
         $eventOrg = strtolower(trim($event->org));
-        $involved = strtolower($event->involved_students);
+        $involved = $event->involved_students ? strtolower($event->involved_students) : null;
         $times = json_decode($event->times, true);
         $guests = json_decode($event->guests, true);
 
-        // ✅ Skip if not from accessible orgs
-        if (!in_array($eventOrg, $accessibleOrgNames)) {
-            continue;
-        }
+        // ✅ If involved is NULL → only visible to tagged guests
+        if ($involved === null) {
+            if (empty($guests) || !in_array($user->email, $guests)) {
+                continue; // skip if user not in guest list
+            }
+        } else {
+            // ✅ Skip if not from accessible orgs
+            if (!in_array($eventOrg, $accessibleOrgNames)) {
+                continue;
+            }
 
-        // ✅ Child org user: only see parent events if "involved" is "all"
-        if (
-            $eventOrg !== $userOrgName && // means event is from parent
-            $userOrg->parent_org_id &&    // this user is from child org
-            $involved !== 'all'
-        ) {
-            continue;
-        }
+            // ✅ Child org user: only see parent events if "involved" is "all"
+            if (
+                $eventOrg !== $userOrgName && 
+                $userOrg->parent_org_id && 
+                $involved !== 'all'
+            ) {
+                continue;
+            }
 
-        // ✅ Role restrictions
-        if ($involved === 'members' && $userRole !== 'member') {
-            continue;
-        }
+            // ✅ Role restrictions
+            if ($involved === 'members' && $userRole !== 'member') {
+                continue;
+            }
 
-        if ($involved === 'officers' && stripos($user->role, 'officer') === false) {
-            continue;
-        }
+            if ($involved === 'officers' && stripos($user->role, 'officer') === false) {
+                continue;
+            }
 
-        if (!in_array($involved, ['all', 'members', 'officers'])) {
-            continue;
+            if (!in_array($involved, ['all', 'members', 'officers'])) {
+                continue;
+            }
         }
 
         // ✅ Format for calendar
@@ -397,6 +400,15 @@ public function CurrentEvent()
         'pastEvents' => $pastEvents,
        
     ]);
+}
+
+
+public function destroy($id)
+{
+    $event = Event::findOrFail($id);
+    $event->delete();
+
+    return response()->json(['message' => 'Event deleted successfully']);
 }
 
 }
