@@ -131,9 +131,10 @@ public function storePayment(Request $request)
     Log::info('storePayment request received:', $request->all());
 
     $request->validate([
-        'student_id' => 'required|string',
-        'amount'     => 'required|numeric|min:0.01',
-        'or_number'  => 'required|string|max:255', // ✅ Add validation for OR number
+        'student_id'    => 'required|string',
+        'amount'        => 'required|numeric|min:0.01',
+        'or_number'     => 'required|string|max:255',
+        'payment_date'  => 'required|date', // ✅ validate date input
     ]);
 
     $setting = Setting::where('key', 'academic_term')->first();
@@ -145,36 +146,38 @@ public function storePayment(Request $request)
     $processedBy = $user->name . ' - ' . strtoupper($user->role);
 
     Log::info('Storing payment with data:', [
-        'student_id'     => $request->student_id,
+        'student_id'       => $request->student_id,
         'transaction_type' => 'PAYMENT',
-        'org'            => $org,
-        'or_num'         => $request->or_number, // ✅ Log OR Number
-        'date'           => now('Asia/Manila')->toDateTimeString(),
-        'acad_code'      => $acadCode,
-        'acad_term'      => $acadTerm,
-        'processed_by'   => $processedBy,
-        'fine_amount'    => $request->amount,
+        'org'              => $org,
+        'or_num'           => $request->or_number,
+        'date'             => $request->payment_date, // ✅ use inputted date
+        'acad_code'        => $acadCode,
+        'acad_term'        => $acadTerm,
+        'processed_by'     => $processedBy,
+        'fine_amount'      => $request->amount,
     ]);
 
     Transaction::create([
-        'student_id'     => $request->student_id,
+        'student_id'       => $request->student_id,
         'transaction_type' => 'PAYMENT',
-        'org'            => $org,
-        'or_num'         => $request->or_number, // ✅ Save OR Number
-        'date'           => now('Asia/Manila'),
-        'acad_code'      => $acadCode,
-        'acad_term'      => $acadTerm,
-        'processed_by'   => $processedBy,
-        'fine_amount'    => $request->amount,
+        'org'              => $org,
+        'or_num'           => $request->or_number,
+        'date'             => $request->payment_date, // ✅ inputted date
+        'acad_code'        => $acadCode,
+        'acad_term'        => $acadTerm,
+        'processed_by'     => $processedBy,
+        'fine_amount'      => $request->amount,
     ]);
 
     Logs::create([
-    'action' => 'Create',
-    'description' => 'Recorded payment for student ID ' . $request->student_id . ' with OR No. ' . $request->or_number . ' (₱' . number_format($request->amount, 2) . ')',
-    'user' => auth()->user()->name ?? 'System',
-    'date_time' => now('Asia/Manila'),
-    'type' => 'Payment',
-]);
+        'action'      => 'Create',
+        'description' => 'Recorded payment for student ID ' . $request->student_id .
+                         ' with OR No. ' . $request->or_number .
+                         ' (₱' . number_format($request->amount, 2) . ')',
+        'user'        => auth()->user()->name ?? 'System',
+        'date_time'   => now('Asia/Manila'), // ✅ still actual log timestamp
+        'type'        => 'Payment',
+    ]);
 
     return back()->with('success', 'Payment recorded successfully.');
 }

@@ -336,32 +336,47 @@ public function showArchive(Request $request, $event_id)
     return view('attendance', compact('archiveEvent', 'archiveAttendances'));
 }
 
-public function liveData()
+public function liveData(Request $request)
 {
     $event = Event::whereDate('event_date', now()->toDateString())->first();
 
     if (!$event) return [];
 
-    $records = Attendance::with('student')
-        ->where('event_id', $event->id)
-        ->get()
-        ->map(function ($att) use ($event) {
-            return [
-                'student_id' => $att->student->id_number,
-                'name' => $att->student->name,
-                'program' => $att->student->course,
-                'block' => $att->student->section,
-                'event' => $event->name,
-                'date' => $att->date,
-                'time_in1' => $att->time_in1,
-                'time_out1' => $att->time_out1,
-                'time_in2' => $att->time_in2,
-                'time_out2' => $att->time_out2,
-                'status' => $att->status, // for 2-timeout events
-                'status_morning' => $att->status_morning, // for 4-timeout events
-                'status_afternoon' => $att->status_afternoon, // for 4-timeout events
-            ];
-        });
+    $query = Attendance::with('student')
+        ->where('event_id', $event->id);
+
+    // ✅ Apply status filter if user selected one
+    if ($request->filled('status')) {
+        $status = $request->status;
+
+        // Handle both 2-timeout and 4-timeout events
+        if ($event->timeouts == 4) {
+            $query->where(function ($q) use ($status) {
+                $q->where('status_morning', $status)
+                  ->orWhere('status_afternoon', $status);
+            });
+        } else {
+            $query->where('status', $status);
+        }
+    }
+
+    $records = $query->get()->map(function ($att) use ($event) {
+        return [
+            'student_id'       => $att->student->id_number,
+            'name'             => $att->student->name,
+            'program'          => $att->student->course,
+            'block'            => $att->student->section,
+            'event'            => $event->name,
+            'date'             => $att->date,
+            'time_in1'         => $att->time_in1,
+            'time_out1'        => $att->time_out1,
+            'time_in2'         => $att->time_in2,
+            'time_out2'        => $att->time_out2,
+            'status'           => $att->status,          // 2-timeout events
+            'status_morning'   => $att->status_morning,  // 4-timeout events
+            'status_afternoon' => $att->status_afternoon // 4-timeout events
+        ];
+    });
 
     return response()->json($records);
 }

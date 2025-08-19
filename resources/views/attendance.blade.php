@@ -67,18 +67,17 @@
 
                     @if($currentEvent && auth()->user()->org === $currentEvent->org)
                         <!-- Filter Form -->
-                        <form method="GET" class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <label for="program" class="form-label">Filter by Program</label>
-                                <select name="program" id="program" class="form-select">
-                                    <option value="">All Programs</option>
-                                    <option value="BSIT">BSIT</option>
-                                    <option value="BSCS">BSCS</option>
-                                    <!-- Add more as needed -->
-                                </select>
-                            </div>
-                        </form>
-
+                       <form method="GET" class="row g-3 mb-4">
+    <div class="col-md-4">
+        <label for="status" class="form-label">Filter by Status</label>
+        <select name="status" id="status" class="form-select">
+            <option value="">All Status</option>
+            <option value="On Time">On Time</option>
+            <option value="Late">Late</option>
+            <option value="Absent">Absent</option>
+        </select>
+    </div>
+</form>
                         <!-- Attendance Table -->
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover" id="attendanceTable">
@@ -173,6 +172,9 @@
   </div>
 </div>
 @endif
+
+
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     $('#archiveEvent').on('change', function () {
@@ -252,7 +254,10 @@ document.getElementById('recordAttendanceForm').addEventListener('submit', funct
 
 <script>
 setInterval(() => {
-    fetch("/attendance/live-data")
+    // Get selected status from dropdown
+    let status = document.getElementById('status')?.value || '';
+
+    fetch(`/attendance/live-data?status=${encodeURIComponent(status)}`)
         .then(res => res.json())
         .then(data => {
             const tbody = document.querySelector('#attendanceTable tbody');
@@ -260,6 +265,11 @@ setInterval(() => {
 
             const timeoutCount = parseInt(document.getElementById('main_box').dataset.timeouts);
             const hasFourTimeouts = timeoutCount === 4;
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="12" class="text-center">No records found</td></tr>`;
+                return;
+            }
 
             data.forEach(row => {
                 if (hasFourTimeouts) {
@@ -298,6 +308,7 @@ setInterval(() => {
         });
 }, 1000);
 </script>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 @include('partials.excuse_modal')

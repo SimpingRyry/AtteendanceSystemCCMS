@@ -46,9 +46,9 @@
         <table class="table table-bordered mt-4">
   <thead class="table-dark">
     <tr>
-      <th>Title</th>
-      <th>Description</th>
-      <th>Event Date</th>
+      <th>Event</th>
+      <th>Evaluation Title</th>
+      <th>Evaluation Description</th>
       <th>Action</th>
     </tr>
   </thead>

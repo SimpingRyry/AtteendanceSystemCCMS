@@ -204,25 +204,31 @@ Route::post('/scan', function (Request $request) {
     [$timeInField, $timeOutField, $timeIndex] = $fieldMap[$session];
 
     // ✅ Time-In Logic
-    if (is_null($existing->$timeInField)) {
-        $refTime = isset($times[$timeIndex]) ? Carbon::parse($times[$timeIndex], 'Asia/Manila') : null;
-        $onTimeCutoff = $refTime?->copy()->addMinutes(15); // 15-minute grace
+ if (is_null($existing->$timeInField)) {
+    $refTime = isset($times[$timeIndex]) ? Carbon::parse($times[$timeIndex], 'Asia/Manila') : null;
+    $onTimeCutoff = $refTime?->copy()->addMinutes(15); // 15-minute grace
 
-        if ($refTime && $onTimeCutoff) {
-            $existing->$timeInField = $now->format('H:i');
+    if ($refTime && $onTimeCutoff) {
+        $existing->$timeInField = $now->format('H:i');
 
-            $status = $now->between($refTime, $onTimeCutoff) ? 'On Time' : 'Late';
+        if ($now->lessThanOrEqualTo($onTimeCutoff)) {
+            $status = 'On Time';
+        } elseif ($now->lessThanOrEqualTo($refTime->copy()->addMinutes(30))) {
+            $status = 'Late';
+        } else {
+            $status = 'Absent';
+        }
 
-            if ($isWholeDay) {
-                if ($session === 'morning') $statusMorning = $status;
-                if ($session === 'afternoon') $statusAfternoon = $status;
-            } else {
-                $existing->status = $status;
-            }
+        if ($isWholeDay) {
+            if ($session === 'morning') $statusMorning = $status;
+            if ($session === 'afternoon') $statusAfternoon = $status;
+        } else {
+            $existing->status = $status;
+        }
 
-            $existing->status_morning = $statusMorning;
-            $existing->status_afternoon = $statusAfternoon;
-            $existing->save();
+        $existing->status_morning = $statusMorning;
+        $existing->status_afternoon = $statusAfternoon;
+        $existing->save();
 
             // ✅ Auto-Fine Logic (Late)
             $fineSettings = FineSetting::where('org', $event->org)->first();
