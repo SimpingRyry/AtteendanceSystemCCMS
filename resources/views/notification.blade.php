@@ -72,8 +72,8 @@ $unreadCount = Notification::where('user_id', $user->id)
     <div class="container inner-glass shadow p-4" id="main_box">
       <div class="mb-4">
         <h2 class="fw-bold" style="color: #232946;">Notifications</h2>
-        <small style="color: #989797;">User Panel /</small>
-        <small style="color: #444444;">My Notifications</small>
+        <small style="color: #989797;">Manage /</small>
+        <small style="color: #444444;">Notifications</small>
 
         @if($unreadCount > 0)
         <div class="alert alert-info mt-3">
@@ -113,8 +113,17 @@ $unreadCount = Notification::where('user_id', $user->id)
               {{ \Illuminate\Support\Str::limit($note->message ?? 'No content', 100) }}
             </div>
           </div>
-          <small class="text-muted">{{ $note->created_at->diffForHumans() }}</small>
-        </a>
+<small class="text-muted">
+    @if ($note->created_at->diffInHours(now()) < 24)
+        {{ $note->created_at->diffForHumans() }}
+    @else
+        @if ($note->created_at->year === now()->year)
+            {{ $note->created_at->format('M d') }}
+        @else
+            {{ $note->created_at->format('M d, Y') }}
+        @endif
+    @endif
+</small>        </a>
         @empty
         <div class="text-center text-muted py-3">No notifications found{{ $filter ? ' for this filter.' : '.' }}</div>
         @endforelse

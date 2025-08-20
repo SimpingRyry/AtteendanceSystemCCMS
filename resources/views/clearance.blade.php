@@ -38,7 +38,7 @@
       <!-- Heading -->
       <div class="mb-4">
         <h2 class="fw-bold" style="color: #232946;">Clearance</h2>
-        <small style="color: #989797;">Get /</small>
+        <small style="color: #989797;">Manage /</small>
         <small style="color: #444444;">Clearance</small>
       </div>
 

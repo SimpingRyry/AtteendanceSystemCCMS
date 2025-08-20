@@ -171,7 +171,7 @@
                             <li><a href="{{ url('events') }}" class="nav-link text-white {{ request()->is('events') ? 'active-link' : '' }}"><img src="{{ asset('images/event_ico.png') }}" class="sidebar-icon"> Events</a></li>
                                <li>
                     <a href="{{ url('notification') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('notification') ? 'active-link' : '' }}">
-                        <img src="{{ asset('images/evaluation_ico.png') }}" class="sidebar-icon"> <span>Notifications</span>
+                        <img src="{{ asset('images/notification.png') }}" class="sidebar-icon"> <span>Notifications</span>
                     </a>
                 </li>
                                             <li><a href="{{ url('officers') }}" class="nav-link text-white {{ request()->is('officers') ? 'active-link' : '' }}"><img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Officers</a></li>
