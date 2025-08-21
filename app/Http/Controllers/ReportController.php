@@ -174,8 +174,17 @@ public function exportFinancialReport(Request $request)
     return $pdf->download('student_roster.pdf');
 }
 
+private function cleanName($name)
+{
+    // Remove leading asterisks or other unwanted characters
+    return trim(preg_replace('/^[\*\s]+/', '', $name));
+}
 public function generatePdf(Request $request)
 {
+    // allow more memory and time (for big PDFs on hosting)
+    ini_set('memory_limit', '512M');
+    ini_set('max_execution_time', 300);
+
     $org = Auth::user()->org;
     $selectedRole = $request->input('role');
 
@@ -186,10 +195,10 @@ public function generatePdf(Request $request)
     $officers = [];
     $presidentName = '';
     $adviserName = '';
-    $preparedByName = auth()->user()->name ?? 'Not Set';
+    $preparedByName = $this->cleanName(auth()->user()->name ?? 'Not Set');
+    $roleLabel = ''; // initialize here
 
     if ($selectedRole === 'Officer') {
-        // --- Your existing Officer logic ---
         $baseRoles = OfficerRole::where('org', $org)
             ->orderBy('id')
             ->pluck('title')
@@ -209,23 +218,23 @@ public function generatePdf(Request $request)
                 $photo = file_exists($photoPath) ? $photoPath : public_path("images/default.png");
 
                 $officers[] = [
-                    'position' => $baseRole,
-                    'name' => $user->name,
-                    'photo' => $photo,
+                    'position'   => $baseRole,
+                    'name'       => $this->cleanName($user->name),
+                    'photo'      => $photo,
                     'birth_date' => $student->birth_date ?? 'Not Set',
-                    'address' => $student->address ?? 'Not Set',
-                    'course' => $student->course ?? 'N/A',
-                    'year' => $student->year ?? null,
+                    'address'    => $student->address ?? 'Not Set',
+                    'course'     => $student->course ?? 'N/A',
+                    'year'       => $student->year ?? null,
                 ];
             } else {
                 $officers[] = [
-                    'position' => $baseRole,
-                    'name' => 'Not Appointed',
-                    'photo' => public_path("images/default.png"),
+                    'position'   => $baseRole,
+                    'name'       => 'Not Appointed',
+                    'photo'      => public_path("images/default.png"),
                     'birth_date' => '-',
-                    'address' => '-',
-                    'course' => '-',
-                    'year' => '-',
+                    'address'    => '-',
+                    'course'     => '-',
+                    'year'       => '-',
                 ];
             }
         }
@@ -234,30 +243,25 @@ public function generatePdf(Request $request)
             ->where('org', $org)
             ->where('term', 'LIKE', "%$termYear%")
             ->first();
-        $presidentName = $presidentUser ? $presidentUser->name : 'Not Appointed';
+        $presidentName = $presidentUser ? $this->cleanName($presidentUser->name) : 'Not Appointed';
 
- $adviserUser = User::where('role', 'Adviser')
-    ->where('org', $org)
-    ->where('term', 'like', "%$termYear%")
-    ->first(); // <-- fetch the actual user
+        $adviserUser = User::where('role', 'Adviser')
+            ->where('org', $org)
+            ->where('term', 'like', "%$termYear%")
+            ->first();
 
-$adviserName = $adviserUser ? $adviserUser->name : 'Not Set';
-
-Log::info('Adviser Name: ' . $adviserName);
-
-    } elseif ($selectedRole === 'Member') {
-        // --- Member logic ---
+        $adviserName = $adviserUser ? $this->cleanName($adviserUser->name) : 'Not Set';
+        $roleLabel   = 'Officers'; // ✅ fixed here
+    } 
+    elseif ($selectedRole === 'Member') {
         $orgModel = OrgList::where('org_name', $org)->first();
         if (!$orgModel) {
             abort(404, 'Organization not found');
         }
 
-        if ($orgModel->children()->exists()) {
-            $orgNames = $orgModel->children()->pluck('org_name')->toArray();
-            $orgNames[] = $org;
-        } else {
-            $orgNames = [$org];
-        }
+        $orgNames = $orgModel->children()->exists()
+            ? $orgModel->children()->pluck('org_name')->toArray() + [$org]
+            : [$org];
 
         $members = User::whereIn('org', $orgNames)
             ->where('role', 'Member')
@@ -268,36 +272,31 @@ Log::info('Adviser Name: ' . $adviserName);
             $photoPath = public_path("uploads/{$member->picture}");
             $photo = file_exists($photoPath) ? $photoPath : public_path("images/default.png");
 
-            $officers[] = [ // same name so template works
-                'position' => 'Member',
-                'name' => $member->name,
-                'photo' => $photo,
+            $officers[] = [
+                'position'   => 'Member',
+                'name'       => $this->cleanName($member->name),
+                'photo'      => $photo,
                 'birth_date' => $student->birth_date ?? 'Not Set',
-                'address' => $student->address ?? 'Not Set',
-                'course' => $student->course ?? 'N/A',
-                'year' => $student->year ?? null,
+                'address'    => $student->address ?? 'Not Set',
+                'course'     => $student->course ?? 'N/A',
+                'year'       => $student->year ?? null,
             ];
         }
 
-                $presidentUser = User::whereRaw("TRIM(role) = ?", ['President - Officer'])
+        $presidentUser = User::whereRaw("TRIM(role) = ?", ['President - Officer'])
             ->where('org', $org)
             ->where('term', 'LIKE', "%$termYear%")
             ->first();
-        $presidentName = $presidentUser ? $presidentUser->name : 'Not Appointed';
+        $presidentName = $presidentUser ? $this->cleanName($presidentUser->name) : 'Not Appointed';
 
- $adviserUser = User::where('role', 'Adviser')
-    ->where('org', $org)
-    ->where('term', 'like', "%$termYear%")
-    ->first(); // <-- fetch the actual user
+        $adviserUser = User::where('role', 'Adviser')
+            ->where('org', $org)
+            ->where('term', 'like', "%$termYear%")
+            ->first();
 
-$adviserName = $adviserUser ? $adviserUser->name : 'Not Set';
-$roleLabel = ucfirst(strtolower($request->input('role'))) . 's';
-
-    
+        $adviserName = $adviserUser ? $this->cleanName($adviserUser->name) : 'Not Set';
+        $roleLabel   = 'Members'; // ✅ defined here too
     }
-    Log::info('Adviser Name: ' . $adviserName);
-
-    
 
     $pdf = Pdf::loadView('report.roster', compact(
         'officers',
@@ -306,24 +305,21 @@ $roleLabel = ucfirst(strtolower($request->input('role'))) . 's';
         'adviserName',
         'preparedByName',
         'roleLabel',
-
     ))
         ->setPaper('A4', 'portrait')
         ->setOption('isHtml5ParserEnabled', true)
         ->setOption('isPhpEnabled', true);
 
     Logs::create([
-        'action' => 'Export',
+        'action'      => 'Export',
         'description' => 'Exported ' . strtolower($selectedRole) . ' roster PDF for org "' . $org . '" (' . $termYear . ')',
-        'user' => auth()->user()->name ?? 'System',
-        'date_time' => now('Asia/Manila'),
-        'type' => 'Others',
+        'user'        => auth()->user()->name ?? 'System',
+        'date_time'   => now('Asia/Manila'),
+        'type'        => 'Others',
     ]);
 
     return $pdf->stream(strtolower($selectedRole) . '_roster.pdf');
 }
-
-
 
 
 }

@@ -13,41 +13,55 @@ class LoginController extends Controller
     //     return view('auth.login');
     // }
 
-    
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-    
-        // Get all users with this email
-        $users = User::where('email', $request->email)->get();
-    
-        // Loop through and find the first user where the password matches
-        foreach ($users as $user) {
-            if (Hash::check($request->password, $user->password)) {
+public function login(Request $request)
+{
+    $request->validate([
+        'email' => 'required|string',
+        // password is optional now
+    ]);
+
+    // Clean input email
+    $cleanEmail = trim(preg_replace('/^[\*\s]+/', '', $request->email));
+
+    // Get all users (since DB may contain *** in front)
+    $users = User::all();
+
+    foreach ($users as $user) {
+        // Clean DB email and name
+        $dbEmail = trim(preg_replace('/^[\*\s]+/', '', $user->email));
+        $dbName  = trim(preg_replace('/^[\*\s]+/', '', $user->name));
+
+        if ($dbEmail === $cleanEmail) {
+            // If user password is null and no password entered → allow login
+            if (is_null($user->password) && empty($request->password)) {
                 Auth::login($user);
-    
-                session([
-                    'user_name' => $user->name,
-                    'user_role' => $user->role,
-                    'user_img' => $user->image ?? 'default.png',
-                ]);
-    
-                if ($user->role === 'Member') {
-                    return redirect()->intended('/student_dashboard');
-                } elseif ($user->role === 'Super Admin') {
-                    return redirect()->intended('/super_dashboard');
-                } elseif ($user->role === 'OSSD') {
-                    return redirect()->intended('/ossd-dashboard');
-                } else {
-                    return redirect()->intended('/dashboard_page');
-                }
             }
+            // Or if user has password and it matches
+            elseif (!is_null($user->password) && Hash::check($request->password, $user->password)) {
+                Auth::login($user);
+            } else {
+                continue;
+            }
+
+            // Store session with cleaned name
+            session([
+                'user_name' => $dbName,
+                'user_role' => $user->role,
+                'user_img'  => $user->image ?? 'default.png',
+            ]);
+
+            // Redirect based on role
+            return match ($user->role) {
+                'Member'      => redirect()->intended('/student_dashboard'),
+                'Super Admin' => redirect()->intended('/super_dashboard'),
+                'OSSD'        => redirect()->intended('/ossd-dashboard'),
+                default       => redirect()->intended('/dashboard_page'),
+            };
         }
-    
-        // If none matched
-        return back()->with('error', 'Invalid credentials.');
     }
+
+    return back()->with('error', 'Invalid credentials.');
+}
+
+
 }

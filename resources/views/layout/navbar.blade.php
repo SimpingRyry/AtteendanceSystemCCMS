@@ -43,8 +43,9 @@
         <img src="{{ asset('uploads/' . ($user->picture ?? 'default.png')) }}" 
              alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
         <div class="d-flex flex-column lh-sm text-start">
-          <span class="profile-name">{{ $user->name ?? 'No Name' }}</span>
-          <small class="profile-role">
+<span class="profile-name">
+  {{ trim(preg_replace('/^[\*\s]+/', '', $user->name)) ?? 'No Name' }}
+</span>          <small class="profile-role">
     @php
         $org = $user->org ?? '';
         $role = str_replace(' - Officer', '', $user->role) ?? 'No Role';

@@ -30,7 +30,6 @@
     {{-- Sidebar --}}
     @include('layout.sidebar')
 
-    <!------------------------------------------------------ MAIN_BOX -------------------------------------------------------->
 <main>
   <div class="container mt-5 pt-5 pb-4">
     <div class="row mb-4 g-4 align-items-stretch">
@@ -38,8 +37,16 @@
       <div class="col-md-4 d-flex">
         <div class="card text-center shadow-sm w-100 h-100 border-0 rounded-4">
           <div class="card-body d-flex flex-column align-items-center justify-content-center">
-            <div class="mb-3" style="width: 150px; height: 150px;">
-              <img src="{{ asset('uploads/' . $profile->photo) }}" class="rounded-circle w-100 h-100" style="object-fit: cover;" alt="Profile Picture">
+            <div class="mb-3" style="width: 150px; height: 150px; position: relative; cursor: pointer;" onclick="document.getElementById('photoInput').click()">
+              <img id="profilePreview" 
+                   src="{{ asset('uploads/' . $profile->photo) }}" 
+                   class="rounded-circle w-100 h-100" 
+                   style="object-fit: cover;" 
+                   alt="Profile Picture">
+              <!-- Small overlay icon -->
+              <div style="position:absolute; bottom:5px; right:5px; background:#00000080; color:#fff; padding:4px 6px; border-radius:50%; font-size:12px;">
+                ✎
+              </div>
             </div>
             <h5 class="card-title mb-1">{{ $profile->name }}</h5>
             <p class="text-muted">{{ $profile->position }}</p>
@@ -51,77 +58,92 @@
       <div class="col-md-8">
         <div class="card shadow-sm h-100 border-0 rounded-4">
           <div class="card-body">
-            <form method="POST" action="{{ route('profile.update') }}">
-  @csrf
+            <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+              @csrf
 
-  <!-- Name (readonly) -->
-  <div class="row mb-3">
-    <label class="col-sm-3 col-form-label fw-semibold">Name:</label>
-    <div class="col-sm-9">
-      <input type="text" name="name" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->name }}" readonly>
-    </div>
-  </div>
-  <hr>
+              <!-- Hidden File Input -->
+              <input type="file" id="photoInput" name="photo" accept="image/*" style="display: none;" onchange="previewImage(event)">
 
-  <!-- Program (readonly) -->
-  <div class="row mb-3">
-    <label class="col-sm-3 col-form-label fw-semibold">Program:</label>
-    <div class="col-sm-9">
-      <input type="text" name="program" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->program }}" readonly>
-    </div>
-  </div>
-  <hr>
+              <!-- Name (readonly) -->
+              <div class="row mb-3">
+                <label class="col-sm-3 col-form-label fw-semibold">Name:</label>
+                <div class="col-sm-9">
+                  <input type="text" name="name" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->name }}" readonly>
+                </div>
+              </div>
+              <hr>
 
-  <!-- Position (readonly) -->
-  <div class="row mb-3">
-    <label class="col-sm-3 col-form-label fw-semibold">Position:</label>
-    <div class="col-sm-9">
-      <input type="text" name="position" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->position }}" readonly>
-    </div>
-  </div>
-  <hr>
+              <!-- Program (readonly) -->
+              <div class="row mb-3">
+                <label class="col-sm-3 col-form-label fw-semibold">Program:</label>
+                <div class="col-sm-9">
+                  <input type="text" name="program" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->program }}" readonly>
+                </div>
+              </div>
+              <hr>
 
-  <!-- Email (readonly) -->
-  <div class="row mb-3">
-    <label class="col-sm-3 col-form-label fw-semibold">Email:</label>
-    <div class="col-sm-9">
-      <input type="email" name="email" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->email }}" readonly>
-    </div>
-  </div>
-  <hr>
+              <!-- Position (readonly) -->
+              <div class="row mb-3">
+                <label class="col-sm-3 col-form-label fw-semibold">Position:</label>
+                <div class="col-sm-9">
+                  <input type="text" name="position" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->position }}" readonly>
+                </div>
+              </div>
+              <hr>
 
-  <!-- Mobile No. (editable) -->
-  <div class="row mb-3">
-    <label class="col-sm-3 col-form-label fw-semibold">Mobile No.:</label>
-    <div class="col-sm-9">
-      <input type="text" name="mobile" class="form-control border rounded px-3" value="{{ $profile->mobile }}">
-    </div>
-  </div>
-  <hr>
+              <!-- Email (readonly) -->
+              <div class="row mb-3">
+                <label class="col-sm-3 col-form-label fw-semibold">Email:</label>
+                <div class="col-sm-9">
+                  <input type="email" name="email" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->email }}" >
+                </div>
+              </div>
+              <hr>
 
-  <!-- Address (readonly) -->
-  <div class="row mb-3">
-    <label class="col-sm-3 col-form-label fw-semibold">Address:</label>
-    <div class="col-sm-9">
-      <input type="text" name="address" class="form-control-plaintext border rounded px-3 bg-light" value="{{ $profile->address }}" readonly>
-    </div>
-  </div>
-  <hr>
+              <!-- Mobile No. (editable) -->
+              <div class="row mb-3">
+                <label class="col-sm-3 col-form-label fw-semibold">Mobile No.:</label>
+                <div class="col-sm-9">
+                  <input type="text" name="mobile" class="form-control border rounded px-3" value="{{ $profile->mobile }}">
+                </div>
+              </div>
+              <hr>
 
-  <!-- Password (editable) -->
-  <div class="row mb-3">
-    <label class="col-sm-3 col-form-label fw-semibold">Password:</label>
-    <div class="col-sm-9">
-      <input type="password" name="password" class="form-control border rounded px-3" placeholder="••••••••">
-      <small class="text-muted">Leave blank to keep current password.</small>
-    </div>
-  </div>
+              <!-- Address (editable now) -->
+              <div class="row mb-3">
+                <label class="col-sm-3 col-form-label fw-semibold">Address:</label>
+                <div class="col-sm-9">
+                  <input type="text" name="address" class="form-control border rounded px-3" value="{{ $profile->address }}">
+                </div>
+              </div>
+              <hr>
 
-  <!-- Save Button -->
-  <div class="text-end">
-    <button type="submit" class="btn btn-primary">Save Changes</button>
+<!-- Birth Date (editable) -->
+<div class="row mb-3">
+  <label class="col-sm-3 col-form-label fw-semibold">Birth Date:</label>
+  <div class="col-sm-9">
+    <input type="date" 
+           name="birth_date" 
+           class="form-control border rounded px-3" 
+           value="{{ $profile->birth_date }}">
   </div>
-</form>
+</div>
+<hr>
+
+              <!-- Password (editable) -->
+              <div class="row mb-3">
+                <label class="col-sm-3 col-form-label fw-semibold">Password:</label>
+                <div class="col-sm-9">
+                  <input type="password" name="password" class="form-control border rounded px-3" placeholder="••••••••">
+                  <small class="text-muted">Leave blank to keep current password.</small>
+                </div>
+              </div>
+
+              <!-- Save Button -->
+              <div class="text-end">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -135,21 +157,33 @@
     </div>
 
     <!-- Charts Row -->
-   <div class="row g-4">
-  <!-- Attendance Breakdown (Full Width) -->
-  <div class="col-md-12">
-    <div class="card shadow-sm h-100 border-0 rounded-4">
-      <div class="card-body">
-        <h6 class="fw-bold mb-3">Attendance Breakdown</h6>
-        <canvas id="barChart" height="100" style="max-height: 200px;"></canvas>
+    <div class="row g-4">
+      <!-- Attendance Breakdown (Full Width) -->
+      <div class="col-md-12">
+        <div class="card shadow-sm h-100 border-0 rounded-4">
+          <div class="card-body">
+            <h6 class="fw-bold mb-3">Attendance Breakdown</h6>
+            <canvas id="barChart" height="100" style="max-height: 200px;"></canvas>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
   </div>
 </main>
 
 <!-- Chart Initialization Script -->
+
+<script>
+  // Live preview when selecting new profile picture
+  function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = function () {
+      document.getElementById('profilePreview').src = reader.result;
+    }
+    reader.readAsDataURL(event.target.files[0]);
+  }
+</script>
+
 <script>
   const attended = parseInt(document.getElementById('attended').textContent);
   const late = parseInt(document.getElementById('late').textContent);

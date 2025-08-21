@@ -19,15 +19,16 @@ class ProfileController extends Controller
     $student = $user->studentList;
 
     // Build profile data
-    $profile = (object) [
-        'name' => $user->name,
-        'position' => $user->role,
-        'email' => $user->email,
-        'program' => $student->course ?? 'N/A',
-        'address' => $student->address ?? 'N/A',
-        'mobile' => $student->contact_no ?? 'N/A',
-        'photo' => $user->picture ?? 'default.jpg',
-    ];
+$profile = (object) [
+    'name' => $user->name,
+    'position' => $user->role,
+    'email' => $user->email,
+    'program' => $student->course ?? 'N/A',
+    'address' => $student->address ?? 'N/A',
+    'mobile' => $student->contact_no ?? 'N/A',
+    'birth_date' => $student->birth_date ?? null, // ✅ add this
+    'photo' => $user->picture ?? 'default.jpg',
+];
 
     // Attendance breakdown logic
     $attendances = \App\Models\Attendance::where('student_id', $user->student_id)->get();
@@ -62,30 +63,43 @@ class ProfileController extends Controller
 
 public function update(Request $request)
 {
-    // Ensure you're working with a true Eloquent model
     $user = \App\Models\User::find(auth()->id());
+    $student = $user->studentList;
 
-    // Validate only the editable fields
     $request->validate([
-        'mobile' => 'nullable|string|max:20',
-        'password' => 'nullable|string|min:6',
+        'mobile'     => 'nullable|string|max:20',
+        'address'    => 'nullable|string|max:255',
+        'birth_date' => 'nullable|date',
+        'email'      => 'required|email', // ✅ removed unique
+        'password'   => 'nullable|string|min:6',
+        'photo'      => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ]);
 
-    // Only update password if it's provided
+    // Update student details
+    if ($student) {
+        $student->contact_no = $request->mobile;
+        $student->address = $request->address;
+        $student->birth_date = $request->birth_date;
+        $student->save();
+    }
+
+    // Update user details
+    $user->email = $request->email; // ✅ email now editable without unique rule
+
     if ($request->filled('password')) {
-        $user->password = Hash::make($request->input('password'));
+        $user->password = bcrypt($request->password);
     }
 
-    // Save user changes
+    if ($request->hasFile('photo')) {
+        $filename = time() . '.' . $request->photo->extension();
+        $request->photo->move(public_path('uploads'), $filename);
+        $user->picture = $filename;
+    }
+
     $user->save();
-
-    // Update studentList only for mobile number
-    if ($user->studentList) {
-        $user->studentList->contact_no = $request->input('mobile');
-        $user->studentList->save();
-    }
 
     return back()->with('success', 'Profile updated successfully.');
 }
+
 
 }

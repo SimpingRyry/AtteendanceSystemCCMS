@@ -157,7 +157,7 @@ body::before {
   </div>
 
   <div class="mb-3 position-relative">
-    <input type="password" name="password" class="form-control form-control-lg bg-light pe-5" placeholder="Password" id="passwordInput" required />
+    <input type="password" name="password" class="form-control form-control-lg bg-light pe-5" placeholder="Password" id="passwordInput"  />
     <i class="bi bi-eye-fill position-absolute top-50 end-0 translate-middle-y me-3 text-secondary" id="eyeIcon" onclick="togglePasswordVisibility()" style="cursor:pointer;"></i>
   </div>
 

@@ -75,28 +75,31 @@
             text-align: center;
         }
 
-        .card {
-            display: inline-block;
-            vertical-align: top;
-            width: 16%;
-            margin: 1%;
-            box-sizing: border-box;
-            text-align: center;
-            height: 180px;
-            page-break-inside: avoid;
-        }
-
+      .card {
+    display: inline-block;
+    vertical-align: top;
+    width: 16%;
+    margin: 1%;
+    box-sizing: border-box;
+    text-align: center;
+    min-height: 180px;  /* instead of fixed height */
+    height: auto;       /* let height adjust */
+    page-break-inside: avoid;
+    word-wrap: break-word; /* break long words */
+    white-space: normal;   /* allow wrapping */
+}
         .card img {
             width: 80px;
             height: 75px;
             object-fit: cover;
         }
 
-        .info {
-            margin-top: 3px;
-            line-height: 1.2;
-        }
-
+     .info {
+    margin-top: 3px;
+    line-height: 1.2;
+    font-size: 11px;   /* optional: slightly smaller to fit */
+    word-break: break-word; /* force wrap if needed */
+}
         .position {
             font-size: 10px;
             color: #555;
@@ -218,7 +221,7 @@
             <div style="font-weight: bold; text-align:left; margin-left: 50px;" >Noted by (President):</div>
             <div style="margin-top: 30px; text-align: center;">
                 <div style="border-bottom: 1px solid #000; display: inline-block; min-width: 220px; font-weight: bold;">
-                    {{ $presidentName }}
+                    <!-- {{ $presidentName }} -->
                 </div>
                 <div style="margin-top: 5px;">Signature over Printed Name</div>
             </div>
@@ -229,7 +232,7 @@
             <div style="font-weight: bold; text-align: left; margin-left: 50px;">Prepared by:</div>
              <div style="margin-top: 30px; text-align: center;">
                 <div style="border-bottom: 1px solid #000; display: inline-block; min-width: 220px; font-weight: bold;">
-                    {{ $preparedByName ?? 'Not Set' }}
+                    <!-- {{ $preparedByName ?? 'Not Set' }} -->
                 </div>
                 <div style="margin-top: 5px;">Signature over Printed Name</div>
             </div>
@@ -247,7 +250,7 @@
             <div style="font-weight: bold; text-align:left; margin-left: 50px;" >Attested by (Adviser):</div>
             <div style="margin-top: 30px; text-align: center;">
                 <div style="border-bottom: 1px solid #000; display: inline-block; min-width: 220px; font-weight: bold;">
-                    {{ $adviserName }}
+                    <!-- {{ $adviserName }} -->
                 </div>
                 <div style="margin-top: 5px;">Signature over Printed Name</div>
             </div>
