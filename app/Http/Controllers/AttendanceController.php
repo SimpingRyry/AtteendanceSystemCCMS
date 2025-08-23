@@ -436,5 +436,38 @@ public function submitExcuse(Request $request)
 
     return redirect()->back()->with('success', 'Excuse submitted and fine removed.');
 }
+public function bulkRevert(Request $request)
+{
+    $ids = $request->input('attendance_ids', []);
 
+    if (!empty($ids)) {
+        foreach ($ids as $id) {
+            $attendance = Attendance::findOrFail($id);
+            $event = $attendance->event;
+
+            // Revert status depending on timeouts
+            if ($event->timeouts == 4) {
+                // Reset both morning and afternoon statuses
+                $attendance->morning_status = 'On Time';
+                $attendance->afternoon_status = 'On Time';
+            } else {
+                $attendance->status = 'On Time';
+            }
+
+            // Clear excuse fields (since this is a revert, not excuse)
+            $attendance->excuse_reason = null;
+            $attendance->excuse_letter = null;
+            $attendance->save();
+
+            // Delete related fines
+            Transaction::where('student_id', $attendance->student_id)
+                ->where('event', $attendance->event->name)
+                ->whereDate('date', $attendance->date)
+                ->where('transaction_type', 'fine')
+                ->delete();
+        }
+    }
+
+    return back()->with('success', 'Selected attendances reverted and fines removed.');
+}
 }

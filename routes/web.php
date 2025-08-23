@@ -323,3 +323,4 @@ Route::get('/homeevents', [HomeController::class, 'showHomeEvent'])->name('homee
 Route::put('/users/{id}/update-password', [UserController::class, 'updatePassword'])->name('users.updatePassword');
 Route::delete('/events/{id}', [EventsController::class, 'destroy'])->name('events.destroy');
 
+Route::post('/attendance/bulk-revert', [AttendanceController::class, 'bulkRevert'])->name('attendance.bulkRevert');

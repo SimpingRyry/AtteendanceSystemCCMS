@@ -7,13 +7,14 @@ use App\Models\Device;
 use App\Models\Setting;
 use App\Models\Student;
 use App\Models\Attendance;
+use App\Models\FineSetting;
+use App\Models\Transaction;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
-use App\Models\FineSetting;
-use App\Models\Transaction;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\AttendanceController;
@@ -144,6 +145,7 @@ Route::get('/fingerprint/latest', function () {
         'url' => $data['url']
     ]);
 });
+
 Route::post('/scan', function (Request $request) {
     $finger_id = $request->input('scanned_id');
 
@@ -204,64 +206,76 @@ Route::post('/scan', function (Request $request) {
     [$timeInField, $timeOutField, $timeIndex] = $fieldMap[$session];
 
     // ✅ Time-In Logic
- if (is_null($existing->$timeInField)) {
-    $refTime = isset($times[$timeIndex]) ? Carbon::parse($times[$timeIndex], 'Asia/Manila') : null;
-    $onTimeCutoff = $refTime?->copy()->addMinutes(15); // 15-minute grace
+    if (is_null($existing->$timeInField)) {
+        $refTime = isset($times[$timeIndex]) ? Carbon::parse($times[$timeIndex], 'Asia/Manila') : null;
+        $onTimeCutoff = $refTime?->copy()->addMinutes(15); // 15-minute grace
 
-    if ($refTime && $onTimeCutoff) {
-        $existing->$timeInField = $now->format('H:i');
+        if ($refTime && $onTimeCutoff) {
+            $existing->$timeInField = $now->format('H:i');
 
-        if ($now->lessThanOrEqualTo($onTimeCutoff)) {
-            $status = 'On Time';
-        } elseif ($now->lessThanOrEqualTo($refTime->copy()->addMinutes(30))) {
-            $status = 'Late';
-        } else {
-            $status = 'Absent';
-        }
+            if ($now->lessThanOrEqualTo($onTimeCutoff)) {
+                $status = 'On Time';
+            } elseif ($now->lessThanOrEqualTo($refTime->copy()->addMinutes(30))) {
+                $status = 'Late';
+            } else {
+                $status = 'Absent';
+            }
 
-        if ($isWholeDay) {
-            if ($session === 'morning') $statusMorning = $status;
-            if ($session === 'afternoon') $statusAfternoon = $status;
-        } else {
-            $existing->status = $status;
-        }
+            if ($isWholeDay) {
+                if ($session === 'morning') $statusMorning = $status;
+                if ($session === 'afternoon') $statusAfternoon = $status;
+            } else {
+                $existing->status = $status;
+            }
 
-        $existing->status_morning = $statusMorning;
-        $existing->status_afternoon = $statusAfternoon;
-        $existing->save();
+            $existing->status_morning = $statusMorning;
+            $existing->status_afternoon = $statusAfternoon;
+            $existing->save();
 
-            // ✅ Auto-Fine Logic (Late)
+            // ✅ Auto-Fine Logic (Late & Absent)
             $fineSettings = FineSetting::where('org', $event->org)->first();
-if ($fineSettings && $status === 'Late') {
-    // Get the setting row with academic_term key
-    $setting = Setting::where('key', 'academic_term')->first();
-    
-    $term = $setting->value ?? 'Unknown Term';
-    $acadCode = $setting->acad_code ?? 'Unknown Code';
+            if ($fineSettings && in_array($status, ['Late', 'Absent'])) {
+                $setting = Setting::where('key', 'academic_term')->first();
 
-    // Check if student is officer for this term
-$isOfficer = User::where('student_id', $student->id_number)
-    ->where('term', $term)
-    ->where('org', $event->org) // ✅ add org condition here
-    ->where('role', 'like', '%- Officer')
-    ->exists();
+                $term = $setting->value ?? 'Unknown Term';
+                $acadCode = $setting->acad_code ?? 'Unknown Code';
 
-$fineAmount = $isOfficer ? $fineSettings->late_officer : $fineSettings->late_member;
+                $isOfficer = User::where('student_id', $student->id_number)
+                    ->where('term', $term)
+                    ->where('org', $event->org)
+                    ->where('role', 'like', '%- Officer')
+                    ->exists();
 
-if ($fineAmount > 0) {
-    Transaction::create([
-        'student_id'       => $student->id_number,
-        'event'            => $event->name,
-        'transaction_type' => 'FINE',
-        'fine_amount'      => $fineAmount,
-        'org'              => $event->org,
-        'date'             => $today,
-        'acad_term'        => $term,
-        'acad_code'        => $acadCode,
-    ]);
-}
-}
+                if ($status === 'Late') {
+                    $fineAmount = $isOfficer ? $fineSettings->late_officer : $fineSettings->late_member;
+                } elseif ($status === 'Absent') {
+                    $fineAmount = $isOfficer ? $fineSettings->absent_officer : $fineSettings->absent_member;
+                } else {
+                    $fineAmount = 0;
+                }
 
+                if ($fineAmount > 0) {
+                    Transaction::create([
+                        'student_id'       => $student->id_number,
+                        'event'            => $event->name,
+                        'transaction_type' => 'FINE',
+                        'fine_amount'      => $fineAmount,
+                        'org'              => $event->org,
+                        'date'             => $today,
+                        'acad_term'        => $term,
+                        'acad_code'        => $acadCode,
+                    ]);
+                }
+            }
+
+            // ✅ Send Notification for Time-In
+            if ($user) {
+                Notification::create([
+                    'user_id' => $user->id,
+                    'title'   => 'Time-In Recorded',
+                    'message' => "You timed in at {$now->format('H:i')} and were marked as {$status}.",
+                ]);
+            }
 
             return response()->json([
                 'message' => 'Time-in recorded',
@@ -299,6 +313,20 @@ if ($fineAmount > 0) {
         $existing->status_morning = $statusMorning;
         $existing->status_afternoon = $statusAfternoon;
         $existing->save();
+
+        // ✅ Send Notification for Time-Out
+        if ($user) {
+            $statusDisplay = $isWholeDay ? [
+                'morning' => $statusMorning,
+                'afternoon' => $statusAfternoon
+            ] : ($existing->status ?? 'Late');
+
+            Notification::create([
+                'user_id' => $user->id,
+                'title'   => 'Time-Out Recorded',
+                'message' => "You timed out at {$now->format('H:i')} with status: " . (is_array($statusDisplay) ? json_encode($statusDisplay) : $statusDisplay),
+            ]);
+        }
 
         return response()->json([
             'message' => 'Time-out recorded',
