@@ -310,6 +310,7 @@ Route::post('/scan', function (Request $request) {
             if ($existing->status === null) $existing->status = 'Late';
         }
 
+        
         $existing->status_morning = $statusMorning;
         $existing->status_afternoon = $statusAfternoon;
         $existing->save();
