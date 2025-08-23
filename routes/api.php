@@ -311,6 +311,7 @@ Route::post('/scan', function (Request $request) {
         }
 
         
+
         $existing->status_morning = $statusMorning;
         $existing->status_afternoon = $statusAfternoon;
         $existing->save();
