@@ -324,3 +324,4 @@ Route::put('/users/{id}/update-password', [UserController::class, 'updatePasswor
 Route::delete('/events/{id}', [EventsController::class, 'destroy'])->name('events.destroy');
 
 Route::post('/attendance/bulk-revert', [AttendanceController::class, 'bulkRevert'])->name('attendance.bulkRevert');
+Route::post('/students/store', [StudentController::class, 'storeOne'])->name('students.store');

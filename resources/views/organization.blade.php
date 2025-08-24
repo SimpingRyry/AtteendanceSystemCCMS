@@ -50,18 +50,18 @@
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto p-4 p-lg-0">
                 <a href="{{ url('/') }}" class="nav-item nav-link">Home</a>
-<a href="{{ url('/') }}#about" class="nav-item nav-link">About</a>
+                <a href="{{ url('/') }}#about" class="nav-item nav-link">About</a>
                 <a href="{{ url('/home-event') }}" class="nav-item nav-link">Events</a>
-                       <div class="nav-item dropdown">
-    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Organizations</a>
-    <div class="dropdown-menu bg-light m-0">
-        @foreach($organizations as $org)
-          <a href="{{ url('/organization/' . $org->id) }}" class="dropdown-item">
-                {{ $org->org_name }}
-            </a>
-        @endforeach
-    </div>
-</div>
+                <div class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Organizations</a>
+                    <div class="dropdown-menu bg-light m-0">
+                        @foreach($organizations as $org)
+                            <a href="{{ url('/organization/' . $org->id) }}" class="dropdown-item">
+                                {{ $org->org_name }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
             </div>
             <a href="{{ url('login') }}" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Login<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
@@ -69,85 +69,103 @@
     <!-- Navbar End -->
 
     <!-- Page Header Start -->
-   <div class="container-fluid page-header py-6 my-6 mt-0 wow fadeIn" data-wow-delay="0.1s">
-    <div class="container text-center">
-        <h1 class="display-4 text-white animated slideInDown mb-4">{{ $organization->org_name }}</h1>
-        <nav aria-label="breadcrumb animated slideInDown">
-            <ol class="breadcrumb justify-content-center mb-0">
-                <li class="breadcrumb-item"><a class="text-white" href="{{ url('/') }}">Home</a></li>
-                <li class="breadcrumb-item"><a class="text-white" href="#">Organizations</a></li>
-                <li class="breadcrumb-item text-primary active" aria-current="page">{{ $organization->org_name }}</li>
-            </ol>
-        </nav>
-    </div>
-</div>
-
-<!-- Organization Info Start -->
-<div class="container-xxl py-6">
-    <div class="container">
-        <div class="row align-items-center">
-            <!-- Left: Description -->
-            <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
-                <h6 class="text-primary text-uppercase mb-2">About Us</h6>
-                <h1 class="display-6 mb-4">{{ $organization->org_name }}</h1>
-                <p class="mb-4">{{ $organization->description }}</p>
-            </div>
-
-            <!-- Right: Logo -->
-            <div class="col-lg-6 text-center wow fadeInUp" data-wow-delay="0.3s">
-                @if($organization->org_logo)
-                    <img src="{{ asset('images/org_list/' . $organization->org_logo) }}" alt="{{ $organization->org_name }}" class="img-fluid" style="max-width: 300px;">
-                @else
-                    <img src="{{ asset('img/default-logo.png') }}" alt="Default Logo" class="img-fluid" style="max-width: 300px;">
-                @endif
-            </div>
+    <div class="container-fluid page-header py-6 my-6 mt-0 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container text-center">
+            <h1 class="display-4 text-white animated slideInDown mb-4">{{ $organization->org_name }}</h1>
+            <nav aria-label="breadcrumb animated slideInDown">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a class="text-white" href="{{ url('/') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a class="text-white" href="#">Organizations</a></li>
+                    <li class="breadcrumb-item text-primary active" aria-current="page">{{ $organization->org_name }}</li>
+                </ol>
+            </nav>
         </div>
     </div>
-</div>
-    <!-- Team End -->
+    <!-- Page Header End -->
 
+    <!-- Sub Tabs Start -->
+    <div class="container mt-5">
+        <ul class="nav nav-tabs justify-content-center" id="orgTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="about-tab" data-bs-toggle="tab" data-bs-target="#about"
+                    type="button" role="tab" aria-controls="about" aria-selected="true">
+                    About
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events"
+                    type="button" role="tab" aria-controls="events" aria-selected="false">
+                    Events
+                </button>
+            </li>
+        </ul>
 
-    <div class="container-xxl events my-6 py-6 pb-0">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-5 wow fadeInUp" data-wow-delay="0.1s">
-            <h1 class="fw-bold">Upcoming Events</h1>
-        </div>
-        <div class="row g-4 justify-content-center">
-            
-            @forelse($events as $event)
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.{{ $loop->iteration }}s">
-<a href="{{ route('events.show', $event->id) }}" class="text-decoration-none text-dark">
-                        <div class="event-item bg-white h-100 shadow-sm">
-                            <div class="position-relative">
-                                <img class="img-fluid w-100" 
-                                    src="{{ asset('images/'.$event->attached_memo) ?? asset('img/default-event.jpg') }}" 
-                                    alt="{{ $event->name }}">
-                                <div class="position-absolute top-0 start-0 bg-warning text-white text-center px-3 py-2">
-                                    <div class="fs-4 fw-bold">{{ \Carbon\Carbon::parse($event->event_date)->format('d') }}</div>
-                                    <div class="small text-uppercase">{{ \Carbon\Carbon::parse($event->event_date)->format('F') }}</div>
-                                </div>
-                            </div>
-                            <div class="p-4">
-                                <p class="text-muted small mb-2">
-                                    <i class="fa fa-map-marker-alt text-warning me-2"></i>{{ $event->venue }}
-                                </p>
-                                <h5 class="fw-bold">{{ $event->name }}</h5>
-                            </div>
+        <div class="tab-content mt-4" id="orgTabsContent">
+            <!-- About Tab -->
+            <div class="tab-pane fade show active" id="about" role="tabpanel" aria-labelledby="about-tab">
+                <div class="row align-items-center">
+                    <!-- Left: Description -->
+                    <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
+                        <h6 class="text-primary text-uppercase mb-2">About Us</h6>
+                        <h1 class="display-6 mb-4">{{ $organization->org_name }}</h1>
+                        <p class="mb-4">{{ $organization->description }}</p>
+                    </div>
+                    <!-- Right: Logo -->
+                    <div class="col-lg-6 text-center wow fadeInUp" data-wow-delay="0.3s">
+                        @if($organization->org_logo)
+                            <img src="{{ asset('images/org_list/' . $organization->org_logo) }}" alt="{{ $organization->org_name }}" class="img-fluid" style="max-width: 300px;">
+                        @else
+                            <img src="{{ asset('img/default-logo.png') }}" alt="Default Logo" class="img-fluid" style="max-width: 300px;">
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Events Tab -->
+            <div class="tab-pane fade" id="events" role="tabpanel" aria-labelledby="events-tab">
+                <div class="container-xxl events my-6 py-6 pb-0">
+                    <div class="container">
+                        <div class="d-flex justify-content-between align-items-center mb-5 wow fadeInUp" data-wow-delay="0.1s">
+                            <h1 class="fw-bold">Upcoming Events</h1>
                         </div>
-                    </a>
+                        <div class="row g-4 justify-content-center">
+                            @forelse($events as $event)
+                                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.{{ $loop->iteration }}s">
+                                    <a href="{{ route('events.show', $event->id) }}" class="text-decoration-none text-dark">
+                                        <div class="event-item bg-white h-100 shadow-sm">
+                                            <div class="position-relative">
+                                                <img class="img-fluid w-100" 
+                                                    src="{{ asset('images/'.$event->attached_memo) ?? asset('img/default-event.jpg') }}" 
+                                                    alt="{{ $event->name }}">
+                                                <div class="position-absolute top-0 start-0 bg-warning text-white text-center px-3 py-2">
+                                                    <div class="fs-4 fw-bold">{{ \Carbon\Carbon::parse($event->event_date)->format('d') }}</div>
+                                                    <div class="small text-uppercase">{{ \Carbon\Carbon::parse($event->event_date)->format('F') }}</div>
+                                                </div>
+                                            </div>
+                                            <div class="p-4">
+                                                <p class="text-muted small mb-2">
+                                                    <i class="fa fa-map-marker-alt text-warning me-2"></i>{{ $event->venue }}
+                                                </p>
+                                                <h5 class="fw-bold">{{ $event->name }}</h5>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            @empty
+                                <div class="col-12 text-center">
+                                    <p class="text-muted">No upcoming events</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
-            @empty
-                <div class="col-12 text-center">
-                    <p class="text-muted">No upcoming events</p>
-                </div>
-            @endforelse
-
+            </div>
         </div>
     </div>
-</div>
+    <!-- Sub Tabs End -->
 
     <!-- Footer Start -->
-   <div class="container-fluid bg-dark text-light footer my-6 mb-0 py-6 wow fadeIn" data-wow-delay="0.1s">
+    <div class="container-fluid bg-dark text-light footer my-6 mb-0 py-6 wow fadeIn" data-wow-delay="0.1s">
         <div class="container">
             <div class="row g-5">
                 <div class="col-lg-3 col-md-6">
@@ -173,12 +191,10 @@
                     <a class="btn btn-link" href="">Terms & Condition</a>
                     <a class="btn btn-link" href="">Support</a>
                 </div>
-                
             </div>
         </div>
     </div>
     <!-- Footer End -->
-
 
     <!-- Copyright Start -->
     <div class="container-fluid copyright text-light py-4 wow fadeIn" data-wow-delay="0.1s">
@@ -188,7 +204,6 @@
                     &copy; <a href="#">Ticktax.com</a>, All Right Reserved.
                 </div>
                 <div class="col-md-6 text-center text-md-end">
-                    <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
                     Designed By <a href="https://htmlcodex.com">Ticktax</a>
                 </div>
             </div>

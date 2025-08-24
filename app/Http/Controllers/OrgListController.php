@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Course;
 use App\Models\OrgList;
+use App\Models\FineSetting;
+use App\Models\DeliveryUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
-use App\Models\DeliveryUnit;
-use App\Models\Course;
 
 class OrgListController extends Controller
 {
@@ -76,6 +77,18 @@ public function store(Request $request)
         'bg_image'    => $bgImageName,
     ]);
 
+    // ✅ Create default fine settings for the org if none exists
+    FineSetting::firstOrCreate(
+        ['org' => $organization->org_name], // condition
+        [   // defaults if not exists
+            'absent_member'       => 50,
+            'late_member'         => 20,
+            'absent_officer'      => 100,
+            'late_officer'        => 40,
+            'grace_period_minutes'=> 15,
+        ]
+    );
+
     // Check and create Adviser if all fields are filled
     if (
         $request->filled('adviser_name') &&
@@ -110,8 +123,12 @@ public function store(Request $request)
         event(new Registered($president));
     }
 
-    return redirect()->back()->with('success', 'Organization and available user accounts created successfully. Please confirm the emails for activation.');
+return redirect()->back()->with(
+    'success',
+    'Organization "' . $organization->org_name . '" and available user accounts created successfully. Default fine settings applied.'
+);
 }
+
 
     // ✅ Update an existing organization
     public function update(Request $request, $id)

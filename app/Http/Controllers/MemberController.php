@@ -11,18 +11,23 @@ class MemberController extends Controller
 {
 public function showMembers(Request $request)
 {
-    $user = Auth::user();
+    $authUser = Auth::user();
+    $authOrg = $authUser->org;
 
+    // Base query: only Members
     $query = User::where('role', 'Member');
 
-    // Restrict based on user's org if not CCMS Student Government
-    if ($user->org !== 'CCMS Student Government') {
-        $query->where('org', $user->org);
-    }
+    // Get the authenticated org record with its children
+    $org = OrgList::where('org_name', $authOrg)->with('children')->first();
+    $childOrgNames = $org?->children->pluck('org_name')->toArray() ?? [];
+    $isParentOrg = !empty($childOrgNames);
 
-    // Apply org filter if from CCMS SG and filter is selected
-    if ($request->filled('org') && $user->org === 'CCMS Student Government') {
-        $query->where('org', $request->org);
+    if ($isParentOrg) {
+        // Parent org → include itself + children
+        $query->whereIn('org', array_merge([$authOrg], $childOrgNames));
+    } else {
+        // Child org → only its own members
+        $query->where('org', $authOrg);
     }
 
     $users = $query->paginate(10);
@@ -30,4 +35,5 @@ public function showMembers(Request $request)
 
     return view('members', compact('users', 'org_list'));
 }
+
 }

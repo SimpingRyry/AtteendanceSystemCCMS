@@ -3,17 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\OrgList;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
-    public function getEligibleMembers()
+public function getEligibleMembers()
 {
+    $authUser = Auth::user();
+    $authOrg = $authUser->org;
+
     $currentTerm = Setting::where('key', 'academic_term')->value('value');
 
-    // Step 1: Get all members
-    $members = User::where('role', 'Member')->get();
+    // Get the authenticated org record with its children
+    $org = OrgList::where('org_name', $authOrg)->with('children')->first();
+    $childOrgNames = $org?->children->pluck('org_name')->toArray() ?? [];
+    $isParentOrg = !empty($childOrgNames);
+
+    // Step 1: Get members under the auth org (and children if parent)
+    $membersQuery = User::where('role', 'Member');
+
+    if ($isParentOrg) {
+        $membersQuery->whereIn('org', array_merge([$authOrg], $childOrgNames));
+    } else {
+        $membersQuery->where('org', $authOrg);
+    }
+
+    $members = $membersQuery->get();
 
     // Step 2: Extract all student_ids
     $studentIds = $members->pluck('student_id');

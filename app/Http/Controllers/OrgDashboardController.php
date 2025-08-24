@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Event;
+use App\Models\OrgList;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,41 +15,50 @@ class OrgDashboardController extends Controller
 {
 public function dashboard()
 {
-    $user = Auth::user();
-    $orgId = $user->org;
+    $authUser = Auth::user();
+    $authOrg = $authUser->org;
 
-    $isCCMS = $orgId === 'CCMS Student Government';
+    // Get the authenticated org record with its children
+    $org = OrgList::where('org_name', $authOrg)->with('children')->first();
+    $childOrgNames = $org?->children->pluck('org_name')->toArray() ?? [];
+    $isParentOrg = !empty($childOrgNames);
 
-    // Registered students (all orgs if CCMS)
+    // Registered members count
     $totalMembersQuery = User::where('role', 'Member');
-    if (!$isCCMS) {
-        $totalMembersQuery->where('org', $orgId);
+    if ($isParentOrg) {
+        $totalMembersQuery->whereIn('org', array_merge([$authOrg], $childOrgNames));
+    } else {
+        $totalMembersQuery->where('org', $authOrg);
     }
     $totalMembers = $totalMembersQuery->count();
     $registered = $totalMembers;
 
-    // Year level distribution (all orgs if CCMS)
+    // Year level distribution
     $yearLevelQuery = DB::table('users')
         ->join('student_list', 'users.student_id', '=', 'student_list.id_number')
-        ->where('users.role', 'member');
-    if (!$isCCMS) {
-        $yearLevelQuery->where('users.org', $orgId);
+        ->where('users.role', 'Member');
+
+    if ($isParentOrg) {
+        $yearLevelQuery->whereIn('users.org', array_merge([$authOrg], $childOrgNames));
+    } else {
+        $yearLevelQuery->where('users.org', $authOrg);
     }
+
     $yearLevelData = $yearLevelQuery
         ->selectRaw('student_list.section as label, COUNT(*) as count')
         ->groupBy('student_list.section')
         ->pluck('count', 'label');
 
-    // These stay scoped by org
-    $totalFines = Transaction::where('org', $orgId)
+    // Transactions and events stay strictly scoped to auth org only
+    $totalFines = Transaction::where('org', $authOrg)
         ->where('transaction_type', 'FINE')
         ->sum('fine_amount');
 
-    $totalCollectedFines = Transaction::where('org', $orgId)
+    $totalCollectedFines = Transaction::where('org', $authOrg)
         ->where('transaction_type', 'PAYMENT')
         ->sum('fine_amount');
 
-    $finesByMonth = Transaction::where('org', $orgId)
+    $finesByMonth = Transaction::where('org', $authOrg)
         ->where('transaction_type', 'FINE')
         ->selectRaw('DATE_FORMAT(`date`, "%Y-%m") as month, SUM(fine_amount) as total')
         ->groupBy('month')
@@ -56,18 +66,25 @@ public function dashboard()
         ->get()
         ->pluck('total', 'month');
 
-    $upcomingEvents = Event::where('org', $orgId)
+    $upcomingEvents = Event::where('org', $authOrg)
         ->whereDate('event_date', '>=', Carbon::today('Asia/Manila'))
         ->orderBy('event_date')
-        ->select('name', 'event_date','times')
+        ->select('name', 'event_date', 'times')
         ->take(3)
+        ->get();
+
+    $recentTransactions = Transaction::where('org', $authOrg)
+        ->where('transaction_type', 'PAYMENT')
+        ->orderBy('date', 'desc')
+        ->take(2)
         ->get();
 
     return view('dashboard_page', compact(
         'totalMembers', 'registered', 'totalCollectedFines', 'totalFines',
-        'finesByMonth', 'yearLevelData', 'upcomingEvents'
+        'finesByMonth', 'yearLevelData', 'upcomingEvents', 'recentTransactions'
     ));
 }
+
 
 
 }

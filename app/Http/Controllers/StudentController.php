@@ -169,6 +169,38 @@ public function store(Request $request)
     return redirect()->back()->with('success', 'Student registered successfully!');
 }
 
+public function storeOne(Request $request)
+{
+    $request->validate([
+        'id_number' => 'required|unique:students,id_number',
+        'name' => 'required|string',
+        'gender' => 'required|string',
+        'course' => 'required|string',
+        'year' => 'required|string',
+        'units' => 'required|numeric',
+        'section' => 'required|string',
+        'birth_date' => 'required|date',
+        // optional fields
+        'contact_no' => 'nullable|string',
+        'address' => 'nullable|string',
+    ]);
+
+    Student::create([
+        'id_number' => $request->id_number,
+        'name' => $request->name,
+        'gender' => $request->gender,
+        'course' => $request->course,
+        'year' => $request->year,
+        'units' => $request->units,
+        'section' => $request->section,
+        'contact_no' => $request->contact_no,
+        'birth_date' => $request->birth_date,
+        'address' => $request->address,
+        'status' => 'Unregistered', // default
+    ]);
+
+    return redirect()->back()->with('success', 'Student added successfully!');
+}
 
 
     

@@ -130,38 +130,37 @@
         <div class="col-lg-6">
           <div class="card shadow-sm p-3 rounded-4">
             <h6 class="mb-3 text-center">Recent Payments</h6>
-            <div class="table-responsive">
-              <table class="table table-hover">
-                <thead class="table-light">
-                  <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Student ID</th>
-                    <th>Org</th>
-                    <th>Position</th>
-                    <th>Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td>Jane Doe</td>
-                    <td>2023001</td>
-                    <td>Praxis</td>
-                    <td>President</td>
-                    <td>2025-04-20</td>
-                  </tr>
-                  <tr>
-                    <td>2</td>
-                    <td>John Smith</td>
-                    <td>2023012</td>
-                    <td>ITS</td>
-                    <td>Member</td>
-                    <td>2025-04-19</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+           <div class="table-responsive">
+  <table class="table table-hover">
+    <thead class="table-light">
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Student ID</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      @forelse($recentTransactions as $index => $transaction)
+        <tr>
+          <td>{{ $index + 1 }}</td>
+          <td>
+            @php
+              $student = \App\Models\User::where('student_id', $transaction->student_id)->first();
+            @endphp
+            {{ $student ? $student->name : 'Unknown' }}
+          </td>
+          <td>{{ $transaction->student_id }}</td>
+          <td>{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}</td>
+        </tr>
+      @empty
+        <tr>
+          <td colspan="4" class="text-center">No recent payments found</td>
+        </tr>
+      @endforelse
+    </tbody>
+  </table>
+</div>
           </div>
         </div>
         <div class="col-lg-6">

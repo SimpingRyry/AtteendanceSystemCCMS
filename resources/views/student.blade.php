@@ -54,6 +54,9 @@
       <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#scheduleModal">
         <i class="bi bi-calendar-check me-1"></i> Generate Schedule
       </button>
+       <button class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+    <i class="bi bi-person-plus me-1"></i> Add Student
+  </button>
     </div>
 
     <!-- Filter Cloud + Search -->
@@ -187,7 +190,7 @@
       @endif
 
      <div class="d-flex justify-content-end mt-3">
-  {{ $students->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
+{{ $students->appends(request()->except('page'))->onEachSide(1)->links('pagination::bootstrap-5') }}
 </div>
     </div>
 
@@ -215,7 +218,82 @@
   </div>
 </main>
 
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <form class="modal-content" action="{{ route('students.store') }}" method="POST">
+      @csrf
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Student</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
 
+          <div class="col-md-6">
+            <label class="form-label">Student ID</label>
+            <input type="text" class="form-control" name="id_number" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-control" name="name" required placeholder="e.g. Dela Cruz, Juan p.">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Sex</label>
+            <select class="form-select" name="gender" required>
+              <option value="">Select...</option>
+              <option value="M">M</option>
+              <option value="F">F</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Program</label>
+            <input type="text" class="form-control" name="course" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Year</label>
+            <input type="text" class="form-control" name="year" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Units</label>
+            <input type="number" class="form-control" name="units" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Section</label>
+            <input type="text" class="form-control" name="section" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Contact No (Optional)</label>
+            <input type="text" class="form-control" name="contact_no">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Birth Date</label>
+            <input type="date" class="form-control" name="birth_date" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Address (Optional)</label>
+            <input type="text" class="form-control" name="address">
+          </div>
+
+          <!-- Status excluded (handled in backend as default "Unregistered" or "Registered") -->
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Student</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 
 
