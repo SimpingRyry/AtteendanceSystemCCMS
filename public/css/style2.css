@@ -114,6 +114,33 @@
     margin-left: 8px;
 }
 
+/* Dropdown item styling */
+.dropdown-menu .dropdown-item {
+    white-space: normal;      /* allow wrapping */
+    word-wrap: break-word;    /* break long words if needed */
+    line-height: 1.4;         /* neat spacing for multi-line text */
+    padding: 8px 12px;        /* better spacing per item */
+    max-width: 250px;         /* keep dropdown tidy */
+}
+
+/* Dropdown scroll limit (4 items max visible) */
+.custom-dropdown {
+    max-height: calc(4 * 42px); /* adjust based on item height */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Add separator lines */
+.custom-dropdown .dropdown-item {
+    border-bottom: 1px solid #0C2B4B;  /* dark blue line */
+    padding: 10px 15px;
+}
+
+/* Remove last border */
+.custom-dropdown .dropdown-item:last-child {
+    border-bottom: none;
+}
+
 @media (max-width: 991.98px) {
     .navbar .navbar-nav .nav-link  {
         margin-right: 0;
