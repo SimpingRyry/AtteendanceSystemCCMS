@@ -412,3 +412,13 @@ Route::post('/check-role', function (Request $request) {
 });
 
 Route::post('/device-enrollment-status', [DeviceController::class, 'updateEnrollmentStatus']);
+
+Route::get('/event', function () {
+    $today = Carbon::now('Asia/Manila')->toDateString();
+
+    $event = Event::whereDate('event_date', $today)->first();
+
+    return response()->json([
+        'event_name' => $event?->name ?? 'Untitled Event'
+    ]);
+});

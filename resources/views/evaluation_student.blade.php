@@ -128,10 +128,12 @@
   </div>
 </div>
 
+
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // View answers modal
   document.querySelectorAll('.show-evaluation-btn').forEach(button => {
     button.addEventListener('click', function () {
       const evalId = this.getAttribute('data-id');
@@ -141,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(res => res.json())
         .then(data => {
           let html = '';
-          data.forEach(item => {
+          data.answers.forEach(item => {
             html += `
               <div class="mb-3">
                 <strong>Q: ${item.question}</strong>
@@ -150,6 +152,9 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
           });
 
+          // Show event name in modal header
+          document.getElementById('viewEvaluationModalLabel').textContent =
+  `Evaluation Answers — ${data.event_name}`;
           document.getElementById('evaluationAnswersContent').innerHTML = html;
           new bootstrap.Modal(document.getElementById('viewEvaluationModal')).show();
         });
@@ -157,23 +162,29 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const cards = document.querySelectorAll('.evaluation-card');
   const modal = new bootstrap.Modal(document.getElementById('evalModal'));
 
-  cards.forEach(card => {
-    card.addEventListener('click', async () => {
-      const id = card.dataset.id;
-      const res = await fetch(`/student/evaluation/${id}/json`);
-      if (!res.ok) return alert('Failed to load evaluation.');
+cards.forEach(card => {
+  card.addEventListener('click', async () => {
+    const id = card.dataset.id;
+    const eventId = card.dataset.eventId;
 
-      const data = await res.json();
-      document.getElementById('modalTitle').textContent = data.title;
-      document.getElementById('modalDesc').textContent = data.description || '—';
-      document.getElementById('evaluation_id').value = data.id;
+    const res = await fetch(`/student/evaluation/${id}/${eventId}/json`);
+    if (!res.ok) return alert('Failed to load evaluation.');
 
-      const container = document.getElementById('modalQuestions');
+    const data = await res.json();
+
+    // Show evaluation + event name in header
+    document.getElementById('modalTitle').textContent =
+      `${data.title} — ${data.event_name}`;
+    document.getElementById('modalDesc').textContent = data.description || '—';
+    document.getElementById('evaluation_id').value = data.id;
+
+    const container = document.getElementById('modalQuestions');
       container.innerHTML = '';
 
       data.questions.forEach((q, i) => {
@@ -220,34 +231,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Form submission via AJAX
   document.getElementById('evalForm').addEventListener('submit', async function (e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  const form = e.target;
-  const formData = new FormData(form);
+    const form = e.target;
+    const formData = new FormData(form);
 
-  try {
-    const res = await fetch('/student/evaluation/submit', {
-      method: 'POST',
-      headers: {
-        'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value
-      },
-      body: formData
-    });
+    try {
+      const res = await fetch('/student/evaluation/submit', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value
+        },
+        body: formData
+      });
 
-    if (res.ok) {
-      alert('Your responses were submitted!');
-      bootstrap.Modal.getInstance(document.getElementById('evalModal')).hide();
-      form.reset();
-    } else {
-      const errorText = await res.text();
-      alert('Error submitting answers: ' + errorText);
-      console.error('Submit error:', errorText);
+      if (res.ok) {
+        bootstrap.Modal.getInstance(document.getElementById('evalModal')).hide();
+        form.reset();
+        // Refresh so button changes Answer -> Show
+        location.reload();
+      } else {
+        const errorText = await res.text();
+        alert('Error submitting answers: ' + errorText);
+        console.error('Submit error:', errorText);
+      }
+    } catch (error) {
+      alert('Network or server error: ' + error.message);
+      console.error(error);
     }
-  } catch (error) {
-    alert('Network or server error: ' + error.message);
-    console.error(error);
-  }
-});
+  });
 });
 </script>
 
