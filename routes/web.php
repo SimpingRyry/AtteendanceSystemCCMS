@@ -218,7 +218,7 @@ Route::middleware(['auth'])->group(function () {
 
     // AJAX – return evaluation + questions JSON
 
-    Route::get('/student/evaluation/{id}/json', [EvaluationController::class, 'getEvaluationWithQuestions']);
+Route::get('/student/evaluation/{evaluationId}/{eventId}/json', [EvaluationController::class, 'getEvaluationWithQuestions']);
 
     Route::get('/evaluation_student/{evaluation}/json', [StudentEvaluationController::class,'json'])
          ->name('evaluation.json');

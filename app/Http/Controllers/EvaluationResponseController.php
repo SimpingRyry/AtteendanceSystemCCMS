@@ -61,38 +61,38 @@ public function summary($assignmentId)
     $eventId = $assignment->event_id;
 
     // Actual respondents (who answered)
-$respondentCount = EvaluationAnswer::where('evaluation_id', $evaluationId)
-    ->where('event_id', $eventId)
-    ->distinct('student_id')
-    ->count('student_id');
+    $respondentCount = EvaluationAnswer::where('evaluation_id', $evaluationId)
+        ->where('event_id', $eventId)
+        ->distinct('student_id')
+        ->count('student_id');
 
-// Step 1: Get the org associated with the event (using org name)
-$eventOrg = OrgList::where('org_name', $event->org)->first();
+    // Step 1: Get the org associated with the event (using org name)
+    $eventOrg = OrgList::where('org_name', $event->org)->first();
 
-// Step 2: Get org names (not IDs) — because User.org stores names
-$orgNames = [];
+    // Step 2: Get org names (not IDs) — because User.org stores names
+    $orgNames = [];
 
-if ($eventOrg) {
-    $orgNames[] = $eventOrg->org_name; // Add the parent org name
+    if ($eventOrg) {
+        $orgNames[] = $eventOrg->org_name; // Add the parent org name
 
-    $childOrgNames = OrgList::where('parent_org_id', $eventOrg->id)
-        ->pluck('org_name')
-        ->toArray();
+        $childOrgNames = OrgList::where('parent_org_id', $eventOrg->id)
+            ->pluck('org_name')
+            ->toArray();
 
-    if (!empty($childOrgNames)) {
-        $orgNames = array_merge($orgNames, $childOrgNames);
+        if (!empty($childOrgNames)) {
+            $orgNames = array_merge($orgNames, $childOrgNames);
+        }
     }
-}
 
-// Step 3: Count members by org name (not ID)
-$totalMembers = User::where('role', 'Member')
-    ->whereIn('org', $orgNames)
-    ->count();
+    // Step 3: Count members by org name (not ID)
+    $totalMembers = User::where('role', 'Member')
+        ->whereIn('org', $orgNames)
+        ->count();
 
-// Format the response text like 3/10 (30%)
-$respondentText = $totalMembers > 0
-    ? "{$respondentCount}/{$totalMembers} (" . round(($respondentCount / $totalMembers) * 100, 2) . "%)"
-    : "{$respondentCount}/0 (0%)";
+    // Format the response text like 3/10 (30%)
+    $respondentText = $totalMembers > 0
+        ? "{$respondentCount}/{$totalMembers} (" . round(($respondentCount / $totalMembers) * 100, 2) . "%)"
+        : "{$respondentCount}/0 (0%)";
 
     // Existing logic: compute question-wise summary
     $questions = EvaluationQuestion::where('evaluation_id', $evaluationId)->get();
@@ -122,8 +122,11 @@ $respondentText = $totalMembers > 0
                         ['answer', $optTrimmed],
                     ])->count();
 
-                if (is_numeric($optTrimmed)) {
-                    $totalScore += $optTrimmed * $count;
+                // Extract numeric value at the start (e.g. "5 - Excellent" -> 5)
+                $numericValue = intval($optTrimmed);
+
+                if ($numericValue > 0) {
+                    $totalScore += $numericValue * $count;
                     $totalResponses += $count;
                 }
 
@@ -166,6 +169,7 @@ $respondentText = $totalMembers > 0
         'summary' => $summary,
     ]);
 }
+
 
 
 }

@@ -152,26 +152,35 @@ public function index()
             $evaluation->load('questions')
         );
     }
-    public function getEvaluationWithQuestions($id)
+public function getEvaluationWithQuestions($evaluationId, $eventId)
 {
-    $evaluation = Evaluation::with(['questions']) // eager-load the related questions
-        ->findOrFail($id);
+    $evaluation = Evaluation::with(['questions'])
+        ->findOrFail($evaluationId);
 
-        return response()->json([
-            'id' => $evaluation->id,
-            'title' => $evaluation->title,
-            'description' => $evaluation->description,
-            'questions' => $evaluation->questions->map(function ($q) {
-                return [
-                    'id' => $q->id,
-                    'question' => $q->question,
-                    'type' => $q->type,
-                    'order' => $q->order,
-                    'is_required' => true,
-                    'options' => is_string($q->options) ? json_decode($q->options, true) : $q->options,
-                ];
-            })
-        ]);
+    // Get assignment specific to this event + evaluation
+    $assignment = EvaluationAssignment::with('event')
+        ->where('evaluation_id', $evaluation->id)
+        ->where('event_id', $eventId)
+        ->first();
+
+    $eventName = $assignment && $assignment->event ? $assignment->event->name : null;
+
+    return response()->json([
+        'id' => $evaluation->id,
+        'title' => $evaluation->title,
+        'description' => $evaluation->description,
+        'event_name' => $eventName,
+        'questions' => $evaluation->questions->map(function ($q) {
+            return [
+                'id' => $q->id,
+                'question' => $q->question,
+                'type' => $q->type,
+                'order' => $q->order,
+                'is_required' => true,
+                'options' => is_string($q->options) ? json_decode($q->options, true) : $q->options,
+            ];
+        })
+    ]);
 }
 
 public function submitAnswers(Request $request)
@@ -281,14 +290,19 @@ public function getAnswers($evaluationId, $eventId)
         ->with('question')
         ->get();
 
-    return response()->json(
-        $answers->map(function ($item) {
+    // Get the event name
+    $event = Event::find($eventId);
+
+    return response()->json([
+        'event_name' => $event ? $event->name : 'Unknown Event',
+        'answers' => $answers->map(function ($item) {
             return [
                 'question' => $item->question->question ?? 'No question',
                 'answer' => $item->answer ?? 'No answer',
             ];
-        })
-    );
+        }),
+    ]);
 }
+
 
 }
