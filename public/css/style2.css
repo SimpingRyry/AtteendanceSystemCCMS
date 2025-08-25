@@ -5,6 +5,9 @@
     --light: #F3F6F8;
     --dark: #0C2B4B;
 }
+.owl-carousel {
+    width: 100% !important;
+}
 
 .py-6 {
     padding-top: 6rem;
@@ -257,7 +260,7 @@
 
 .team-item:hover::after {
     height: 100%;
-    background: var(--primary);
+    background: #232946;
 }
 
 .team-item .team-social {

@@ -85,8 +85,7 @@
                         <h1 class="display-2 text-light mb-5 animated slideInDown">
                             Student Organization Attendance and Event Management
                         </h1>
-                        <a href="{{ route('login') }}" class="btn btn-primary py-sm-3 px-sm-5">Login Now</a>
-                        <a href="{{ route('login') }}" class="btn btn-light py-sm-3 px-sm-5 ms-3">Access System</a>
+                        <a href="{{ route('login') }}" class="btn btn-primary py-sm-3 px-sm-5 ms-3">Access System</a>
                     </div>
                 </div>
             </div>
@@ -101,8 +100,7 @@
                         <h1 class="display-2 text-light mb-5 animated slideInDown">
                             Monitor Fines & Manage Organizations with Ease
                         </h1>
-                        <a href="{{ route('login') }}" class="btn btn-primary py-sm-3 px-sm-5">Sign In</a>
-                        <a href="{{ route('login') }}" class="btn btn-light py-sm-3 px-sm-5 ms-3">Proceed to Login</a>
+                        <a href="{{ route('login') }}" class="btn btn-primary py-sm-3 px-sm-5 ms-3">Proceed to Login</a>
                     </div>
                 </div>
             </div>
