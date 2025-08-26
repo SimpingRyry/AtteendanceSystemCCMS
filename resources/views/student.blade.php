@@ -313,8 +313,12 @@
             <!-- Left: Profile Picture + Fingerprint -->
             <div class="col-md-4 text-center">
              
-<div class="border rounded d-flex align-items-center justify-content-center bg-light mb-3" style="height: 250px;" >
-  <img id="capturedImage" class="img-fluid d-block mx-auto" style="max-height: 100%; max-width: 100%; display: none;" alt="Profile Picture" />
+<div class="border rounded d-flex align-items-center justify-content-center bg-light mb-3" style="height: 250px;">
+  <img id="capturedImage" 
+       src="{{ asset('uploads/human.png') }}" 
+       class="img-fluid d-block mx-auto" 
+       style="max-height: 100%; max-width: 100%;" 
+       alt="Profile Picture" />
 </div>
 
               <div class="d-flex flex-column gap-2 mb-3">

@@ -44,9 +44,9 @@ public function store(Request $request)
     }
 
     // ✅ Handle image requirements
-    if (!$request->uploaded_picture && !$request->captured_image) {
-        return back()->withErrors(['error' => 'Please upload or capture a picture.']);
-    }
+    // if (!$request->uploaded_picture && !$request->captured_image) {
+    //     return back()->withErrors(['error' => 'Please upload or capture a picture.']);
+    // }
 
     if ($request->uploaded_picture && $request->captured_image) {
         return back()->withErrors(['error' => 'Only one image should be provided.']);

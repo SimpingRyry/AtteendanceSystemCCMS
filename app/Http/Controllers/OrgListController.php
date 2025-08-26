@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\OrgList;
+use App\Models\Setting;
 use App\Models\FineSetting;
 use App\Models\DeliveryUnit;
 use Illuminate\Http\Request;
@@ -68,6 +69,8 @@ public function store(Request $request)
 
     $bgImageName = $sanitizedOrgName . '_bg.' . $request->bg_image->extension();
     $request->bg_image->move(public_path('images/org_lists'), $bgImageName);
+    $term = Setting::where('key', 'academic_term')->value('value');
+
 
     // Create the organization
     $organization = OrgList::create([
@@ -101,6 +104,7 @@ public function store(Request $request)
             'password' => Hash::make($request->adviser_password),
             'org'      => $organization->org_name,
             'role'     => 'Adviser',
+            'term'     => $term
         ]);
 
         event(new Registered($adviser));
@@ -118,6 +122,8 @@ public function store(Request $request)
             'password' => Hash::make($request->president_password),
             'org'      => $organization->org_name,
             'role'     => 'President - Officer',
+            'term'     => $term
+
         ]);
 
         event(new Registered($president));
