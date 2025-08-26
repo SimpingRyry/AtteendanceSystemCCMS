@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,14 +20,29 @@ class AccountsController extends Controller
         return view('accounts', compact('users'));
     }
 
-    public function showAdmins()
+public function showAdmins()
 {
-    $users = User::select('id', 'name', 'email', 'role', 'org')
-                      ->where('role', 'like', '%admin%')
-                      ->get();
+    // Get the current term year like "2025-2026"
+    $fullTerm = Setting::where('key', 'academic_term')->value('value');
+    preg_match('/\d{4}-\d{4}/', $fullTerm, $matches);
+    $termYear = $matches[0] ?? 'Unknown Year';
+$users = User::select('id', 'name', 'email', 'role', 'org', 'term')
+    ->where(function ($query) use ($termYear) {
+        $query->where(function ($q) use ($termYear) {
+            $q->where('role', 'like', '%- Officer%')
+              ->orWhere('role', 'Adviser')
+              ->where('term', 'like', "%$termYear%");
+        })
+        ->orWhere(function ($q) {
+            $q->where('role', 'not like', '%- Officer%')
+              ->where('role', '<>', 'Adviser');
+        });
+    })
+    ->paginate(10); // ✅ paginate instead of get()
 
     return view('accounts', compact('users'));
 }
+
 public function showOfficers()
 {
     $currentOrg = Auth::user()->org;

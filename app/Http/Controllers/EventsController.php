@@ -35,6 +35,9 @@ public function index()
 }
 public function store(Request $request)
 {
+    // 🔎 Debug first if needed
+    // dd($request->all());
+
     $request->validate([
         'name' => 'required|string|max:255',
         'description' => 'nullable|string',
@@ -44,12 +47,14 @@ public function store(Request $request)
         'course' => 'nullable|string',
         'organization' => 'nullable|string', // for Super Admin
         'repeat_dates' => 'nullable|string',
-        'guests' => 'nullable|string',
-        'involved_students' => 'nullable|in:All,Members,Officers', // allow null now
+        'guests' => 'nullable|array',
+        'guests.*' => 'email',
+        'involved_students' => 'nullable|in:All,Members,Officers',
         'attached_memo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         'evaluation_template' => 'required|exists:evaluation,id',
     ]);
 
+    // Handle times
     $times = [];
     if ($request->timeouts == 2) {
         $times = [$request->half_start, $request->half_end];
@@ -62,6 +67,7 @@ public function store(Request $request)
         ];
     }
 
+    // Handle repeat dates
     $dates = [$request->event_date];
     if (!empty($request->repeat_dates)) {
         $extraDates = array_map('trim', explode(',', $request->repeat_dates));
@@ -72,6 +78,7 @@ public function store(Request $request)
     $role = $user->role ?? null;
     $organization = $role === 'Super Admin' ? $request->organization : $user->org;
 
+    // Determine course
     $course = null;
     if ($role === 'Super Admin') {
         $course = 'MAIN-' . $request->course;
@@ -83,11 +90,10 @@ public function store(Request $request)
         $course = 'All';
     }
 
-    $guestEmails = [];
-    if (!empty($request->guests)) {
-        $guestEmails = array_filter(array_map('trim', explode(',', $request->guests)));
-    }
+    // ✅ Guest handling
+    $guestEmails = $request->guests ?? [];
 
+    // Handle memo
     $memoFilename = null;
     if ($request->hasFile('attached_memo')) {
         $image = $request->file('attached_memo');
@@ -135,10 +141,9 @@ public function store(Request $request)
             'type' => 'Event',
         ]);
 
+        // === Notify based on involved_students ===
         $involved = $request->involved_students;
-
         if ($involved !== null) {
-            // === Notify based on involved_students ===
             $targetOrgs = [$organization];
 
             if (in_array($involved, ['All', 'Members'])) {
@@ -176,24 +181,26 @@ public function store(Request $request)
                     'message' => 'Your advised org has an event on ' . $event->event_date . ' at ' . $event->venue,
                 ]);
             }
-        } else {
-            // === involved_students is NULL → notify only guests ===
-            if (!empty($guestEmails)) {
-                $guestUsers = \App\Models\User::whereIn('email', $guestEmails)->get();
+        }
 
-                foreach ($guestUsers as $guest) {
-                    \App\Models\Notification::create([
-                        'user_id' => $guest->id,
-                        'title' => 'You were tagged in an event: ' . $event->name,
-                        'message' => 'You were invited to the event on ' . $event->event_date . ' at ' . $event->venue,
-                    ]);
-                }
+        // ✅ Always notify guests if provided
+        if (!empty($guestEmails)) {
+            $guestUsers = \App\Models\User::whereIn('email', $guestEmails)->get();
+
+            foreach ($guestUsers as $guest) {
+                \App\Models\Notification::create([
+                    'user_id' => $guest->id,
+                    'title' => 'You were tagged in an event: ' . $event->name,
+                    'message' => 'You were invited to the event on ' . $event->event_date . ' at ' . $event->venue,
+                ]);
             }
         }
     }
 
     return redirect()->back()->with('success', 'Events created and evaluation assigned successfully!');
 }
+
+
 
 
     

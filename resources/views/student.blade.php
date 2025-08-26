@@ -173,7 +173,7 @@
         <td>{{ $student->address }}</td>
         <td>
             @if($student->status === 'Unregistered')
-                @if(!(auth()->user()->role === 'OSSD' || auth()->user()->organization === 'CCMS Student Government'))
+                @if(!(auth()->user()->role === 'OSSD' || auth()->user()->role === 'Super Admin'))
                     <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
                 @else
                     <span class="badge bg-warning">Unregistered</span>

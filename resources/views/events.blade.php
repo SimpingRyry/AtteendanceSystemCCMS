@@ -177,8 +177,9 @@
                                     </select>
                                 </div>
                                 <div class="col-md-6 position-relative">
-                                    <input type="text" class="form-control" id="guests" name="guests" placeholder="use @ to involved specific members or officers (optional)">
-                                    <div id="mentionDropdown" class="list-group position-absolute w-100 z-3" style="display: none; max-height: 200px; overflow-y: auto;"></div>
+<div class="chip-container d-flex flex-wrap align-items-center p-2 border rounded" id="chipContainer">
+    <input type="text" id="guests" class="form-control border-0 flex-grow-1" placeholder="Type @ to mention">
+</div>                                   <div id="mentionDropdown" class="list-group position-absolute w-100 z-3" style="display: none; max-height: 200px; overflow-y: auto;"></div>
                                 </div>
                             </div>
                         </div>
@@ -498,13 +499,15 @@
 
 <script>
 let adminUsers = [];
+let selectedUsers = [];
 
 document.addEventListener("DOMContentLoaded", () => {
     const guestsInput = document.getElementById("guests");
+    const chipContainer = document.getElementById("chipContainer");
     const mentionDropdown = document.getElementById("mentionDropdown");
 
     // Load admin users
-    fetch('/officer-users') // Laravel route returns admins
+    fetch('/officer-users')
         .then(res => res.json())
         .then(data => adminUsers = data);
 
@@ -520,8 +523,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (matches.length) {
                 mentionDropdown.innerHTML = matches.map(user => `
-                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center" data-email="${user.email}">
-            <img src="/uploads/${user.picture || 'human.png'}" class="rounded-circle me-2" width="30" height="30">
+                    <a href="#" 
+                       class="list-group-item list-group-item-action d-flex align-items-center" 
+                       data-email="${user.email}" 
+                       data-name="${user.name}">
+                        <img src="/uploads/${user.picture || 'human.png'}" class="rounded-circle me-2" width="30" height="30">
                         <div>
                             <strong>${user.name}</strong><br>
                             <small>${user.email}</small>
@@ -537,17 +543,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // When selecting a user
     mentionDropdown.addEventListener("click", function (e) {
         e.preventDefault();
         const item = e.target.closest("a");
         if (item) {
             const email = item.dataset.email;
-            const value = guestsInput.value;
-            const atIndex = value.lastIndexOf("@");
-            guestsInput.value = value.substring(0, atIndex) + email + ', ';
+            const name = item.dataset.name;
+
+            if (!selectedUsers.includes(email)) {
+                selectedUsers.push(email);
+                addChip(email, name);
+            }
+
+            guestsInput.value = ""; // clear input
             mentionDropdown.style.display = "none";
         }
     });
+
+    // Create chip element
+    function addChip(email, name) {
+        const chip = document.createElement("div");
+        chip.className = "chip d-flex align-items-center bg-light border rounded-pill px-2 me-2 mb-2";
+        chip.innerHTML = `
+            <span class="me-1">${name} (${email})</span>
+            <button type="button" class="btn-close btn-sm" aria-label="Remove"></button>
+            <input type="hidden" name="guests[]" value="${email}">
+        `;
+
+        chip.querySelector("button").addEventListener("click", () => {
+            chip.remove();
+            selectedUsers = selectedUsers.filter(u => u !== email);
+        });
+
+        chipContainer.insertBefore(chip, guestsInput);
+    }
 
     document.addEventListener("click", function (e) {
         if (!mentionDropdown.contains(e.target) && e.target !== guestsInput) {

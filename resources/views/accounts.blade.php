@@ -59,18 +59,9 @@
                         <option value="">All Roles</option>
                         <option value="Member">Member</option>
                         <option value="Officer">Officer</option>
-                        <option value="Admin">Admin</option>
                     </select>
                 </div>
-                <div>
-                    <label for="deptFilter" class="form-label">Filter by Organization</label>
-                    <select id="deptFilter" class="form-select form-select-sm" onchange="applyFilters()">
-                        <option value="">All Organization</option>
-                        <option value="ITS">ITS</option>
-                        <option value="PRAXIS">PRAXIS</option>
-                        <option value="CCMS-SG">CCMS-SG</option>
-                    </select>
-                </div>
+               
             </div>
         </div>
 
@@ -100,119 +91,124 @@
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @foreach($users as $user)
-                                    <tr style="border-bottom: 1px solid #dee2e6;">
-                                        <td>{{ $user->user_ID }}</td>
-                                        <td>{{ $user->name }}</td>
-                                        <td>{{ $user->email }}</td>
-                                        <td>{{ $user->role }}</td>
-                                        <td>{{ $user->org }}</td>
-                                        <td>
-                                            <button type="button" class="btn btn-sm btn-warning me-1 border-0 shadow-none"
-                                                onclick="openEditModal('{{ $user->user_ID }}', '{{ $user->name }}', '{{ $user->email }}', '{{ $user->role }}', '{{ $user->org }}')">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-danger border-0 shadow-none">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
+                         <tbody>
+    @foreach($users as $user)
+        <tr style="border-bottom: 1px solid #dee2e6;">
+            <td>{{ $user->id }}</td>
+            <td>{{ $user->name }}</td>
+            <td>{{ $user->email }}</td>
+            <td>{{ $user->role }}</td>
+            <td>{{ $user->org }}</td>
+            <td>
+                <!-- Edit button -->
+                <button type="button" class="btn btn-sm btn-warning me-1 border-0 shadow-none"
+    onclick="openPasswordModal('{{ $user->id }}')">
+    <i class="bi bi-pencil-square"></i>
+</button>
+
+                <!-- Delete button (hidden if it's the logged-in user) -->
+                @if(Auth::id() !== $user->id)
+                    <form action="" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-danger border-0 shadow-none"
+                            onclick="return confirm('Are you sure you want to delete this user?')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                @endif
+            </td>
+        </tr>
+    @endforeach
+</tbody>
                         </table>
                     </div>
                 @endif
 
                 <!-- Pagination -->
-                <div class="d-flex justify-content-end mt-3">
-                    <nav>
-                        <ul class="pagination">
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                            <li class="page-item"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
+               <div class="d-flex justify-content-end mt-3">
+    {{ $users->links('pagination::bootstrap-5') }}
+</div>
             </div>
         </div>
     </div>
 </main>
 
 
-     <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+<div class="modal fade" id="editPasswordModal" tabindex="-1" aria-labelledby="editPasswordLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <form id="editUserForm" method="POST" action="{{ route('users.update') }}">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold text-info" id="editPasswordLabel">Edit User Password</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="editPasswordForm" method="POST">
         @csrf
-        <div class="modal-header">
-          <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+        @method('PUT')
         <div class="modal-body">
-
           <div class="mb-3">
-            <label for="editUserId" class="form-label">User ID</label>
-            <input type="text" class="form-control" id="editUserId" name="user_id" readonly>
+            <label for="newPassword" class="form-label">New Password</label>
+            <input type="password" class="form-control" id="newPassword" name="password" required>
           </div>
-
           <div class="mb-3">
-            <label for="editUserName" class="form-label">Name</label>
-            <input type="text" class="form-control" id="editUserName" name="name">
+            <label for="confirmPassword" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="confirmPassword" name="password_confirmation" required>
           </div>
-
-          <div class="mb-3">
-            <label for="editUserEmail" class="form-label">Email</label>
-            <input type="email" class="form-control" id="editUserEmail" name="email">
-          </div>
-
-          <div class="mb-3">
-            <label for="editUserRole" class="form-label">Role</label>
-            <select class="form-select" id="editUserRole" name="role">
-              <option value="member">Member</option>
-              <option value="officer">Officer</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label for="editUserOrg" class="form-label">Organization</label>
-            <select class="form-select" id="editUserOrg" name="org">
-              <option value="ITS">ITS</option>
-              <option value="PRAXIS">PRAXIS</option>
-              <option value="CCMS-SG">CCMS-SG</option>
-            </select>
-          </div>
-
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <button type="submit" class="btn btn-primary">Update Password</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
-
-
+@if(session('success'))
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <div class="modal-body">
+        <div class="text-success mb-3">
+          <i class="bi bi-check-circle-fill" style="font-size: 60px;"></i>
+        </div>
+        <h5 class="text-success">Success!</h5>
+        <p>{{ session('success') }}</p>
+        <button type="button" class="btn btn-success mt-2" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
     integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11">
     </script>
-    
+    @if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+    });
+</script>
+@endif
+<script>
+function openPasswordModal(userId) {
+    // Set the form action dynamically for the selected user
+    let form = document.getElementById('editPasswordForm');
+    form.action = "/users/" + userId + "/update-password";  // ✅ use your existing route
+
+    // Reset fields
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+
+    // Show modal
+    var modal = new bootstrap.Modal(document.getElementById('editPasswordModal'));
+    modal.show();
+}
+</script>
     <script>
     function toggleFilterCloud() {
         const cloud = document.getElementById("filterCloud");
