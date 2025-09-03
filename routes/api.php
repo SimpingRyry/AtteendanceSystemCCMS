@@ -44,33 +44,30 @@ Route::get('/device/name/{name}/mute', [DeviceController::class, 'getMuteStatusB
 
 Route::post('/device-auth', function (Illuminate\Http\Request $request) {
     $validated = $request->validate([
-        'name' => 'required|string',
-        'password' => 'required|string',
+        'device_id' => 'required|integer',
+        'name'      => 'required|string',
+        'password'  => 'required|string',
     ]);
 
-    // Check device in DB or any array
-    $device = \App\Models\Device::where('name', $validated['name'])->first();
+    $device = \App\Models\Device::find($validated['device_id']);
 
-    if ($device) {
-        if ($device->password === $validated['password']) {
-            $device->is_online = true;
-            $device->last_seen = now();
-            $device->save();
+   if ($device) {
+    $device->update([
+        'is_online' => true,
+        'last_seen' => now(),
+    ]);
 
-            return response()->json(['message' => 'Device authenticated.'], 200);
-        } else {
-            return response()->json(['message' => 'Wrong password.'], 403);
-        }
-    } else {
-        // Auto-register if not exist
-        \App\Models\Device::create([
-            'name' => $validated['name'],
-            'password' => $validated['password'],
-            'is_online' => true,
-        ]);
-
-        return response()->json(['message' => 'Device registered and online.'], 200);
+        return response()->json(['message' => 'Device updated.'], 200);
     }
+
+    $device = \App\Models\Device::create([
+        'id'        => $validated['device_id'], // fixed ID
+        'name'      => $validated['name'],
+        'password'  => $validated['password'],
+        'is_online' => true,
+    ]);
+
+    return response()->json(['message' => 'Device registered.'], 200);
 });
 
 Route::post('/register', function (Request $request) {

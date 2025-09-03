@@ -151,6 +151,22 @@
   </div>
 </div>
 
+
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <div class="modal-body">
+        <div class="text-success mb-3">
+          <i class="fa fa-check-circle" style="font-size: 60px;"></i>
+        </div>
+        <h5 class="text-success">Success!</h5>
+        <p id="successMessage">Your changes were saved successfully.</p>
+        <button type="button" class="btn btn-success mt-2" id="successOkBtn">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
     <style>
         .indicator-circle {
             width: 15px;
@@ -171,6 +187,16 @@
         }
     </style>
 <script>
+          function showSuccess(message) {
+    document.getElementById("successMessage").innerText = message;
+    const modal = new bootstrap.Modal(document.getElementById("successModal"));
+    modal.show();
+
+    document.getElementById("successOkBtn").onclick = function () {
+        modal.hide();
+        window.location.reload();
+    };
+}
 document.querySelectorAll('.open-settings-btn').forEach(button => {
     button.addEventListener('click', () => {
         const id = button.dataset.deviceId;
@@ -213,8 +239,10 @@ document.getElementById('deviceSettingsForm').addEventListener('submit', async f
 
         const data = await response.json();
         if (response.ok) {
-            alert('✅ Settings saved and synced to Python.');
-            window.location.reload(); // Refresh to update display
+                            bootstrap.Modal.getInstance(document.getElementById("settingsModal")).hide();
+
+   showSuccess("Device settings updated successfully!");
+
         } else {
             alert('❌ Failed: ' + data.message);
         }
@@ -247,6 +275,17 @@ document.querySelectorAll('.speaker-toggle').forEach(toggle => {
 
 
     <script>
+
+        function showSuccess(message) {
+    document.getElementById("successMessage").innerText = message;
+    const modal = new bootstrap.Modal(document.getElementById("successModal"));
+    modal.show();
+
+    document.getElementById("successOkBtn").onclick = function () {
+        modal.hide();
+        window.location.reload();
+    };
+}
         document.getElementById("deviceForm").addEventListener("submit", function (e) {
             e.preventDefault();
 
@@ -293,6 +332,7 @@ document.querySelectorAll('.speaker-toggle').forEach(toggle => {
                 errorEl.style.display = "none";
                 document.getElementById("deviceForm").reset();
                 bootstrap.Modal.getInstance(document.getElementById("addDeviceModal")).hide();
+                showSuccess("Device added successfully!");
             })
             .catch(async err => {
                 let msg = "An error occurred.";
