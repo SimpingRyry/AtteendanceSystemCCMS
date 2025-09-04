@@ -22,7 +22,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
-    <title>CCMS Attendance System</title>
+    <title>Ticktax Attendance System</title>
 </head>
 
 <body style="background-color: #fffffe;">

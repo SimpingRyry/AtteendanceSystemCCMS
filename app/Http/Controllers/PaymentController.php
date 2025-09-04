@@ -18,27 +18,57 @@ class PaymentController extends Controller
 public function showStatementOfAccount(Request $request)
 {
     $studentId = Auth::user()->student_id;
-    $selectedOrg = $request->input('organization'); // Get selected org from dropdown
+    $selectedOrg = $request->input('organization');
+    $semester = $request->input('semester'); // new semester input
 
     $query = Transaction::where('student_id', $studentId);
 
-    // Only filter by org if it's NOT "All" or null
+    // Organization filter
     if ($selectedOrg && $selectedOrg !== 'All') {
         $query->where('org', $selectedOrg);
     }
 
-    $transactionsGrouped = $query->orderBy('date')->get()->groupBy('acad_term');
+    // Semester filter (match acad_code only)
+    if ($semester) {
+        $query->whereRaw("LEFT(acad_term, LOCATE(' ', acad_term) - 1) = ?", [$semester]);
+    }
+
+    $transactionsGrouped = $query->orderBy('date')->get()
+        ->groupBy(function ($transaction) {
+            // Group by the acad_code only (before first space)
+            return strtok($transaction->acad_term, ' ');
+        });
 
     $student = User::where('student_id', $studentId)->first();
     $studentSection = Student::where('id_number', $studentId)->value('section');
+
+    // Get user's org record
+    $userOrg = OrgList::where('org_name', Auth::user()->org)->first();
+    $orgOptions = collect();
+
+    if ($userOrg) {
+        if ($userOrg->parent) {
+            $orgOptions->push($userOrg->parent->org_name);
+        }
+        $orgOptions->push($userOrg->org_name);
+        if ($userOrg->children->isNotEmpty()) {
+            foreach ($userOrg->children as $child) {
+                $orgOptions->push($child->org_name);
+            }
+        }
+    }
 
     return view('student_payment', [
         'transactionsGrouped' => $transactionsGrouped,
         'student' => $student,
         'studentSection' => $studentSection,
         'selectedOrg' => $selectedOrg,
+        'orgOptions' => $orgOptions,
+        'semester' => $semester,
     ]);
 }
+
+
 
 public function index()
 {

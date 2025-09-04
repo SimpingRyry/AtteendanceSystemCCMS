@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>CCMS Attendance System</title>
+    <title>Ticktax Attendance System</title>
 </head>
 
 <body style="background-color: #fffffe;">

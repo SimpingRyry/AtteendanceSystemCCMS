@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="{{ asset('css/dash_side.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
 
-    <title>CCMS Attendance System</title>
+    <title>Ticktax Attendance System</title>
 </head>
 
 <body style="background-color: #fffffe;">

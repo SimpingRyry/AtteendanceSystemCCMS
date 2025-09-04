@@ -23,7 +23,7 @@
 
     
 
-    <title>CCMS Attendance System</title>
+    <title>Ticktax Attendance System</title>
 </head>
 
 <body style="background-color: #fffffe;">

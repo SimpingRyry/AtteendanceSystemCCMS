@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="{{ asset('css/dash_side.css') }}">
   <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
 
-  <title>CCMS Attendance System</title>
+  <title>Ticktax Attendance System</title>
 
   <style>
     body {
@@ -65,22 +65,24 @@
           <!-- Semester Input -->
           <div class="col-md-3">
             <label for="inputSemester" class="form-label fw-semibold">Semester</label>
-            <input type="text" class="form-control" name="semester" id="inputSemester" placeholder="e.g., 1st Semester"
+            <input type="text" class="form-control" name="semester" id="inputSemester" placeholder="e.g., 25-1"
                    value="{{ request('semester') }}">
           </div>
 
           <!-- Organization Filter -->
-          <div class="col-md-3">
-            <label for="inputOrganization" class="form-label fw-semibold">Organization</label>
-            <select id="inputOrganization" name="organization" class="form-select" onchange="this.form.submit()">
-              <option disabled {{ is_null($selectedOrg) ? 'selected' : '' }}>Select organization</option>
-              <option value="All" {{ $selectedOrg == 'All' ? 'selected' : '' }}>All</option>
-              <option value="CCMS Student Government" {{ $selectedOrg == 'CCMS Student Government' ? 'selected' : '' }}>CCMS Student Government</option>
-              <option value="{{ auth()->user()->org }}" {{ $selectedOrg == auth()->user()->org ? 'selected' : '' }}>
-                {{ auth()->user()->org }}
-              </option>
-            </select>
-          </div>
+     <div class="col-md-3">
+    <label for="inputOrganization" class="form-label fw-semibold">Organization</label>
+    <select id="inputOrganization" name="organization" class="form-select" onchange="this.form.submit()">
+        <option disabled {{ is_null($selectedOrg) ? 'selected' : '' }}>Select organization</option>
+        <option value="All" {{ $selectedOrg == 'All' ? 'selected' : '' }}>All</option>
+
+        @foreach($orgOptions as $org)
+            <option value="{{ $org }}" {{ $selectedOrg == $org ? 'selected' : '' }}>
+                {{ $org }}
+            </option>
+        @endforeach
+    </select>
+</div>
         </form>
       </div>
 

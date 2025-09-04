@@ -61,7 +61,7 @@
                 </li>
                  <li>
                     <a href="{{ url('notification') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('notification') ? 'active-link' : '' }}">
-                        <img src="{{ asset('images/evaluation_ico.png') }}" class="sidebar-icon"> <span>Notifications</span>
+                        <img src="{{ asset('images/notification.png') }}" class="sidebar-icon"> <span>Notifications</span>
                     </a>
                 </li>
 

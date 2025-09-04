@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="{{ asset('css/dash_side.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dash_nav.css') }}">
 
-    <title>CCMS Attendance System</title>
+    <title>Ticktax Attendance System</title>
 
     <script>
         function previewImage(input, previewId) {
@@ -53,9 +53,9 @@
 
             <!-- Heading -->
             <div class="mb-3">
-                <h2 class="fw-bold text-dark">Manage Orgs</h2>
+                <h2 class="fw-bold text-dark">Manage Organizations</h2>
                 <small class="text-muted">Manage /</small>
-                <small class="text-secondary">Orgs</small>
+                <small class="text-secondary">Organizations</small>
             </div>
 
             <!-- Tabs -->
@@ -106,15 +106,19 @@
                                             </td>
                                             <td class="text-truncate" style="max-width: 200px;">{{ $org->description }}</td>
                                             <td>
-                                                <img src="{{ asset('images/org_list/' . $org->bg_image) }}" alt="Background" width="50" class="rounded">
+                                                <img src="{{ asset('images/' . $org->bg_image) }}" alt="Background" width="50" class="rounded">
                                             </td>
                                             <td>
                                                 <button class="btn btn-sm btn-warning edit-btn" data-bs-toggle="modal" data-bs-target="#editOrgModal{{ $org->id }}" title="Edit">
-                                                    <i class="bi bi-pencil-square"></i>
+                                                    <i class="bi bi-pencil-square"></i> Edit
                                                 </button>
-                                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteOrgModal{{ $org->id }}" title="Delete">
-                                                    <i class="bi bi-trash"></i>
+
+                                                @if (auth()->user()->role === 'Super Admin')
+                                                  <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteOrgModal{{ $org->id }}" title="Delete">
+                                                    <i class="bi bi-trash"></i> Delete
                                                 </button>
+                                                @endif
+                                              
                                             </td>
                                         </tr>
                                     @empty
