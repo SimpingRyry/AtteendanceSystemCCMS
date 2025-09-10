@@ -46,10 +46,16 @@ public function generateBiometricsSchedule(Request $request)
     $startDate = Carbon::parse($request->input('start_date'));
     $endDate = Carbon::parse($request->input('end_date'));
 
-    // Retrieve only unregistered students
+    // Retrieve only unregistered students and clean names
     $students = Student::where('status', 'Unregistered')
         ->orderBy('name')
-        ->get();
+        ->get()
+        ->map(function ($student) {
+            // Remove leading **** (if present) and trim spaces
+            $student->name = ltrim($student->name, '*');
+            $student->name = trim($student->name);
+            return $student;
+        });
 
     // Chunk students into groups of 10 (10 per day)
     $chunks = $students->chunk(10);
@@ -73,18 +79,22 @@ public function generateBiometricsSchedule(Request $request)
         ];
     }
 
-    // ✅ Get authenticated user org and fetch the logo from OrgList
+    // ✅ Get authenticated user org and fetch the logo + org name
     $authUser = Auth::user();
     $orgList = OrgList::where('org_name', $authUser->org)->first();
     $orgLogo = $orgList?->org_logo ?? 'default-logo.png';
+    $orgName = $orgList?->org_name ?? 'Organization Name';
 
     // Generate PDF with passed data
     $pdf = Pdf::loadView('biometrics_schedule', [
         'title' => 'Biometric Registration Schedule',
         'pagedChunks' => $pagedChunks,
         'orgLogo' => $orgLogo,
+        'orgName' => $orgName, // ✅ Pass org name here
     ]);
 
     return $pdf->stream('biometrics_schedule.pdf');
 }
+
+
 }

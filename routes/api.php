@@ -261,6 +261,7 @@ Route::post('/scan', function (Request $request) {
                         'date'             => $today,
                         'acad_term'        => $term,
                         'acad_code'        => $acadCode,
+                        'event_id'         => $event->id
                     ]);
                 }
             }

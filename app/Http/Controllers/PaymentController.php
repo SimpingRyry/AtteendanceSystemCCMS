@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Logs;
 use App\Models\User;
+use App\Models\Event;
 use App\Models\OrgList;
 use App\Models\Setting;
 use App\Models\Student;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\Logs;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class PaymentController extends Controller
@@ -121,16 +123,33 @@ public function index()
         $balances[$student->student_id] = $balance;
     }
 
+    // Dropdown list: unpaid fine events for this logged-in student
+
+
     // Filters
     $years = Student::select('year')->distinct()->pluck('year')->filter()->sort()->values();
     $sections = Student::select('section')->distinct()->pluck('section')->filter()->sort()->values();
     $orgs = OrgList::select('org_name')->distinct()->pluck('org_name');
 
-    return view('payment_page2', compact('students', 'balances', 'years', 'sections', 'orgs'));
+    return view('payment_page2', compact('students', 'balances', 'years', 'sections', 'orgs', ));
 }
 
 
+public function getUnpaidEvents($studentId)
+{
+    $authOrg = Auth::user()->org;
 
+    $unpaidEvents = DB::table('transaction')
+        ->join('events', 'transaction.event_id', '=', 'events.id')
+        ->where('transaction.student_id', $studentId)
+        ->where('transaction.status', 'Unpaid')
+        ->where('transaction.org', $authOrg)
+        ->select('events.id', 'events.name', 'events.event_date', 'transaction.fine_amount')
+        ->distinct()
+        ->get();
+
+    return response()->json($unpaidEvents);
+}
 
 public function loadStudentSOA($studentId)
 {
@@ -162,55 +181,63 @@ public function storePayment(Request $request)
 
     $request->validate([
         'student_id'    => 'required|string',
+        'event_id'      => 'required|integer|exists:events,id',
         'amount'        => 'required|numeric|min:0.01',
         'or_number'     => 'required|string|max:255',
-        'payment_date'  => 'required|date', // ✅ validate date input
+        'payment_date'  => 'required|date',
     ]);
 
+    // Get academic info
     $setting = Setting::where('key', 'academic_term')->first();
     $acadTerm = $setting->value ?? 'Unknown Term';
     $acadCode = $setting->acad_code ?? 'Unknown Code';
 
+    // Officer/org
     $user = Auth::user();
     $org = $user->org;
     $processedBy = $user->name . ' - ' . strtoupper($user->role);
 
-    Log::info('Storing payment with data:', [
-        'student_id'       => $request->student_id,
-        'transaction_type' => 'PAYMENT',
-        'org'              => $org,
-        'or_num'           => $request->or_number,
-        'date'             => $request->payment_date, // ✅ use inputted date
-        'acad_code'        => $acadCode,
-        'acad_term'        => $acadTerm,
-        'processed_by'     => $processedBy,
-        'fine_amount'      => $request->amount,
-    ]);
+    // ✅ Fetch event details
+    $event = Event::find($request->event_id);
 
+    // ✅ Create payment transaction
     Transaction::create([
         'student_id'       => $request->student_id,
+        'event_id'         => $request->event_id,
+        'event'            => $event->name,
         'transaction_type' => 'PAYMENT',
         'org'              => $org,
         'or_num'           => $request->or_number,
-        'date'             => $request->payment_date, // ✅ inputted date
+        'date'             => $request->payment_date,
         'acad_code'        => $acadCode,
         'acad_term'        => $acadTerm,
         'processed_by'     => $processedBy,
         'fine_amount'      => $request->amount,
+        'status'           => 'Paid', // optional if you want this here too
     ]);
 
+    // ✅ Mark the original fine as Paid
+    Transaction::where('student_id', $request->student_id)
+        ->where('event_id', $request->event_id)
+        ->where('transaction_type', 'FINE')
+        ->where('status', 'Unpaid')
+        ->update(['status' => 'Paid']);
+
+    // ✅ Log the action
     Logs::create([
         'action'      => 'Create',
         'description' => 'Recorded payment for student ID ' . $request->student_id .
+                         ' for event "' . $event->name . '"' .
                          ' with OR No. ' . $request->or_number .
                          ' (₱' . number_format($request->amount, 2) . ')',
-        'user'        => auth()->user()->name ?? 'System',
-        'date_time'   => now('Asia/Manila'), // ✅ still actual log timestamp
+        'user'        => $user->name ?? 'System',
+        'date_time'   => now('Asia/Manila'),
         'type'        => 'Payment',
     ]);
 
-    return back()->with('success', 'Payment recorded successfully.');
+    return back()->with('success', 'Payment for event "' . $event->name . '" recorded successfully and fine marked as Paid.');
 }
+
 public function gcashSuccess(Request $request)
 {
     $sourceId = $request->input('source.id') 

@@ -73,7 +73,7 @@
             <td>
                 <div class="org-details" style="text-align: left;">
                     <div class="school-name">CAMARINES NORTE STATE COLLEGE</div>
-                    <div class="college-name">COLLEGE OF COMPUTING AND MULTIMEDIA STUDIES</div>
+<div class="college-name">{{ strtoupper($orgName) }}</div>
                     <span class="org-address">F. PIMENTEL AVENUE, BARANGAY II, DAET, CAMARINES NORTE - 4600, PHILIPPINES</span>
                 </div>
             </td>

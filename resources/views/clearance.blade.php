@@ -47,50 +47,49 @@
         <div class="col-md-12 d-flex justify-content-end align-items-end gap-2">
 
           <!-- Filter Button + Cloud -->
-            <div style="position: relative;">
-                <button class="btn btn-outline-secondary" onclick="toggleFilterCloud()" style="border-radius: 6px;">
-                <i class="bi bi-funnel-fill"></i>
-                </button>
+          <div style="position: relative;">
+            <button class="btn btn-outline-secondary" onclick="toggleFilterCloud()" style="border-radius: 6px;">
+              <i class="bi bi-funnel-fill"></i>
+            </button>
 
-                <!-- Filter Cloud -->
-                <div id="filterCloud" class="shadow p-3 rounded" style="position: absolute; top: 120%; right: 0; background-color: white; border: 1px solid #ddd; border-radius: 12px; display: none; min-width: 270px; z-index: 10;">
-                <form method="GET">
-                    
-                    @if(auth()->user()->role === 'Super Admin')
-                    <div class="mb-2">
-                    <label for="org" class="form-label">Filter by Organization</label>
-                    <select name="org" id="org" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">All Organizations</option>
-                        @foreach($organizations as $org)
-                        <option value="{{ $org }}" {{ request('org') == $org ? 'selected' : '' }}>{{ $org }}</option>
-                        @endforeach
-                    </select>
-                    </div>
-                    @endif
-
-                    <div class="mb-2">
-                    <label for="section" class="form-label">Filter by Section</label>
-                    <select name="section" id="section" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">All Sections</option>
-                        @foreach($sections as $section)
-                        <option value="{{ $section }}" {{ request('section') == $section ? 'selected' : '' }}>{{ $section }}</option>
-                        @endforeach
-                    </select>
-                    </div>
-                    
-
-                    <div class="mb-2">
-                    <label for="program" class="form-label">Filter by Courses</label>
-                    <select name="program" id="program" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">All Courses</option>
-                        @foreach($courses as $program)
-                        <option value="{{ $program }}" {{ request('program') == $program ? 'selected' : '' }}>{{ $program }}</option>
-                        @endforeach
-                    </select>
-                    </div>
-                </form>
+            <!-- Filter Cloud -->
+            <div id="filterCloud" class="shadow p-3 rounded" style="position: absolute; top: 120%; right: 0; background-color: white; border: 1px solid #ddd; border-radius: 12px; display: none; min-width: 270px; z-index: 10;">
+              <form method="GET">
+                  
+                @if(auth()->user()->role === 'Super Admin')
+                <div class="mb-2">
+                  <label for="org" class="form-label">Filter by Organization</label>
+                  <select name="org" id="org" class="form-select form-select-sm" onchange="this.form.submit()">
+                      <option value="">All Organizations</option>
+                      @foreach($organizations as $org)
+                      <option value="{{ $org }}" {{ request('org') == $org ? 'selected' : '' }}>{{ $org }}</option>
+                      @endforeach
+                  </select>
                 </div>
+                @endif
+
+                <div class="mb-2">
+                  <label for="section" class="form-label">Filter by Section</label>
+                  <select name="section" id="section" class="form-select form-select-sm" onchange="this.form.submit()">
+                      <option value="">All Sections</option>
+                      @foreach($sections as $section)
+                      <option value="{{ $section }}" {{ request('section') == $section ? 'selected' : '' }}>{{ $section }}</option>
+                      @endforeach
+                  </select>
+                </div>
+                
+                <div class="mb-2">
+                  <label for="program" class="form-label">Filter by Courses</label>
+                  <select name="program" id="program" class="form-select form-select-sm" onchange="this.form.submit()">
+                      <option value="">All Courses</option>
+                      @foreach($courses as $program)
+                      <option value="{{ $program }}" {{ request('program') == $program ? 'selected' : '' }}>{{ $program }}</option>
+                      @endforeach
+                  </select>
+                </div>
+              </form>
             </div>
+          </div>
 
           <!-- Search Input -->
           <div style="min-width: 250px;">
@@ -116,29 +115,38 @@
             </tr>
           </thead>
           <tbody>
-            @foreach($students as $student)
-<tr onclick="window.location='{{ route('payment.index') }}?search={{ $student->student_id }}'" style="cursor: pointer;">
-  <td>{{ $student->student_id }}</td>
-  <td>{{ $student->name }}</td>
-  <td>{{ $student->studentList->course ?? 'N/A' }}</td>
-  <td>{{ $student->studentList->section ?? 'N/A' }}</td>
-  <td>{{ $student->org }}</td>
-  <td>₱{{ number_format($balances[$student->student_id] ?? 0, 2) }}</td>
-  <td>
-    @if ($student->balance != 0)
-      <span class="badge bg-danger">Not Eligible</span>
-    @else
-      <span class="badge bg-success">Eligible</span>
-    @endif
-  </td>
-  <td>
-    <a href="{{ route('clearance.show', ['id' => $student->student_id]) }}" class="btn btn-sm btn-primary" target="_blank">
-      Generate Clearance
-    </a>
-  </td>
-</tr>
-@endforeach
-          </tbody>
+  @foreach($students as $student)
+  @php
+    $balance = $balances[$student->student_id] ?? 0;
+  @endphp
+  <tr>
+    <td>{{ $student->student_id }}</td>
+    <td>{{ $student->name }}</td>
+    <td>{{ $student->studentList->course ?? 'N/A' }}</td>
+    <td>{{ $student->studentList->section ?? 'N/A' }}</td>
+    <td>{{ $student->org }}</td>
+    <td>
+      <a href="{{ route('payment.index') }}?search={{ $student->student_id }}" 
+         class="text-decoration-none text-dark fw-bold">
+        ₱{{ number_format($balance, 2) }}
+      </a>
+    </td>
+    <td>
+      @if ($balance != 0)
+        <span class="badge bg-danger">Not Eligible</span>
+      @else
+        <span class="badge bg-success">Eligible</span>
+      @endif
+    </td>
+    <td>
+      <a href="{{ route('clearance.show', ['id' => $student->student_id]) }}" 
+         class="btn btn-sm btn-primary" target="_blank">
+        Generate Clearance
+      </a>
+    </td>
+  </tr>
+  @endforeach
+</tbody>
         </table>
       </div>
     </div>

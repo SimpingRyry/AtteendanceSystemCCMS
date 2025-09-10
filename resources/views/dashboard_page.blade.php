@@ -163,47 +163,55 @@
 </div>
           </div>
         </div>
-        <div class="col-lg-6">
-          <div class="card shadow-sm p-3 rounded-4" style="min-height: 200px">
-            <h6 class="mb-3 text-center">Upcoming Events</h6>
-            <ul class="list-group list-group-flush">
-              @forelse($upcomingEvents as $event)
+     <div class="col-lg-6">
+    <div class="card shadow-sm p-3 rounded-4 h-100">
+        <h6 class="mb-3 text-center">Upcoming Events</h6>
+        <ul class="list-group list-group-flush">
+            @forelse($upcomingEvents as $event)
                 @php
-                  $times = json_decode($event->times, true);
-                  $startTime = (!empty($times) && isset($times[0]))
-                    ? \Carbon\Carbon::createFromFormat('H:i:s', trim($times[0]))->format('g:i A')
-                    : 'N/A';
-                @endphp
-                <li class="list-group-item d-flex justify-content-between align-items-start flex-column flex-md-row">
-                  <div>
-                    <strong>{{ $event->name }}</strong><br>
-                    <small class="text-muted">
-                      {{ \Carbon\Carbon::parse($event->event_date)->format('F j, Y') }}
-                    </small>
-                  </div>
-                  <span class="badge 
-                      @if($loop->index == 0) bg-primary
-                      @elseif($loop->index == 1) bg-success
-                      @elseif($loop->index == 2) bg-warning text-dark
-                      @else bg-secondary
-                      @endif
-                      rounded-pill align-self-md-center mt-2 mt-md-0">
-                    {{ $startTime }}
-                  </span>
-                </li>
-              @empty
-                <li class="list-group-item text-center">No upcoming events.</li>
-              @endforelse
-            </ul>
+                    $times = json_decode($event->times, true);
+                    $startTime = 'N/A';
 
-            {{-- See More Button --}}
-            <div class="text-center mt-3">
-              <a href="{{ route('events.index') }}" class="btn btn-outline-primary btn-sm">
-                See More <i class="bi bi-arrow-right-circle"></i>
-              </a>
-            </div>
-          </div>
-        </div>
+                    if (!empty($times) && isset($times[0])) {
+                        $timeValue = trim($times[0]);
+
+                        try {
+                            // Try parsing with seconds
+                            $startTime = \Carbon\Carbon::createFromFormat('H:i:s', $timeValue)->format('g:i A');
+                        } catch (\Exception $e) {
+                            try {
+                                // Try parsing without seconds
+                                $startTime = \Carbon\Carbon::createFromFormat('H:i', $timeValue)->format('g:i A');
+                            } catch (\Exception $e) {
+                                $startTime = 'N/A';
+                            }
+                        }
+                    }
+                @endphp
+
+                <li class="list-group-item d-flex justify-content-between align-items-start flex-column flex-md-row">
+                    <div>
+                        <strong>{{ $event->name }}</strong><br>
+                        <small class="text-muted">
+                            {{ \Carbon\Carbon::parse($event->event_date)->format('F j, Y') }}
+                        </small>
+                    </div>
+                    <span class="badge 
+                        @if($loop->index == 0) bg-primary
+                        @elseif($loop->index == 1) bg-success
+                        @elseif($loop->index == 2) bg-warning text-dark
+                        @else bg-secondary
+                        @endif
+                        rounded-pill align-self-md-center mt-2 mt-md-0">
+                        {{ $startTime }}
+                    </span>
+                </li>
+            @empty
+                <li class="list-group-item text-center">No upcoming events.</li>
+            @endforelse
+        </ul>
+    </div>
+</div>
       </div>
 
     </div>

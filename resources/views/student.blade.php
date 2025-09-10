@@ -748,6 +748,7 @@ function applySearchFilter() {
         console.log("URL:", url);
         console.log("User ID:", userId);
 
+   
         const modal = document.getElementById("registerStudentModal");
 
         if (modal && modal.classList.contains("show")) {

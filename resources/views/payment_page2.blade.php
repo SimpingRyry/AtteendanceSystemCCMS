@@ -161,9 +161,13 @@
                 <td>{{ $student->org }}</td>
                 <td>₱{{ number_format($balances[$student->student_id] ?? 0, 2) }}</td>
                 <td>
-                  <button class="btn btn-success btn-sm">
-                    <i class="fas fa-money-bill-wave"></i> Pay
-                  </button>
+                <button class="btn btn-success btn-sm pay-btn"
+        data-student-id="{{ $student->student_id }}"
+        data-org="{{ $student->org }}"
+        data-bs-toggle="modal"
+        data-bs-target="#paymentModal">
+  <i class="fas fa-money-bill-wave"></i> Pay
+</button>
                   <button class="btn btn-primary btn-sm view-btn"
                           data-student-id="{{ $student->student_id }}"
                           data-bs-toggle="modal"
@@ -199,7 +203,6 @@
     </div>
   </div>
 </div>
-
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <form method="POST" action="{{ route('transactions.pay') }}" class="w-100">
@@ -214,10 +217,22 @@
         </div>
         
         <div class="modal-body px-4">
+
+          <!-- Unpaid Events Dropdown -->
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label for="event_id" class="form-label">Event <span class="text-danger">*</span></label>
+               <select name="event_id" id="event_id" class="form-select" required>
+      <option value="">-- Select Event with Unpaid Fine --</option>
+    </select>
+            </div>
+          </div>
+
+          <!-- Amount and OR Number -->
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
-              <input type="number" step="0.01" min="1" class="form-control" id="amount" name="amount" placeholder="Enter payment amount" required>
+              <input type="number" step="0.01" min="1" class="form-control" id="amount" name="amount" readonly required>
             </div>
             <div class="col-md-6 mb-3">
               <label for="or_number" class="form-label">Receipt Number <span class="text-danger">*</span></label>
@@ -225,7 +240,7 @@
             </div>
           </div>
 
-          <!-- New Date Field -->
+          <!-- Payment Date -->
           <div class="row">
             <div class="col-md-6 mb-3">
               <label for="payment_date" class="form-label">Payment Date <span class="text-danger">*</span></label>
@@ -242,7 +257,75 @@
     </form>
   </div>
 </div>
+@if(session('success'))
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <div class="modal-body">
+        <div class="text-success mb-3">
+          <i class="bi bi-check-circle-fill" style="font-size: 60px;"></i>
+        </div>
+        <h5 class="text-success">Success!</h5>
+        <p>{{ session('success') }}</p>
+        <button type="button" class="btn btn-success mt-2" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+@endif
 
+<!-- Auto-fill script -->
+
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        successModal.show();
+    });
+</script>
+@endif
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const eventSelect = document.getElementById('event_id');
+  const amountInput = document.getElementById('amount');
+
+  // When clicking Pay button
+  document.querySelectorAll('.pay-btn').forEach(button => {
+    button.addEventListener('click', function () {
+      const studentId = this.getAttribute('data-student-id');
+      const org = this.getAttribute('data-org');
+
+      // Fill hidden inputs
+      document.getElementById('paymentStudentId').value = studentId;
+      document.getElementById('paymentOrg').value = org;
+
+      // Clear dropdown
+      eventSelect.innerHTML = '<option value="">-- Select Event with Unpaid Fine --</option>';
+      amountInput.value = '';
+
+      // Fetch unpaid events
+      fetch(`/students/${studentId}/unpaid-events`)
+        .then(response => response.json())
+        .then(events => {
+          events.forEach(event => {
+            const option = document.createElement('option');
+            option.value = event.id;
+            option.setAttribute('data-amount', event.fine_amount);
+            option.textContent = `${event.name} (${event.event_date}) - ₱${parseFloat(event.fine_amount).toFixed(2)}`;
+            eventSelect.appendChild(option);
+          });
+        });
+    });
+  });
+
+  // Auto-fill amount when event selected
+  eventSelect.addEventListener('change', function () {
+    const selectedOption = this.options[this.selectedIndex];
+    const fineAmount = selectedOption.getAttribute('data-amount');
+    amountInput.value = fineAmount ? fineAmount : '';
+  });
+});
+</script>
 <!-- Bootstrap JS -->
 
 

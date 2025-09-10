@@ -327,3 +327,5 @@ Route::post('/attendance/bulk-revert', [AttendanceController::class, 'bulkRevert
 Route::post('/students/store', [StudentController::class, 'storeOne'])->name('students.store');
 Route::get('/org/{orgId}/children', [OrgListController::class, 'getChildren']);
 Route::get('/org/{orgName}/roles', [OrgListController::class, 'getRoles']);
+Route::get('/students/{student}/unpaid-events', [PaymentController::class, 'getUnpaidEvents'])
+     ->name('students.unpaidEvents');
