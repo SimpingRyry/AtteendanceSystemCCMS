@@ -420,3 +420,12 @@ Route::get('/event', function () {
         'event_name' => $event?->name ?? 'Untitled Event'
     ]);
 });
+Route::get('/event', function () {
+    $today = Carbon::now('Asia/Manila')->toDateString();
+
+    $event = Event::whereDate('event_date', $today)->first();
+
+    return response()->json([
+        'event_name' => $event?->name ?? 'Untitled Event'
+    ]);
+});

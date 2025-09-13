@@ -5,6 +5,8 @@
 <table class="table table-bordered mt-3">
   <thead class="table-light">
     <tr>
+            <th>Event</th>
+
       <th>Date</th>
       <th>Transaction</th>
       <th>Debit</th>
@@ -16,7 +18,7 @@
     @php $grandTotal = 0; @endphp
     @foreach ($transactionsGrouped as $acadCode => $transactions)
       <tr>
-        <td colspan="5" class="table-primary fw-bold">
+        <td colspan="6" class="table-primary fw-bold">
           Term: {{ $transactions->first()->acad_term }} | Code: {{ $acadCode }}
         </td>
       </tr>
@@ -29,6 +31,8 @@
           $grandTotal += ($debit - $credit);
         @endphp
         <tr>
+                    <td>{{ $transaction->event }}</td>
+
           <td>{{ \Carbon\Carbon::parse($transaction->date)->format('M d, Y') }}</td>
           <td>{{ $transaction->transaction_type }}</td>
           <td>{{ $debit > 0 ? number_format($debit, 2) : '-' }}</td>

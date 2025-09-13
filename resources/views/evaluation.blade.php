@@ -599,39 +599,49 @@
 
 
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        const viewModal = document.getElementById('viewModal');
+        const titleEl = document.getElementById('modalTitle');
+        const descEl = document.getElementById('modalDescription');
+        const questionsEl = document.getElementById('modalQuestions');
 
-            const viewModal = document.getElementById('viewModal');
-            const titleEl = document.getElementById('modalTitle');
-            const descEl = document.getElementById('modalDescription');
-            const questionsEl = document.getElementById('modalQuestions');
+        viewModal.addEventListener('show.bs.modal', async (e) => {
+            const btn = e.relatedTarget; // button that triggered the modal
+            const id = btn.getAttribute('data-id');
 
-            viewModal.addEventListener('show.bs.modal', async (e) => {
-                const btn = e.relatedTarget; // button that triggered the modal
-                const id = btn.getAttribute('data-id');
+            // fetch evaluation + questions
+            const res = await fetch(`{{ url('evaluation') }}/${id}/questions`);
+            const data = await res.json();
 
-                // fetch evaluation + questions
-                const res = await fetch(`{{ url('evaluation') }}/${id}/questions`);
-                const data = await res.json();
+            // fill modal
+            titleEl.textContent = data.title;
+            descEl.textContent = data.description ?? '—';
 
-                // fill modal
-                titleEl.textContent = data.title;
-                descEl.textContent = data.description ?? '—';
+            questionsEl.innerHTML = '';
+            data.questions.forEach((q, i) => {
+                let optionsHtml = '';
 
-                questionsEl.innerHTML = '';
-                data.questions.forEach((q, i) => {
-                    questionsEl.insertAdjacentHTML('beforeend', `
-              <div class="mb-3">
-                  <strong>${i+1}. ${q.question} ${q.is_required ? '<span class="text-danger">*</span>':''}</strong>
-                  <div><em>Type:</em> ${q.type}</div>
-              </div>
-          `);
-                });
+                if (q.options && Array.isArray(q.options) && q.options.length > 0) {
+                    optionsHtml = '<ul class="mt-2">';
+                    q.options.forEach(opt => {
+                        optionsHtml += `<li>${opt}</li>`;
+                    });
+                    optionsHtml += '</ul>';
+                }
+
+                questionsEl.insertAdjacentHTML('beforeend', `
+                    <div class="mb-3">
+                        <strong>${i+1}. ${q.question} ${q.is_required ? '<span class="text-danger">*</span>':''}</strong>
+                        ${optionsHtml}
+                    </div>
+                `);
             });
         });
-    </script>
+    });
+</script>
+
 
 
 

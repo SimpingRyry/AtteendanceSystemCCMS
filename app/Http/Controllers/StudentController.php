@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Logs;
 use App\Models\User;
 use App\Models\Setting;
 use App\Models\Student;
@@ -12,13 +13,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
-use App\Models\Logs;
+use App\Notifications\CustomVerifyEmail;
 
 class StudentController extends Controller
 {
 public function store(Request $request)
 {
-    
     Log::info('Starting user creation', ['request' => $request->all()]);
 
     $request->validate([
@@ -43,11 +43,7 @@ public function store(Request $request)
         return redirect()->back()->with('error', 'You cannot be an officer in both your local organization and the Student Government.');
     }
 
-    // ✅ Handle image requirements
-    // if (!$request->uploaded_picture && !$request->captured_image) {
-    //     return back()->withErrors(['error' => 'Please upload or capture a picture.']);
-    // }
-
+    // ✅ Handle image
     if ($request->uploaded_picture && $request->captured_image) {
         return back()->withErrors(['error' => 'Only one image should be provided.']);
     }
@@ -99,9 +95,9 @@ public function store(Request $request)
     Log::info('Saving Member account', $memberUser->toArray());
     $memberUser->save();
 
-    event(new Registered($memberUser));
-
     $term = Setting::where('key', 'academic_term')->value('value');
+
+    $isOfficer = false;
 
     // ✅ Main org officer account
     if (Str::lower($request->role) !== 'member') {
@@ -118,6 +114,8 @@ public function store(Request $request)
 
         Log::info('Saving Officer account with term', $officerUser->toArray());
         $officerUser->save();
+
+        $isOfficer = true;
     }
 
     // ✅ SG officer account (if Member but selected SG role)
@@ -138,6 +136,8 @@ public function store(Request $request)
 
         Log::info('Saving SG Officer account', $sgOfficer->toArray());
         $sgOfficer->save();
+
+        $isOfficer = true;
     }
 
     // ✅ Update student record
@@ -158,17 +158,19 @@ public function store(Request $request)
         return redirect()->back()->with('error', 'Student record not found.');
     }
 
+    // ✅ Send custom verification email
+    $memberUser->notify(new CustomVerifyEmail($isOfficer, $request->student_id));
+
     Logs::create([
-    'action' => 'Create',
-    'description' => 'Registered student "' . $request->sname . '" with ID: ' . $request->student_id,
-    'user' => auth()->user()->name ?? 'System',
-    'date_time' => now('Asia/Manila'),
-    'type' => 'User',
-]);
+        'action' => 'Create',
+        'description' => 'Registered student "' . $request->sname . '" with ID: ' . $request->student_id,
+        'user' => auth()->user()->name ?? 'System',
+        'date_time' => now('Asia/Manila'),
+        'type' => 'User',
+    ]);
 
     return redirect()->back()->with('success', 'Student registered successfully!');
 }
-
 public function storeOne(Request $request)
 {
     $request->validate([
