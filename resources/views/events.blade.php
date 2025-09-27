@@ -63,17 +63,31 @@
             </button>
         @endif
 
-                    <div>
-                        <label for="monthFilter" class="form-label small">Filter by Month</label>
-                        <select class="form-select" id="monthFilter">
-                            <option value="all">All Months</option>
-                            <option value="January">January</option>
-                            <option value="February">February</option>
-                            <!-- Add more months -->
-                        </select>
-                    </div>
+                  <div>
+  <label for="monthFilter" class="form-label small">Filter by Month</label>
+  <select class="form-select" id="monthFilter">
+    <option >All Months</option>
+    <option value="01">January</option>
+    <option value="02">February</option>
+    <option value="03">March</option>
+    <option value="04">April</option>
+    <option value="05">May</option>
+    <option value="06">June</option>
+    <option value="07">July</option>
+    <option value="08">August</option>
+    <option value="09">September</option>
+    <option value="10">October</option>
+    <option value="11">November</option>
+    <option value="12">December</option>
+  </select>
+</div>
 
-                    <input type="text" class="form-control" id="eventSearch" placeholder="Search events...">
+<div>
+  <label for="yearFilter" class="form-label small">Filter by Year</label>
+  <input type="number" class="form-control" id="yearFilter" min="{{ now()->year }}" placeholder="All Years">
+</div>
+
+<input type="text" class="form-control mt-2" id="eventSearch" placeholder="Search events...">
 
                     <div class="border rounded-3 p-3 bg-white">
                         <h6 class="text-center fw-semibold mb-2">Upcoming Events</h6>
@@ -291,7 +305,7 @@
 
           <div class="mb-3">
             <label class="form-label">Date</label>
-            <input type="date" id="editEventDate" name="date" class="form-control">
+            <input type="date" id="editEventDate" name="event_date" class="form-control">
           </div>
 
           <div class="mb-3">
@@ -765,10 +779,11 @@ const dayTypeSelect = document.getElementById('editEventDayType');
   // Example: how to trigger this modal and populate values
   function openEditEventModal(event) {
     document.getElementById('editEventId').value = event.extendedProps.id;
-    alert(event.extendedProps.id);
+
     document.getElementById('editEventTitle').value = event.title;
     document.getElementById('editEventVenue').value = event.extendedProps.venue || '';
     document.getElementById('editEventDate').value = event.start.toISOString().slice(0, 10);
+  
     // document.getElementById('editEventCourse').value = event.extendedProps.course || '';
 
     const timeout = event.extendedProps.timeout;
@@ -1052,52 +1067,82 @@ if (userRole === 'Member') {
     });
 
     calendar.render();
+    let allEvents = [];
     fetch("{{ route('events.fetch') }}")
-    .then(response => response.json())
-    .then(events => {
-        const list = document.getElementById('upcomingEventsList');
-        list.innerHTML = ''; // Clear current content
+        .then(response => response.json())
+        .then(events => {
+            allEvents = events;
+            renderUpcomingEvents(); // ✅ initial render shows all
+        })
+        .catch(error => console.error("Error fetching upcoming events:", error));
 
-        const today = new Date();
-        const upcoming = events.filter(event => {
-            const eventDate = new Date(event.start);
-            return eventDate >= today;
-        }).sort((a, b) => new Date(a.start) - new Date(b.start));
+    const list = document.getElementById('upcomingEventsList');
+    const monthFilter = document.getElementById('monthFilter');
+    const yearFilter = document.getElementById('yearFilter');
+    const searchInput = document.getElementById('eventSearch');
 
-        upcoming.forEach(event => {
-            const date = new Date(event.start);
-            const formattedDate = date.toLocaleDateString(undefined, {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
+  function renderUpcomingEvents() {
+    list.innerHTML = '';
+    const today = new Date();
 
-            // Determine badge color
-            let badgeClass = 'bg-primary';
+    const monthVal = monthFilter.value === "All Months" ? "" : monthFilter.value;
+    const yearVal = yearFilter.value.trim(); // "" if empty
+    const searchVal = searchInput.value.toLowerCase();
 
-if (event.extendedProps.course === 'BSIT') {
-    badgeClass = 'bg-info text-dark';
-} else if (event.extendedProps.course === 'BSIS') {
-    badgeClass = 'bg-purple text-white';
-} else if (event.extendedProps.course === 'All') {
-    badgeClass = 'bg-success text-white';
+    const upcoming = allEvents.filter(event => {
+        const eventDate = new Date(event.start);
+
+        // Only future events
+        if (eventDate < today) return false;
+
+        // Month filter
+        if (monthVal && (String(eventDate.getMonth() + 1).padStart(2, '0') !== monthVal)) {
+            return false;
+        }
+
+        // Year filter
+        if (yearVal && eventDate.getFullYear() !== parseInt(yearVal)) {
+            return false;
+        }
+
+        // Search filter
+        if (searchVal && !event.title.toLowerCase().includes(searchVal)) {
+            return false;
+        }
+
+        return true;
+    }).sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    // Render list
+    if (upcoming.length === 0) {
+        list.innerHTML = `<li class="list-group-item text-center text-muted">No upcoming events found</li>`;
+        return;
+    }
+
+    upcoming.forEach(event => {
+        const date = new Date(event.start);
+        const formattedDate = date.toLocaleDateString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        });
+
+        let badgeClass = 'bg-primary';
+        if (event.extendedProps.course === 'BSIT') badgeClass = 'bg-info text-dark';
+        else if (event.extendedProps.course === 'BSIS') badgeClass = 'bg-purple text-white';
+        else if (event.extendedProps.course === 'All') badgeClass = 'bg-success text-white';
+
+        const li = document.createElement('li');
+        li.className = 'list-group-item d-flex justify-content-between align-items-center rounded-3 mb-2 shadow-sm';
+        li.innerHTML = `${event.title} <span class="badge ${badgeClass} rounded-pill">${formattedDate}</span>`;
+        list.appendChild(li);
+    });
 }
 
-            // Create list item
-            const li = document.createElement('li');
-            li.className = 'list-group-item d-flex justify-content-between align-items-center rounded-3 mb-2 shadow-sm';
-
-            li.innerHTML = `
-                ${event.title}
-                <span class="badge ${badgeClass} rounded-pill">${formattedDate}</span>
-            `;
-
-            list.appendChild(li);
-        });
-    })
-    .catch(error => {
-        console.error("Error fetching upcoming events:", error);
-    });
+    // Filters update the list
+    monthFilter.addEventListener('change', renderUpcomingEvents);
+    yearFilter.addEventListener('input', renderUpcomingEvents);
+    searchInput.addEventListener('input', renderUpcomingEvents);
 });
 
 

@@ -85,6 +85,30 @@ public function dashboard()
     ));
 }
 
+public function filterFines(Request $request)
+{
+    $authUser = Auth::user();
+    $authOrg = $authUser->org;
 
+    $year = $request->input('year');
+    $month = $request->input('month');
+
+    $query = Transaction::where('org', $authOrg)
+        ->where('transaction_type', 'FINE');
+
+    if ($year) {
+        $query->whereYear('date', $year);
+    }
+
+    if ($month) {
+        $query->whereMonth('date', $month);
+    }
+
+    $totalFines = $query->sum('fine_amount');
+
+    return response()->json([
+        'totalFines' => number_format($totalFines),
+    ]);
+}
 
 }

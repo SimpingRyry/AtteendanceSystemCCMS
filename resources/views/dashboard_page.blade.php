@@ -33,7 +33,7 @@
     @include('layout.sidebar')
 
     @stack('scripts')
-    <main>
+<main>
   <div class="container outer-box mt-5 pt-5 pb-4">
     <div class="container inner-glass shadow p-4" id="main_box">
       <!-- Heading -->
@@ -44,35 +44,34 @@
       </div>
 
       <!-- Fines Filter -->
-      <form class="row g-2 mb-3">
-        <div class="col-auto">
-          <select class="form-select" id="filterYear">
-            <option selected disabled>Year</option>
-            <option value="2025">2025</option>
-            <option value="2024">2024</option>
-          </select>
-        </div>
-        <div class="col-auto">
-          <select class="form-select" id="filterMonth">
-            <option selected disabled>Month</option>
-            <option value="01">January</option>
-            <option value="02">February</option>
-            <option value="03">March</option>
-            <option value="04">April</option>
-            <option value="05">May</option>
-            <option value="06">June</option>
-            <option value="07">July</option>
-            <option value="08">August</option>
-            <option value="09">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-          </select>
-        </div>
-        <div class="col-auto">
-          <button type="button" class="btn btn-primary" onclick="filterFines()">Filter</button>
-        </div>
-      </form>
+      <div class="mb-3">
+        <label class="form-label fw-semibold" style="color:#444;">Fine Filter</label>
+        <form class="row g-2">
+          <div class="col-auto">
+            <input type="number" class="form-control" id="filterYear" placeholder="Year" min="2000" max="2100" step="1" value="{{ date('Y') }}">
+          </div>
+          <div class="col-auto">
+            <select class="form-select" id="filterMonth">
+              <option selected disabled>Month</option>
+              <option value="01">January</option>
+              <option value="02">February</option>
+              <option value="03">March</option>
+              <option value="04">April</option>
+              <option value="05">May</option>
+              <option value="06">June</option>
+              <option value="07">July</option>
+              <option value="08">August</option>
+              <option value="09">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </div>
+          <div class="col-auto">
+            <button type="button" class="btn btn-primary" onclick="filterFines()">Filter</button>
+          </div>
+        </form>
+      </div>
 
       <!-- Overview Cards -->
       <div class="row g-4 mb-4">
@@ -90,7 +89,7 @@
         </div>
         <div class="col-md-3">
           <div class="card text-center shadow-sm p-3 rounded-4 h-100">
-            <h6 class="text-muted">Total Collected Fines</h6>
+            <h6 class="text-muted">Total Collected Payments</h6>
             <h2>₱{{ number_format($totalCollectedFines) }}</h2>
           </div>
         </div>
@@ -104,13 +103,13 @@
 
       <!-- Charts Row -->
       <div class="row g-4 mb-4">
-             <div class="col-lg-6">
-  <div class="card shadow-sm p-3 rounded-4">
-    <h6 class="mb-3 text-center">Fines Issued by Month</h6>
-    <div id="finesChartWrapper" data-fines='@json($finesByMonth)'></div>
-    <canvas id="finesChart" style="height: 300px;"></canvas>
-  </div>
-</div>
+        <div class="col-lg-6">
+          <div class="card shadow-sm p-3 rounded-4">
+            <h6 class="mb-3 text-center">Fines Issued by Month</h6>
+            <div id="finesChartWrapper" data-fines='@json($finesByMonth)'></div>
+            <canvas id="finesChart" style="height: 300px;"></canvas>
+          </div>
+        </div>
         <div class="col-lg-6">
           <div class="card shadow-sm p-3 rounded-4 h-100">
             <h6 class="mb-3 text-center">Registered Students by Program, Year and Block</h6>
@@ -130,93 +129,93 @@
         <div class="col-lg-6">
           <div class="card shadow-sm p-3 rounded-4">
             <h6 class="mb-3 text-center">Recent Payments</h6>
-           <div class="table-responsive">
-  <table class="table table-hover">
-    <thead class="table-light">
-      <tr>
-        <th>#</th>
-        <th>Name</th>
-        <th>Student ID</th>
-        <th>Date</th>
-      </tr>
-    </thead>
-    <tbody>
-      @forelse($recentTransactions as $index => $transaction)
-        <tr>
-          <td>{{ $index + 1 }}</td>
-          <td>
-            @php
-              $student = \App\Models\User::where('student_id', $transaction->student_id)->first();
-            @endphp
-            {{ $student ? $student->name : 'Unknown' }}
-          </td>
-          <td>{{ $transaction->student_id }}</td>
-          <td>{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}</td>
-        </tr>
-      @empty
-        <tr>
-          <td colspan="4" class="text-center">No recent payments found</td>
-        </tr>
-      @endforelse
-    </tbody>
-  </table>
-</div>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Student ID</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @forelse($recentTransactions as $index => $transaction)
+                    <tr>
+                      <td>{{ $index + 1 }}</td>
+                      <td>
+                        @php
+                          $student = \App\Models\User::where('student_id', $transaction->student_id)->first();
+                        @endphp
+                        {{ $student ? $student->name : 'Unknown' }}
+                      </td>
+                      <td>{{ $transaction->student_id }}</td>
+                      <td>{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}</td>
+                    </tr>
+                  @empty
+                    <tr>
+                      <td colspan="4" class="text-center">No recent payments found</td>
+                    </tr>
+                  @endforelse
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-     <div class="col-lg-6">
-    <div class="card shadow-sm p-3 rounded-4 h-100">
-        <h6 class="mb-3 text-center">Upcoming Events</h6>
-        <ul class="list-group list-group-flush">
-            @forelse($upcomingEvents as $event)
+        <div class="col-lg-6">
+          <div class="card shadow-sm p-3 rounded-4 h-100">
+            <h6 class="mb-3 text-center">Upcoming Events</h6>
+            <ul class="list-group list-group-flush">
+              @forelse($upcomingEvents as $event)
                 @php
-                    $times = json_decode($event->times, true);
-                    $startTime = 'N/A';
+                  $times = json_decode($event->times, true);
+                  $startTime = 'N/A';
 
-                    if (!empty($times) && isset($times[0])) {
-                        $timeValue = trim($times[0]);
+                  if (!empty($times) && isset($times[0])) {
+                      $timeValue = trim($times[0]);
 
-                        try {
-                            // Try parsing with seconds
-                            $startTime = \Carbon\Carbon::createFromFormat('H:i:s', $timeValue)->format('g:i A');
-                        } catch (\Exception $e) {
-                            try {
-                                // Try parsing without seconds
-                                $startTime = \Carbon\Carbon::createFromFormat('H:i', $timeValue)->format('g:i A');
-                            } catch (\Exception $e) {
-                                $startTime = 'N/A';
-                            }
-                        }
-                    }
+                      try {
+                          $startTime = \Carbon\Carbon::createFromFormat('H:i:s', $timeValue)->format('g:i A');
+                      } catch (\Exception $e) {
+                          try {
+                              $startTime = \Carbon\Carbon::createFromFormat('H:i', $timeValue)->format('g:i A');
+                          } catch (\Exception $e) {
+                              $startTime = 'N/A';
+                          }
+                      }
+                  }
                 @endphp
 
                 <li class="list-group-item d-flex justify-content-between align-items-start flex-column flex-md-row">
-                    <div>
-                        <strong>{{ $event->name }}</strong><br>
-                        <small class="text-muted">
-                            {{ \Carbon\Carbon::parse($event->event_date)->format('F j, Y') }}
-                        </small>
-                    </div>
-                    <span class="badge 
-                        @if($loop->index == 0) bg-primary
-                        @elseif($loop->index == 1) bg-success
-                        @elseif($loop->index == 2) bg-warning text-dark
-                        @else bg-secondary
-                        @endif
-                        rounded-pill align-self-md-center mt-2 mt-md-0">
-                        {{ $startTime }}
-                    </span>
+                  <div>
+                    <strong>{{ $event->name }}</strong><br>
+                    <small class="text-muted">
+                      {{ \Carbon\Carbon::parse($event->event_date)->format('F j, Y') }}
+                    </small>
+                  </div>
+                  <span class="badge 
+                    @if($loop->index == 0) bg-primary
+                    @elseif($loop->index == 1) bg-success
+                    @elseif($loop->index == 2) bg-warning text-dark
+                    @else bg-secondary
+                    @endif
+                    rounded-pill align-self-md-center mt-2 mt-md-0">
+                    {{ $startTime }}
+                  </span>
                 </li>
-            @empty
+              @empty
                 <li class="list-group-item text-center">No upcoming events.</li>
-            @endforelse
-        </ul>
-    </div>
-</div>
+              @endforelse
+            </ul>
+          </div>
+        </div>
       </div>
 
     </div>
   </div>
 </main>
+
+
 
 <script>
   const finesData = {
@@ -343,6 +342,20 @@
         }
     });
     </script>
+
+    <script>
+function filterFines() {
+    const year = document.getElementById("filterYear").value;
+    const month = document.getElementById("filterMonth").value;
+
+    fetch(`/filter-fines?year=${year}&month=${month}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("totalFines").innerText = "₱" + data.totalFines;
+        })
+        .catch(error => console.error("Error fetching fines:", error));
+}
+</script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"

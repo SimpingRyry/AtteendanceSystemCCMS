@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+
 use Carbon\Carbon;
+use App\Models\Logs;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\OrgList;
@@ -13,7 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\EvaluationAssignment;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Logs;
+use Illuminate\Support\Facades\Log;
+
 
 class EventsController extends Controller
 {
@@ -35,182 +38,240 @@ public function index()
 }
 public function store(Request $request)
 {
-    // 🔎 Debug first if needed
-    // dd($request->all());
+    try {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'venue' => 'nullable|string',
+            'event_date' => 'required|date',
+            'timeouts' => 'required|in:2,4',
+            'course' => 'nullable|string',
+            'organization' => 'nullable|string',
+            'repeat_dates' => 'nullable|string',
+            'guests' => 'nullable|array',
+            'guests.*' => 'email',
+            'involved_students' => 'nullable|in:All,Members,Officers',
+            'attached_memo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'evaluation_template' => 'required|exists:evaluation,id',
+        ]);
 
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'venue' => 'nullable|string',
-        'event_date' => 'required|date',
-        'timeouts' => 'required|in:2,4',
-        'course' => 'nullable|string',
-        'organization' => 'nullable|string', // for Super Admin
-        'repeat_dates' => 'nullable|string',
-        'guests' => 'nullable|array',
-        'guests.*' => 'email',
-        'involved_students' => 'nullable|in:All,Members,Officers',
-        'attached_memo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        'evaluation_template' => 'required|exists:evaluation,id',
-    ]);
-
-    // Handle times
-    $times = [];
-    if ($request->timeouts == 2) {
-        $times = [$request->half_start, $request->half_end];
-    } elseif ($request->timeouts == 4) {
-        $times = [
-            $request->morning_start,
-            $request->morning_end,
-            $request->afternoon_start,
-            $request->afternoon_end
-        ];
-    }
-
-    // Handle repeat dates
-    $dates = [$request->event_date];
-    if (!empty($request->repeat_dates)) {
-        $extraDates = array_map('trim', explode(',', $request->repeat_dates));
-        $dates = array_merge($dates, $extraDates);
-    }
-
-    $user = auth()->user();
-    $role = $user->role ?? null;
-    $organization = $role === 'Super Admin' ? $request->organization : $user->org;
-
-    // Determine course
-    $course = null;
-    if ($role === 'Super Admin') {
-        $course = 'MAIN-' . $request->course;
-    } elseif ($organization === 'Information Technology Society' || $organization === 'ITS') {
-        $course = 'MAIN-BSIT';
-    } elseif ($organization === 'PRAXIS') {
-        $course = 'MAIN-BSIS';
-    } elseif ($organization === 'CCMS Student Government') {
-        $course = 'All';
-    }
-
-    // ✅ Guest handling
-    $guestEmails = $request->guests ?? [];
-
-    // Handle memo
-    $memoFilename = null;
-    if ($request->hasFile('attached_memo')) {
-        $image = $request->file('attached_memo');
-        $memoFilename = time() . '_' . $image->getClientOriginalName();
-        $image->move(public_path('images'), $memoFilename);
-    }
-
-    foreach ($dates as $date) {
-        $existingEvent = Event::where('event_date', $date)
-            ->when($request->venue, function ($query) use ($request) {
-                return $query->where('venue', $request->venue);
-            })
-            ->first();
-
-        if ($existingEvent) {
-            return redirect()->back()->withErrors([
-                'event_date' => "An event is already scheduled on $date at venue '{$request->venue}'."
-            ])->withInput();
+        // Handle times safely
+        $times = [];
+        if ($request->timeouts == 2) {
+            $times = array_filter([$request->half_start, $request->half_end]);
+        } elseif ($request->timeouts == 4) {
+            $times = array_filter([
+                $request->morning_start,
+                $request->morning_end,
+                $request->afternoon_start,
+                $request->afternoon_end,
+            ]);
         }
 
-        $event = Event::create([
-            'name' => $request->name,
-            'venue' => $request->venue,
-            'event_date' => $date,
-            'timeouts' => $request->timeouts,
-            'times' => json_encode($times),
-            'course' => $course,
-            'guests' => json_encode($guestEmails),
-            'description' => $request->description,
-            'org' => $organization,
-            'involved_students' => $request->involved_students,
-            'attached_memo' => $memoFilename,
-        ]);
+        // Handle repeat dates safely
+        $dates = [$request->event_date];
+        if (!empty($request->repeat_dates)) {
+            $extraDates = array_filter(array_map('trim', explode(',', $request->repeat_dates)));
+            $dates = array_merge($dates, $extraDates);
+        }
 
-        EvaluationAssignment::create([
-            'event_id' => $event->id,
-            'evaluation_id' => $request->evaluation_template,
-        ]);
+        $user = auth()->user();
+        if (!$user) {
+            return redirect()->back()->withErrors(['auth' => 'User not authenticated'])->withInput();
+        }
 
-        Logs::create([
-            'action' => 'Create',
-            'description' => 'Created event "' . $event->name . '" on ' . $event->event_date . ' at ' . $event->venue,
-            'user' => auth()->user()->name ?? 'Unknown',
-            'date_time' => now('Asia/Manila'),
-            'type' => 'Event',
-        ]);
+        $role = $user->role ?? null;
+        $organization = $role === 'Super Admin'
+            ? ($request->organization ?? $user->org)
+            : ($user->org ?? 'Unknown Org');
 
-        // === Notify based on involved_students ===
-        $involved = $request->involved_students;
-        if ($involved !== null) {
-            $targetOrgs = [$organization];
+        // Determine course safely
+        $course = null;
+        if ($role === 'Super Admin') {
+            $course = $request->course ? 'MAIN-' . $request->course : null;
+        } elseif (in_array($organization, ['Information Technology Society', 'ITS'])) {
+            $course = 'MAIN-BSIT';
+        } elseif ($organization === 'PRAXIS') {
+            $course = 'MAIN-BSIS';
+        } elseif ($organization === 'CCMS Student Government') {
+            $course = 'All';
+        }
 
-            if (in_array($involved, ['All', 'Members'])) {
-                $orgModel = \App\Models\OrgList::where('org_name', $organization)->first();
-                $childOrgs = $orgModel ? $orgModel->children->pluck('org_name')->toArray() : [];
-                $targetOrgs = array_merge($targetOrgs, $childOrgs);
-            }
+        // Guests
+        $guestEmails = $request->guests ?? [];
 
-            $recipients = \App\Models\User::whereIn('org', $targetOrgs)->get()->filter(function ($user) use ($involved) {
-                $role = strtolower($user->role);
-                return match ($involved) {
-                    'All'     => $role === 'member' || str_contains($role, 'officer'),
-                    'Members' => $role === 'member',
-                    'Officers' => str_contains($role, 'officer'),
-                    default   => false,
-                };
-            });
-
-            foreach ($recipients as $user) {
-                \App\Models\Notification::create([
-                    'user_id' => $user->id,
-                    'title' => 'New Event: ' . $event->name,
-                    'message' => 'An event is scheduled for ' . $event->event_date . ' at ' . $event->venue,
-                ]);
-            }
-
-            $advisers = \App\Models\User::whereIn('org', $targetOrgs)
-                ->where('role', 'Adviser')
-                ->get();
-
-            foreach ($advisers as $adviser) {
-                \App\Models\Notification::create([
-                    'user_id' => $adviser->id,
-                    'title' => 'Adviser Notice: Event "' . $event->name . '" Scheduled',
-                    'message' => 'Your advised org has an event on ' . $event->event_date . ' at ' . $event->venue,
-                ]);
+        // Handle memo safely
+        $memoFilename = null;
+        if ($request->hasFile('attached_memo')) {
+            $image = $request->file('attached_memo');
+            if ($image && $image->isValid()) {
+                $memoFilename = time() . '_' . $image->getClientOriginalName();
+                $image->move(public_path('images'), $memoFilename);
             }
         }
 
-        // ✅ Always notify guests if provided
-        if (!empty($guestEmails)) {
-            $guestUsers = \App\Models\User::whereIn('email', $guestEmails)->get();
+        foreach ($dates as $date) {
+            // Check for existing event safely
+            $existingEvent = Event::where('event_date', $date)
+                ->when(!empty($request->venue), function ($query) use ($request) {
+                    return $query->where('venue', $request->venue);
+                })
+                ->first();
 
-            foreach ($guestUsers as $guest) {
-                \App\Models\Notification::create([
-                    'user_id' => $guest->id,
-                    'title' => 'You were tagged in an event: ' . $event->name,
-                    'message' => 'You were invited to the event on ' . $event->event_date . ' at ' . $event->venue,
-                ]);
+            if ($existingEvent) {
+                return redirect()->back()->withErrors([
+                    'event_date' => "An event is already scheduled on $date at venue '{$request->venue}'."
+                ])->withInput();
+            }
+
+            $event = Event::create([
+                'name' => $request->name,
+                'venue' => $request->venue,
+                'event_date' => $date,
+                'timeouts' => $request->timeouts,
+                'times' => json_encode($times),
+                'course' => $course,
+                'guests' => json_encode($guestEmails),
+                'description' => $request->description,
+                'org' => $organization,
+                'involved_students' => $request->involved_students,
+                'attached_memo' => $memoFilename,
+            ]);
+
+            EvaluationAssignment::create([
+                'event_id' => $event->id,
+                'evaluation_id' => $request->evaluation_template,
+            ]);
+
+            Logs::create([
+                'action' => 'Create',
+                'description' => 'Created event "' . $event->name . '" on ' . $event->event_date . ' at ' . ($event->venue ?? 'Unknown venue'),
+                'user' => $user->name ?? 'Unknown',
+                'date_time' => now('Asia/Manila'),
+                'type' => 'Event',
+            ]);
+
+            // Notifications for involved students
+            $involved = $request->involved_students;
+            if (!empty($involved)) {
+                $targetOrgs = [$organization];
+
+                if (in_array($involved, ['All', 'Members'])) {
+                    $orgModel = \App\Models\OrgList::where('org_name', $organization)->first();
+                    $childOrgs = $orgModel ? $orgModel->children->pluck('org_name')->toArray() : [];
+                    $targetOrgs = array_merge($targetOrgs, $childOrgs);
+                }
+
+                $recipients = \App\Models\User::whereIn('org', $targetOrgs)->get()->filter(function ($user) use ($involved) {
+                    $role = strtolower($user->role ?? '');
+                    return match ($involved) {
+                        'All'     => $role === 'member' || str_contains($role, 'officer'),
+                        'Members' => $role === 'member',
+                        'Officers' => str_contains($role, 'officer'),
+                        default   => false,
+                    };
+                });
+
+                foreach ($recipients as $notifyUser) {
+                    \App\Models\Notification::create([
+                        'user_id' => $notifyUser->id,
+                        'title' => 'New Event: ' . $event->name,
+                        'message' => 'An event is scheduled for ' . $event->event_date . ' at ' . ($event->venue ?? 'TBA'),
+                    ]);
+                }
+
+                $advisers = \App\Models\User::whereIn('org', $targetOrgs)
+                    ->where('role', 'Adviser')
+                    ->get();
+
+                foreach ($advisers as $adviser) {
+                    \App\Models\Notification::create([
+                        'user_id' => $adviser->id,
+                        'title' => 'Adviser Notice: Event "' . $event->name . '" Scheduled',
+                        'message' => 'Your advised org has an event on ' . $event->event_date . ' at ' . ($event->venue ?? 'TBA'),
+                    ]);
+                }
+            }
+
+            // Always notify guests
+            if (!empty($guestEmails)) {
+                $guestUsers = \App\Models\User::whereIn('email', $guestEmails)->get();
+
+                foreach ($guestUsers as $guest) {
+                    \App\Models\Notification::create([
+                        'user_id' => $guest->id,
+                        'title' => 'You were tagged in an event: ' . $event->name,
+                        'message' => 'You were invited to the event on ' . $event->event_date . ' at ' . ($event->venue ?? 'TBA'),
+                    ]);
+                }
             }
         }
-    }
 
-    return redirect()->back()->with('success', 'Events created and evaluation assigned successfully!');
+        return redirect()->back()->with('success', 'Events created and evaluation assigned successfully!');
+    } catch (\Throwable $e) {
+        // Log the error for debugging
+        Log::error('Error creating event', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        return redirect()->back()->withErrors([
+            'error' => 'Something went wrong while creating the event. Please try again.'
+        ])->withInput();
+    }
 }
 
 
 
 
+
     
     
-    public function fetchEvents()
+public function fetchEvents()
 {
     $user = Auth::user();
     $userOrgName = strtolower(trim($user->org));
     $userRole = strtolower($user->role);
 
+    // ✅ Super Admin: fetch all events directly
+    if ($userRole === 'super admin') {
+        $events = Event::all();
+        $calendarEvents = [];
+
+        foreach ($events as $event) {
+            $times = json_decode($event->times, true);
+            $guests = json_decode($event->guests, true);
+
+            $calendarEvents[] = [
+                'id' => $event->id,
+                'title' => $event->name,
+                'start' => $event->event_date . 'T' . $times[0],
+                'end' => $event->timeouts == 4
+                    ? $event->event_date . 'T' . $times[3]
+                    : $event->event_date . 'T' . $times[1],
+                'extendedProps' => [
+                    'id' => $event->id,
+                    'org' => $event->org,
+                    'venue' => $event->venue,
+                    'timeout' => $event->timeouts,
+                    'times' => $times,
+                    'guests' => $guests,
+                    'description' => $event->description,
+                    'attached_memo' => $event->attached_memo,
+                    'attached_memo_url' => $event->attached_memo
+                        ? asset('images/' . $event->attached_memo)
+                        : null,
+                ],
+                'color' => strtolower($event->org) === 'praxis' 
+                    ? 'violet' 
+                    : (empty($event->org) ? 'green' : 'blue'),
+            ];
+        }
+
+        return response()->json($calendarEvents);
+    }
+
+    // ✅ Non-Super Admin flow
     $userOrg = OrgList::whereRaw('LOWER(TRIM(org_name)) = ?', [$userOrgName])->first();
 
     if (!$userOrg) {
@@ -241,7 +302,7 @@ public function store(Request $request)
         // ✅ If involved is NULL → only visible to tagged guests
         if ($involved === null) {
             if (empty($guests) || !in_array($user->email, $guests)) {
-                continue; // skip if user not in guest list
+                continue;
             }
         } else {
             // ✅ Skip if not from accessible orgs
@@ -301,6 +362,7 @@ public function store(Request $request)
 }
 
 
+
     
     public function update(Request $request)
     {
@@ -310,7 +372,7 @@ public function store(Request $request)
             'event_id' => 'required|integer|exists:events,id',
             'title' => 'required|string|max:255',
             'venue' => 'nullable|string',
-            'date' => 'required|date',
+            'event_date' => 'required|date',
             'course' => 'nullable|string',
             'dayType' => 'required|in:Half Day,Whole Day',
             'edit_times' => 'required|array',
@@ -329,7 +391,7 @@ public function store(Request $request)
     
         $event->name = $request->title;
         $event->venue = $request->venue;
-        $event->event_date = $request->date;
+        $event->event_date = $request->event_date;
         $event->course = $request->course;
         $event->timeouts = $expectedTimeCount;
         $event->times = json_encode($request->edit_times); // Save times as JSON
