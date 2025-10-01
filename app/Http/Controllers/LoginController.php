@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+
 class LoginController extends Controller
 {
     // public function showLogin()
@@ -43,6 +46,29 @@ public function login(Request $request)
                 continue;
             }
 
+            // ✅ Check officer term if role ends with "- Officer"
+         if (str_ends_with($user->role, '- Officer')) {
+    $academicTermRecord = Setting::where('key', 'academic_term')->first();
+    $activeTerm = $academicTermRecord->value ?? null;
+
+    if ($activeTerm) {
+        // Extract academic year like "2024-2025" from "24-1 First Sem A.Y. 2024-2025"
+        preg_match('/\d{4}-\d{4}/', $activeTerm, $matchesActive);
+        $activeYear = $matchesActive[0] ?? null;
+
+        // Extract academic year from user term
+        preg_match('/\d{4}-\d{4}/', $user->term, $matchesUser);
+        $userYear = $matchesUser[0] ?? null;
+
+        Log::info("Active year: " . $activeYear . " | User year: " . $userYear);
+
+        // If they don't match → block login
+        if ($activeYear !== $userYear) {
+            Auth::logout();
+            return back()->with('error', 'Your officer account has expired.');
+        }
+    }
+}
             // Store session with cleaned name
             session([
                 'user_name' => $dbName,
@@ -62,6 +88,7 @@ public function login(Request $request)
 
     return back()->with('error', 'Invalid credentials.');
 }
+
 
 
 }

@@ -57,14 +57,15 @@ public function showOfficers()
     public function update(Request $request)
 {
     // Validate the input first
+    dd($request->all());
     $request->validate([
-        'user_id' => 'required|exists:users,user_ID',
+        'user_id' => 'required|exists:users,id',
         'role' => 'required|string',
         'org' => 'required|string',
     ]);
 
     // Find the user by ID
-    $user = User::where('user_ID', $request->user_id)->first();
+    $user = User::where('id', $request->user_id)->first();
 
     if ($user) {
         // Update role and org

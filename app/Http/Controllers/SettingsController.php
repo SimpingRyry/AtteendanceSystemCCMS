@@ -158,13 +158,13 @@ public function updateAcademic(Request $request)
 
     $academicTerm = $request->academic_term;
 
-    // Get code part before any space or extra characters (e.g., "24-1" from "24-1 First Semester")
+    // Get code part before any space (e.g., "24-1" from "24-1 First Semester")
     $acadCode = explode(' ', $academicTerm)[0];
 
     Setting::updateOrCreate(
-        ['id' => 1], // or any unique identifier
+        ['key' => 'academic_term'], // look up by key instead of id
         [
-            'academic_term' => $academicTerm,
+            'value' => $academicTerm, // update the "value" column
             'acad_code' => $acadCode,
         ]
     );

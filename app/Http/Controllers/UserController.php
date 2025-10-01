@@ -63,7 +63,7 @@ public function getEligibleMembers()
 public function updatePassword(Request $request, $id)
 {
     $request->validate([
-        'password' => 'required|string|min:8|confirmed',
+        'password' => 'required|string|min:3|confirmed',
     ]);
 
     $user = User::findOrFail($id);

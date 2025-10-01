@@ -235,15 +235,15 @@
     <!-- Prepared by -->
     <td style="width: 100%; text-align: left; vertical-align: top;">
       <div style="margin-bottom: 5px;">Prepared by:</div>
-      <strong style="font-size: 14px;">{{ $financialUser->name ?? 'Not Set' }}</strong><br>
-      <span style="font-size: 12px;">{{ $financialUser->role ?? 'N/A' }}</span>
+      <strong style="font-size: 14px;">{{ $financialUser->name ?? '' }}</strong><br>
+      <span style="font-size: 12px;">{{ $financialUser->role ?? '' }}</span>
     </td>
 
     <!-- Attested by -->
     <td style="width: 20%; text-align: left; vertical-align: top; margin-left: 20px;">
       <div style="margin-bottom: 5px;">Attested:</div>
-      <strong style="font-size: 14px;">{{ $presidentUser->name ?? 'Not Set' }}</strong><br>
-      <span style="font-size: 12px;">{{ $presidentUser->role ?? 'N/A' }}</span>
+      <strong style="font-size: 14px;">{{ $presidentUser->name ?? '' }}</strong><br>
+      <span style="font-size: 12px;">{{ $presidentUser->role ?? '' }}</span>
     </td>
   </tr>
 
@@ -251,14 +251,14 @@
     <!-- Audited -->
     <td style="width: 50%; text-align: left; padding-top: 40px;">
       <div style="margin-bottom: 5px;">Audited:</div>
-      <strong style="font-size: 14px;">{{ $auditorUser->name ?? 'Not Set' }}</strong><br>
-      <span style="font-size: 12px;">{{ $auditorUser->role ?? 'N/A' }}</span>
+      <strong style="font-size: 14px;">{{ $auditorUser->name ?? '' }}</strong><br>
+      <span style="font-size: 12px;">{{ $auditorUser->role ?? '' }}</span>
     </td>
 
     <!-- Noted -->
     <td style="width: 50%; text-align: left; padding-top: 40px;">
       <div style="margin-bottom: 5px; ">Noted:</div>
-      <strong style="font-size: 14px;">{{ $adviserUser->name ?? 'Not Set' }}</strong><br>
+      <strong style="font-size: 14px;">{{ $adviserUser->name ?? '' }}</strong><br>
       <span style="font-size: 12px;">{{ $adviserUser->role ?? 'Adviser' }}</span>
     </td>
   </tr>

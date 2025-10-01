@@ -118,5 +118,13 @@
     @endif
 @endforeach
 
+<div style="margin-top: 60px; margin-left: 50px; text-align: left;">
+    <div style="margin-bottom: 40px;">&nbsp;</div>
+    <strong>{{ strtoupper($president->name ?? '') }}</strong><br>
+    <span style="display: inline-block; border-top: 1px solid #000; width: 250px; margin-top: 5px;"></span><br>
+    <div style="text-align: center; font-weight: bold; font-size: 14px; width: 250px;">
+        President
+    </div>
+</div>
 </body>
 </html>

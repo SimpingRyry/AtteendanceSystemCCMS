@@ -349,8 +349,8 @@
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-white mb-4">Get In Touch</h4>
                     <h2 class="text-primary mb-4">Ticktax</h2>
-                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>123 Street, New York, USA</p>
-                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+012 345 67890</p>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>F. Pimentel Avenue, Barangay 2 4600 Daet, Philippines</p>
+                    <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>+63938 042 2897/p>
                     <p class="mb-2"><i class="fa fa-envelope me-3"></i>info@example.com</p>
                 </div>
                 <div class="col-lg-3 col-md-6">

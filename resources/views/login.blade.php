@@ -161,15 +161,7 @@ body::before {
     <i class="bi bi-eye-fill position-absolute top-50 end-0 translate-middle-y me-3 text-secondary" id="eyeIcon" onclick="togglePasswordVisibility()" style="cursor:pointer;"></i>
   </div>
 
-  <div class="mb-4 d-flex justify-content-between">
-    <div class="form-check">
-      <input type="checkbox" class="form-check-input" id="formCheck" />
-      <label for="formCheck" class="form-check-label"><small>Remember Me</small></label>
-    </div>
-    <div>
-      <small><a href="#" class="text-decoration-none text-light">Forgot Password?</a></small>
-    </div>
-  </div>
+
 
   <div>
     <button type="submit" class="btn btn-primary btn-lg w-100">Login</button>

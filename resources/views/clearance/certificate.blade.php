@@ -91,7 +91,6 @@
         <ul>
             <li>Financial Obligations (<em>Fines, Debts, and etc.</em>)</li>
             
-            <li>Disciplinary Records</li>
         </ul>
     </div>
 <table style="width: 100%; margin-top: 30px;">
@@ -101,7 +100,7 @@
             <div style="text-align: left;">
                 <p style="margin: 0; font-size: 11pt;">Verified by:</p>
                 <p style="margin: 0; font-weight: bold; margin-top: 15px; font-size: 12pt;">
-                    {{ $vicePresident?->name ?? 'PRINCESS LIAN C. GAMELO' }}
+                    {{ $vicePresident?->name ?? '' }}
                 </p>
                 <p style="margin: 0;">
                     {{ $vicePresident?->role ?? 'CCMS-SG Vice President for Financial Affairs' }}
@@ -114,7 +113,7 @@
             <div style="text-align: left;">
                 <p style="margin: 0; font-size: 11pt;">Certified by:</p>
                 <p style="margin: 0; font-weight: bold; margin-top: 15px; font-size: 12pt;">
-                    {{ $president?->name ?? 'REIZO BHIENN S. CATAROJA' }}
+                    {{ $president?->name ?? '' }}
                 </p>
                 <p style="margin: 0;">
                     {{ $president?->role ?? 'CCMS-SG President' }}

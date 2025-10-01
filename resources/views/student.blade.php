@@ -312,27 +312,30 @@
           <div class="row">
             <!-- Left: Profile Picture + Fingerprint -->
             <div class="col-md-4 text-center">
-             
-<div class="border rounded d-flex align-items-center justify-content-center bg-light mb-3" style="height: 250px;">
+
+              <!-- Profile Picture / Camera Frame -->
+      <div class="border rounded bg-light mb-3" 
+     style="height: 250px; width: 100%; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+  
+  <!-- Profile Picture -->
   <img id="capturedImage" 
        src="{{ asset('uploads/human.png') }}" 
-       class="img-fluid d-block mx-auto" 
-       style="max-height: 100%; max-width: 100%;" 
-       alt="Profile Picture" />
+       alt="Profile Picture"
+       style="height: 100%; width: 100%; object-fit: contain; display: block;" />
+
+  <!-- Camera Stream (hidden by default) -->
+  <video id="cameraStream" 
+         autoplay playsinline
+         style="height: 100%; width: 100%; object-fit: cover; display: none;"></video>
 </div>
 
               <div class="d-flex flex-column gap-2 mb-3">
                 <button type="button" class="btn btn-outline-primary btn-sm" onclick="showUpload()">Upload Image</button>
                 <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showCamera()">Capture Image</button>
+                <button type="button" id="takePhotoBtn" class="btn btn-success btn-sm" onclick="capturePhoto()" style="display:none;">Take Picture</button>
               </div>
 
-<input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
-              
-              <div id="cameraContainer" class="text-center" style="display: none;">
-                <video id="cameraStream" class="rounded border" width="100%" height="200" autoplay playsinline></video>
-                <button type="button" class="btn btn-success btn-sm mt-2" onclick="capturePhoto()">Take Picture</button>
-              </div>
-
+              <input type="file" name="uploaded_picture" accept="image/*" id="uploadInput" class="form-control mb-3" style="display: none;" onchange="previewUploadImage(event)">
               <input type="hidden" name="captured_image" id="capturedImageInput">
 
               <!-- Fingerprint Scan -->
@@ -404,41 +407,42 @@
               </div>
 
               <!-- Organization Selection -->
-@if ($org_list->isNotEmpty())
-<div class="mb-4">
-  <label class="form-label" for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
-  <select name="organization" id="organizationSelect" class="form-select" required>
-    <option value="">-- Select Organization --</option>
-    @foreach ($org_list as $org)
-      <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
-    @endforeach
-  </select>
-</div>
-@endif
+              @if ($org_list->isNotEmpty())
+              <div class="mb-4">
+                <label class="form-label" for="organizationSelect">Select Organization <span class="text-danger">*</span></label>
+                <select name="organization" id="organizationSelect" class="form-select" required>
+                  <option value="">-- Select Organization --</option>
+                  @foreach ($org_list as $org)
+                    <option value="{{ $org->org_name }}">{{ $org->org_name }}</option>
+                  @endforeach
+                </select>
+              </div>
+              @endif
 
               <!-- Role / Position -->
               <div class="mb-4">
-  <h6 class="fw-bold text-info">Role / Position</h6>
-  <label class="form-label" for="roleSelect">Select Role <span class="text-danger">*</span></label>
-  <select name="role" id="roleSelect" class="form-select" required>
-    <option value="Member">Member</option>
-    @foreach($officerRoles as $role)
-        <option value="{{ $role->title }}">{{ $role->title }}</option>
-    @endforeach
-  </select>
-</div>
+                <h6 class="fw-bold text-info">Role / Position</h6>
+                <label class="form-label" for="roleSelect">Select Role <span class="text-danger">*</span></label>
+                <select name="role" id="roleSelect" class="form-select" required>
+                  <option value="Member">Member</option>
+                  @foreach($officerRoles as $role)
+                    <option value="{{ $role->title }}">{{ $role->title }}</option>
+                  @endforeach
+                </select>
+              </div>
+
               <!-- SG Role Dropdown -->
               @if ($sgRoles->isNotEmpty())
-<div class="mb-4">
-  <label class="form-label" for="sgOfficerRole">SG Officer Role <span class="text-danger">*</span></label>
-  <select name="sg_officer_role" id="sgOfficerRole" class="form-select">
-    <option value="">-- Select SG Officer Role --</option>
-    @foreach ($sgRoles as $role)
-      <option value="{{ $role->title }}">{{ $role->title }}</option>
-    @endforeach
-  </select>
-</div>
-@endif
+              <div class="mb-4">
+                <label class="form-label" for="sgOfficerRole">SG Officer Role <span class="text-danger">*</span></label>
+                <select name="sg_officer_role" id="sgOfficerRole" class="form-select">
+                  <option value="">-- Select SG Officer Role --</option>
+                  @foreach ($sgRoles as $role)
+                    <option value="{{ $role->title }}">{{ $role->title }}</option>
+                  @endforeach
+                </select>
+              </div>
+              @endif
             </div>
           </div>
         </form>
@@ -453,11 +457,11 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
+<!-- <script>
 function showUpload() {
   document.getElementById('uploadInput').click();
 }
-</script>
+</script> -->
 <script>
   $('#organizationSelect').on('change', function () {
     const selectedOrg = $(this).val();
@@ -608,38 +612,38 @@ function showUpload() {
           <h5 class="modal-title">CSV Preview</h5>
           <a href="" class="btn-close"></a>
         </div>
-        <div class="modal-body">
-          <div class="table-responsive">
-            <table class="table table-bordered">
-              <thead>
-                <tr>
-                  <th>ID</th><th>Name</th><th>Course</th><th>Year</th><th>Units</th><th>Section</th><th>Contact</th><th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                @foreach(session('previewData') as $row)
-                <tr>
-                  <td>{{ $row['id_number'] }}</td>
-                  <td>{{ $row['name'] }}</td>
-                  <td>{{ $row['course'] }}</td>
-                  <td>{{ $row['year'] }}</td>
-                  <td>{{ $row['units'] }}</td>
-                  <td>{{ $row['section'] }}</td>
-                  <td>{{ $row['contact_no'] }}</td>
-                  <td>
-      <span class="badge 
-        {{ $row['status'] == 'New' ? 'bg-success' : 
-           ($row['status'] == 'Updated' ? 'bg-info text-dark' : 
-           'bg-warning text-dark') }}">
-        {{ $row['status'] }}
-      </span>
-    </td>
-                </tr>
-                @endforeach
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+  <div class="table-responsive">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>ID</th><th>Name</th><th>Course</th><th>Year</th><th>Units</th><th>Section</th><th>Contact</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach(session('previewData') as $row)
+        <tr>
+          <td>{{ $row['id_number'] }}</td>
+          <td>{{ $row['name'] }}</td>
+          <td>{{ $row['course'] }}</td>
+          <td>{{ $row['year'] }}</td>
+          <td>{{ $row['units'] }}</td>
+          <td>{{ $row['section'] }}</td>
+          <td>{{ $row['contact_no'] }}</td>
+          <td>
+            <span class="badge 
+              {{ $row['status'] == 'New' ? 'bg-success' : 
+                 ($row['status'] == 'Updated' ? 'bg-info text-dark' : 
+                 'bg-warning text-dark') }}">
+              {{ $row['status'] }}
+            </span>
+          </td>
+        </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+</div>
         <div class="modal-footer">
           <button class="btn btn-primary" type="submit">Confirm Import</button>
           <a href="" class="btn btn-secondary">Cancel</a>
@@ -673,20 +677,31 @@ function applySearchFilter() {
 }
 </script>
 <script>
-  async function checkEnrollmentStatus(deviceId) {
+  let enrollmentPolling = null;
+
+  async function checkMultipleEnrollmentStatus(deviceIds) {
     try {
-      const response = await fetch(`/api/device-settings/${deviceId}`);
-      const data = await response.json();
+      let isAnyOn = false;
+
+      for (const deviceId of deviceIds) {
+        const response = await fetch(`/api/device-settings/${deviceId}`);
+        const data = await response.json();
+
+        if (data.enrollment_on) {
+          isAnyOn = true;
+          break; // no need to check the rest if one is ON
+        }
+      }
 
       const badge = document.getElementById('enrollmentStatusBadge');
-
-      if (data.enrollment_on) {
+      if (isAnyOn) {
         badge.textContent = 'Enrollment ON';
         badge.className = 'badge bg-success';
       } else {
         badge.textContent = 'Enrollment OFF';
         badge.className = 'badge bg-danger';
       }
+
     } catch (error) {
       console.error('Error fetching enrollment status:', error);
       const badge = document.getElementById('enrollmentStatusBadge');
@@ -695,18 +710,23 @@ function applySearchFilter() {
     }
   }
 
-  // Call this when the modal opens or fingerprint loads
-  document.addEventListener('DOMContentLoaded', function () {
-    // Replace with actual device ID you want to check
-    const DEVICE_ID = 4;
-    checkEnrollmentStatus(DEVICE_ID);
+  function startEnrollmentPolling(deviceIds) {
+    checkMultipleEnrollmentStatus(deviceIds); // Run once immediately
+    enrollmentPolling = setInterval(() => checkMultipleEnrollmentStatus(deviceIds), 2000); // Poll every 2s
+  }
+
+  function stopEnrollmentPolling() {
+    clearInterval(enrollmentPolling);
+    enrollmentPolling = null;
+  }
+
+  // Attach to modal events
+  $('#registerStudentModal').on('shown.bs.modal', function () {
+    startEnrollmentPolling([4, 5]); // ✅ check both devices
   });
 
-  // Optional: run again when modal is shown
-  const modal = document.getElementById('registerStudentModal');
-  modal.addEventListener('shown.bs.modal', function () {
-    const DEVICE_ID = 4; // or dynamically passed
-    checkEnrollmentStatus(DEVICE_ID);
+  $('#registerStudentModal').on('hidden.bs.modal', function () {
+    stopEnrollmentPolling();
   });
 </script>
 </script>
@@ -829,70 +849,77 @@ function applySearchFilter() {
   }
 </script>
 
-<script>
-  function showUpload() {
- 
-  document.getElementById('uploadInput').click();
 
-    // document.getElementById('uploadInput').style.display = 'block';
-    // document.getElementById('cameraContainer').style.display = 'none';
-    // document.getElementById('capturedImage').style.display = 'none';
+ <script>
+  let stream;
+
+  function showUpload() {
+    document.getElementById("uploadInput").click();
     stopCamera();
   }
 
-  function showCamera() {
-    document.getElementById('uploadInput').style.display = 'none';
-    document.getElementById('cameraContainer').style.display = 'block';
-    document.getElementById('capturedImage').style.display = 'none';
-    startCamera();
-  }
-
   function previewUploadImage(event) {
-    const reader = new FileReader();
-    reader.onload = function () {
-      const img = document.getElementById('capturedImage');
-      img.src = reader.result;
-      img.style.display = 'block';
-    };
-    reader.readAsDataURL(event.target.files[0]);
-  }
-
-  function startCamera() {
-    const video = document.getElementById('cameraStream');
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        video.srcObject = stream;
-      })
-      .catch(err => {
-        alert("Camera access denied: " + err);
-      });
-  }
-
-  function stopCamera() {
-    const video = document.getElementById('cameraStream');
-    const stream = video.srcObject;
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById("capturedImage").src = e.target.result;
+        document.getElementById("capturedImage").style.display = "block";
+        document.getElementById("cameraStream").style.display = "none";
+        document.getElementById("takePhotoBtn").style.display = "none";
+        document.getElementById("capturedImageInput").value = "";
+      };
+      reader.readAsDataURL(file);
     }
-    video.srcObject = null;
+  }
+
+  async function showCamera() {
+    const video = document.getElementById("cameraStream");
+    const img = document.getElementById("capturedImage");
+    const takeBtn = document.getElementById("takePhotoBtn");
+
+    img.style.display = "none";
+    video.style.display = "block";
+    takeBtn.style.display = "inline-block";
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+    } catch (err) {
+      alert("Camera access denied or not available.");
+      console.error(err);
+    }
   }
 
   function capturePhoto() {
-    const canvas = document.getElementById('canvas');
-    const video = document.getElementById('cameraStream');
-    const image = document.getElementById('capturedImage');
-    const input = document.getElementById('capturedImageInput');
-
+    const video = document.getElementById("cameraStream");
+    const canvas = document.createElement("canvas");
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
 
-    const imageData = canvas.toDataURL('image/png');
-    image.src = imageData;
-    image.style.display = 'block';
-    input.value = imageData;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const dataURL = canvas.toDataURL("image/png");
+
+    document.getElementById("capturedImage").src = dataURL;
+    document.getElementById("capturedImage").style.display = "block";
+    document.getElementById("cameraStream").style.display = "none";
+    document.getElementById("takePhotoBtn").style.display = "none";
+
+    document.getElementById("capturedImageInput").value = dataURL;
+
+    stopCamera();
+  }
+
+  function stopCamera() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
   }
 </script>
+
 
 <script>
   function toggleFilterCloud() {

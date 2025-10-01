@@ -58,7 +58,7 @@
                             @csrf
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Academic Year & Term</label>
-                                <input type="text" name="academic_term" class="form-control" placeholder="e.g., 24-1 First Sem A.Y. 2024-2025" value="{{ $academic_term ?? '' }}">
+                                <input type="text" name="academic_term" class="form-control" placeholder="e.g., 24-1 First Sem A.Y. 2024-2025" value="{{ $academicTerm ?? '' }}">
                                 <small class="form-text text-muted">Example: 24-1 First Sem A.Y. 2024-2025</small>
                             </div>
                             <div class="text-end">

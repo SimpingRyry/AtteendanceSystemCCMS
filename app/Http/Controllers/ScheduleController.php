@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
+use App\Models\User;
+use App\Models\OrgList;
+use App\Models\Setting;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Models\OrgList;
 use Illuminate\Support\Facades\Auth;
 
 class ScheduleController extends Controller
@@ -51,7 +53,6 @@ public function generateBiometricsSchedule(Request $request)
         ->orderBy('name')
         ->get()
         ->map(function ($student) {
-            // Remove leading **** (if present) and trim spaces
             $student->name = ltrim($student->name, '*');
             $student->name = trim($student->name);
             return $student;
@@ -85,12 +86,35 @@ public function generateBiometricsSchedule(Request $request)
     $orgLogo = $orgList?->org_logo ?? 'default-logo.png';
     $orgName = $orgList?->org_name ?? 'Organization Name';
 
+    // ✅ Get current academic term and extract year range
+    $academicTermRecord = Setting::where('key', 'academic_term')->first();
+    $activeTerm = $academicTermRecord?->value ?? null;
+
+    $activeYearRange = null;
+    if ($activeTerm) {
+        preg_match('/\b(\d{4}-\d{4})\b/', $activeTerm, $matches);
+        $activeYearRange = $matches[1] ?? null;
+    }
+
+    // ✅ Find current President (Officer) of the org whose term matches
+    $president = null;
+    if ($activeYearRange) {
+        $president = User::where('org', $authUser->org)
+            ->where('role', 'President - Officer')
+            ->get()
+            ->first(function ($user) use ($activeYearRange) {
+                preg_match('/\b(\d{4}-\d{4})\b/', $user->term, $m);
+                return isset($m[1]) && $m[1] === $activeYearRange;
+            });
+    }
+
     // Generate PDF with passed data
     $pdf = Pdf::loadView('biometrics_schedule', [
         'title' => 'Biometric Registration Schedule',
         'pagedChunks' => $pagedChunks,
         'orgLogo' => $orgLogo,
-        'orgName' => $orgName, // ✅ Pass org name here
+        'orgName' => $orgName,
+        'president' => $president, // ✅ pass president with matched term
     ]);
 
     return $pdf->stream('biometrics_schedule.pdf');

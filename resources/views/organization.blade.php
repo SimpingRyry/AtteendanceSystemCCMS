@@ -51,7 +51,7 @@
             <div class="navbar-nav ms-auto p-4 p-lg-0">
                 <a href="{{ url('/') }}" class="nav-item nav-link">Home</a>
                 <a href="{{ url('/') }}#about" class="nav-item nav-link">About</a>
-                <a href="{{ url('/home-event') }}" class="nav-item nav-link">Events</a>
+            <a href="{{ route('homeevents.show') }}" class="nav-item nav-link">Events</a>
                 <div class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Organizations</a>
                     <div class="dropdown-menu bg-light m-0">
