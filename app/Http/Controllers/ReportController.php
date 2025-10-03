@@ -181,12 +181,14 @@ private function cleanName($name)
 }
 public function generatePdf(Request $request)
 {
-    // allow more memory and time (for big PDFs on hosting)
-    ini_set('memory_limit', '512M');
-    ini_set('max_execution_time', 300);
-
     $org = Auth::user()->org;
     $selectedRole = $request->input('role');
+
+    // ✅ Handle org logo exactly like in exportFinancialReport
+    $logo = public_path("images/org_list/{$org}_logo.png");
+    if (!file_exists($logo)) {
+        $logo = public_path("images/default_logo.png");
+    }
 
     $fullTerm = Setting::where('key', 'academic_term')->first()->value ?? 'Unknown Term';
     preg_match('/\d{4}-\d{4}/', $fullTerm, $matches);
@@ -196,7 +198,15 @@ public function generatePdf(Request $request)
     $presidentName = '';
     $adviserName = '';
     $preparedByName = $this->cleanName(auth()->user()->name ?? 'Not Set');
-    $roleLabel = ''; // initialize here
+    $roleLabel = '';
+
+    // ✅ helper closure to get photo path consistently
+    $getPhoto = function ($filename) {
+        $path = public_path("uploads/{$filename}");
+        return (file_exists($path) && !is_dir($path))
+            ? $path
+            : public_path("images/default.png");
+    };
 
     if ($selectedRole === 'Officer') {
         $baseRoles = OfficerRole::where('org', $org)
@@ -214,13 +224,11 @@ public function generatePdf(Request $request)
 
             if ($user) {
                 $student = Student::where('id_number', $user->student_id)->first();
-                $photoPath = public_path("uploads/{$user->picture}");
-                $photo = file_exists($photoPath) ? $photoPath : public_path("images/default.png");
 
                 $officers[] = [
                     'position'   => $baseRole,
                     'name'       => $this->cleanName($user->name),
-                    'photo'      => $photo,
+                    'photo'      => $getPhoto($user->picture), // ✅ same style as logo
                     'birth_date' => $student->birth_date ?? 'Not Set',
                     'address'    => $student->address ?? 'Not Set',
                     'course'     => $student->course ?? 'N/A',
@@ -249,9 +257,9 @@ public function generatePdf(Request $request)
             ->where('org', $org)
             ->where('term', 'like', "%$termYear%")
             ->first();
-
         $adviserName = $adviserUser ? $this->cleanName($adviserUser->name) : 'Not Set';
-        $roleLabel   = 'Officers'; // ✅ fixed here
+
+        $roleLabel = 'Officers';
     } 
     elseif ($selectedRole === 'Member') {
         $orgModel = OrgList::where('org_name', $org)->first();
@@ -269,13 +277,11 @@ public function generatePdf(Request $request)
 
         foreach ($members as $member) {
             $student = Student::where('id_number', $member->student_id)->first();
-            $photoPath = public_path("uploads/{$member->picture}");
-            $photo = file_exists($photoPath) ? $photoPath : public_path("images/default.png");
 
             $officers[] = [
                 'position'   => 'Member',
                 'name'       => $this->cleanName($member->name),
-                'photo'      => $photo,
+                'photo'      => $getPhoto($member->picture), // ✅ same style as logo
                 'birth_date' => $student->birth_date ?? 'Not Set',
                 'address'    => $student->address ?? 'Not Set',
                 'course'     => $student->course ?? 'N/A',
@@ -293,14 +299,15 @@ public function generatePdf(Request $request)
             ->where('org', $org)
             ->where('term', 'like', "%$termYear%")
             ->first();
-
         $adviserName = $adviserUser ? $this->cleanName($adviserUser->name) : 'Not Set';
-        $roleLabel   = 'Members'; // ✅ defined here too
+
+        $roleLabel = 'Members';
     }
 
     $pdf = Pdf::loadView('report.roster', compact(
         'officers',
         'org',
+        'logo',            // ✅ pass logo to view too
         'presidentName',
         'adviserName',
         'preparedByName',
@@ -320,6 +327,7 @@ public function generatePdf(Request $request)
 
     return $pdf->stream(strtolower($selectedRole) . '_roster.pdf');
 }
+
 
 
 }

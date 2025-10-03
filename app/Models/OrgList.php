@@ -21,7 +21,11 @@ class OrgList extends Model
         'delivery_unit_id',
         'course_id',
         'scope',
-        'parent_org_id'
+        'parent_org_id',
+ 
+
+        
+        
     ];
 
     public function parent()

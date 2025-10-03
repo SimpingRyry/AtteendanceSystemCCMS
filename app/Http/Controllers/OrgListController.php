@@ -11,6 +11,8 @@ use App\Models\DeliveryUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+
 use Illuminate\Auth\Events\Registered;
 
 class OrgListController extends Controller
@@ -44,97 +46,98 @@ public function setHierarchy(Request $request)
 }
 public function store(Request $request)
 {
-    $request->validate([
-        'org_name'          => 'required|string|max:255',
-        'description'       => 'required|string',
-        'org_logo'          => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        'bg_image'          => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+    try {
+        $request->validate([
+            'org_name'          => 'required|string|max:255',
+            'description'       => 'required|string',
+            'org_logo'          => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'bg_image'          => 'required|image|mimes:jpeg,png,jpg,gif,svg',
 
-        // Adviser fields are nullable
-        'adviser_name'      => 'nullable|string|max:255',
-        'adviser_email'     => 'nullable|string|email|max:255|unique:users,email',
-        'adviser_password'  => 'nullable|string|min:6',
+            'adviser_name'      => 'nullable|string|max:255',
+            'adviser_email'     => 'nullable|string|email|max:255|unique:users,email',
+            'adviser_password'  => 'nullable|string|min:6',
 
-        // President fields are nullable
-        'president_name'    => 'nullable|string|max:255',
-        'president_email'   => 'nullable|email|unique:users,email',
-        'president_password'=> 'nullable|string|min:6',
-    ]);
-
-    // Sanitize and handle file uploads
-    $sanitizedOrgName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $request->org_name);
-
-    $orgLogoName = $sanitizedOrgName . '_logo.' . $request->org_logo->extension();
-    $request->org_logo->move(public_path('images/org_list'), $orgLogoName);
-
-    $bgImageName = $sanitizedOrgName . '_bg.' . $request->bg_image->extension();
-    $request->bg_image->move(public_path('images/org_lists'), $bgImageName);
-    $term = Setting::where('key', 'academic_term')->value('value');
-
-
-    // Create the organization
-    $organization = OrgList::create([
-        'org_name'    => $request->org_name,
-        'description' => $request->description,
-        'org_logo'    => $orgLogoName,
-        'bg_image'    => $bgImageName,
-    ]);
-
-    // ✅ Create default fine settings for the org if none exists
-    FineSetting::firstOrCreate(
-        ['org' => $organization->org_name], // condition
-        [   // defaults if not exists
-            'absent_member'       => 50,
-            'late_member'         => 20,
-            'absent_officer'      => 100,
-            'late_officer'        => 40,
-            'grace_period_minutes'=> 15,
-        ]
-    );
-
-    // Check and create Adviser if all fields are filled
-    if (
-        $request->filled('adviser_name') &&
-        $request->filled('adviser_email') &&
-        $request->filled('adviser_password')
-    ) {
-        $adviser = User::create([
-            'name'     => $request->adviser_name,
-            'email'    => $request->adviser_email,
-            'password' => Hash::make($request->adviser_password),
-            'org'      => $organization->org_name,
-            'role'     => 'Adviser',
-            'term'     => $term
+            'president_name'    => 'nullable|string|max:255',
+            'president_email'   => 'nullable|email|unique:users,email',
+            'president_password'=> 'nullable|string|min:6',
         ]);
 
-        event(new Registered($adviser));
-    }
+        // sanitize and file uploads
+        $sanitizedOrgName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $request->org_name);
 
-    // Check and create President if all fields are filled
-    if (
-        $request->filled('president_name') &&
-        $request->filled('president_email') &&
-        $request->filled('president_password')
-    ) {
-        $president = User::create([
-            'name'     => $request->president_name,
-            'email'    => $request->president_email,
-            'password' => Hash::make($request->president_password),
-            'org'      => $organization->org_name,
-            'role'     => 'President - Officer',
-            'term'     => $term
+        $orgLogoName = $sanitizedOrgName . '_logo.' . $request->org_logo->extension();
+        $request->org_logo->move(public_path('images/org_list'), $orgLogoName);
 
+        $bgImageName = $sanitizedOrgName . '_bg.' . $request->bg_image->extension();
+        $request->bg_image->move(public_path('images'), $bgImageName);
+
+        $term = Setting::where('key', 'academic_term')->value('value');
+
+        // create org
+        $organization = OrgList::create([
+            'org_name'    => $request->org_name,
+            'description' => $request->description,
+            'org_logo'    => $orgLogoName,
+            'bg_image'    => $bgImageName,
         ]);
 
-        event(new Registered($president));
-    }
+        FineSetting::firstOrCreate(
+            ['org' => $organization->org_name],
+            [
+                'absent_member'        => 50,
+                'late_member'          => 20,
+                'absent_officer'       => 100,
+                'late_officer'         => 40,
+                'grace_period_minutes' => 15,      
+                'morning_in'      => '08:00:00',
+        'morning_out'     => '12:00:00',
+        'afternoon_in'    => '13:00:00',
+        'afternoon_out'   => '17:00:00',
+            ]
+        );
 
-return redirect()->back()->with(
-    'success',
-    'Organization "' . $organization->org_name . '" and available user accounts created successfully. Default fine settings applied.'
-);
+        // create adviser
+        if ($request->filled('adviser_name') && $request->filled('adviser_email') && $request->filled('adviser_password')) {
+            $adviser = User::create([
+                'name'     => $request->adviser_name,
+                'email'    => $request->adviser_email,
+                'password' => Hash::make($request->adviser_password),
+                'org'      => $organization->org_name,
+                'role'     => 'Adviser',
+                'term'     => $term
+            ]);
+            event(new Registered($adviser));
+        }
+
+        // create president
+        if ($request->filled('president_name') && $request->filled('president_email') && $request->filled('president_password')) {
+            $president = User::create([
+                'name'     => $request->president_name,
+                'email'    => $request->president_email,
+                'password' => Hash::make($request->president_password),
+                'org'      => $organization->org_name,
+                'role'     => 'President - Officer',
+                'term'     => $term
+            ]);
+            event(new Registered($president));
+        }
+
+        return redirect()->back()->with(
+            'success',
+            'Organization "' . $organization->org_name . '" and accounts created successfully. Default fine settings applied.'
+        );
+
+    } catch (\Exception $e) {
+        // Log the error for debugging
+        Log::error('Error creating organization: '.$e->getMessage());
+
+        // Redirect back with error message
+        return redirect()->back()->withInput()->with(
+            'error',
+            'An error occurred while creating the organization: '.$e->getMessage()
+        );
+    }
 }
-
 
     // ✅ Update an existing organization
     public function update(Request $request, $id)
@@ -147,6 +150,7 @@ return redirect()->back()->with(
             'description' => 'nullable|string',
             'org_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'bg_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:4096',
+
         ]);
 
         // Conditionally update org_name

@@ -338,7 +338,7 @@ public function showArchive(Request $request, $event_id)
 
 public function liveData(Request $request)
 {
-    $event = Event::whereDate('event_date', now()->toDateString())->first();
+    $event = Event::whereDate('event_date', now('Asia/Manila')->toDateString())->first();
 
     if (!$event) return [];
 

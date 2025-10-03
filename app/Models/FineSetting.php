@@ -19,7 +19,12 @@ class FineSetting extends Model
         'absent_officer',
         'late_officer',
         'grace_period_minutes',
-        'org'
+        'org',
+               'morning_in',
+        'morning_out',
+
+        'afternoon_in',
+        'afternoon_out',
 
     ];
 }

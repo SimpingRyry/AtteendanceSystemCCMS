@@ -335,7 +335,16 @@
 </div>
 @endif
 
+
+
+@if(session('error'))
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+    });
 </script>
+@endif
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const scopeSelector = document.getElementById('scopeSelector');
