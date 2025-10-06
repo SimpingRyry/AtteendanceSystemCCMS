@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Logs;
 use App\Models\User;
+use App\Models\OrgList;
 use App\Models\Setting;
 use App\Models\Student;
+use App\Models\FineSetting;
+use App\Models\Transaction;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -97,6 +100,9 @@ public function store(Request $request)
 
     $term = Setting::where('key', 'academic_term')->value('value');
 
+
+
+
     $isOfficer = false;
 
     // ✅ Main org officer account
@@ -156,6 +162,42 @@ public function store(Request $request)
         $student->save();
     } else {
         return redirect()->back()->with('error', 'Student record not found.');
+    }
+
+    // ✅ Apply membership fee fines
+    $registeredOrg = OrgList::where('org_name', $organization)->first();
+
+    if ($registeredOrg) {
+        $applyMembershipFee = function($org) use ($memberUser, $term) {
+            $fineSetting = FineSetting::where('org', $org->org_name)->first();
+                $setting = Setting::where('key', 'academic_term')->first();
+                $acadCode = $setting->acad_code ?? 'Unknown Code';
+
+            if ($fineSetting && $fineSetting->membership_fee > 0) {
+                Transaction::create([
+                    'student_id'        => $memberUser->student_id,
+                    'event'             => 'Membership Fee',
+                    'transaction_type'  => 'FINE',
+                    'fine_amount'       => $fineSetting->membership_fee,
+                    'org'               => $org->org_name,
+                    'date'              => now('Asia/Manila'),
+                    'acad_term'         => $term,
+                    'acad_code'         => $acadCode,
+                    'processed_by'      => auth()->user()->name ?? 'System',
+                    'or_num'            => null,
+                    'event_id'          => null,
+                    'status'            => 'Unpaid',
+                ]);
+            }
+        };
+
+        // Apply fee for the registered org
+        $applyMembershipFee($registeredOrg);
+
+        // Apply fee for the parent org (if exists)
+        if ($registeredOrg->parent) {
+            $applyMembershipFee($registeredOrg->parent);
+        }
     }
 
     // ✅ Send custom verification email

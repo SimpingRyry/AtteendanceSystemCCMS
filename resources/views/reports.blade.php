@@ -39,6 +39,11 @@
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="fines-tab" data-bs-toggle="tab" data-bs-target="#fines" type="button" role="tab">
+                        Fines & Payments Report
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
                     <button class="nav-link" id="roster-tab" data-bs-toggle="tab" data-bs-target="#roster" type="button" role="tab">
                         Student Roster
                     </button>
@@ -107,6 +112,54 @@
                     </div>
                 </div>
 
+                {{-- Fines & Payments Report Tab --}}
+                <div class="tab-pane fade" id="fines" role="tabpanel">
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning text-dark fw-semibold">
+                            Generate Fines & Payments Report
+                        </div>
+                        <div class="card-body">
+                            <form action="{{ route('report.fines') }}" method="GET" target="_blank">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Month</label>
+                                        <select class="form-select" name="month">
+                                            <option value="All">All</option>
+                                            <option value="January">January</option>
+                                            <option value="February">February</option>
+                                            <option value="March">March</option>
+                                            <option value="April">April</option>
+                                            <option value="May">May</option>
+                                            <option value="June">June</option>
+                                            <option value="July">July</option>
+                                            <option value="August">August</option>
+                                            <option value="September">September</option>
+                                            <option value="October">October</option>
+                                            <option value="November">November</option>
+                                            <option value="December">December</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">Year</label>
+                                        <input type="number" class="form-control" name="year" placeholder="{{ date('Y') }}" min="2000" max="{{ date('Y') }}">
+                                    </div>
+                                    @if(auth()->user()->role === 'Super Admin')
+                                    <div class="col-md-4">
+                                        <label class="form-label">Organization</label>
+                                        <input type="text" class="form-control" name="organization" placeholder="Org name">
+                                    </div>
+                                    @endif
+                                </div>
+                                <div class="mt-4 text-end">
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fa-solid fa-scale-balanced"></i> Generate Fines Report
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Student Roster Tab --}}
                 <div class="tab-pane fade" id="roster" role="tabpanel">
                     <div class="card mb-4">
@@ -125,21 +178,13 @@
                                             <option value="PRAXIS">PRAXIS</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Program</label>
-                                        <select class="form-select" name="program">
-                                            <option value="">All</option>
-                                            <option value="IT">Information Technology</option>
-                                            <option value="IS">Information Systems</option>
-                                        </select>
-                                    </div>
+                               
                                     @endif
                                     <div class="col-md-4">
                                         <label class="form-label">Role</label>
                                         <select class="form-select" name="role">
                                             <option value="Member">Members</option>
                                             <option value="Officer">Officers</option>
-                                  
                                         </select>
                                     </div>
                                 </div>

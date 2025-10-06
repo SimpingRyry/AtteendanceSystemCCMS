@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Course;
 use App\Models\Setting;
 use App\Models\FineHistory;
@@ -9,9 +11,8 @@ use App\Models\OfficerRole;
 use App\Models\DeliveryUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-use Carbon\Carbon;
 
 class SettingsController extends Controller
 {
@@ -87,20 +88,22 @@ public function destroy($id)
 }
 public function updateFines(Request $request)
 {
+    Log::info('updateFines() called', ['request_data' => $request->all()]);
+
     $request->validate([
         'absent_member' => 'required|numeric|min:0',
         'absent_officer' => 'required|numeric|min:0',
         'late_member' => 'required|numeric|min:0',
         'late_officer' => 'required|numeric|min:0',
         'grace_period_minutes' => 'required|integer|min:0',
-        // Optional validation for time inputs (future-proof)
-        'morning_in' => 'nullable|date_format:H:i',
-        'morning_out' => 'nullable|date_format:H:i',
-        'afternoon_in' => 'nullable|date_format:H:i',
-        'afternoon_out' => 'nullable|date_format:H:i',
+       'morning_in' => 'nullable|date_format:H:i:s',
+'morning_out' => 'nullable|date_format:H:i:s',
+'afternoon_in' => 'nullable|date_format:H:i:s',
+'afternoon_out' => 'nullable|date_format:H:i:s',
     ]);
 
     $orgName = auth()->user()->org;
+    Log::info('Authenticated user org', ['org' => $orgName]);
 
     $data = [
         'absent_member' => $request->absent_member,
@@ -111,25 +114,28 @@ public function updateFines(Request $request)
         'updated_at' => now(),
     ];
 
-    // Only include time fields if columns exist (for now, just prepare)
     $timeFields = ['morning_in', 'morning_out', 'afternoon_in', 'afternoon_out'];
     foreach ($timeFields as $field) {
         if ($request->has($field)) {
-            $data[$field] = $request->$field; // Won't error even if column not yet added
+            $data[$field] = $request->$field;
         }
     }
 
+    Log::info('Prepared data for update/insert', ['data' => $data]);
+
     $existing = DB::table('fine_settings')->where('org', $orgName)->first();
+    Log::info('Existing record check', ['existing' => $existing]);
 
     if ($existing) {
-        DB::table('fine_settings')->where('org', $orgName)->update($data);
+        $affected = DB::table('fine_settings')->where('org', $orgName)->update($data);
+        Log::info('Update executed', ['affected_rows' => $affected]);
     } else {
         $data['org'] = $orgName;
         $data['created_at'] = now();
         DB::table('fine_settings')->insert($data);
+        Log::info('Insert executed', ['inserted_data' => $data]);
     }
 
-    // Fine history (only for monetary values)
     $fineTypes = [
         'Absent Fine (Member)' => $request->absent_member,
         'Absent Fine (Officer)' => $request->absent_officer,
@@ -145,11 +151,18 @@ public function updateFines(Request $request)
             'org' => $orgName,
             'changed_at' => now(),
         ]);
+        Log::info('FineHistory entry created', [
+            'type' => $type,
+            'amount' => $amount,
+            'org' => $orgName,
+            'user_id' => auth()->id()
+        ]);
     }
+
+    Log::info('updateFines() completed successfully');
 
     return redirect()->back()->with('success', 'Fine settings updated successfully.');
 }
-
 public function updateAcademic(Request $request)
 {
     $request->validate([

@@ -15,7 +15,7 @@ class FineSetting extends Model
     protected $fillable = [
         'id',
         'absent_member',
-        'late,member',
+        'late_member',
         'absent_officer',
         'late_officer',
         'grace_period_minutes',
@@ -25,6 +25,7 @@ class FineSetting extends Model
 
         'afternoon_in',
         'afternoon_out',
+        'membership_fee'
 
     ];
 }

@@ -163,7 +163,7 @@
 </div>
 
 <div class="text-center mb-3">
-  <strong>Fines and Payment Report</strong><br>
+  <strong>Fees and Payment Report</strong><br>
   <span>({{ $month ?? 'All Months' }}, {{ $year ?? 'All Years' }})</span>
 </div>
 
@@ -176,7 +176,7 @@
         <thead>
           <tr style="background-color: #eaeaea;">
             <th style="border: 1px solid #000; padding: 6px;">Event</th>
-            <th style="border: 1px solid #000; padding: 6px;">Fines Issued</th>
+            <th style="border: 1px solid #000; padding: 6px;">Fees/Fine Issued</th>
             <th style="border: 1px solid #000; padding: 6px;">Payments Made</th>
             <th style="border: 1px solid #000; padding: 6px;">Balance</th>
           </tr>

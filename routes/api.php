@@ -426,6 +426,6 @@ Route::get('/event', function () {
     $event = Event::whereDate('event_date', $today)->first();
 
     return response()->json([
-        'event_name' => $event?->name ?? 'Untitled Event'
+        'event_name' => $event?->name ?? ''
     ]);
 });

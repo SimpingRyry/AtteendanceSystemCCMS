@@ -27,12 +27,12 @@ public function generateFinancialReport(Request $request)
     // Determine the organization based on role
     $org = $user->role === 'Super Admin' ? $request->organization : $user->org;
 
-   $query = DB::table('transaction')
-    ->select('event', 'transaction_type', DB::raw('SUM(fine_amount) as total_amount'))
-    ->when($month !== 'All', fn($q) => $q->whereMonth('date', date('m', strtotime($month))))
-    ->when($year, fn($q) => $q->whereYear('date', $year))
-    ->when($org, fn($q) => $q->where('org', $org))
-    ->groupBy('event', 'transaction_type');
+    $query = DB::table('transaction')
+        ->select('event', 'transaction_type', DB::raw('SUM(fine_amount) as total_amount'))
+        ->when($month !== 'All', fn($q) => $q->whereMonth('date', date('m', strtotime($month))))
+        ->when($year, fn($q) => $q->whereYear('date', $year))
+        ->when($org, fn($q) => $q->where('org', $org))
+        ->groupBy('event', 'transaction_type');
 
     $rawData = $query->get();
 
@@ -52,13 +52,11 @@ public function generateFinancialReport(Request $request)
         'balance' => $grouped->sum('balance')
     ];
 
-    // Set logo based on organization
-    $logo = public_path('images/org_ccms_logo.png');
-    if ($org === 'Information Technology Society') {
-        $logo = public_path('images/ITS_LOGO.png');
-    } elseif ($org === 'PRAXIS') {
-        $logo = public_path('images/praxis_logo.png');
-    }
+    // 🔹 Fetch org logo dynamically from org_list table
+    $orgData = \App\Models\OrgList::where('org_name', $org)->first();
+    $logo = $orgData && $orgData->org_logo 
+        ? public_path('images/org_list/' . $orgData->org_logo) 
+        : public_path('images/org_ccms_logo.png'); // default fallback
 
     PDF::setOptions(['defaultFont' => 'DejaVu Sans']);
     $pdf = Pdf::loadView('report.financial_pdf', compact('grouped', 'summary', 'month', 'year', 'org', 'logo'));
