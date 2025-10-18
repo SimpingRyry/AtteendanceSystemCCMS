@@ -9,16 +9,24 @@ use Illuminate\Support\Facades\Http;
 class GCashPaymentController extends Controller
 {
 public function createSource(Request $request)
-{
+
+
+{ 
     $request->validate([
-        'amount'       => 'required|numeric|min:20',
-        'organization' => 'required|string',
+        'amount'          => 'required|numeric|min:20',
+        'selected_events' => 'required|json', // from hidden input
     ], [
         'amount.min' => 'Minimum payment amount is ₱20.00 due to GCash restrictions.'
     ]);
 
     $amountInCentavos = $request->amount * 100;
+    $selectedEvents = json_decode($request->selected_events, true);
 
+    if (empty($selectedEvents) || !is_array($selectedEvents)) {
+        return back()->withErrors(['selected_events' => 'No events selected for payment.']);
+    }
+
+    // ✅ Create PayMongo GCash source
     $response = Http::withBasicAuth(env('PAYMONGO_SECRET_KEY'), '')
         ->post('https://api.paymongo.com/v1/sources', [
             'data' => [
@@ -36,30 +44,27 @@ public function createSource(Request $request)
 
     $data = $response->json();
 
-    // Store source ID and organization in session
+    // ✅ Store source ID and selected events in session
     if (isset($data['data']['id'])) {
         session([
             'gcash_source_id' => $data['data']['id'],
-            'gcash_organization' => $request->organization,
+            'gcash_selected_events' => $selectedEvents,
+            'gcash_amount' => $request->amount,
         ]);
     }
 
-    $ID = session('gcash_source_id');
-
     Log::info('GCash source created', [
-        'source_id' => $ID,
-        'amount'    => $request->amount,
-        'organization' => $request->organization,
+        'source_id' => session('gcash_source_id'),
+        'amount' => $request->amount,
+        'selected_events' => $selectedEvents,
     ]);
 
-    // Log the full API response for debugging
-    Log::info('PayMongo createSource Response:', $data);
-
+    // Redirect user to GCash checkout
     if (isset($data['data']['attributes']['redirect']['checkout_url'])) {
         return redirect($data['data']['attributes']['redirect']['checkout_url']);
     }
 
-    return back()->withErrors(['gcash_error' => 'Unable to create GCash source.']);
+    return back()->withErrors(['gcash_error' => 'Unable to create GCash source. Please try again.']);
 }
 
 }

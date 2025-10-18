@@ -332,4 +332,5 @@ Route::get('/org/{orgName}/roles', [OrgListController::class, 'getRoles']);
 Route::get('/students/{student}/unpaid-events', [PaymentController::class, 'getUnpaidEvents'])
      ->name('students.unpaidEvents');
 Route::get('/filter-fines', [OrgDashboardController::class, 'filterFines'])->name('filter.fines');
-     
+    Route::get('/student/{studentId}/unpaid-events', [PaymentController::class, 'getStudentUnpaidEvents'])
+    ->name('student.unpaid.events');

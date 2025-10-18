@@ -69,20 +69,9 @@
                    value="{{ request('semester') }}">
           </div>
 
-          <!-- Organization Filter -->
-     <div class="col-md-3">
-    <label for="inputOrganization" class="form-label fw-semibold">Organization</label>
-    <select id="inputOrganization" name="organization" class="form-select" onchange="this.form.submit()">
-        <option disabled {{ is_null($selectedOrg) ? 'selected' : '' }}>Select organization</option>
-        <option value="All" {{ $selectedOrg == 'All' ? 'selected' : '' }}>All</option>
-
-        @foreach($orgOptions as $org)
-            <option value="{{ $org }}" {{ $selectedOrg == $org ? 'selected' : '' }}>
-                {{ $org }}
-            </option>
-        @endforeach
-    </select>
-</div>
+          <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+          </div>
         </form>
       </div>
 
@@ -98,6 +87,7 @@
             <tr>
               <th>Date</th>
               <th>Event</th>
+              <th>Organization</th> <!-- ✅ Added organization column -->
               <th>Transaction</th>
               <th>Debit</th>
               <th>Credit</th>
@@ -110,7 +100,7 @@
 
             @forelse ($transactionsGrouped as $acadCode => $transactions)
               <tr>
-                <td colspan="7" class="table-primary fw-bold">
+                <td colspan="8" class="table-primary fw-bold">
                   Academic Code: {{ $acadCode }}
                 </td>
               </tr>
@@ -126,6 +116,7 @@
                 <tr>
                   <td>{{ \Carbon\Carbon::parse($transaction->date)->format('M d, Y') }}</td>
                   <td>{{ $transaction->event }}</td>
+                  <td>{{ $transaction->org ?? '-' }}</td> <!-- ✅ Display org -->
                   <td>{{ $transaction->transaction_type }}</td>
                   <td>{{ $debit > 0 ? number_format($debit, 2) : '-' }}</td>
                   <td>{{ $credit > 0 ? number_format($credit, 2) : '-' }}</td>
@@ -135,7 +126,7 @@
               @endforeach
             @empty
               <tr>
-                <td colspan="6" class="text-center text-muted">No transactions found for the selected filter.</td>
+                <td colspan="8" class="text-center text-muted">No transactions found for the selected filter.</td>
               </tr>
             @endforelse
           </tbody>
@@ -146,8 +137,8 @@
         Total Remaining Balance: <span id="totalBalance">{{ number_format($grandTotal, 2) }}</span>
       </div>
 
-      <!-- Pay Online Button -->
-      <div class="mt-4" id="payOnlineWrapper" style="display: none;">
+      <!-- Pay Online Button (optional — kept static) -->
+      <div class="mt-4" id="payOnlineWrapper">
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#onlinePaymentModal">
           <i class="fas fa-wallet me-1"></i> Pay Online
         </button>
@@ -155,39 +146,56 @@
     </div>
   </div>
 </main>
-<div class="modal fade" id="onlinePaymentModal" tabindex="-1" aria-labelledby="onlinePaymentModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="onlinePaymentModalLabel">Online Payment</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-  <form id="onlinePaymentForm" method="POST" action="{{ route('gcash.pay') }}">
-    @csrf
-    <input type="hidden" name="organization" value="{{ $selectedOrg }}"> <!-- ✅ Send selected org -->
 
-    <div class="modal-body">
-        <div class="mb-3">
-            <label for="paymentAmount" class="form-label">Enter Amount to Pay</label>
-            <input type="number" class="form-control" id="paymentAmount" name="amount"
-                   placeholder="₱0.00" required min="20">
-            <small class="form-text text-danger mt-1">
-                Please pay either the exact amount or any amount <strong>not less than ₱20.00</strong>.
-            </small>
-        </div>
-        <div class="text-muted small">
-            You will be redirected to GCash to complete your payment.
-        </div>
+<div class="modal fade" id="onlinePaymentModal" tabindex="-1" aria-labelledby="onlinePaymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="onlinePaymentModalLabel">Online Payment</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form id="onlinePaymentForm" method="POST" action="{{ route('gcash.pay') }}">
+        @csrf
+        <input type="hidden" name="student_id" value="{{ $student->student_id }}">
+
+<div class="modal-body">
+  <div class="mb-3">
+    <label class="form-label fw-semibold">Unpaid Events</label>
+    <div class="mb-2">
+      <input type="checkbox" id="selectAllOnlineEvents" class="form-check-input">
+      <label for="selectAllOnlineEvents" class="form-check-label">Select All</label>
     </div>
-    <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">
-            <i class="fas fa-paper-plane me-1"></i> Proceed Payment
-        </button>
+    <div id="onlineUnpaidEventsList" class="border rounded p-2" style="max-height: 200px; overflow-y: auto;">
+      <p class="text-muted">Loading unpaid events...</p>
     </div>
-</form>
+    <div id="onlineSelectionSummary" class="text-success mt-2 fw-semibold" style="display: none;"></div>
+    <input type="hidden" id="selectedOnlineEvents" name="selected_events">
+  </div>
+
+  <div class="mb-3">
+    <label for="paymentAmount" class="form-label">Total Amount</label>
+    <input type="number" class="form-control" id="paymentAmount" name="amount" placeholder="₱0.00" required min="20" readonly>
+    <small class="form-text text-danger mt-1">
+      Please pay either the exact amount or any amount <strong>not less than ₱20.00</strong>.
+    </small>
+  </div>
+  <div class="text-muted small">
+    You will be redirected to GCash to complete your payment.
+  </div>
+</div>
+
+        <div class="modal-footer px-4">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane me-1"></i> Proceed to GCash
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
+
 @if(session('success'))
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -220,7 +228,7 @@
   </div>
 </div>
 @endif
-<script>
+<!-- <script>
   document.addEventListener('DOMContentLoaded', function () {
     const orgSelect = document.getElementById('inputOrganization');
     const payBtnWrapper = document.getElementById('payOnlineWrapper');
@@ -245,9 +253,89 @@
       togglePayButton(this.value);
     });
   });
-</script>
+</script> -->
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const unpaidList = document.getElementById('onlineUnpaidEventsList');
+  const selectAll = document.getElementById('selectAllOnlineEvents');
+  const totalInput = document.getElementById('paymentAmount');
+  const summary = document.getElementById('onlineSelectionSummary');
+  const selectedInput = document.getElementById('selectedOnlineEvents');
+
+  // When modal opens
+  const modal = document.getElementById('onlinePaymentModal');
+  modal.addEventListener('show.bs.modal', () => {
+    const studentId = '{{ $student->student_id }}';
+    unpaidList.innerHTML = '<p class="text-muted">Loading unpaid events...</p>';
+    totalInput.value = 0;
+    summary.style.display = 'none';
+    selectAll.checked = false;
+
+    fetch(`/student/${studentId}/unpaid-events`)
+      .then(res => res.json())
+      .then(events => {
+        unpaidList.innerHTML = '';
+
+        if (events.length === 0) {
+          unpaidList.innerHTML = '<p class="text-muted">No unpaid events found.</p>';
+          return;
+        }
+
+        events.forEach(event => {
+          const div = document.createElement('div');
+          div.classList.add('form-check', 'mb-1');
+
+          div.innerHTML = `
+            <input class="form-check-input online-event-checkbox" type="checkbox"
+                   value="${event.id}" data-amount="${event.fine_amount}" id="online-event-${event.id}">
+            <label class="form-check-label" for="online-event-${event.id}">
+              <strong>${event.name}</strong> (${event.event_date}) 
+              <span class="text-muted small">[${event.org}]</span> – 
+              ₱${parseFloat(event.fine_amount).toFixed(2)}
+            </label>
+          `;
+          unpaidList.appendChild(div);
+        });
+
+        // Attach listeners to update total
+        document.querySelectorAll('.online-event-checkbox').forEach(cb => {
+          cb.addEventListener('change', updateTotal);
+        });
+      });
+  });
+
+  // Select All Checkbox
+  selectAll.addEventListener('change', function () {
+    document.querySelectorAll('.online-event-checkbox').forEach(cb => cb.checked = this.checked);
+    updateTotal();
+  });
+
+  // Function to update total and summary
+  function updateTotal() {
+    const selectedCheckboxes = document.querySelectorAll('.online-event-checkbox:checked');
+    let total = 0;
+    let selectedEventIds = [];
+
+    selectedCheckboxes.forEach(cb => {
+      total += parseFloat(cb.getAttribute('data-amount'));
+      selectedEventIds.push(cb.value);
+    });
+
+    totalInput.value = total.toFixed(2);
+    selectedInput.value = JSON.stringify(selectedEventIds);
+
+    if (selectedCheckboxes.length > 0) {
+      summary.style.display = 'block';
+      summary.textContent = `${selectedCheckboxes.length} event${selectedCheckboxes.length > 1 ? 's' : ''} selected – ₱${total.toFixed(2)} total`;
+    } else {
+      summary.style.display = 'none';
+    }
+  }
+});
+</script>
 
 @if(session('success'))
 <script>

@@ -209,7 +209,8 @@
       @csrf
       <input type="hidden" name="student_id" id="paymentStudentId">
       <input type="hidden" name="org" id="paymentOrg">
-      
+      <input type="hidden" name="selected_events" id="selectedEvents">
+
       <div class="modal-content">
         <div class="modal-header bg-success text-white">
           <h5 class="modal-title" id="paymentModalLabel">Payment Details</h5>
@@ -218,20 +219,29 @@
         
         <div class="modal-body px-4">
 
-          <!-- Unpaid Events Dropdown -->
-          <div class="row">
-            <div class="col-md-12 mb-3">
-              <label for="event_id" class="form-label">Event <span class="text-danger">*</span></label>
-               <select name="event_id" id="event_id" class="form-select" required>
-      <option value="">-- Select Event with Unpaid Fine --</option>
-    </select>
+          <!-- ✅ Unpaid Events Checklist -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Unpaid Events</label>
+            <div id="unpaidEventsList" class="border rounded p-2" style="max-height: 250px; overflow-y: auto;">
+              <p class="text-muted">Loading unpaid events...</p>
+            </div>
+
+            <!-- Pay All Option -->
+            <div class="form-check mt-2">
+              <input type="checkbox" class="form-check-input" id="selectAllEvents">
+              <label class="form-check-label" for="selectAllEvents">Pay all events</label>
+            </div>
+
+            <!-- ✅ Live Summary -->
+            <div id="selectionSummary" class="mt-2 fw-semibold text-success" style="display:none;">
+              0 events selected – ₱0.00 total
             </div>
           </div>
 
           <!-- Amount and OR Number -->
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
+              <label for="amount" class="form-label">Total Amount <span class="text-danger">*</span></label>
               <input type="number" step="0.01" min="1" class="form-control" id="amount" name="amount" readonly required>
             </div>
             <div class="col-md-6 mb-3">
@@ -247,6 +257,7 @@
               <input type="date" class="form-control" id="payment_date" name="payment_date" value="{{ date('Y-m-d') }}" required>
             </div>
           </div>
+
         </div>
         
         <div class="modal-footer px-4">
@@ -286,8 +297,11 @@
 @endif
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  const eventSelect = document.getElementById('event_id');
+  const unpaidEventsList = document.getElementById('unpaidEventsList');
+  const selectAllCheckbox = document.getElementById('selectAllEvents');
   const amountInput = document.getElementById('amount');
+  const selectedEventsInput = document.getElementById('selectedEvents');
+  const summary = document.getElementById('selectionSummary');
 
   // When clicking Pay button
   document.querySelectorAll('.pay-btn').forEach(button => {
@@ -295,35 +309,75 @@ document.addEventListener('DOMContentLoaded', function () {
       const studentId = this.getAttribute('data-student-id');
       const org = this.getAttribute('data-org');
 
-      // Fill hidden inputs
       document.getElementById('paymentStudentId').value = studentId;
       document.getElementById('paymentOrg').value = org;
 
-      // Clear dropdown
-      eventSelect.innerHTML = '<option value="">-- Select Event with Unpaid Fine --</option>';
-      amountInput.value = '';
+      unpaidEventsList.innerHTML = '<p class="text-muted">Loading unpaid events...</p>';
+      amountInput.value = 0;
+      summary.style.display = 'none';
+      summary.textContent = '';
+      selectAllCheckbox.checked = false;
 
       // Fetch unpaid events
       fetch(`/students/${studentId}/unpaid-events`)
         .then(response => response.json())
         .then(events => {
+          unpaidEventsList.innerHTML = '';
+
+          if (events.length === 0) {
+            unpaidEventsList.innerHTML = '<p class="text-muted">No unpaid events found.</p>';
+            return;
+          }
+
           events.forEach(event => {
-            const option = document.createElement('option');
-            option.value = event.id;
-            option.setAttribute('data-amount', event.fine_amount);
-            option.textContent = `${event.name} (${event.event_date}) - ₱${parseFloat(event.fine_amount).toFixed(2)}`;
-            eventSelect.appendChild(option);
+            const div = document.createElement('div');
+            div.classList.add('form-check', 'mb-1');
+
+            div.innerHTML = `
+              <input class="form-check-input event-checkbox" type="checkbox" value="${event.id}" data-amount="${event.fine_amount}" id="event-${event.id}">
+              <label class="form-check-label" for="event-${event.id}">
+                ${event.name} (${event.event_date}) – ₱${parseFloat(event.fine_amount).toFixed(2)}
+              </label>
+            `;
+            unpaidEventsList.appendChild(div);
+          });
+
+          // Attach listeners to each checkbox
+          document.querySelectorAll('.event-checkbox').forEach(cb => {
+            cb.addEventListener('change', updateTotal);
           });
         });
     });
   });
 
-  // Auto-fill amount when event selected
-  eventSelect.addEventListener('change', function () {
-    const selectedOption = this.options[this.selectedIndex];
-    const fineAmount = selectedOption.getAttribute('data-amount');
-    amountInput.value = fineAmount ? fineAmount : '';
+  // Handle Select All
+  selectAllCheckbox.addEventListener('change', function () {
+    const allCheckboxes = document.querySelectorAll('.event-checkbox');
+    allCheckboxes.forEach(cb => cb.checked = this.checked);
+    updateTotal();
   });
+
+  // Function to update total and summary
+  function updateTotal() {
+    const selectedCheckboxes = document.querySelectorAll('.event-checkbox:checked');
+    let total = 0;
+    let selectedEventIds = [];
+
+    selectedCheckboxes.forEach(cb => {
+      total += parseFloat(cb.getAttribute('data-amount'));
+      selectedEventIds.push(cb.value);
+    });
+
+    amountInput.value = total.toFixed(2);
+    selectedEventsInput.value = JSON.stringify(selectedEventIds);
+
+    if (selectedCheckboxes.length > 0) {
+      summary.style.display = 'block';
+      summary.textContent = `${selectedCheckboxes.length} event${selectedCheckboxes.length > 1 ? 's' : ''} selected – ₱${total.toFixed(2)} total`;
+    } else {
+      summary.style.display = 'none';
+    }
+  }
 });
 </script>
 <!-- Bootstrap JS -->

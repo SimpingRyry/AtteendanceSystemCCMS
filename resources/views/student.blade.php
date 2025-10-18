@@ -345,9 +345,9 @@
               </div>
               <input type="hidden" name="fingerprint_data" id="fingerprintData">
               <input type="hidden" name="fingerprint_user_id" id="fingerprintUserId">
-              <div class="mt-2 text-center">
+              <!-- <div class="mt-2 text-center">
                 <span id="enrollmentStatusBadge" class="badge bg-secondary">Checking status...</span>
-              </div>
+              </div> -->
             </div>
 
             <!-- Right: Student Info -->

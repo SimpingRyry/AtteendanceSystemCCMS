@@ -216,7 +216,7 @@ public function store(Request $request)
 public function storeOne(Request $request)
 {
     $request->validate([
-        'id_number' => 'required|unique:students,id_number',
+        'id_number' => 'required|unique:student_list,id_number',
         'name' => 'required|string',
         'gender' => 'required|string',
         'course' => 'required|string',
