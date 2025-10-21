@@ -87,11 +87,9 @@
             <tr>
               <th>Date</th>
               <th>Event</th>
-              <th>Organization</th> <!-- ✅ Added organization column -->
+              <th>Organization</th>
               <th>Transaction</th>
-              <th>Debit</th>
-              <th>Credit</th>
-              <th>Balance</th>
+              <th>Amount</th>
               <th>OR/Reference No.</th>
             </tr>
           </thead>
@@ -100,33 +98,36 @@
 
             @forelse ($transactionsGrouped as $acadCode => $transactions)
               <tr>
-                <td colspan="8" class="table-primary fw-bold">
+                <td colspan="6" class="table-primary fw-bold">
                   Academic Code: {{ $acadCode }}
                 </td>
               </tr>
 
-              @php $balance = 0; @endphp
               @foreach ($transactions as $transaction)
                 @php
-                  $debit = $transaction->transaction_type === 'FINE' ? $transaction->fine_amount : 0;
-                  $credit = $transaction->transaction_type === 'PAYMENT' ? $transaction->fine_amount : 0;
-                  $balance += ($debit - $credit);
-                  $grandTotal += ($debit - $credit);
+                  $amount = $transaction->fine_amount;
+                  if ($transaction->transaction_type === 'FINE') {
+                      $grandTotal += $amount;
+                      $sign = '+';
+                      $color = 'text-danger';
+                  } else {
+                      $grandTotal -= $amount;
+                      $sign = '-';
+                      $color = 'text-success';
+                  }
                 @endphp
                 <tr>
                   <td>{{ \Carbon\Carbon::parse($transaction->date)->format('M d, Y') }}</td>
                   <td>{{ $transaction->event }}</td>
-                  <td>{{ $transaction->org ?? '-' }}</td> <!-- ✅ Display org -->
+                  <td>{{ $transaction->org ?? '-' }}</td>
                   <td>{{ $transaction->transaction_type }}</td>
-                  <td>{{ $debit > 0 ? number_format($debit, 2) : '-' }}</td>
-                  <td>{{ $credit > 0 ? number_format($credit, 2) : '-' }}</td>
-                  <td>{{ number_format($balance, 2) }}</td>
+                  <td class="{{ $color }}">{{ $sign }}{{ number_format($amount, 2) }}</td>
                   <td>{{ $transaction->or_num ?? '-' }}</td>
                 </tr>
               @endforeach
             @empty
               <tr>
-                <td colspan="8" class="text-center text-muted">No transactions found for the selected filter.</td>
+                <td colspan="6" class="text-center text-muted">No transactions found for the selected filter.</td>
               </tr>
             @endforelse
           </tbody>
@@ -137,7 +138,7 @@
         Total Remaining Balance: <span id="totalBalance">{{ number_format($grandTotal, 2) }}</span>
       </div>
 
-      <!-- Pay Online Button (optional — kept static) -->
+      <!-- Pay Online Button -->
       <div class="mt-4" id="payOnlineWrapper">
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#onlinePaymentModal">
           <i class="fas fa-wallet me-1"></i> Pay Online
@@ -146,6 +147,8 @@
     </div>
   </div>
 </main>
+
+
 
 <div class="modal fade" id="onlinePaymentModal" tabindex="-1" aria-labelledby="onlinePaymentModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
