@@ -62,8 +62,10 @@ public function studentindex()
     $completedEvents = Attendance::where('student_id', $studentId)->count();
 
     // Upcoming events count
-    $upcomingEventsCount = Event::where('event_date', '>', now())->count();
-
+$upcomingEventsCount = Event::where('event_date', '>', now())
+    ->select('name', 'venue', 'org')
+    ->distinct()
+    ->count();
     // Attendance breakdown
     $attended = Attendance::where('student_id', $studentId)
         ->where(function ($q) {

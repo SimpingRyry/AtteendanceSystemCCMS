@@ -1,43 +1,43 @@
 <p><strong>Student Name:</strong> {{ $student->name }}</p>
 <p><strong>Student ID:</strong> {{ $student->student_id }}</p>
 <p><strong>Course & Section:</strong> {{ $studentSection }}</p>
-
 <table class="table table-bordered mt-3">
   <thead class="table-light">
     <tr>
-            <th>Event</th>
-
+      <th>Event</th>
       <th>Date</th>
       <th>Transaction</th>
-      <th>Debit</th>
-      <th>Credit</th>
-      <th>Balance</th>
+      <th>Amount</th>
     </tr>
   </thead>
   <tbody>
     @php $grandTotal = 0; @endphp
+
     @foreach ($transactionsGrouped as $acadCode => $transactions)
       <tr>
-        <td colspan="6" class="table-primary fw-bold">
+        <td colspan="4" class="table-primary fw-bold">
           Term: {{ $transactions->first()->acad_term }} | Code: {{ $acadCode }}
         </td>
       </tr>
-      @php $balance = 0; @endphp
+
       @foreach ($transactions as $transaction)
         @php
-          $debit = $transaction->transaction_type === 'FINE' ? $transaction->fine_amount : 0;
-          $credit = $transaction->transaction_type === 'PAYMENT' ? $transaction->fine_amount : 0;
-          $balance += ($debit - $credit);
-          $grandTotal += ($debit - $credit);
+          $amount = $transaction->fine_amount;
+          if ($transaction->transaction_type === 'FINE') {
+              $grandTotal += $amount;
+              $sign = '+';
+              $color = 'text-danger';
+          } else {
+              $grandTotal -= $amount;
+              $sign = '-';
+              $color = 'text-success';
+          }
         @endphp
         <tr>
-                    <td>{{ $transaction->event }}</td>
-
+          <td>{{ $transaction->event }}</td>
           <td>{{ \Carbon\Carbon::parse($transaction->date)->format('M d, Y') }}</td>
           <td>{{ $transaction->transaction_type }}</td>
-          <td>{{ $debit > 0 ? number_format($debit, 2) : '-' }}</td>
-          <td>{{ $credit > 0 ? number_format($credit, 2) : '-' }}</td>
-          <td>{{ number_format($balance, 2) }}</td>
+          <td class="{{ $color }}">{{ $sign }}{{ number_format($amount, 2) }}</td>
         </tr>
       @endforeach
     @endforeach

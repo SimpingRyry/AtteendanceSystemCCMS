@@ -6,13 +6,14 @@ use App\Models\User;
 use App\Models\Course;
 use App\Models\OrgList;
 use App\Models\Setting;
+use App\Models\Student;
 use App\Models\FineSetting;
 use App\Models\DeliveryUnit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 
 class OrgListController extends Controller
@@ -52,6 +53,7 @@ public function store(Request $request)
             'description'       => 'required|string',
             'org_logo'          => 'required|image|mimes:jpeg,png,jpg,gif,svg',
             'bg_image'          => 'required|image|mimes:jpeg,png,jpg,gif,svg',
+            'student_csv'       => 'nullable|file|mimes:csv,txt',
 
             'adviser_name'      => 'nullable|string|max:255',
             'adviser_email'     => 'nullable|string|email|max:255|unique:users,email',
@@ -81,6 +83,7 @@ public function store(Request $request)
             'bg_image'    => $bgImageName,
         ]);
 
+        // default fine settings
         FineSetting::firstOrCreate(
             ['org' => $organization->org_name],
             [
@@ -88,11 +91,11 @@ public function store(Request $request)
                 'late_member'          => 20,
                 'absent_officer'       => 100,
                 'late_officer'         => 40,
-                'grace_period_minutes' => 15,      
+                'grace_period_minutes' => 15,
                 'morning_in'      => '08:00:00',
-        'morning_out'     => '12:00:00',
-        'afternoon_in'    => '13:00:00',
-        'afternoon_out'   => '17:00:00',
+                'morning_out'     => '12:00:00',
+                'afternoon_in'    => '13:00:00',
+                'afternoon_out'   => '17:00:00',
             ]
         );
 
@@ -122,22 +125,106 @@ public function store(Request $request)
             event(new Registered($president));
         }
 
+        // ✅ Integrated CSV import process (with email support)
+        if ($request->hasFile('student_csv')) {
+            $file = $request->file('student_csv');
+            $path = $file->getRealPath();
+
+            $rows = array_map('str_getcsv', file($path));
+            $rows = array_slice($rows, 7); // Skip first 7 lines
+
+            $studentsUpdated = 0;
+            $studentsAdded = 0;
+
+            foreach ($rows as $index => $row) {
+                // Skip if row is completely empty
+                if (empty(array_filter($row))) continue;
+
+                // Safely handle birth date
+                $birthDate = null;
+                if (!empty($row[9])) {
+                    try {
+                        $birthDate = \Carbon\Carbon::createFromFormat('m/d/Y', $row[9])->format('Y-m-d');
+                    } catch (\Exception $e) {
+                        $birthDate = null;
+                    }
+                }
+
+                // Find existing student by ID number and org
+                $student = Student::where('id_number', $row[1] ?? null)
+                                  ->where('org', $organization->org_name)
+                                  ->first();
+
+                if ($student) {
+                    // Update only changed fields
+                    $changes = [
+                        'no'         => $row[0] ?? null,
+                        'name'       => $row[2] ?? null,
+                        'gender'     => $row[3] ?? null,
+                        'course'     => $row[4] ?? null,
+                        'year'       => $row[5] ?? null,
+                        'units'      => $row[6] ?? null,
+                        'section'    => $row[7] ?? null,
+                        'contact_no' => $row[8] ?? null,
+                        'birth_date' => $birthDate,
+                        'address'    => $row[10] ?? null,
+                        'email'      => !empty($row[11]) ? $row[11] : null,
+                    ];
+
+                    $hasChanges = false;
+                    foreach ($changes as $key => $value) {
+                        if ($student->$key != $value) {
+                            $student->$key = $value;
+                            $hasChanges = true;
+                        }
+                    }
+
+                    if ($hasChanges) {
+                        $student->save();
+                        $studentsUpdated++;
+                    }
+                } else {
+                    // Create new student
+                    Student::create([
+                        'no'         => $row[0] ?? null,
+                        'id_number'  => $row[1] ?? null,
+                        'name'       => $row[2] ?? null,
+                        'gender'     => $row[3] ?? null,
+                        'course'     => $row[4] ?? null,
+                        'year'       => $row[5] ?? null,
+                        'units'      => $row[6] ?? null,
+                        'section'    => $row[7] ?? null,
+                        'contact_no' => $row[8] ?? null,
+                        'birth_date' => $birthDate,
+                        'address'    => $row[10] ?? null,
+                        'email'      => !empty($row[11]) ? $row[11] : null,
+                        'status'     => 'Unregistered',
+                        'org'        => $organization->org_name,
+                    ]);
+                    $studentsAdded++;
+                }
+            }
+        }
+
         return redirect()->back()->with(
             'success',
-            'Organization "' . $organization->org_name . '" and accounts created successfully. Default fine settings applied.'
+            'Organization "' . $organization->org_name . '" created successfully. ' .
+            ($studentsAdded + $studentsUpdated > 0
+                ? "$studentsAdded students added, $studentsUpdated updated."
+                : 'No student data imported.') .
+            ' Default fine settings applied.'
         );
 
     } catch (\Exception $e) {
-        // Log the error for debugging
-        Log::error('Error creating organization: '.$e->getMessage());
-
-        // Redirect back with error message
+        Log::error('Error creating organization: ' . $e->getMessage());
         return redirect()->back()->withInput()->with(
             'error',
-            'An error occurred while creating the organization: '.$e->getMessage()
+            'An error occurred while creating the organization: ' . $e->getMessage()
         );
     }
 }
+
+
 
     // ✅ Update an existing organization
     public function update(Request $request, $id)

@@ -193,6 +193,7 @@ public function preview(Request $request)
             'contact_no' => trim($row[8] ?? ''),
             'birth_date' => $birthDateFormatted,
             'address'    => trim($row[10] ?? ''),
+            'email'      => trim($row[11] ?? ''), // ✅ Added email column
         ];
 
         if (!$existingStudent) {
@@ -217,8 +218,6 @@ public function preview(Request $request)
 
             if (!empty($differences)) {
                 $rowData['status'] = 'Updated';
-
-                // Log the differences
                 Log::info("Student {$idNumber} has updates:", $differences);
             } else {
                 $rowData['status'] = 'Duplicate';
@@ -251,7 +250,6 @@ public function confirmImport()
 
         $student = Student::where('id_number', $row['id_number'])->first();
 
-        // ✅ Ensure safe birth_date
         $birthDate = !empty($row['birth_date']) ? $row['birth_date'] : null;
 
         if (!$student) {
@@ -265,8 +263,9 @@ public function confirmImport()
                 'units'      => $row['units'],
                 'section'    => $row['section'],
                 'contact_no' => $row['contact_no'],
-                'birth_date' => $birthDate, // ✅ safe
+                'birth_date' => $birthDate,
                 'address'    => $row['address'],
+                'email'      => $row['email'], // ✅ Added email
                 'status'     => 'Unregistered',
             ]);
             $imported++;
@@ -279,8 +278,9 @@ public function confirmImport()
                 'units'      => $row['units'],
                 'section'    => $row['section'],
                 'contact_no' => $row['contact_no'],
-                'birth_date' => $birthDate, // ✅ safe
+                'birth_date' => $birthDate,
                 'address'    => $row['address'],
+                'email'      => $row['email'], // ✅ Update email too
             ]);
             $updated++;
         } else {

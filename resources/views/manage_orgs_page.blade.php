@@ -228,21 +228,34 @@
                     <!-- Step 1 -->
                     <div class="form-step step-1">
                         <h5>Step 1: Organization Information</h5>
+
                         <div class="mb-3">
                             <label class="form-label">Organization Name <span class="text-danger">*</span></label>
                             <input type="text" name="org_name" class="form-control" required>
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Description <span class="text-danger">*</span></label>
                             <textarea name="description" class="form-control" rows="3" required></textarea>
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Organization Logo <span class="text-danger">*</span></label>
                             <input type="file" name="org_logo" class="form-control" accept="image/*" required>
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Background Image <span class="text-danger">*</span></label>
                             <input type="file" name="bg_image" class="form-control" accept="image/*" required>
+                        </div>
+
+                        <!-- 🆕 Import Student List -->
+                        <div class="mb-3">
+                            <label class="form-label">Import Student List (CSV) <small class="text-muted">(Optional)</small></label>
+                            <input type="file" name="student_csv" class="form-control" accept=".csv">
+                            <small class="text-muted">
+                                Upload a CSV file: 
+                            </small>
                         </div>
                     </div>
 
@@ -257,15 +270,16 @@
                             <label class="form-label">Email</label>
                             <input type="email" name="adviser_email" class="form-control">
                         </div>
-                       <div class="mb-3">
-  <label class="form-label">Password</label>
-  <div class="input-group">
-    <input type="password" name="adviser_password" class="form-control" id="adviserPassword">
-    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('adviserPassword', this)">
-      <i class="bi bi-eye"></i>
-    </button>
-  </div>
-</div>             </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" name="adviser_password" class="form-control" id="adviserPassword">
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('adviserPassword', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Step 3 -->
                     <div class="form-step step-3 d-none">
@@ -283,15 +297,15 @@
                                 <label class="form-label">Email</label>
                                 <input type="email" name="president_email" class="form-control">
                             </div>
-                           <div class="mb-3">
-  <label class="form-label">Password</label>
-  <div class="input-group">
-    <input type="password" name="president_password" class="form-control" id="presidentPassword">
-    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('presidentPassword', this)">
-      <i class="bi bi-eye"></i>
-    </button>
-  </div>
-</div>
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <div class="input-group">
+                                    <input type="password" name="president_password" class="form-control" id="presidentPassword">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('presidentPassword', this)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -305,6 +319,7 @@
                             <li class="list-group-item"><strong>President:</strong> <span id="confirmPresidentName"></span></li>
                         </ul>
                     </div>
+
                 </div>
 
                 <div class="modal-footer">

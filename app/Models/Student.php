@@ -28,7 +28,9 @@ class Student extends Model
         'birth_date', 
         'address',
         'status',
-        'f_id'
+        'f_id',
+        'email',
+        'org'
     ];
 
 }

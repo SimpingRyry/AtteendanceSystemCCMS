@@ -86,7 +86,7 @@
           <thead class="table-light">
             <tr>
               <th>Date</th>
-              <th>Event</th>
+              <th>Event/Reason</th>
               <th>Organization</th>
               <th>Transaction</th>
               <th>Amount</th>
