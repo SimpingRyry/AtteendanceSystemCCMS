@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\OrgList;
@@ -9,7 +10,9 @@ use App\Models\Setting;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Mail\BiometricScheduleMail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class ScheduleController extends Controller
 {
@@ -45,10 +48,11 @@ class ScheduleController extends Controller
     }
 public function generateBiometricsSchedule(Request $request)
 {
+    // ✅ Parse start and end dates
     $startDate = Carbon::parse($request->input('start_date'));
     $endDate = Carbon::parse($request->input('end_date'));
 
-    // Retrieve only unregistered students and clean names
+    // ✅ Retrieve unregistered students and clean names
     $students = Student::where('status', 'Unregistered')
         ->orderBy('name')
         ->get()
@@ -58,35 +62,26 @@ public function generateBiometricsSchedule(Request $request)
             return $student;
         });
 
-    // Chunk students into groups of 10 (10 per day)
+    // ✅ Group students (10 per day)
     $chunks = $students->chunk(10);
 
-    // Limit the date range based on number of student chunks
+    // ✅ Build date range based on chunk count
     $dateRange = [];
     $maxDaysNeeded = $chunks->count();
-
     $currentDate = $startDate->copy();
+
     while ($currentDate->lte($endDate) && count($dateRange) < $maxDaysNeeded) {
         $dateRange[] = $currentDate->copy();
         $currentDate->addDay();
     }
 
-    // Build paged chunks for the view
-    $pagedChunks = [];
-    foreach ($dateRange as $index => $date) {
-        $pagedChunks[] = [
-            'date' => $date->format('F d, Y'),
-            'students' => $chunks[$index] ?? collect(),
-        ];
-    }
-
-    // ✅ Get authenticated user org and fetch the logo + org name
+    // ✅ Get authenticated user + organization info
     $authUser = Auth::user();
     $orgList = OrgList::where('org_name', $authUser->org)->first();
     $orgLogo = $orgList?->org_logo ?? 'default-logo.png';
     $orgName = $orgList?->org_name ?? 'Organization Name';
 
-    // ✅ Get current academic term and extract year range
+    // ✅ Get current academic term
     $academicTermRecord = Setting::where('key', 'academic_term')->first();
     $activeTerm = $academicTermRecord?->value ?? null;
 
@@ -96,7 +91,7 @@ public function generateBiometricsSchedule(Request $request)
         $activeYearRange = $matches[1] ?? null;
     }
 
-    // ✅ Find current President (Officer) of the org whose term matches
+    // ✅ Find current President based on matching term
     $president = null;
     if ($activeYearRange) {
         $president = User::where('org', $authUser->org)
@@ -108,17 +103,41 @@ public function generateBiometricsSchedule(Request $request)
             });
     }
 
-    // Generate PDF with passed data
+    // ✅ Build paged chunks for the view and send emails
+    $pagedChunks = [];
+
+    foreach ($dateRange as $index => $date) {
+        $studentsForTheDay = $chunks[$index] ?? collect();
+
+        $pagedChunks[] = [
+            'date' => $date->format('F d, Y'),
+            'students' => $studentsForTheDay,
+        ];
+
+        // ✅ Send custom email notification for each student
+        foreach ($studentsForTheDay as $student) {
+            if (!empty($student->email)) {
+                try {
+                    Mail::to($student->email)->send(
+                        new BiometricScheduleMail($student, $date, $orgName)
+                    );
+                } catch (\Exception $e) {
+                    Log::error("Failed to send biometric schedule email to {$student->email}: " . $e->getMessage());
+                }
+            }
+        }
+    }
+
+    // ✅ Generate PDF with schedule summary
     $pdf = Pdf::loadView('biometrics_schedule', [
         'title' => 'Biometric Registration Schedule',
         'pagedChunks' => $pagedChunks,
         'orgLogo' => $orgLogo,
         'orgName' => $orgName,
-        'president' => $president, // ✅ pass president with matched term
+        'president' => $president,
     ]);
 
     return $pdf->stream('biometrics_schedule.pdf');
 }
-
 
 }

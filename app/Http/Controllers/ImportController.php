@@ -241,6 +241,8 @@ public function confirmImport()
     $skipped = 0;
     $updated = 0;
 
+    $userOrg = auth()->user()->org ?? null; // ✅ Get authenticated user's org
+
     foreach ($previewData as $row) {
         // ✅ Skip if row is completely empty or missing ID
         if (empty(array_filter($row)) || empty($row['id_number'])) {
@@ -266,6 +268,7 @@ public function confirmImport()
                 'birth_date' => $birthDate,
                 'address'    => $row['address'],
                 'email'      => $row['email'], // ✅ Added email
+                'org'        => $userOrg, // ✅ Use auth user org
                 'status'     => 'Unregistered',
             ]);
             $imported++;
@@ -281,6 +284,7 @@ public function confirmImport()
                 'birth_date' => $birthDate,
                 'address'    => $row['address'],
                 'email'      => $row['email'], // ✅ Update email too
+                'org'        => $userOrg, // ✅ Update org as well (optional)
             ]);
             $updated++;
         } else {
@@ -300,6 +304,7 @@ public function confirmImport()
 
     return redirect()->back()->with('success', "Students imported: $imported, updated: $updated, skipped: $skipped");
 }
+
 
 
 }

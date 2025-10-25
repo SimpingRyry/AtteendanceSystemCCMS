@@ -139,27 +139,28 @@
       @if($students->isEmpty())
       <p class="text-muted">No students found.</p>
       @else
-      <div class="table-responsive">
-        <table class="table table-hover align-middle" id="studentTable">
-          <thead class="table-light">
-            <tr>
-              <th>No</th>
-              <th>Student ID</th>
-              <th>Name</th>
-              <th>Sex</th>
-              <th>Program</th>
-              <th>Year</th>
-              <th>Units</th>
-              <th>Section</th>
-              <th>Contact</th>
-              <th>Birth Date</th>
-              <th>Address</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-         <tbody>
-    @foreach($students as $student)
-    <tr>
+   <div class="table-responsive">
+  <table class="table table-hover align-middle table-sm text-nowrap" id="studentTable">
+    <thead class="table-light">
+      <tr class="text-center align-middle">
+        <th style="width: 40px;">No</th>
+        <th style="min-width: 90px;">Student ID</th>
+        <th style="min-width: 150px;">Name</th>
+        <th style="width: 50px;">Sex</th>
+        <th style="min-width: 110px;">Program</th>
+        <th style="width: 60px;">Year</th>
+        <th style="width: 60px;">Units</th>
+        <th style="min-width: 90px;">Section</th>
+        <th style="min-width: 100px;">Contact</th>
+        <th style="min-width: 160px;">Email</th>
+        <th style="min-width: 120px;">Birth Date</th>
+        <th style="min-width: 150px;">Address</th>
+        <th style="width: 80px;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach($students as $student)
+      <tr>
         <td>{{ $loop->iteration }}</td>
         <td>{{ $student->id_number }}</td>
         <td>{{ $student->name }}</td>
@@ -169,24 +170,25 @@
         <td>{{ $student->units }}</td>
         <td>{{ $student->section }}</td>
         <td>{{ $student->contact_no }}</td>
+        <td class="text-truncate" style="max-width: 180px;">{{ $student->email }}</td>
         <td>{{ $student->birth_date }}</td>
-        <td>{{ $student->address }}</td>
-        <td>
-            @if($student->status === 'Unregistered')
-                @if(!(auth()->user()->role === 'OSSD' || auth()->user()->role === 'Super Admin'))
-                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
-                @else
-                    <span class="badge bg-warning">Unregistered</span>
-                @endif
+        <td class="text-truncate" style="max-width: 200px;">{{ $student->address }}</td>
+        <td class="text-center">
+          @if($student->status === 'Unregistered')
+            @if(!(auth()->user()->role === 'OSSD' || auth()->user()->role === 'Super Admin'))
+              <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#registerStudentModal" onclick="fillModalData(this)">Register</button>
             @else
-                <span class="badge bg-success">Registered</span>
+              <span class="badge bg-warning">Unregistered</span>
             @endif
+          @else
+            <span class="badge bg-success">Registered</span>
+          @endif
         </td>
-    </tr>
-    @endforeach
-</tbody>
-        </table>
-      </div>
+      </tr>
+      @endforeach
+    </tbody>
+  </table>
+</div>
       @endif
 
      <div class="d-flex justify-content-end mt-3">
@@ -399,10 +401,10 @@
                     <label class="form-label">Address</label>
                     <input type="text" class="form-control" id="modalAddress" value="${data.address}" readonly>
                   </div>
-                  <div class="col-12">
-                    <label class="form-label">Email <span class="text-danger">*</span></label>
-                    <input type="email" name="email" class="form-control" placeholder="Enter Email" required>
-                  </div>
+              <div class="col-12">
+  <label class="form-label">Email <span class="text-danger">*</span></label>
+  <input type="email" name="email" id="modalEmail" class="form-control" placeholder="Enter Email" required>
+</div>
                 </div>
               </div>
 
@@ -617,7 +619,7 @@ function showUpload() {
     <table class="table table-bordered">
       <thead>
         <tr>
-          <th>ID</th><th>Name</th><th>Course</th><th>Year</th><th>Units</th><th>Section</th><th>Contact</th><th>Status</th>
+          <th>ID</th><th>Name</th><th>Course</th><th>Year</th><th>Units</th><th>Section</th><th>Contact</th><th>Email</th><th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -630,6 +632,8 @@ function showUpload() {
           <td>{{ $row['units'] }}</td>
           <td>{{ $row['section'] }}</td>
           <td>{{ $row['contact_no'] }}</td>
+                    <td>{{ $row['email'] }}</td>
+
           <td>
             <span class="badge 
               {{ $row['status'] == 'New' ? 'bg-success' : 
@@ -947,13 +951,9 @@ function applySearchFilter() {
 
 <script>
 function fillModalData(button) {
-    // Find the row (`<tr>`) that contains the clicked button
     var row = button.closest('tr');
-
-    // Get all cells (`<td>`) in that row
     var cells = row.getElementsByTagName('td');
 
-    // Now fill the modal inputs
     document.getElementById('modalStudentId').value = cells[1].innerText.trim();
     document.getElementById('modalStudentName').value = cells[2].innerText.trim();
     document.getElementById('modalGender').value = cells[3].innerText.trim();
@@ -961,8 +961,9 @@ function fillModalData(button) {
     document.getElementById('modalYear').value = cells[5].innerText.trim();
     document.getElementById('modalSection').value = cells[7].innerText.trim();
     document.getElementById('modalContactNumber').value = cells[8].innerText.trim();
-    document.getElementById('modalBirthDate').value = cells[9].innerText.trim();
-    document.getElementById('modalAddress').value = cells[10].innerText.trim();
+    document.getElementById('modalEmail').value = cells[9].innerText.trim();
+    document.getElementById('modalBirthDate').value = cells[10].innerText.trim();
+    document.getElementById('modalAddress').value = cells[11].innerText.trim();
 }
 </script>
 
