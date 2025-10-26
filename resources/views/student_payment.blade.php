@@ -120,7 +120,7 @@
                   <td>{{ \Carbon\Carbon::parse($transaction->date)->format('M d, Y') }}</td>
                   <td>{{ $transaction->event }}</td>
                   <td>{{ $transaction->org ?? '-' }}</td>
-                  <td>{{ $transaction->transaction_type }}</td>
+                  <td>{{ $transaction->transaction_type === 'FINE' ? 'FEE' : $transaction->transaction_type }}</td>
                   <td class="{{ $color }}">{{ $sign }}{{ number_format($amount, 2) }}</td>
                   <td>{{ $transaction->or_num ?? '-' }}</td>
                 </tr>

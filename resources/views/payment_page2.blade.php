@@ -77,65 +77,63 @@
         <small style="color: #444444;">Payment</small>
       </div>
 
-      <!-- Filter Toggle Button -->
-
       <!-- Filter Cloud -->
       <div class="row align-items-center mb-3">
-  <div class="col-md-12 d-flex justify-content-end align-items-end gap-2">
+        <div class="col-md-12 d-flex justify-content-end align-items-end gap-2">
 
-    <!-- Filter Button + Cloud -->
-    <div style="position: relative;">
-      <button class="btn btn-outline-secondary" onclick="toggleFilterCloud()" style="border-radius: 6px;">
-        <i class="bi bi-funnel-fill"></i>
-      </button>
+          <!-- Filter Button + Cloud -->
+          <div style="position: relative;">
+            <button class="btn btn-outline-secondary" onclick="toggleFilterCloud()" style="border-radius: 6px;">
+              <i class="bi bi-funnel-fill"></i>
+            </button>
 
-      <!-- Filter Cloud -->
-    <div id="filterCloud" class="shadow p-3 rounded" style="position: absolute; top: 120%; right: 0; background-color: white; border: 1px solid #ddd; border-radius: 12px; display: none; min-width: 270px; z-index: 10;">
-  
-  <!-- Year Level -->
-  <div class="mb-2">
-    <label for="filterYear" class="form-label">Filter by Year Level</label>
-    <select id="filterYear" class="form-select form-select-sm">
-      <option value="">All</option>
-      @foreach($years as $year)
-        <option>{{ $year }}</option>
-      @endforeach
-    </select>
-  </div>
+            <!-- Filter Cloud -->
+            <div id="filterCloud" class="shadow p-3 rounded" style="position: absolute; top: 120%; right: 0; background-color: white; border: 1px solid #ddd; border-radius: 12px; display: none; min-width: 270px; z-index: 10;">
+              
+              <!-- Year Level -->
+              <div class="mb-2">
+                <label for="filterYear" class="form-label">Filter by Year Level</label>
+                <select id="filterYear" class="form-select form-select-sm">
+                  <option value="">All</option>
+                  @foreach($years as $year)
+                    <option>{{ $year }}</option>
+                  @endforeach
+                </select>
+              </div>
 
-  <!-- Section -->
-  <div class="mb-2">
-    <label for="filterCourseSection" class="form-label">Filter by Section</label>
-    <select id="filterCourseSection" class="form-select form-select-sm">
-      <option value="">All</option>
-      @foreach($sections as $section)
-        <option>{{ $section }}</option>
-      @endforeach
-    </select>
-  </div>
+              <!-- Section -->
+              <div class="mb-2">
+                <label for="filterCourseSection" class="form-label">Filter by Section</label>
+                <select id="filterCourseSection" class="form-select form-select-sm">
+                  <option value="">All</option>
+                  @foreach($sections as $section)
+                    <option>{{ $section }}</option>
+                  @endforeach
+                </select>
+              </div>
 
-  <!-- Organization (Only if Super Admin) -->
-  @if(auth()->user()->role === 'Super Admin')
-  <div>
-    <label for="filterOrg" class="form-label">Filter by Organization</label>
-    <select id="filterOrg" class="form-select form-select-sm">
-      <option value="">All</option>
-      @foreach($orgs as $org)
-        <option>{{ $org }}</option>
-      @endforeach
-    </select>
-  </div>
-  @endif
-</div>
-    </div>
+              <!-- Organization (Only if Super Admin) -->
+              @if(auth()->user()->role === 'Super Admin')
+              <div>
+                <label for="filterOrg" class="form-label">Filter by Organization</label>
+                <select id="filterOrg" class="form-select form-select-sm">
+                  <option value="">All</option>
+                  @foreach($orgs as $org)
+                    <option>{{ $org }}</option>
+                  @endforeach
+                </select>
+              </div>
+              @endif
+            </div>
+          </div>
 
-    <!-- Search Input -->
-    <div style="min-width: 250px;">
-      <label class="form-label mb-1">Search</label>
-<input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Enter name or ID..." oninput="applySearchFilter()">
-    </div>
-  </div>
-</div>
+          <!-- Search Input -->
+          <div style="min-width: 250px;">
+            <label class="form-label mb-1">Search</label>
+            <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Enter name or ID..." oninput="applySearchFilter()">
+          </div>
+        </div>
+      </div>
 
       <!-- Student Table -->
       <div class="table-responsive">
@@ -161,13 +159,15 @@
                 <td>{{ $student->org }}</td>
                 <td>₱{{ number_format($balances[$student->student_id] ?? 0, 2) }}</td>
                 <td>
-                <button class="btn btn-success btn-sm pay-btn"
-        data-student-id="{{ $student->student_id }}"
-        data-org="{{ $student->org }}"
-        data-bs-toggle="modal"
-        data-bs-target="#paymentModal">
-  <i class="fas fa-money-bill-wave"></i> Pay
-</button>
+                  <button class="btn btn-success btn-sm pay-btn"
+                          data-student-id="{{ $student->student_id }}"
+                          data-org="{{ $student->org }}"
+                          data-bs-toggle="modal"
+                          data-bs-target="#paymentModal"
+                          @if($student->student_id == auth()->user()->student_id) disabled title="You cannot pay your own balance" @endif>
+                    <i class="fas fa-money-bill-wave"></i> Pay
+                  </button>
+
                   <button class="btn btn-primary btn-sm view-btn"
                           data-student-id="{{ $student->student_id }}"
                           data-bs-toggle="modal"

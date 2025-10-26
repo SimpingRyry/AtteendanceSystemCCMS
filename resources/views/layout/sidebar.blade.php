@@ -1,7 +1,9 @@
 <!-- Offcanvas Sidebar -->
 <div class="offcanvas offcanvas-start sidebar-nav" style="background-color:#232946;" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
     @php
+        use Illuminate\Support\Str;
         $org = Auth::user()->organization;
+        $role = Auth::user()->role;
     @endphp
 
     <!-- Org Logo & Name -->
@@ -92,7 +94,6 @@
                     </a>
                     <div class="collapse show" id="manageMenu">
                         <ul class="navbar-nav ps-3">
-
                              <li>
                                 <a href="{{ url('manage_orgs_page') }}" class="nav-link text-white {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}">
                                     <img src="{{ asset('images/org_ico.png') }}" class="sidebar-icon"> Organization
@@ -108,18 +109,19 @@
                                     <img src="{{ asset('images/instruct_ico.png') }}" class="sidebar-icon"> Advisers
                                 </a>
                             </li>
-                           
-                            
-                           
-
-                             <li><a href="{{ url('officers') }}" class="nav-link text-white {{ request()->is('officers') ? 'active-link' : '' }}"><img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Officers</a></li>
-
+                            <li>
+                                <a href="{{ url('officers') }}" class="nav-link text-white {{ request()->is('officers') ? 'active-link' : '' }}">
+                                    <img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Officers
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </li>
+
                 <li class="mt-3 mb-2">
                     <div class="small fw-bold text-uppercase core-section">SYSTEM SETTINGS</div>
                 </li>
+
                 <li>
                     <a class="nav-link px-3 text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#systemSettings" role="button" aria-expanded="false" aria-controls="systemSettings">
                         <span><img src="{{ asset('images/system.png') }}" class="sidebar-icon me-2">Settings</span>
@@ -156,7 +158,6 @@
                     <div class="small fw-bold text-uppercase core-section">MANAGE</div>
                 </li>
 
-                <!-- Full Manage Collapsible -->
                 <li>
                     <a class="nav-link px-3 text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#manageMenu" role="button" aria-expanded="false" aria-controls="manageMenu">
                         <span>
@@ -164,68 +165,82 @@
                         </span>
                         <i class="bi bi-chevron-down"></i>
                     </a>
+
                     <div class="collapse" id="manageMenu">
                         <ul class="navbar-nav ps-3">
                             <li><a href="{{ url('student') }}" class="nav-link text-white {{ request()->is('student') ? 'active-link' : '' }}"><img src="{{ asset('images/user_prof.png') }}" class="sidebar-icon"> Students</a></li>
-  @if (Auth::user()->role !== 'Super Admin')
-        <li>
-            <a href="{{ url('members') }}" class="nav-link text-white {{ request()->is('members') ? 'active-link' : '' }}">
-                <img src="{{ asset('images/instruct_ico.png') }}" class="sidebar-icon"> Members
-            </a>
-        </li>
-        @endif
-                                    <li><a href="{{ url('events') }}" class="nav-link text-white {{ request()->is('events') ? 'active-link' : '' }}"><img src="{{ asset('images/event_ico.png') }}" class="sidebar-icon"> Events</a></li>
-                               <li>
-                    <a href="{{ url('notification') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('notification') ? 'active-link' : '' }}">
-                        <img src="{{ asset('images/notification.png') }}" class="sidebar-icon"> <span>Notifications</span>
-                    </a>
-                </li>
-       @if (Auth::user()->role !== 'Super Admin')
-        <li>
-            <a href="{{ url('officers') }}" class="nav-link text-white {{ request()->is('officers') ? 'active-link' : '' }}">
-                <img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Officers
-            </a>
-        </li>
-        @endif
+
+                            @if (Auth::user()->role !== 'Super Admin')
+                                <li>
+                                    <a href="{{ url('members') }}" class="nav-link text-white {{ request()->is('members') ? 'active-link' : '' }}">
+                                        <img src="{{ asset('images/instruct_ico.png') }}" class="sidebar-icon"> Members
+                                    </a>
+                                </li>
+                            @endif
+
+                            <li><a href="{{ url('events') }}" class="nav-link text-white {{ request()->is('events') ? 'active-link' : '' }}"><img src="{{ asset('images/event_ico.png') }}" class="sidebar-icon"> Events</a></li>
+
+                            <li>
+                                <a href="{{ url('notification') }}" class="nav-link px-3 text-white d-flex align-items-center {{ request()->is('notification') ? 'active-link' : '' }}">
+                                    <img src="{{ asset('images/notification.png') }}" class="sidebar-icon"> <span>Notifications</span>
+                                </a>
+                            </li>
+
+                            @if (Auth::user()->role !== 'Super Admin')
+                                <li>
+                                    <a href="{{ url('officers') }}" class="nav-link text-white {{ request()->is('officers') ? 'active-link' : '' }}">
+                                        <img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Officers
+                                    </a>
+                                </li>
+                            @endif
+
                             @if (Auth::user()->role !== 'OSSD')
-                            <li><a href="{{ url('attendance') }}" class="nav-link text-white {{ request()->is('attendance') ? 'active-link' : '' }}"><img src="{{ asset('images/attendance.png') }}" class="sidebar-icon"> Attendance</a></li>
-                            <li><a href="{{ url('payment') }}" class="nav-link text-white {{ request()->is('payment') ? 'active-link' : '' }}"><img src="{{ asset('images/payment_ico.png') }}" class="sidebar-icon"> Payment</a></li>
-                            <li><a href="{{ url('reports') }}" class="nav-link text-white {{ request()->is('reports') ? 'active-link' : '' }}"><img src="{{ asset('images/record_ico.png') }}" class="sidebar-icon"> Reports</a></li>
+                                <li><a href="{{ url('attendance') }}" class="nav-link text-white {{ request()->is('attendance') ? 'active-link' : '' }}"><img src="{{ asset('images/attendance.png') }}" class="sidebar-icon"> Attendance</a></li>
+                                
+                                {{-- ✅ Show Payment only if role contains Financial, Treasurer, or Auditing --}}
+                                @if (Str::contains(strtolower($role), ['financial', 'treasurer', 'auditing']))
+                                    <li>
+                                        <a href="{{ url('payment') }}" class="nav-link text-white {{ request()->is('payment') ? 'active-link' : '' }}">
+                                            <img src="{{ asset('images/payment_ico.png') }}" class="sidebar-icon"> Payment
+                                        </a>
+                                    </li>
+                                @endif
+
+                                <li><a href="{{ url('reports') }}" class="nav-link text-white {{ request()->is('reports') ? 'active-link' : '' }}"><img src="{{ asset('images/record_ico.png') }}" class="sidebar-icon"> Reports</a></li>
                             @endif
 
                             <li><a href="{{ url('clearance') }}" class="nav-link text-white {{ request()->is('clearance') ? 'active-link' : '' }}"><img src="{{ asset('images/evaluation_ico.png') }}" class="sidebar-icon"> Clearance</a></li>
                             <li><a href="{{ url('evaluation') }}" class="nav-link text-white {{ request()->is('evaluation') ? 'active-link' : '' }}"><img src="{{ asset('images/evaluation_ico.png') }}" class="sidebar-icon"> Evaluation</a></li>
                             
                             @if (Auth::user()->role === 'Super Admin')
-                            <li><a href="{{ url('accounts') }}" class="nav-link text-white {{ request()->is('accounts') ? 'active-link' : '' }}"><img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Accounts</a></li>
-                            <li><a href="{{ url('OSSD') }}" class="nav-link text-white {{ request()->is('OSSD') ? 'active-link' : '' }}"><img src="{{ asset('images/office.png') }}" class="sidebar-icon"> OSSD</a></li>
-                            <li><a href="{{ url('manage_orgs_page') }}" class="nav-link text-white {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}"><img src="{{ asset('images/org_ico.png') }}" class="sidebar-icon"> Organization</a></li>
+                                <li><a href="{{ url('accounts') }}" class="nav-link text-white {{ request()->is('accounts') ? 'active-link' : '' }}"><img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Accounts</a></li>
+                                <li><a href="{{ url('OSSD') }}" class="nav-link text-white {{ request()->is('OSSD') ? 'active-link' : '' }}"><img src="{{ asset('images/office.png') }}" class="sidebar-icon"> OSSD</a></li>
+                                <li><a href="{{ url('manage_orgs_page') }}" class="nav-link text-white {{ request()->is('manage_orgs_page') ? 'active-link' : '' }}"><img src="{{ asset('images/org_ico.png') }}" class="sidebar-icon"> Organization</a></li>
                             @elseif (Auth::user()->role === 'Adviser')
-                    
-                            <li><a href="{{ url('officers') }}" class="nav-link text-white {{ request()->is('officers') ? 'active-link' : '' }}"><img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Officers</a></li>
+                                <li><a href="{{ url('officers') }}" class="nav-link text-white {{ request()->is('officers') ? 'active-link' : '' }}"><img src="{{ asset('images/add_account.png') }}" class="sidebar-icon"> Officers</a></li>
                             @endif
                         </ul>
                     </div>
                 </li>
 
                 @if (Auth::user()->role !== 'officer' && Auth::user()->role !== 'OSSD')
-                <!-- SYSTEM SETTINGS -->
-                <li class="mt-3 mb-2">
-                    <div class="small fw-bold text-uppercase core-section">SYSTEM SETTINGS</div>
-                </li>
-                <li>
-                    <a class="nav-link px-3 text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#systemSettings" role="button" aria-expanded="false" aria-controls="systemSettings">
-                        <span><img src="{{ asset('images/system.png') }}" class="sidebar-icon me-2">Settings</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </a>
-                    <div class="collapse" id="systemSettings">
-                        <ul class="navbar-nav ps-3">
-                            <li><a href="{{ url('device_page') }}" class="nav-link text-white {{ request()->is('device_page') ? 'active-link' : '' }}"><img src="{{ asset('images/device_ico.png') }}" class="sidebar-icon"> Device</a></li>
-                            <li><a href="{{ url('config') }}" class="nav-link text-white {{ request()->is('config') ? 'active-link' : '' }}"><img src="{{ asset('images/config_ico.png') }}" class="sidebar-icon"> Configure</a></li>
-                            <li><a href="{{ url('logs') }}" class="nav-link text-white {{ request()->is('logs') ? 'active-link' : '' }}"><img src="{{ asset('images/loggs_ico.png') }}" class="sidebar-icon"> Logs</a></li>
-                        </ul>
-                    </div>
-                </li>
+                    <!-- SYSTEM SETTINGS -->
+                    <li class="mt-3 mb-2">
+                        <div class="small fw-bold text-uppercase core-section">SYSTEM SETTINGS</div>
+                    </li>
+                    <li>
+                        <a class="nav-link px-3 text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#systemSettings" role="button" aria-expanded="false" aria-controls="systemSettings">
+                            <span><img src="{{ asset('images/system.png') }}" class="sidebar-icon me-2">Settings</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </a>
+                        <div class="collapse" id="systemSettings">
+                            <ul class="navbar-nav ps-3">
+                                <li><a href="{{ url('device_page') }}" class="nav-link text-white {{ request()->is('device_page') ? 'active-link' : '' }}"><img src="{{ asset('images/device_ico.png') }}" class="sidebar-icon"> Device</a></li>
+                                <li><a href="{{ url('config') }}" class="nav-link text-white {{ request()->is('config') ? 'active-link' : '' }}"><img src="{{ asset('images/config_ico.png') }}" class="sidebar-icon"> Configure</a></li>
+                                <li><a href="{{ url('logs') }}" class="nav-link text-white {{ request()->is('logs') ? 'active-link' : '' }}"><img src="{{ asset('images/loggs_ico.png') }}" class="sidebar-icon"> Logs</a></li>
+                            </ul>
+                        </div>
+                    </li>
                 @endif
 
             @endif
